@@ -1,0 +1,51 @@
+﻿<html>
+<head>
+  <meta charset="utf-8">
+  <title>CloudBoost Tests</title>
+  <link rel="stylesheet" media="all" href="bower_components/mocha/mocha.css">
+
+ <!-- <script src="bower_components/jquery/dist/jquery.js"></script>-->
+  <script src="bower_components/mocha/mocha.js"></script>
+  <script type="text/javascript">mocha.setup('bdd')</script>
+
+  <!-- SDK --> 
+  <script src="http://localhost:4730/sdk/js/1.0.0"></script>
+  <script src="util/util.js"></script> 
+
+  <!-- CloudObjects Test --> 
+  <script src="init/init.js"></script>
+
+ <!--<script src="CloudObject/test.js"></script>
+  <script src="CloudObject/file.js"></script>
+    <script src="CloudFile/CloudFile.js"></script>
+    <script src="CloudObject/expire.js"></script>
+
+    <script src="CloudObject/notification.js"></script>
+  <script src="CloudNotification/test.js"></script>
+    <script src="CloudExpire/test.js"></script>
+
+    <script src="CloudQuery/include_list.js"></script>
+    <script src="CloudQuery/query_test.js"></script>-->
+   <script src="CloudUser/user_test.js"></script>
+   <!-- <script src="CloudRole/role.js"></script>
+    <script src="ACL/search_acl.js"></script>
+    <script src="ACL/acl_test1.js"></script>-->
+
+</head>
+<body>
+  <div id="mocha"><p><a href=".">Browser CloudBoost JS SDK Test</a></p></div>
+  <div id="messages"></div>
+  <div id="fixtures"></div>
+  
+  <script>
+      if (window.mochaPhantomJS) {
+          mochaPhantomJS.run();
+      }
+      else {
+          mocha.run();
+      }
+  </script>
+
+</body>
+
+</html>
