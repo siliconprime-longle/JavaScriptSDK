@@ -142,7 +142,6 @@ describe("Cloud Object", function() {
 		     		success : function(newObj){
 		     			throw "Saved an object violated unique constraint.";
 		     		}, error : function(error){
-		     			console.log(error);
 		     			done();
 		     		}
 		     	});
@@ -298,10 +297,8 @@ describe("Cloud Object", function() {
        			obj2.set('name','sample');
        			obj2.set('uniqueRelation', obj1);
        			obj2.save({success : function(newObj){
-       				console.log(newObj);
        				throw "Saved a duplicate relation on a unique field.";
        			}, error : function(error){
-       				console.log(error);
        				done();
        			}	
        		});
@@ -387,12 +384,10 @@ describe("Cloud Object", function() {
        			obj2.save({success : function(newObj){
        				throw "Saved different types of CloudObject in a single list";
        			}, error : function(error){
-       				console.log(error);
        				done();
        			}	
        		});
     	}, error : function(error){
-                console.log(error);
                 throw "Cannot save obj";
             }});
     });

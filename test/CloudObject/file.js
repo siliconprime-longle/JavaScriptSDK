@@ -7,10 +7,15 @@ describe("Cloud Objects Files", function() {
      this.timeout(10000);
 
        //save file first. 
-      var afileparts = ['<a id="a"><b id="b">hey!</b></a>'];
-      var omyblob = new Blob(afileparts, {type : 'text/html'}); // the blob
-
-      var file = new CB.CloudFile(omyblob);
+         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+         try {
+             var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+         } catch (e) {
+             var builder = new WebKitBlobBuilder();
+             builder.append(aFileParts);
+             var oMyBlob = builder.getBlob();
+         }
+      var file = new CB.CloudFile(oMyBlob);
 
       file.save().then(function(file) {
          if(file.url){
@@ -34,7 +39,6 @@ describe("Cloud Objects Files", function() {
            throw "upload success. but cannot find the url.";
          }
        }, function(err) {
-         console.log(err);
          throw "error uploading file";
        });
 
@@ -43,17 +47,27 @@ describe("Cloud Objects Files", function() {
     it("should save an array of files.", function(done) {
      this.timeout(10000);
      //save file first. 
-     var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-     var oMyBlob = new Blob(aFileParts, {type : 'text/html'}); // the blob
-
+        var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+        try {
+            var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+        } catch (e) {
+            var builder = new WebKitBlobBuilder();
+            builder.append(aFileParts);
+            var oMyBlob = builder.getBlob();
+        }
      var file = new CB.CloudFile(oMyBlob);
 
      file.save().then(function(file) {
         if(file.url){
-          
-         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-         var oMyBlob = new Blob(aFileParts, {type : 'text/html'}); // the blob
 
+            var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+            try {
+                var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+            } catch (e) {
+                var builder = new WebKitBlobBuilder();
+                builder.append(aFileParts);
+                var oMyBlob = builder.getBlob();
+            }
          var file1 = new CB.CloudFile(oMyBlob);
 
          file1.save().then(function(file1) {
@@ -74,7 +88,6 @@ describe("Cloud Objects Files", function() {
               throw "Upload success. But cannot find the URL.";
             }
           }, function(err) {
-            console.log(err);
             throw "Error uploading file";
           });
 
@@ -82,7 +95,6 @@ describe("Cloud Objects Files", function() {
           throw "Upload success. But cannot find the URL.";
         }
       }, function(err) {
-        console.log(err);
         throw "Error uploading file";
       });
     });

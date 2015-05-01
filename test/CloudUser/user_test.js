@@ -1,15 +1,16 @@
 describe("CloudUser", function () {
 
-   /*it("Should create new user", function (done) {
+   it("Should create new user", function (done) {
 
         this.timeout(10000);
 
         var obj = new CB.CloudUser();
-        obj.set('username', 'vipul');
+        var username = util.makeString();
+        obj.set('username', username);
         obj.set('password','abcd');
-        obj.set('email','vipul19@gmail.com');
+        obj.set('email',util.makeEmail());
         obj.signUp().then(function(list) {
-            if(list.get('username')==='vipul')
+            if(list.get('username') === username)
                 done();
             else
                 throw "create user error"
@@ -17,10 +18,17 @@ describe("CloudUser", function () {
             throw "user create error";
         });
 
-    });*/
+    });
 
-
-    it("Should login user", function (done) {
+    it('should logout the user',function (done){
+        this.timeout(10000);
+        CB.CloudUser.current.logOut().then(function(){
+            done();
+        },function(){
+            throw "err";
+        });
+    });
+   it("Should login user", function (done) {
 
         this.timeout(10000);
 
@@ -36,7 +44,7 @@ describe("CloudUser", function () {
 
     });
 
-   it("Should logout current user", function (done) {
+   /*it("Should logout current user", function (done) {
 
         this.timeout(10000);
        CB.CloudUser.current.logOut().then(function(list){
@@ -44,8 +52,8 @@ describe("CloudUser", function () {
                 },function(){
                 throw "user logout error";
             });
-    });
-    /*var role = new CB.CloudRole('admin');
+    });*/
+    var role = new CB.CloudRole('admin');
     it("Should create a role ", function (done) {
 
         this.timeout(10000);
@@ -134,7 +142,7 @@ describe("CloudUser", function () {
         });
 
     });
-*/
+
 
 
 });

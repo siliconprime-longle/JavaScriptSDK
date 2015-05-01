@@ -30,8 +30,6 @@
         var query = new CB.CloudQuery('Custom4');
         query.include('newColumn7');
         query.find().then(function(list){
-            console.log("GOT");
-            console.log(list);
             if(list.length>0){
                 for(var i=0;i<list.length;i++){
                     var student_obj=list[i].get('newColumn7');

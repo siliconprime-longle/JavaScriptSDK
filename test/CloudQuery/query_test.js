@@ -47,7 +47,6 @@ describe("CloudQuery", function () {
         var obj = new CB.CloudQuery('student1');
         obj.containedIn('name',['vipul','nawaz']);
         obj.find().then(function(list) {
-            console.log(list);
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
                 {
@@ -85,7 +84,6 @@ describe("CloudQuery", function () {
         var obj = new CB.CloudQuery('student4');
         obj.containsAll('subject',['java','python']);
         obj.find().then(function(list) {
-            console.log(list);
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
                 {
@@ -113,7 +111,6 @@ describe("CloudQuery", function () {
         var obj = new CB.CloudQuery('student1');
         obj.startsWith('name','v');
         obj.find().then(function(list) {
-            console.log(list);
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
                 {
@@ -174,8 +171,6 @@ describe("CloudQuery", function () {
         var obj = new CB.CloudQuery('student4');
         obj.notContainedIn('subject',['java','python']);
         obj.find().then(function(list) {
-            //console.log(list);
-            //done();
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
                 {

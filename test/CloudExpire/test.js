@@ -22,8 +22,6 @@ describe("CloudExpire", function () {
         var curr=new Date().getTime();
         var query = new CB.CloudQuery('Custom');
         query.find().then(function(list){
-            //console.log("GOT");
-            //console.log(list);
             if(list.length>0){
                 var __success = false;
                 for(var i=0;i<list.length;i++){

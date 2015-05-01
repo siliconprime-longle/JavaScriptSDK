@@ -43,7 +43,7 @@ describe("ACL", function () {
 
     });
 
-    it("Should set the user write access", function (done) {
+/*    it("Should set the user write access", function (done) {
 
         this.timeout(10000);
 
@@ -73,7 +73,7 @@ describe("ACL", function () {
             throw "user write access save error";
         });
 
-    });
+    });*/
 
     it("Should set the user read access", function (done) {
 

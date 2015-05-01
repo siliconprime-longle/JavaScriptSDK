@@ -13,9 +13,6 @@
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-mocha": "^0.4.12",
-    "grunt-simple-mocha": "^0.4.0",
-    "mocha": "^2.2.4",
-    "phantomjs": "^1.9.16"
+    "mocha-phantomjs": "^3.5.3"
   }
 }

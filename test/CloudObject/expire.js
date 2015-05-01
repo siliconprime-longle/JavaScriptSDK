@@ -76,7 +76,7 @@ describe("CloudObjectExpires", function () {
             }else{ done();
             }
             },error: function(error){
-                console.log(error);
+                throw "should not show expired objects";
             }
             });
 

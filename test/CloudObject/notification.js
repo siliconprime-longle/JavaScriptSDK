@@ -9,6 +9,7 @@ describe("Cloud Objects Notification", function() {
       CB.CloudObject.on('Student', 'created', function(data){
        if(data.get('name') === 'sample') {
            done();
+           CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
        }
        else
         throw "Wrong data received.";
@@ -24,7 +25,7 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
- /*   it("should throw an error when wrong event type is entered. ", function(done) {
+   it("should throw an error when wrong event type is entered. ", function(done) {
       
      	try{
      	  CB.CloudObject.on('Student', 'wrongtype', function(data){
@@ -36,13 +37,14 @@ describe("Cloud Objects Notification", function() {
      		done();
      	}     
 
-    });*/
+    });
 
     it("should alert when the object is updated.", function(done) {
 
       this.timeout(10000);
       CB.CloudObject.on('student4', 'updated', function(data){
         done();
+          CB.CloudObject.off('student4','updated',{success:function(){},error:function(){}});
       }, {
       	success : function(){
       		obj1.set('age', 15);
@@ -59,14 +61,16 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
- /*   it("should alert when the object is deleted.", function(done) {
+    it("should alert when the object is deleted.", function(done) {
 
       this.timeout(10000);
 
       CB.CloudObject.on('Student', 'deleted', function(data){
 
-      	if(data instanceof CB.CloudObject)
-           done();
+      	if(data instanceof CB.CloudObject) {
+            done();
+            CB.CloudObject.off('Student','deleted',{success:function(){},error:function(){}});
+        }
         else
           throw "Wrong data received.";
          
@@ -194,8 +198,6 @@ describe("Cloud Objects Notification", function() {
       	}
 
       }, 5000);
-    });*/
-
-    //ToDo : Add ACL Tests. 
+    });
 
 });
