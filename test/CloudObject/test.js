@@ -392,4 +392,82 @@ describe("Cloud Object", function() {
             }});
     });
 
+ // Test for error of getting duplicate objects while saving a object after updating
+    it("Should not duplicate the values in a list after updating",function(done){
+        this.timeout(10000);
+        var obj = new CB.CloudObject('student1');
+        obj.set('age',5);
+        obj.set('name','abcd');
+        var obj1 = new CB.CloudObject('Custom4');
+        obj1.set('newColumn7',[obj,obj]);
+        obj1.save().then(function(list){
+            nc7=list.get('newColumn7');
+            nc7.push(obj);
+            obj1.set('newColumn7',nc7);
+            obj1.save().then(function(list){
+                if(list.get('newColumn7').length === 3)
+                    done();
+                else
+                    throw "should not save duplicate objects";
+            },function(){
+                throw "should save cloud object ";
+            });
+        },function(err){
+            throw "should save cloud object";
+        });
+    });
+
+// Test Case for error saving an object in a column
+    it("should save a JSON object in a column",function(done){
+        this.timeout(10000);
+        var json= {"name":"vipul","location":"uoh","age":10};
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn6',json);
+        obj.save().then(function(list){
+            var obje=list.get('newColumn6');
+            if(obje.name === 'vipul' && obje.location === 'uoh' && obje.age === 10)
+                done();
+            else
+                throw "error in saving json object";
+        },function(){
+            throw "should save JSON object in cloud";
+        });
+    });
+
+// Test to automatically delete the a reference of the non existing cloudobject when it is saved.
+
+    it("should automatically delete the reference of deleted object while saving",function(done){
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Custom4');
+        var obj1 = new CB.CloudObject('student1');
+        var obj2 = new CB.CloudObject('student1');
+        obj1.set('name','vipul');
+        obj1.set('age',15);
+        obj2.set('name','ranjeet');
+        obj2.set('age',24);
+        obj.set('newColumn7',[obj1]);
+        obj.save().then(function(list){
+            obj=list;
+            obj1=list.get('newColumn7')[0];
+            obj1.delete().then(function(){
+                nc7=obj.get('newColumn7');
+                nc7.push(obj2);
+                obj.set('newColumn7',nc7);
+                obj.save().then(function(list){
+                    var check = list.get('newColumn7');
+                    if(check.length === 1) {
+                        if (check[0].get('name') === 'ranjeet')
+                            done();
+                        else
+                            throw "should automatically delete reference of automatically deleted object";
+                    }else
+                        throw "should automatically delete reference of automatically deleted object";
+                },function(err){
+                    console.log(err);
+                });
+            },function(){
+            throw "should delete object";
+        });
+    });
+    });
 });

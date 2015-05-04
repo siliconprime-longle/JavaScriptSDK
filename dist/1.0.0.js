@@ -2578,6 +2578,9 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
+                }else
+                {
+                    document[key] = data[key];
                 }
             } else {
                 document[key] = data[key];
