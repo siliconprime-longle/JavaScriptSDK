@@ -44,7 +44,7 @@ describe("CloudUser", function () {
 
     });
 
-   /*it("Should logout current user", function (done) {
+   it("Should logout current user", function (done) {
 
         this.timeout(10000);
        CB.CloudUser.current.logOut().then(function(list){
@@ -52,7 +52,7 @@ describe("CloudUser", function () {
                 },function(){
                 throw "user logout error";
             });
-    });*/
+    });
     var role = new CB.CloudRole('admin');
     it("Should create a role ", function (done) {
 

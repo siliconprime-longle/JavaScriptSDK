@@ -23,35 +23,25 @@ CB.CloudRole.getRole = function(role, callback) {
         def = new CB.Promise();
     }
     var roleName = role.document.name;
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/role/getRole/" + roleName ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                var thisObj=CB._deserialize(JSON.parse(xmlhttp.responseText));
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        var thisObj = CB._deserialize((JSON.parse(response)));
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
     if (!callback) {
         return def;

@@ -264,3 +264,33 @@ CB._clone=function(obj,url){
     n_obj.document=doc2;
     return n_obj;
 };
+
+CB._request=function(method,url,params)
+{
+    var def = new CB.Promise();
+    var xmlhttp= CB._loadXml();
+
+    xmlhttp.open(method,url,true);
+    xmlhttp.setRequestHeader('Content-type','application/json');
+    //res.header('Access-Control-Expose-Headers','sessionID');
+    var ssid = localStorage.getItem('sessionID');
+    if(ssid != null)
+        xmlhttp.setRequestHeader('sessionID', ssid);
+    xmlhttp.send(params);
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == xmlhttp.DONE) {
+            if (xmlhttp.status == 200) {
+                var sessionID = xmlhttp.getResponseHeader('sessionID');
+                if(sessionID)
+                    localStorage.setItem('sessionID', sessionID);
+                else
+                    localStorage.removeItem('sessionID');
+                def.resolve(xmlhttp.responseText);
+            } else {
+                def.reject(xmlhttp.status);
+            }
+        }
+    }
+    return def;
+};
