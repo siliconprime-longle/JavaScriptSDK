@@ -455,7 +455,6 @@ CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static 
         return def;
     }
 };
-
 /*
  Access Control List (ACL)
  */
@@ -570,6 +569,7 @@ CB.ACL.prototype.setRoleReadAccess = function(roleId, value) {
         }
     }
 };
+
 /* CloudNotificiation */
 
 CB.CloudNotification = CB.CloudNotification || {};
@@ -2016,38 +2016,27 @@ CB.CloudUser.prototype.signUp = function(callback) {
         def = new CB.Promise();
     }
     //now call the signup API.
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB._serialize(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                CB._deserialize(JSON.parse(xmlhttp.responseText), thisObj);
-                CB.CloudUser.current = thisObj;
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                CB.CloudUser.current = null;
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        CB._deserialize(JSON.parse(response),thisObj);
+        CB.CloudUser.current = thisObj;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
 
     if (!callback) {
@@ -2067,39 +2056,27 @@ CB.CloudUser.prototype.logIn = function(callback) {
         def = new CB.Promise();
     }
     //now call the signup API.
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB._serialize(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                CB._deserialize(JSON.parse(xmlhttp.responseText), thisObj);
-                CB.CloudUser.current = thisObj;
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                CB.CloudUser.current = null;
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        CB._deserialize(JSON.parse(response),thisObj);
+        CB.CloudUser.current = thisObj;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
-
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
     if (!callback) {
         return def;
@@ -2118,36 +2095,27 @@ CB.CloudUser.prototype.logOut = function(callback) {
         def = new CB.Promise();
     }
     //now call the logout API.
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB._serialize(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                CB.CloudUser.current = null;;
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        CB._deserialize(JSON.parse(response),thisObj);
+        CB.CloudUser.current = null;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
 
     if (!callback) {
@@ -2164,8 +2132,6 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
         def = new CB.Promise();
     }
     //Call the addToRole API
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         user: CB._serialize(thisObj),
         role: CB._serialize(role),
@@ -2173,29 +2139,20 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
 
-    xmlhttp.open('PUT',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                CB._deserialize(JSON.parse(xmlhttp.responseText), thisObj);
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('PUT',url,params).then(function(response){
+        CB._deserialize(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
-
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
     if (!callback) {
         return def;
@@ -2217,8 +2174,6 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
         def = new CB.Promise();
     }
     //now call the removeFromRole API.
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         user: CB._serialize(thisObj),
         role: CB._serialize(role),
@@ -2226,29 +2181,20 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
 
-    xmlhttp.open('PUT',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                CB._deserialize(JSON.parse(xmlhttp.responseText), thisObj);
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('PUT',url,params).then(function(response){
+        CB._deserialize(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
-
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
     if (!callback) {
         return def;
@@ -2281,35 +2227,25 @@ CB.CloudRole.getRole = function(role, callback) {
         def = new CB.Promise();
     }
     var roleName = role.document.name;
-
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/role/getRole/" + roleName ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                var thisObj=CB._deserialize(JSON.parse(xmlhttp.responseText));
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        var thisObj = CB._deserialize((JSON.parse(response)));
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
     if (!callback) {
         return def;
@@ -2413,8 +2349,10 @@ CB.CloudFile.prototype.save = function(callback) {
     var xmlhttp = CB._loadXml();
     var params=formdata;
     url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
-
     xmlhttp.open('POST',url,true);
+    var ssid = localStorage.getItem('sessionID');
+    if(ssid != null)
+        xmlhttp.setRequestHeader('sessionID', ssid);
     //  xmlhttp.setRequestHeader('Content-type','multipart/form-data');
     xmlhttp.send(params);
 
@@ -2422,6 +2360,11 @@ CB.CloudFile.prototype.save = function(callback) {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
                 thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                var sessionID = xmlhttp.getResponseHeader('sessionID');
+                if(sessionID)
+                    localStorage.setItem('sessionID', sessionID);
+                else
+                    localStorage.removeItem('sessionID');
                 if (callback) {
                     callback.success(thisObj);
                 } else {
@@ -2444,7 +2387,6 @@ CB.CloudFile.prototype.save = function(callback) {
 }
 
 CB.CloudFile.prototype.delete = function(callback) {
-
     var def;
 
     if(!this.url) {
@@ -2455,43 +2397,32 @@ CB.CloudFile.prototype.delete = function(callback) {
     }
     var thisObj = this;
 
-    var xmlhttp= CB._loadXml();
     var params=JSON.stringify({
         url: thisObj.url,
         key: CB.appKey
     });
     url = CB.serverUrl+'/file/' + CB.appId + '/delete' ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                thisObj.url = null;
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        thisObj.url = null;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
-
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
 
     if (!callback) {
         return def;
     }
 }
-
 /*
 *CloudGeoPoint
 */
@@ -2853,4 +2784,34 @@ CB._clone=function(obj,url){
     }
     n_obj.document=doc2;
     return n_obj;
+};
+
+CB._request=function(method,url,params)
+{
+    var def = new CB.Promise();
+    var xmlhttp= CB._loadXml();
+
+    xmlhttp.open(method,url,true);
+    xmlhttp.setRequestHeader('Content-type','application/json');
+    //res.header('Access-Control-Expose-Headers','sessionID');
+    var ssid = localStorage.getItem('sessionID');
+    if(ssid != null)
+        xmlhttp.setRequestHeader('sessionID', ssid);
+    xmlhttp.send(params);
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == xmlhttp.DONE) {
+            if (xmlhttp.status == 200) {
+                var sessionID = xmlhttp.getResponseHeader('sessionID');
+                if(sessionID)
+                    localStorage.setItem('sessionID', sessionID);
+                else
+                    localStorage.removeItem('sessionID');
+                def.resolve(xmlhttp.responseText);
+            } else {
+                def.reject(xmlhttp.status);
+            }
+        }
+    }
+    return def;
 };

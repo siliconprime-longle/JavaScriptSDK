@@ -94,8 +94,10 @@ CB.CloudFile.prototype.save = function(callback) {
     var xmlhttp = CB._loadXml();
     var params=formdata;
     url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
-
     xmlhttp.open('POST',url,true);
+    var ssid = localStorage.getItem('sessionID');
+    if(ssid != null)
+        xmlhttp.setRequestHeader('sessionID', ssid);
     //  xmlhttp.setRequestHeader('Content-type','multipart/form-data');
     xmlhttp.send(params);
 
@@ -103,6 +105,11 @@ CB.CloudFile.prototype.save = function(callback) {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
                 thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                var sessionID = xmlhttp.getResponseHeader('sessionID');
+                if(sessionID)
+                    localStorage.setItem('sessionID', sessionID);
+                else
+                    localStorage.removeItem('sessionID');
                 if (callback) {
                     callback.success(thisObj);
                 } else {
@@ -125,7 +132,6 @@ CB.CloudFile.prototype.save = function(callback) {
 }
 
 CB.CloudFile.prototype.delete = function(callback) {
-
     var def;
 
     if(!this.url) {
@@ -136,36 +142,26 @@ CB.CloudFile.prototype.delete = function(callback) {
     }
     var thisObj = this;
 
-    var xmlhttp= CB._loadXml();
     var params=JSON.stringify({
         url: thisObj.url,
         key: CB.appKey
     });
     url = CB.serverUrl+'/file/' + CB.appId + '/delete' ;
 
-    xmlhttp.open('POST',url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
-    xmlhttp.send(params);
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                thisObj.url = null;
-                if (callback) {
-                    callback.success(thisObj);
-                } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
-                }
-            }
+    CB._request('POST',url,params).then(function(response){
+        thisObj.url = null;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
         }
-    }
-
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 
 
     if (!callback) {
