@@ -966,6 +966,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         return def;
     }
 };
+
 /*
  CloudQuery
  */
@@ -2262,7 +2263,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
 };
+
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudRole.prototype, 'name', {
     get: function() {
         return this.document.name;
@@ -2312,6 +2315,8 @@ CB.CloudRole.getRole = function(role, callback) {
         return def;
     }
 };
+
+
 /*
  CloudFiles
  */
@@ -2487,24 +2492,104 @@ CB.CloudFile.prototype.delete = function(callback) {
     }
 }
 
+/*
+*CloudGeoPoint
+*/
+
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+	if(!latitude || !longitude)
+		throw "Latitude or Longitude is empty.";
+	
+	if(isNaN(latitude))
+		throw "Latitude "+ latitude +" is not a number type.";
+		
+	if(isNaN(longitude))
+		throw "Longitude "+ longitude+" is not a number type.";
+	
+	this.document = {};
+	this.document.latitude = Number(latitude);
+	this.document.longitude = Number(longitude);
+	
+};
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
+    get: function() {
+        return this.document.latitude;
+    },
+    set: function(latitude) {
+        this.document.latitude = latitude;
+    }
+});
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
+    get: function() {
+        return this.document.longitude;
+    },
+    set: function(longitude) {
+        this.document.longitude = longitude;
+    }
+});
+
+CB.CloudGeoPoint.prototype.distanceInKMs = function(point) {
+	
+	var earthRedius = 6371; //in Kilometer
+	return earthRedius * greatCircleFormula(this, point);
+};
+
+CB.CloudGeoPoint.prototype.distanceInMiles = function(point){
+
+	var earthRedius = 3959 // in Miles
+	return earthRedius * greatCircleFormula(this, point);
+	
+};
+
+CB.CloudGeoPoint.prototype.distanceInRadians = function(point){
+	
+	return greatCircleFormula(this, point);
+};
+
+function greatCircleFormula(thisObj, point){
+
+	var dLat =(thisObj.document.latitude - point.document.latitude).toRad();
+	var dLon = (thisObj.document.longitude - point.document.longitude).toRad();
+	var lat1 = (point.document.latitude).toRad();
+	var lat2 = (thisObj.document.latitude).toRad();
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	return c;
+	
+}
+
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+  }
+}
+
+
 /* PRIVATE METHODS */
 CB._serialize = function(thisObj) {
 
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
+        
     var obj= CB._clone(thisObj,url);
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile) {
-        throw "Data passed is not an instance of CloudObject or CloudFile";
+    
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
-
+        
+    if(obj instanceof CB.CloudGeoPoint)
+        return obj.document;
+	
     var doc = obj.document;
 
     for (var key in doc) {
-        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
             doc[key] = CB._serialize(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -2517,7 +2602,7 @@ CB._serialize = function(thisObj) {
         } else if (doc[key] instanceof Array) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
-            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile)) {
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB._serialize(doc[key][i]));
@@ -2578,12 +2663,19 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else
-                {
+                }else if (data[key].latitude || data[key].longitude) { 
+            
+            		document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
+            	
+    			}else{
+    			
                     document[key] = data[key];
+                    
                 }
-            } else {
+            }else {
+            
                 document[key] = data[key];
+                
             }
         }
 
@@ -2599,7 +2691,7 @@ CB._deserialize = function(data, thisObj) {
             return thisObj;
         }
 
-    } else {
+    }else {
         //if this is plain json.
         return data;
     }
@@ -2745,9 +2837,18 @@ CB._clone=function(obj,url){
                 doc2[key]=CB._clone(doc[key],null);
             else if(doc[key] instanceof CB.CloudFile){
                 doc2[key]=CB._clone(doc[key],doc[key].document.url);
+            }else if(doc[key] instanceof CB.CloudGeoPoint){
+            	doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
+        }
+    }else if(obj instanceof CB.CloudGeoPoint){
+    	n_obj = obj;
+        var doc=obj.document;
+        var doc2={};
+        for (var key in doc) {
+        	doc2[key]=doc[key];
         }
     }
     n_obj.document=doc2;
