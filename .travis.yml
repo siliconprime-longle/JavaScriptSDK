@@ -6,6 +6,4 @@ node_js:
             - "1.0"
             - "1.8"
             - "2.0"
-before_install:
-            -"grunt concat"
 script: mocha-phantomjs test/index.html
