@@ -2,7 +2,7 @@ describe("Search_ACL", function () {
 
     var obj = new CB.CloudObject('student4');
     obj.isSearchable = true;
-    obj.set('age',105);
+    obj.set('age',150);
 
    it("Should set the public read access", function (done) {
 
@@ -14,7 +14,7 @@ describe("Search_ACL", function () {
             acl=list.get('ACL');
             if(acl.read.length === 0) {
              var cs = new CB.CloudSearch('student4');
-                cs.searchOn('age',105);
+                cs.searchOn('age',150);
                 cs.search().then(function(list){
                     if(list.length>0)
                     {
