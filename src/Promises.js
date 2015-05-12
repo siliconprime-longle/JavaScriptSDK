@@ -11,8 +11,8 @@ CB.version = "1.0.0";
 CB._isNode = false;
 CB.Socket = null;
 
-CB.serverUrl = 'http://localhost:4730';
-//CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+//CB.serverUrl = 'http://localhost:4730';
+CB.serverUrl = 'https://api.cloudboost.io'; // server url.
 
 CB.io = null; //socket.io library is saved here.
 
@@ -57,13 +57,23 @@ CB._ajaxIE8 = function(method, url, data) {
 CB._loadXml = function()
 {
     var xmlhttp;
-    if(window.XMLHttpRequest){
-        xmlhttp=new XMLHttpRequest();
+    var req = typeof(require) === 'function' ? require : null;
+    // Load references to other dependencies
+    if (typeof(XMLHttpRequest) !== 'undefined') {
+        xmlhttp = XMLHttpRequest;
+    } else if (typeof(require) === 'function' &&
+        typeof(require.ensure) === 'undefined') {
+        xmlhttp = req('xmlhttprequest').XMLHttpRequest;
     }
-    else {
-        xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-    }
+    xmlhttp = new xmlhttp();
     return xmlhttp;
+    /*if(window.XMLHttpRequest){
+     xmlhttp=new XMLHttpRequest();
+     }
+     else {
+     xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
+     }
+     return xmlhttp;*/
 };
 CB.Promise = function() {
     this._resolved = false;

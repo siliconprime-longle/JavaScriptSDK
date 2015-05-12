@@ -55,25 +55,25 @@ CB._ajaxIE8 = function(method, url, data) {
     return promise;
 };
 CB._loadXml = function()
-{	
-	var xmlhttp;
-	var req = typeof(require) === 'function' ? require : null;
-  // Load references to other dependencies
-  if (typeof(XMLHttpRequest) !== 'undefined') {
-    xmlhttp = XMLHttpRequest;
-  } else if (typeof(require) === 'function' &&
-      typeof(require.ensure) === 'undefined') {
-    xmlhttp = req('xmlhttprequest').XMLHttpRequest;
-  }
-  xmlhttp = new xmlhttp();
-  return xmlhttp;
+{
+    var xmlhttp;
+    var req = typeof(require) === 'function' ? require : null;
+    // Load references to other dependencies
+    if (typeof(XMLHttpRequest) !== 'undefined') {
+        xmlhttp = XMLHttpRequest;
+    } else if (typeof(require) === 'function' &&
+        typeof(require.ensure) === 'undefined') {
+        xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+    }
+    xmlhttp = new xmlhttp();
+    return xmlhttp;
     /*if(window.XMLHttpRequest){
-        xmlhttp=new XMLHttpRequest();
-    }
-    else {
-        xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-    }
-    return xmlhttp;*/
+     xmlhttp=new XMLHttpRequest();
+     }
+     else {
+     xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
+     }
+     return xmlhttp;*/
 };
 CB.Promise = function() {
     this._resolved = false;
@@ -2502,35 +2502,35 @@ CB._validate = function() {
 };
 
 CB._loadSocketio = function(done) {
-	console.log(CB._isNode);
+    console.log(CB._isNode);
     if(CB._isNode)
-	{
-			CB.io = require('socket.io-client');
-			done();
-	}
-	else
-	{
-		var xmlhttp = CB._loadXml();
-		xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
-		xmlhttp.send();
-		xmlhttp.onreadystatechange=function(){
-			if(xmlhttp.readyState == xmlhttp.DONE) {
-				if(xmlhttp.status == 200) {
-					eval(xmlhttp.responseText);
-					CB.io=io;
-					done();
-				}
-			}
-		}
-	}
+    {
+        CB.io = require('socket.io-client');
+        done();
+    }
+    else
+    {
+        var xmlhttp = CB._loadXml();
+        xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange=function(){
+            if(xmlhttp.readyState == xmlhttp.DONE) {
+                if(xmlhttp.status == 200) {
+                    eval(xmlhttp.responseText);
+                    CB.io=io;
+                    done();
+                }
+            }
+        }
+    }
 };
 
 CB._initAppSocketConnection = function(done) {
-	if (typeof(process) !== "undefined" &&
-      process.versions &&
-      process.versions.node) {
-    CB._isNode = true;
-  }
+    if (typeof(process) !== "undefined" &&
+        process.versions &&
+        process.versions.node) {
+        CB._isNode = true;
+    }
     try {
         if (!CB.io) {
             //if socket.io is not loaded.
@@ -2588,20 +2588,20 @@ CB._isSocketsActivated = function(done) {
     // Create a refeence to this
     var _ = new Object();
     /*if (typeof module !== 'undefined' && module.exports) {
-        //its nodejs  - export CB.
+     //its nodejs  - export CB.
+     CB._isNode = true;
+     }else{
+     CB._isNode = false;
+     }*/
+    if (typeof(process) !== "undefined" &&
+        process.versions &&
+        process.versions.node) {
         CB._isNode = true;
-    }else{
+    }
+    else
+    {
         CB._isNode = false;
-    }*/
-	if (typeof(process) !== "undefined" &&
-      process.versions &&
-      process.versions.node) {
-    CB._isNode = true;
-  }
-  else
-  {
-	  CB._isNode = false;
-  }
+    }
 })();
 
 function _all(arrayOfPromises) {
@@ -2641,10 +2641,10 @@ CB._request=function(method,url,params)
 {
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-	if (CB.isNode) {
-		var LocalStorage = require('node-localstorage').LocalStorage;
-		localStorage = new LocalStorage('./scratch');
-	}
+    if (CB.isNode) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-type','application/json');
     //res.header('Access-Control-Expose-Headers','sessionID');

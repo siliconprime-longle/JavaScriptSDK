@@ -151,26 +151,38 @@ CB._validate = function() {
 };
 
 CB._loadSocketio = function(done) {
-
-    var xmlhttp = CB._loadXml();
-    xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
-    xmlhttp.send();
-    xmlhttp.onreadystatechange=function(){
-        if(xmlhttp.readyState == xmlhttp.DONE) {
-            if(xmlhttp.status == 200) {
-                eval(xmlhttp.responseText);
-                CB.io=io;
-                done();
+    console.log(CB._isNode);
+    if(CB._isNode)
+    {
+        CB.io = require('socket.io-client');
+        done();
+    }
+    else
+    {
+        var xmlhttp = CB._loadXml();
+        xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange=function(){
+            if(xmlhttp.readyState == xmlhttp.DONE) {
+                if(xmlhttp.status == 200) {
+                    eval(xmlhttp.responseText);
+                    CB.io=io;
+                    done();
+                }
             }
         }
     }
 };
 
 CB._initAppSocketConnection = function(done) {
-
+    if (typeof(process) !== "undefined" &&
+        process.versions &&
+        process.versions.node) {
+        CB._isNode = true;
+    }
     try {
         if (!CB.io) {
-            //if socketio is not loaded.
+            //if socket.io is not loaded.
             CB._loadSocketio(initAppConnection);
         } else {
             initAppConnection();
@@ -224,10 +236,19 @@ CB._isSocketsActivated = function(done) {
     var root = this;
     // Create a refeence to this
     var _ = new Object();
-    if (typeof module !== 'undefined' && module.exports) {
-        //its nodejs  - export CB.
+    /*if (typeof module !== 'undefined' && module.exports) {
+     //its nodejs  - export CB.
+     CB._isNode = true;
+     }else{
+     CB._isNode = false;
+     }*/
+    if (typeof(process) !== "undefined" &&
+        process.versions &&
+        process.versions.node) {
         CB._isNode = true;
-    }else{
+    }
+    else
+    {
         CB._isNode = false;
     }
 })();
@@ -269,7 +290,10 @@ CB._request=function(method,url,params)
 {
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-
+    if (CB.isNode) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-type','application/json');
     //res.header('Access-Control-Expose-Headers','sessionID');
