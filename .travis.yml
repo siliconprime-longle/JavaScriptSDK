@@ -6,4 +6,4 @@ node_js:
             - "1.0"
             - "1.8"
             - "2.0"
-script: mocha-phantomjs test/index.html
+script: mocha-phantomjs -s webSecurityEnabled=false test/index.html
