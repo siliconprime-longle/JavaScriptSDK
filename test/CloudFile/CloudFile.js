@@ -25,7 +25,7 @@ describe("Cloud Files", function() {
 
     });
 
-    it("should delete a file", function(done) {
+  /*  it("should delete a file", function(done) {
 
      this.timeout(15000);
      var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
@@ -56,7 +56,7 @@ describe("Cloud Files", function() {
     }, function(err) {
       throw "Error uploading file";
     });
-   });
+   });*/
 
     //add ACL on CloudFiles.
     
