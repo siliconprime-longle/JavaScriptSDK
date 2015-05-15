@@ -1,12 +1,11 @@
 {
   "name": " cloudboost",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cloudboost is a hybrid No-Sql database as a service ",
-  "main": "1.0.0.js",
+  "main": "lib/cloudboost",
   "engines": {
     "node": ">=0.8.0"
   },
-  "main": "lib/cloudboost",
   "keywords": [
     "database as a service",
     "dbaas",
