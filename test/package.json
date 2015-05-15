@@ -10,8 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "grunt": "^0.4.5",
-    "mocha": "^2.2.4",
-    "phantomjs": "^1.9.16"
+
   },
   "devDependencies": {
     "mocha": "^2.2.4"
