@@ -70,13 +70,13 @@ describe("CloudUser", function () {
     });
 
 
-  /*  it("Should assign role to user", function (done) {
+  /* it("Should assign role to user", function (done) {
 
         this.timeout(100000);
 
         var obj = new CB.CloudUser();
      //   var role = new CB.CloudRole(rolename);
-        obj.set('username', 'Xjy9g');
+        obj.set('username', 'vipul');
         obj.set('password','abcd');
         obj.logIn().then(function(list) {
             role.save().then(function(role){
@@ -92,14 +92,14 @@ describe("CloudUser", function () {
             throw "role create error";
         })
 
-    });
+    });*/
 
     it("Should check if role is assigned to user", function (done) {
 
         this.timeout(10000);
 
         var obj = new CB.CloudUser();
-        obj.set('username', 'Xjy9g');
+        obj.set('username', 'vipul');
         obj.set('password','abcd');
         obj.logIn().then(function(list) {
             if(list.get('roles').length>0) {
@@ -115,9 +115,9 @@ describe("CloudUser", function () {
             throw "role create error";
         });
 
-    });;
+    });
 
-    it("Should remove role assigned role to user", function (done) {
+   /* it("Should remove role assigned role to user", function (done) {
 
         this.timeout(1000000);
 
@@ -125,7 +125,7 @@ describe("CloudUser", function () {
         rolename = util.makeString();
             role.set('name',rolename);
         var role = new CB.CloudRole(rolename);
-        obj.set('username', 'Xjy9g');
+        obj.set('username', 'vipul');
         obj.set('password','abcd');
         obj.logIn().then(function(list) {
             role.save().then(function(role){
@@ -145,8 +145,7 @@ describe("CloudUser", function () {
             throw "user login error";
         });
 
-    });
+    });*/
 
 
-*/
 });

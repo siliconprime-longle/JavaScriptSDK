@@ -1,13 +1,13 @@
 {
-  "name": "SDK",
+  "name": " cloudboost",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cloudboost is a hybrid No-Sql database as a service ",
   "main": "1.0.0.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "hello@cloudboost.io",
+  "license": "MIT",
   "dependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.1",

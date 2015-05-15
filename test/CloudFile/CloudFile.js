@@ -7,12 +7,14 @@ describe("Cloud Files", function() {
      try {
          var oMyBlob = new Blob(aFileParts, {type: "text/html"});
      } catch (e) {
+         var phantom = require('phantomjs');
+         console.log(phantom);
          var builder = new WebKitBlobBuilder();
          builder.append(aFileParts);
          var oMyBlob = builder.getBlob();
      }
-     var file = new CB.CloudFile(oMyBlob);
-
+        var file = new CB.CloudFile(descriptor);
+        console.log(file);
      file.save().then(function(file) {
         if(file.url){
           done();
@@ -20,9 +22,9 @@ describe("Cloud Files", function() {
           throw "Upload success. But cannot find the URL.";
         }
       }, function(err) {
+         console.log(err);
         throw "Error uploading file";
       });
-
     });
 
   /*  it("should delete a file", function(done) {

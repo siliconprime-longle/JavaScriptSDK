@@ -151,7 +151,6 @@ CB._validate = function() {
 };
 
 CB._loadSocketio = function(done) {
-    console.log(CB._isNode);
     if(CB._isNode)
     {
         CB.io = require('socket.io-client');
@@ -197,12 +196,28 @@ CB._initAppSocketConnection = function(done) {
         if (CB.Socket)
             done();
 
-        if(!CB.Socket)
-            CB.Socket = CB.io(CB.serverUrl); //have the server URL here.
-
-        CB.Socket.on('connect', function() {
-            done();
-        });
+        if(!CB.Socket) {
+            var xmlhttp = CB._loadXml();
+            xmlhttp.open('GET','http://localhost:4730',true);
+            xmlhttp.send();
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == xmlhttp.DONE) {
+                    if (xmlhttp.status == 200) {
+                        CB.serverUrl = 'http://localhost:4730';
+                    }
+                    CB.Socket = CB.io(CB.serverUrl); //have the server URL here.
+                    console.log(CB.serverUrl);
+                    CB.Socket.on('connect', function () {
+                        done();
+                    });
+                }
+            };
+        }
+        else {
+            CB.Socket.on('connect', function () {
+                done();
+            });
+        }
     }
 };
 
@@ -290,18 +305,21 @@ CB._request=function(method,url,params)
 {
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-    if (CB.isNode) {
+    if (CB._isNode) {
         var LocalStorage = require('node-localstorage').LocalStorage;
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
+    xmlhttp.setRequestHeader('Content-Type','application/json');
     //res.header('Access-Control-Expose-Headers','sessionID');
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
+    if(CB._isNode)
+        xmlhttp.setRequestHeader("User-Agent",
+            "CB/" + CB.version +
+            " (NodeJS " + process.versions.node + ")");
     xmlhttp.send(params);
-
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
@@ -312,7 +330,8 @@ CB._request=function(method,url,params)
                     localStorage.removeItem('sessionID');
                 def.resolve(xmlhttp.responseText);
             } else {
-                def.reject(xmlhttp.status);
+                console.log(xmlhttp.status);
+                def.reject(xmlhttp.responseText);
             }
         }
     }

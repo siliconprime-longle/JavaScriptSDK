@@ -21,6 +21,7 @@ describe("Cloud Object", function() {
 
      			done();
      		}, error : function(error){
+                console.log(error);
      			throw 'Error saving the object';
      		}
      	});

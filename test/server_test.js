@@ -2,18 +2,21 @@ describe("Server Check",function(){
     it("should check for localhost",function(done){
         var xmlhttp;
         this.timeout(10000);
-        if(window.XMLHttpRequest){
-          xmlhttp=new XMLHttpRequest();
-        }
-        else {
-            xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-        }
+        var req = typeof(require) === 'function' ? require : null;
+        // Load references to other dependencies
+        if (typeof(XMLHttpRequest) !== 'undefined') {
+             xmlhttp = XMLHttpRequest;
+            } else if (typeof(require) === 'function' &&
+                typeof(require.ensure) === 'undefined') {
+                xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+            }
+            xmlhttp = new xmlhttp();
         xmlhttp.open('GET','http://localhost:4730',true);
         xmlhttp.send();
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
-                    CB.appId = devappkey;
+                    CB.appId = 'sample123';
                     CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
                     CB.serverUrl = 'http://localhost:4730';
                     CB.apiUrl = CB.serverUrl + '/api';
