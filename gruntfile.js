@@ -12,11 +12,9 @@ module.exports = function(grunt) {
             },
             bar:{
               // the files to concatenate
-                   /* src: ['dist/1.0.0.js','test/util/util.js','test/server_test.js','test/init/init.js','test/CloudObject/*.js','test/CloudExpire/*.js'
+                    src: ['dist/1.0.0.js','test/util/util.js','test/server_test.js','test/init/init.js','test/CloudObject/*.js','test/CloudExpire/*.js'
                         ,'test/CloudExpire/*.js','test/CloudFile/*.js','test/CloudNotification/*.js','test/CloudQuery/*.js','test/CloudSearch/*.js'
-                    ,'test/CloudUser/*.js','test/ACL/*.js'],*/
-                    // the location of the resulting JS file
-                src: ['dist/1.0.0.js','test/util/util.js','test/server_test.js','test/init/init.js','test/CloudFile/*.js'],
+                    ,'test/CloudUser/*.js','test/ACL/*.js'],
                     dest: 'test/join.js'
             }
         },
