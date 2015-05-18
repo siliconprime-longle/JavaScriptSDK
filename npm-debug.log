@@ -1,25 +1,106 @@
 0 info it worked if it ends with ok
 1 verbose cli [ 'c:\\Program Files\\nodejs\\node.exe',
 1 verbose cli   'c:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
-1 verbose cli   'version',
-1 verbose cli   'patch' ]
+1 verbose cli   'publish' ]
 2 info using npm@2.5.1
 3 info using node@v0.12.1
-4 info git [ 'status', '--porcelain' ]
-5 verbose stack Error: Git working directory not clean.
-5 verbose stack D npm-debug.log
-5 verbose stack     at c:\Program Files\nodejs\node_modules\npm\lib\version.js:138:37
-5 verbose stack     at ChildProcess.exithandler (child_process.js:735:7)
-5 verbose stack     at ChildProcess.emit (events.js:110:17)
-5 verbose stack     at maybeClose (child_process.js:1008:16)
-5 verbose stack     at Process.ChildProcess._handle.onexit (child_process.js:1080:5)
-6 verbose cwd c:\Users\NeoScript\WebstormProjects\SDK
-7 error Windows_NT 6.1.7601
-8 error argv "c:\\Program Files\\nodejs\\node.exe" "c:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "version" "patch"
-9 error node v0.12.1
-10 error npm  v2.5.1
-11 error Git working directory not clean.
-11 error D npm-debug.log
-12 error If you need help, you may report this error at:
-12 error     <http://github.com/npm/npm/issues>
-13 verbose exit [ 1, true ]
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec { raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: 'c:\\Users\\NeoScript\\WebstormProjects\\SDK',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package.tgz not in flight; packing
+9 verbose tar pack [ 'C:\\Users\\NeoScript\\AppData\\Roaming\\npm-cache\\cloudboost\\1.0.2\\package.tgz',
+9 verbose tar pack   'c:\\Users\\NeoScript\\WebstormProjects\\SDK' ]
+10 verbose tarball C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package.tgz
+11 verbose folder c:\Users\NeoScript\WebstormProjects\SDK
+12 info prepublish cloudboost@1.0.2
+13 verbose addLocalTarball adding from inside cache C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package.tgz
+14 silly cache afterAdd cloudboost@1.0.2
+15 verbose afterAdd C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package\package.json not in flight; writing
+16 verbose afterAdd C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package\package.json written
+17 silly publish { name: 'cloudboost',
+17 silly publish   version: '1.0.2',
+17 silly publish   description: 'Cloudboost is a hybrid No-Sql database as a service ',
+17 silly publish   main: 'lib/cloudboost',
+17 silly publish   engines: { node: '>=0.8.0' },
+17 silly publish   keywords: [ 'database as a service', 'dbaas', 'no-sql', 'database' ],
+17 silly publish   scripts: { test: 'echo "Error: no test specified" && exit 1' },
+17 silly publish   author: { name: 'hello@cloudboost.io' },
+17 silly publish   license: 'MIT',
+17 silly publish   dependencies:
+17 silly publish    { grunt: '^0.4.5',
+17 silly publish      'grunt-contrib-concat': '^0.5.1',
+17 silly publish      'grunt-contrib-uglify': '^0.9.1',
+17 silly publish      'grunt-contrib-watch': '^0.6.1',
+17 silly publish      'node-localstorage': '^0.5.0',
+17 silly publish      'socket.io-client': '^1.3.5',
+17 silly publish      'mocha-phantomjs': '^3.5.3',
+17 silly publish      xmlhttprequest: '^1.7.0' },
+17 silly publish   devDependencies:
+17 silly publish    { 'mocha-phantomjs': '^3.5.3',
+17 silly publish      mocha: '^2.2.4',
+17 silly publish      phantomjs: '^1.9.16' },
+17 silly publish   gitHead: '5ed4bae59feed9dc59fdbabfc676d8e88daa846d',
+17 silly publish   readme: '# CloudBoost: Hybrid No-Sql Database as a Service\r\n\r\n<img align="right" height="160" width="100" src="https://cloudboost.io/assets/images/cblogoicon.png">\r\n### Documentation\r\n\r\nVisit the [CloudBoost Docs](http://docs.cloudboost.io) for documentation.\r\n\r\n',
+17 silly publish   readmeFilename: 'README.md',
+17 silly publish   _id: 'cloudboost@1.0.2',
+17 silly publish   _shasum: '2fdf49a20c008337a18902e146d241b8db1a4423',
+17 silly publish   _from: '.' }
+18 silly mapToRegistry name cloudboost
+19 silly mapToRegistry using default registry
+20 silly mapToRegistry registry https://registry.npmjs.org/
+21 silly mapToRegistry uri https://registry.npmjs.org/cloudboost
+22 verbose publish registryBase https://registry.npmjs.org/
+23 silly publish uploading C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package.tgz
+24 verbose request uri https://registry.npmjs.org/cloudboost
+25 verbose request sending authorization for write operation
+26 info attempt registry request try #1 at 3:36:06 PM
+27 verbose request using bearer token for auth
+28 verbose request id b4967933a3eb6e63
+29 http request PUT https://registry.npmjs.org/cloudboost
+30 http 404 https://registry.npmjs.org/cloudboost
+31 verbose headers { 'content-type': 'application/json',
+31 verbose headers   'cache-control': 'max-age=0',
+31 verbose headers   'content-length': '21',
+31 verbose headers   'accept-ranges': 'bytes',
+31 verbose headers   date: 'Mon, 18 May 2015 10:06:09 GMT',
+31 verbose headers   via: '1.1 varnish',
+31 verbose headers   connection: 'keep-alive',
+31 verbose headers   'x-served-by': 'cache-atl6225-ATL',
+31 verbose headers   'x-cache': 'MISS',
+31 verbose headers   'x-cache-hits': '0',
+31 verbose headers   'x-timer': 'S1431943567.202438,VS0,VE2666' }
+32 verbose request invalidating C:\Users\NeoScript\AppData\Roaming\npm-cache\registry.npmjs.org\cloudboost on PUT
+33 error publish Failed PUT 404
+34 verbose stack Error: Not found : cloudboost
+34 verbose stack     at CachingRegistryClient.<anonymous> (c:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:254:14)
+34 verbose stack     at Request._callback (c:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:178:14)
+34 verbose stack     at Request.self.callback (c:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:344:22)
+34 verbose stack     at Request.emit (events.js:110:17)
+34 verbose stack     at Request.<anonymous> (c:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1239:14)
+34 verbose stack     at Request.emit (events.js:129:20)
+34 verbose stack     at IncomingMessage.<anonymous> (c:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1187:12)
+34 verbose stack     at IncomingMessage.emit (events.js:129:20)
+34 verbose stack     at _stream_readable.js:908:16
+34 verbose stack     at process._tickCallback (node.js:355:11)
+35 verbose statusCode 404
+36 verbose pkgid cloudboost
+37 verbose cwd c:\Users\NeoScript\WebstormProjects\SDK
+38 error Windows_NT 6.1.7601
+39 error argv "c:\\Program Files\\nodejs\\node.exe" "c:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+40 error node v0.12.1
+41 error npm  v2.5.1
+42 error code E404
+43 error 404 Not found : cloudboost
+43 error 404
+43 error 404 'cloudboost' is not in the npm registry.
+43 error 404 You should bug the author to publish it (or use the name yourself!)
+43 error 404
+43 error 404 Note that you can also install from a
+43 error 404 tarball, folder, http url, or git url.
+44 verbose exit [ 1, true ]
