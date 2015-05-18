@@ -174,11 +174,6 @@ CB._loadSocketio = function(done) {
 };
 
 CB._initAppSocketConnection = function(done) {
-    if (typeof(process) !== "undefined" &&
-        process.versions &&
-        process.versions.node) {
-        CB._isNode = true;
-    }
     try {
         if (!CB.io) {
             //if socket.io is not loaded.
@@ -240,32 +235,17 @@ CB._isSocketsActivated = function(done) {
 (function () {
 
     //download socket.io
-    if(!CB.io){
+   /* if(!CB.io){
         CB._initAppSocketConnection(function(){
             //done!
         });
-    }
+    }*/
 
 
     // Establish the root object, `window` in the browser, or `global` on the server.
     var root = this;
     // Create a refeence to this
     var _ = new Object();
-    /*if (typeof module !== 'undefined' && module.exports) {
-     //its nodejs  - export CB.
-     CB._isNode = true;
-     }else{
-     CB._isNode = false;
-     }*/
-    if (typeof(process) !== "undefined" &&
-        process.versions &&
-        process.versions.node) {
-        CB._isNode = true;
-    }
-    else
-    {
-        CB._isNode = false;
-    }
 })();
 
 function _all(arrayOfPromises) {

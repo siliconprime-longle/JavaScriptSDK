@@ -22,6 +22,16 @@ CB.apiUrl = CB.serverUrl+'/api';
 CB.appId = CB.appId || null;
 CB.appKey = CB.appKey || null;
 
+if (typeof(process) !== "undefined" &&
+    process.versions &&
+    process.versions.node) {
+    CB._isNode = true;
+}
+else
+{
+    CB._isNode = false;
+}
+
 /*
  Parse codes:
  */
