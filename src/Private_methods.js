@@ -150,101 +150,12 @@ CB._validate = function() {
     }
 };
 
-CB._loadSocketio = function(done) {
-    if(CB._isNode)
-    {
-        CB.io = require('socket.io-client');
-        done();
-    }
-    else
-    {
-        var xmlhttp = CB._loadXml();
-        xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
-        xmlhttp.send();
-        xmlhttp.onreadystatechange=function(){
-            if(xmlhttp.readyState == xmlhttp.DONE) {
-                if(xmlhttp.status == 200) {
-                    eval(xmlhttp.responseText);
-                    CB.io=io;
-                    done();
-                }
-            }
-        }
-    }
-};
-
-CB._initAppSocketConnection = function(done) {
-    try {
-        if (!CB.io) {
-            //if socket.io is not loaded.
-            CB._loadSocketio(initAppConnection);
-        } else {
-            initAppConnection();
-        }
-    } catch (err) {
-        CB._loadSocketio(initAppConnection);
-    }
-
-
-    function initAppConnection() {
-        //socket io is loaded now.
-        if (CB.Socket)
-            done();
-
-        if(!CB.Socket) {
-            var xmlhttp = CB._loadXml();
-            xmlhttp.open('GET','http://localhost:4730',true);
-            xmlhttp.send();
-            xmlhttp.onreadystatechange = function() {
-                if (xmlhttp.readyState == xmlhttp.DONE) {
-                    if (xmlhttp.status == 200) {
-                        CB.serverUrl = 'http://localhost:4730';
-                    }
-                    CB.Socket = CB.io(CB.serverUrl); //have the server URL here.
-                    console.log(CB.serverUrl);
-                    CB.Socket.on('connect', function () {
-                        done();
-                    });
-                }
-            };
-        }
-        else {
-            CB.Socket.on('connect', function () {
-                done();
-            });
-        }
-    }
-};
-
-CB._isSocketsActivated = function(done) {
-
-    try {
-        if (!CB.io) {
-            //if socketio is not loaded.
-            return false;
-        } else {
-            return true;
-        }
-    } catch (err) {
-        return false;
-    }
-
-};
 
 //to check if its running under node, If yes - then export CB.
 (function () {
-
-    //download socket.io
-   /* if(!CB.io){
-        CB._initAppSocketConnection(function(){
-            //done!
-        });
-    }*/
-
-
     // Establish the root object, `window` in the browser, or `global` on the server.
     var root = this;
-    // Create a refeence to this
+    // Create a reference to this
     var _ = new Object();
 })();
 

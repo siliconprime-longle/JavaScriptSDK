@@ -7595,16 +7595,6 @@ CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static 
         CB.io = io;
     }
     CB.Socket = CB.io(CB.serverUrl);
-   /* var socketIoLoadCheker = setInterval(function(){
-        if(CB.io){
-            clearInterval(socketIoLoadCheker);
-            if (callback) {
-                callback.success();
-            } else {
-                def.resolve();
-            }
-        }
-    }, 200);*/
     if (callback) {
         callback.success();
     } else {
@@ -9679,12 +9669,7 @@ CB._loadSocketio = function(done) {
     }
 };
 
-CB._initAppSocketConnection = function(done) {
-    if (typeof(process) !== "undefined" &&
-        process.versions &&
-        process.versions.node) {
-        CB._isNode = true;
-    }
+/*CB._initAppSocketConnection = function(done) {
     try {
         if (!CB.io) {
             //if socket.io is not loaded.
@@ -9740,38 +9725,14 @@ CB._isSocketsActivated = function(done) {
         return false;
     }
 
-};
+};*/
 
 //to check if its running under node, If yes - then export CB.
 (function () {
-
-    //download socket.io
-   /* if(!CB.io){
-        CB._initAppSocketConnection(function(){
-            //done!
-        });
-    }*/
-
-
     // Establish the root object, `window` in the browser, or `global` on the server.
     var root = this;
-    // Create a refeence to this
+    // Create a reference to this
     var _ = new Object();
-    /*if (typeof module !== 'undefined' && module.exports) {
-     //its nodejs  - export CB.
-     CB._isNode = true;
-     }else{
-     CB._isNode = false;
-     }*/
-    if (typeof(process) !== "undefined" &&
-        process.versions &&
-        process.versions.node) {
-        CB._isNode = true;
-    }
-    else
-    {
-        CB._isNode = false;
-    }
 })();
 
 function _all(arrayOfPromises) {
@@ -9899,6 +9860,7 @@ describe("Server Check",function(){
 });
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
+        this.timeout(100000);
               CB.CloudApp.init(CB.appId, CB.appKey).then(function(){
 				    done();
 		  }, function(error){
