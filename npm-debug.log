@@ -46,9 +46,9 @@
 17 silly publish      phantomjs: '^1.9.16' },
 17 silly publish   readme: '# CloudBoost: Hybrid No-Sql Database as a Service\r\n\r\n<img align="right" height="160" width="150" src="https://cloudboost.io/assets/images/cblogoicon.png">\r\n### Documentation\r\n\r\nVisit the [CloudBoost Docs](http://docs.cloudboost.io) for documentation.\r\n\r\n',
 17 silly publish   readmeFilename: 'README.md',
-17 silly publish   gitHead: '64144c51e7f0c044657c809e09c0c85b84b70881',
+17 silly publish   gitHead: '02685e9e068042e7d1af07afcde44c0bd103b9d7',
 17 silly publish   _id: 'cloudboost@1.0.2',
-17 silly publish   _shasum: 'dca3abc069a600c57c016cac5113f8f667143b73',
+17 silly publish   _shasum: '2cae1484f0151f97fc26bf2b902168425252f670',
 17 silly publish   _from: '.' }
 18 silly mapToRegistry name cloudboost
 19 silly mapToRegistry using default registry
@@ -58,22 +58,22 @@
 23 silly publish uploading C:\Users\NeoScript\AppData\Roaming\npm-cache\cloudboost\1.0.2\package.tgz
 24 verbose request uri https://registry.npmjs.org/cloudboost
 25 verbose request sending authorization for write operation
-26 info attempt registry request try #1 at 4:15:58 PM
+26 info attempt registry request try #1 at 7:49:08 PM
 27 verbose request using bearer token for auth
-28 verbose request id 5e1fa70aabffcb6b
+28 verbose request id 4cd7a55818d44337
 29 http request PUT https://registry.npmjs.org/cloudboost
 30 http 404 https://registry.npmjs.org/cloudboost
 31 verbose headers { 'content-type': 'application/json',
 31 verbose headers   'cache-control': 'max-age=0',
 31 verbose headers   'content-length': '21',
 31 verbose headers   'accept-ranges': 'bytes',
-31 verbose headers   date: 'Mon, 18 May 2015 10:46:02 GMT',
+31 verbose headers   date: 'Mon, 18 May 2015 14:19:17 GMT',
 31 verbose headers   via: '1.1 varnish',
 31 verbose headers   connection: 'keep-alive',
-31 verbose headers   'x-served-by': 'cache-atl6221-ATL',
+31 verbose headers   'x-served-by': 'cache-atl6234-ATL',
 31 verbose headers   'x-cache': 'MISS',
 31 verbose headers   'x-cache-hits': '0',
-31 verbose headers   'x-timer': 'S1431945959.421105,VS0,VE2949' }
+31 verbose headers   'x-timer': 'S1431958750.774926,VS0,VE6947' }
 32 verbose request invalidating C:\Users\NeoScript\AppData\Roaming\npm-cache\registry.npmjs.org\cloudboost on PUT
 33 error publish Failed PUT 404
 34 verbose stack Error: Not found : cloudboost

@@ -9646,86 +9646,6 @@ CB._validate = function() {
     }
 };
 
-CB._loadSocketio = function(done) {
-    if(CB._isNode)
-    {
-        CB.io = require('socket.io-client');
-        done();
-    }
-    else
-    {
-        var xmlhttp = CB._loadXml();
-        xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
-        xmlhttp.send();
-        xmlhttp.onreadystatechange=function(){
-            if(xmlhttp.readyState == xmlhttp.DONE) {
-                if(xmlhttp.status == 200) {
-                    eval(xmlhttp.responseText);
-                    CB.io=io;
-                    done();
-                }
-            }
-        }
-    }
-};
-
-/*CB._initAppSocketConnection = function(done) {
-    try {
-        if (!CB.io) {
-            //if socket.io is not loaded.
-            CB._loadSocketio(initAppConnection);
-        } else {
-            initAppConnection();
-        }
-    } catch (err) {
-        CB._loadSocketio(initAppConnection);
-    }
-
-
-    function initAppConnection() {
-        //socket io is loaded now.
-        if (CB.Socket)
-            done();
-
-        if(!CB.Socket) {
-            var xmlhttp = CB._loadXml();
-            xmlhttp.open('GET','http://localhost:4730',true);
-            xmlhttp.send();
-            xmlhttp.onreadystatechange = function() {
-                if (xmlhttp.readyState == xmlhttp.DONE) {
-                    if (xmlhttp.status == 200) {
-                        CB.serverUrl = 'http://localhost:4730';
-                    }
-                    CB.Socket = CB.io(CB.serverUrl); //have the server URL here.
-                    console.log(CB.serverUrl);
-                    CB.Socket.on('connect', function () {
-                        done();
-                    });
-                }
-            };
-        }
-        else {
-            CB.Socket.on('connect', function () {
-                done();
-            });
-        }
-    }
-};
-
-CB._isSocketsActivated = function(done) {
-
-    try {
-        if (!CB.io) {
-            //if socketio is not loaded.
-            return false;
-        } else {
-            return true;
-        }
-    } catch (err) {
-        return false;
-    }
-
-};*/
 
 //to check if its running under node, If yes - then export CB.
 (function () {
@@ -11061,6 +10981,62 @@ describe("CloudQuery Include", function () {
         })
 
     });
+
+});
+describe("CloudQuery Include", function () {
+
+
+
+    it("save a relation.", function (done) {
+
+        this.timeout(10000);
+
+        //create an object.
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn1', 'Course');
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'Vipul');
+        var obj2= new CB.CloudObject('student1');
+        obj2.set('name', 'Nawaz');
+        obje=[obj1,obj2];
+        obj.set('newColumn7', obje);
+        obj.save().then(function() {
+            done();
+        }, function () {
+            throw "Relation Save error";
+        });
+
+    });
+
+    it("should include a relation object when include is requested in a query.", function (done) {
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Custom4');
+        query.equalTo('Custom4.name','Vipul');
+        query.include('newColumn7');
+        query.find().then(function(list){
+            if(list.length>0){
+                for(var i=0;i<list.length;i++){
+                    var student_obj=list[i].get('newColumn7');
+                    for(var j=0;j<student_obj.length;j++)
+                    {
+                        if(!student_obj[j].document.name)
+                        {
+                            throw "Unsuccessful Join";
+                        }
+                    }
+                }
+                done();
+            }else{
+                throw "Cannot retrieve a saved relation.";
+            }
+        }, function(error){
+
+        })
+
+    });
+
 
 });
 describe("CloudQuery", function () {
