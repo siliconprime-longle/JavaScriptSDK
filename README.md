@@ -4,7 +4,7 @@
 ```
 npm install cloudboost
 ```
-<img align="right" src="https://cloud.githubusercontent.com/assets/5427704/7723971/bf689f5c-ff0a-11e4-9603-bf20ae669730.png">
+<img align="right" src="https://cloud.githubusercontent.com/assets/5427704/7724257/b7f45d6c-ff0d-11e4-8f60-06024eaa1508.png">
 
 ### Usage
 
