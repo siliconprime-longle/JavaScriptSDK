@@ -18,6 +18,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
         if(file.url){
           done();
+          console.log(file.url);
         }else{
           throw "Upload success. But cannot find the URL.";
         }
@@ -26,6 +27,7 @@ describe("Cloud Files", function() {
         throw "Error uploading file";
       });
     });
+   it("should delete a file", function(done) {
 
   /*  it("should delete a file", function(done) {
 
@@ -43,6 +45,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
       if(file.url){
         //received the blob's url
+        console.log(file.url);
         file.delete().then(function(file) {
           if(file.url === null) {
             done();

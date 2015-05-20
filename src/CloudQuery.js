@@ -269,6 +269,59 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     return this;
 }
 
+//GeoPoint near query
+CB.Query.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
+	if(!this.query[columnName]){
+		this.query[columnName] = {};
+		this.query[columnName]['$near'] = {
+			'$geometry': coordinates,
+			'$maxDistance': maxDistance,
+			'$minDistance': minDistance
+		};
+	}
+};
+
+//GeoPoint geoWithin query
+CB.Query.prototype.geoWithin = function(columnName, geoPointArray, radius){
+	
+	var coordinates = [];
+	//extracting coordinates from each CloudGeoPoint Object
+	if (Object.prototype.toString.call(geoPointArray) === '[object Array]') {
+		for(i=0; i < geoPointArray.length; i++){
+		
+			if (geoPointArray[i].hasOwnProperty('coordinates')) {
+				
+				coordinates[i] = geoPointArray[i]['coordinates'];
+				
+			}
+		}
+	}else{
+		throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+	}
+	
+	if(!radius){
+		//2dSphere needs first and last coordinates to be same for polygon type
+		//eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one 
+		coordinates[coordinates.length] = coordinates[0];
+		
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {};
+			this.query[columnName]['$geoWithin']['$geometry'] = {
+					'type': 'Polygon',
+					'coordinates': coordinates
+			};
+		}
+	}else{
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {
+				'$centerSphere': [ coordinates, radius ]
+			};
+		}
+	}
+};
+
 CB.CloudQuery.prototype.count = function(callback) {
     if (!CB.appId) {
         throw "CB.appId is null.";

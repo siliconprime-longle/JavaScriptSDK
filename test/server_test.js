@@ -1,5 +1,6 @@
 describe("Server Check",function(){
     it("should check for localhost",function(done){
+    	this.timeout(10000);
         var xmlhttp;
         this.timeout(10000);
         var req = typeof(require) === 'function' ? require : null;

@@ -8573,6 +8573,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
         return def;
     }
 };
+
 /*
  CloudSearch (ACL)
  */
@@ -9278,7 +9279,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
 };
+
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudRole.prototype, 'name', {
     get: function() {
         return this.document.name;
@@ -9318,6 +9321,7 @@ CB.CloudRole.getRole = function(role, callback) {
         return def;
     }
 };
+
 /*
  CloudFiles
  */
@@ -9494,6 +9498,7 @@ CB.CloudFile.prototype.delete = function(callback) {
         return def;
     }
 }
+
 /* PRIVATE METHODS */
 CB._serialize = function(thisObj) {
 
@@ -9778,6 +9783,7 @@ describe("Server Check",function(){
         }
     });
 });
+
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(100000);
@@ -9789,8 +9795,6 @@ describe("Cloud App", function() {
 		  }); 
     });
 });
-
-
 
 describe("CloudObjectExpires", function () {
 

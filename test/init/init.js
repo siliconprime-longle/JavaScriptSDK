@@ -7,7 +7,6 @@ describe("Cloud App", function() {
                   throw 'sdk init failed';
 				//should.fail('SDK Init Failed');
 		  }); 
+		  
     });
 });
-
-
