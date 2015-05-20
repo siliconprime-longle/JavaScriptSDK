@@ -11,7 +11,6 @@ CB.version = "1.0.0";
 CB._isNode = false;
 CB.Socket = null;
 
-//CB.serverUrl = 'http://localhost:4730';
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
 
 CB.io = null; //socket.io library is saved here.
@@ -7982,7 +7981,6 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
     CB._validate();
 
     var thisObj = this;
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB._serialize(thisObj),
         key: CB.appKey
@@ -9340,7 +9338,8 @@ CB.CloudFile = CB.CloudFile || function(file) {
         };
 
     } else if(typeof file === "string") {
-        if (file.match(/(((http|ftp|https):\/\/)|www\.)[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#!]*[\w\-\@?^=%&/~\+#])?/g)) {
+        var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
+        if (regexp.test(file)) {
             this.document = {
                 _type: 'file',
                 name: '',
