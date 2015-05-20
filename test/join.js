@@ -8362,6 +8362,59 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     return this;
 }
 
+//GeoPoint near query
+CB.Query.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
+	if(!this.query[columnName]){
+		this.query[columnName] = {};
+		this.query[columnName]['$near'] = {
+			'$geometry': coordinates,
+			'$maxDistance': maxDistance,
+			'$minDistance': minDistance
+		};
+	}
+};
+
+//GeoPoint geoWithin query
+CB.Query.prototype.geoWithin = function(columnName, geoPointArray, radius){
+	
+	var coordinates = [];
+	//extracting coordinates from each CloudGeoPoint Object
+	if (Object.prototype.toString.call(geoPointArray) === '[object Array]') {
+		for(i=0; i < geoPointArray.length; i++){
+		
+			if (geoPointArray[i].hasOwnProperty('coordinates')) {
+				
+				coordinates[i] = geoPointArray[i]['coordinates'];
+				
+			}
+		}
+	}else{
+		throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+	}
+	
+	if(!radius){
+		//2dSphere needs first and last coordinates to be same for polygon type
+		//eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one 
+		coordinates[coordinates.length] = coordinates[0];
+		
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {};
+			this.query[columnName]['$geoWithin']['$geometry'] = {
+					'type': 'Polygon',
+					'coordinates': coordinates
+			};
+		}
+	}else{
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {
+				'$centerSphere': [ coordinates, radius ]
+			};
+		}
+	}
+};
+
 CB.CloudQuery.prototype.count = function(callback) {
     if (!CB.appId) {
         throw "CB.appId is null.";
@@ -9322,6 +9375,7 @@ CB.CloudRole.getRole = function(role, callback) {
     }
 };
 
+
 /*
  CloudFiles
  */
@@ -9498,6 +9552,80 @@ CB.CloudFile.prototype.delete = function(callback) {
         return def;
     }
 }
+/*
+*CloudGeoPoint
+*/
+
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+	if(!latitude || !longitude)
+		throw "Latitude or Longitude is empty.";
+	
+	if(isNaN(latitude))
+		throw "Latitude "+ latitude +" is not a number type.";
+		
+	if(isNaN(longitude))
+		throw "Longitude "+ longitude+" is not a number type.";
+	
+	this.document = {};
+	this.document.type = "Point";
+	
+	//The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
+	this.document.coordinates = [Number(longitude), Number(latitude)];
+};
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
+    get: function() {
+        return this.document.coordinates[1];
+    },
+    set: function(latitude) {
+        this.document.coordinates[1] = latitude;
+    }
+});
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
+    get: function() {
+        return this.document.coordinates[0];
+    },
+    set: function(longitude) {
+        this.document.coordinates[0] = longitude;
+    }
+});
+
+CB.CloudGeoPoint.prototype.distanceInKMs = function(point) {
+	
+	var earthRedius = 6371; //in Kilometer
+	return earthRedius * greatCircleFormula(this, point);
+};
+
+CB.CloudGeoPoint.prototype.distanceInMiles = function(point){
+
+	var earthRedius = 3959 // in Miles
+	return earthRedius * greatCircleFormula(this, point);
+	
+};
+
+CB.CloudGeoPoint.prototype.distanceInRadians = function(point){
+	
+	return greatCircleFormula(this, point);
+};
+
+function greatCircleFormula(thisObj, point){
+
+	var dLat =(thisObj.document.coordinates[1] - point.document.coordinates[1]).toRad();
+	var dLon = (thisObj.document.coordinates[0] - point.document.coordinates[0]).toRad();
+	var lat1 = (point.document.coordinates[1]).toRad();
+	var lat2 = (thisObj.document.coordinates[1]).toRad();
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	return c;
+}
+
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+  }
+}
+
 
 /* PRIVATE METHODS */
 CB._serialize = function(thisObj) {
@@ -9505,18 +9633,23 @@ CB._serialize = function(thisObj) {
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
+        
     var obj= CB._clone(thisObj,url);
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile) {
-        throw "Data passed is not an instance of CloudObject or CloudFile";
+    
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
-
+        
+    if(obj instanceof CB.CloudGeoPoint)
+        return obj.document;
+	
     var doc = obj.document;
 
     for (var key in doc) {
-        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
             doc[key] = CB._serialize(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -9529,7 +9662,7 @@ CB._serialize = function(thisObj) {
         } else if (doc[key] instanceof Array) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
-            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile)) {
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB._serialize(doc[key][i]));
@@ -9590,12 +9723,19 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else
-                {
+                }else if (data[key].latitude || data[key].longitude) { 
+            
+            		document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
+            	
+    			}else{
+    			
                     document[key] = data[key];
+                    
                 }
-            } else {
+            }else {
+            
                 document[key] = data[key];
+                
             }
         }
 
@@ -9611,7 +9751,7 @@ CB._deserialize = function(data, thisObj) {
             return thisObj;
         }
 
-    } else {
+    }else {
         //if this is plain json.
         return data;
     }
@@ -9684,9 +9824,18 @@ CB._clone=function(obj,url){
                 doc2[key]=CB._clone(doc[key],null);
             else if(doc[key] instanceof CB.CloudFile){
                 doc2[key]=CB._clone(doc[key],doc[key].document.url);
+            }else if(doc[key] instanceof CB.CloudGeoPoint){
+            	doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
+        }
+    }else if(obj instanceof CB.CloudGeoPoint){
+    	n_obj = obj;
+        var doc=obj.document;
+        var doc2={};
+        for (var key in doc) {
+        	doc2[key]=doc[key];
         }
     }
     n_obj.document=doc2;
@@ -9729,6 +9878,7 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
    var util = {
      makeString : function(){
 	    var text = "";
@@ -9751,6 +9901,7 @@ CB._request=function(method,url,params)
 	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
+    	this.timeout(10000);
         var xmlhttp;
         this.timeout(10000);
         var req = typeof(require) === 'function' ? require : null;
@@ -9793,6 +9944,7 @@ describe("Cloud App", function() {
                   throw 'sdk init failed';
 				//should.fail('SDK Init Failed');
 		  }); 
+		  
     });
 });
 
@@ -10734,6 +10886,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
         if(file.url){
           done();
+          console.log(file.url);
         }else{
           throw "Upload success. But cannot find the URL.";
         }
@@ -10742,6 +10895,7 @@ describe("Cloud Files", function() {
         throw "Error uploading file";
       });
     });
+   it("should delete a file", function(done) {
 
   /*  it("should delete a file", function(done) {
 
@@ -10759,6 +10913,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
       if(file.url){
         //received the blob's url
+        console.log(file.url);
         file.delete().then(function(file) {
           if(file.url === null) {
             done();
@@ -10779,6 +10934,7 @@ describe("Cloud Files", function() {
     //add ACL on CloudFiles.
     
 });
+
 
 
 describe("CloudNotification", function() {
@@ -10881,6 +11037,66 @@ describe("CloudNotification", function() {
     });
 
 });
+describe("Cloud GeoPoint Test", function() {
+  
+	it("should save a latitude and longitude when passing data are number type", function(done) {
+		var obj = new CB.CloudObject('Sample');
+     	obj.set("name", "ranjeet");
+     	var loc = new CB.CloudGeoPoint(17.4,78.3);
+		obj.set("sameRelation", loc);
+		var loc1 = new CB.CloudGeoPoint(17.4372,78.3444);
+		var loc2 = new CB.CloudGeoPoint(17.3959,78.4312);
+		console.log(loc1.distanceInKMs(loc2) + " Kms");
+		console.log(loc1.distanceInMiles(loc2) + " miles");
+		console.log(loc1.distanceInRadians(loc2) + " radians");
+		obj.save({
+     		success : function(newObj){
+     			done();
+     		}, error : function(error){
+     			throw 'Error saving the object';
+     		}
+     	});
+	});
+	
+	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
+		var obj = new CB.CloudObject('Sample');
+     	obj.set("name", "ranjeet");
+     	var loc = new CB.CloudGeoPoint("17.4","78.3");
+		obj.set("sameRelation", loc);
+		var loc1 = new CB.CloudGeoPoint("17.4372","78.3444");
+		var loc2 = new CB.CloudGeoPoint("17.3959","78.4312");
+		console.log(loc1.distanceInKMs(loc2) + " Kms");
+		console.log(loc1.distanceInMiles(loc2) + " miles");
+		console.log(loc1.distanceInRadians(loc2) + " radians");
+		obj.save({
+     		success : function(newObj){
+     			done();
+     		}, error : function(error){
+     			throw 'Error saving the object';
+     		}
+     	});
+	});
+	
+	it("should get a data from server for near function", function(done) {
+     	var loc = new CB.CloudGeoPoint("17.4","78.3");
+        var query = new CB.CloudQuery('Sample');
+		query.near("location", loc, 10);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+});
+
 describe("CloudQuery Include", function () {
     
    
@@ -10985,62 +11201,6 @@ describe("CloudQuery Include", function () {
         })
 
     });
-
-});
-describe("CloudQuery Include", function () {
-
-
-
-    it("save a relation.", function (done) {
-
-        this.timeout(10000);
-
-        //create an object.
-        var obj = new CB.CloudObject('Custom4');
-        obj.set('newColumn1', 'Course');
-        var obj1 = new CB.CloudObject('student1');
-        obj1.set('name', 'Vipul');
-        var obj2= new CB.CloudObject('student1');
-        obj2.set('name', 'Nawaz');
-        obje=[obj1,obj2];
-        obj.set('newColumn7', obje);
-        obj.save().then(function() {
-            done();
-        }, function () {
-            throw "Relation Save error";
-        });
-
-    });
-
-    it("should include a relation object when include is requested in a query.", function (done) {
-
-        this.timeout(10000);
-
-        var query = new CB.CloudQuery('Custom4');
-        query.equalTo('Custom4.name','Vipul');
-        query.include('newColumn7');
-        query.find().then(function(list){
-            if(list.length>0){
-                for(var i=0;i<list.length;i++){
-                    var student_obj=list[i].get('newColumn7');
-                    for(var j=0;j<student_obj.length;j++)
-                    {
-                        if(!student_obj[j].document.name)
-                        {
-                            throw "Unsuccessful Join";
-                        }
-                    }
-                }
-                done();
-            }else{
-                throw "Cannot retrieve a saved relation.";
-            }
-        }, function(error){
-
-        })
-
-    });
-
 
 });
 describe("CloudQuery", function () {
