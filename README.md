@@ -1,6 +1,6 @@
 # CloudBoost: Hybrid No-Sql Database as a Service
 
-<img align="right" height="150" src="https://cloud.githubusercontent.com/assets/5427704/7724257/b7f45d6c-ff0d-11e4-8f60-06024eaa1508.png">
+
 
 ## Installation
 ```
@@ -20,6 +20,7 @@ obj.save().then(function(res){
 },function(err){
     console.log("error while saving object");
 });
+<img align="right" height="150" src="https://cloud.githubusercontent.com/assets/5427704/7724257/b7f45d6c-ff0d-11e4-8f60-06024eaa1508.png">
 ```
 #### Documentation
 
