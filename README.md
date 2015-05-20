@@ -12,7 +12,9 @@ npm install cloudboost
 
 ``` js
 
-var CB = new require('cloudboost');
+var CB = require('cloudboost');
+
+
 var obj = new CB.CloudObject('Dbass');
 obj.set('name','cloudboost');
 obj.save().then(function(res){
