@@ -9278,7 +9278,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
 };
+
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudRole.prototype, 'name', {
     get: function() {
         return this.document.name;
@@ -9318,6 +9320,8 @@ CB.CloudRole.getRole = function(role, callback) {
         return def;
     }
 };
+
+
 /*
  CloudFiles
  */
@@ -9494,24 +9498,104 @@ CB.CloudFile.prototype.delete = function(callback) {
         return def;
     }
 }
+/*
+*CloudGeoPoint
+*/
+
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+	if(!latitude || !longitude)
+		throw "Latitude or Longitude is empty.";
+	
+	if(isNaN(latitude))
+		throw "Latitude "+ latitude +" is not a number type.";
+		
+	if(isNaN(longitude))
+		throw "Longitude "+ longitude+" is not a number type.";
+	
+	this.document = {};
+	this.document.latitude = Number(latitude);
+	this.document.longitude = Number(longitude);
+	
+};
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
+    get: function() {
+        return this.document.latitude;
+    },
+    set: function(latitude) {
+        this.document.latitude = latitude;
+    }
+});
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
+    get: function() {
+        return this.document.longitude;
+    },
+    set: function(longitude) {
+        this.document.longitude = longitude;
+    }
+});
+
+CB.CloudGeoPoint.prototype.distanceInKMs = function(point) {
+	
+	var earthRedius = 6371; //in Kilometer
+	return earthRedius * greatCircleFormula(this, point);
+};
+
+CB.CloudGeoPoint.prototype.distanceInMiles = function(point){
+
+	var earthRedius = 3959 // in Miles
+	return earthRedius * greatCircleFormula(this, point);
+	
+};
+
+CB.CloudGeoPoint.prototype.distanceInRadians = function(point){
+	
+	return greatCircleFormula(this, point);
+};
+
+function greatCircleFormula(thisObj, point){
+
+	var dLat =(thisObj.document.latitude - point.document.latitude).toRad();
+	var dLon = (thisObj.document.longitude - point.document.longitude).toRad();
+	var lat1 = (point.document.latitude).toRad();
+	var lat2 = (thisObj.document.latitude).toRad();
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	return c;
+	
+}
+
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+  }
+}
+
+
 /* PRIVATE METHODS */
 CB._serialize = function(thisObj) {
 
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
+        
     var obj= CB._clone(thisObj,url);
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile) {
-        throw "Data passed is not an instance of CloudObject or CloudFile";
+    
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
-
+        
+    if(obj instanceof CB.CloudGeoPoint)
+        return obj.document;
+	
     var doc = obj.document;
 
     for (var key in doc) {
-        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
             doc[key] = CB._serialize(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -9524,7 +9608,7 @@ CB._serialize = function(thisObj) {
         } else if (doc[key] instanceof Array) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
-            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile)) {
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB._serialize(doc[key][i]));
@@ -9585,12 +9669,19 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else
-                {
+                }else if (data[key].latitude || data[key].longitude) { 
+            
+            		document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
+            	
+    			}else{
+    			
                     document[key] = data[key];
+                    
                 }
-            } else {
+            }else {
+            
                 document[key] = data[key];
+                
             }
         }
 
@@ -9606,7 +9697,7 @@ CB._deserialize = function(data, thisObj) {
             return thisObj;
         }
 
-    } else {
+    }else {
         //if this is plain json.
         return data;
     }
@@ -9679,9 +9770,18 @@ CB._clone=function(obj,url){
                 doc2[key]=CB._clone(doc[key],null);
             else if(doc[key] instanceof CB.CloudFile){
                 doc2[key]=CB._clone(doc[key],doc[key].document.url);
+            }else if(doc[key] instanceof CB.CloudGeoPoint){
+            	doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
+        }
+    }else if(obj instanceof CB.CloudGeoPoint){
+    	n_obj = obj;
+        var doc=obj.document;
+        var doc2={};
+        for (var key in doc) {
+        	doc2[key]=doc[key];
         }
     }
     n_obj.document=doc2;
@@ -9724,6 +9824,7 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
    var util = {
      makeString : function(){
 	    var text = "";
@@ -9787,10 +9888,9 @@ describe("Cloud App", function() {
                   throw 'sdk init failed';
 				//should.fail('SDK Init Failed');
 		  }); 
+		  
     });
 });
-
-
 
 describe("CloudObjectExpires", function () {
 
@@ -9897,7 +9997,7 @@ describe("Cloud Objects Files", function() {
 
       file.save().then(function(file) {
          if(file.url){
-          
+          console.log(file);
            //create a new object.
            var obj = new CB.CloudObject('Sample');
            obj.set('name', 'sample');
@@ -9923,7 +10023,7 @@ describe("Cloud Objects Files", function() {
      });
 
     it("should save an array of files.", function(done) {
-     this.timeout(10000);
+     this.timeout(100000);
      //save file first. 
         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
         try {
@@ -10711,37 +10811,35 @@ describe("CloudExpire", function () {
 
 });
 describe("Cloud Files", function() {
- 
+
     it("should save a new file", function(done) {
 
-     this.timeout(10000);
-     var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-     try {
-         var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-     } catch (e) {
-         var phantom = require('phantomjs');
-         console.log(phantom);
-         var builder = new WebKitBlobBuilder();
-         builder.append(aFileParts);
-         var oMyBlob = builder.getBlob();
-     }
-        var file = new CB.CloudFile(descriptor);
-        console.log(file);
-     file.save().then(function(file) {
-        if(file.url){
-          done();
-        }else{
-          throw "Upload success. But cannot find the URL.";
+        this.timeout(10000);
+        var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+        try {
+            var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+        } catch (e) {
+            var builder = new WebKitBlobBuilder();
+            builder.append(aFileParts);
+            var oMyBlob = builder.getBlob();
         }
-      }, function(err) {
-         console.log(err);
-        throw "Error uploading file";
-      });
+        var file = new CB.CloudFile(oMyBlob);
+
+        file.save().then(function(file) {
+            if(file.url){
+                done();
+            }else{
+                throw "Upload success. But cannot find the URL.";
+            }
+        }, function(err) {
+            throw "Error uploading file";
+        });
+
     });
 
-  /*  it("should delete a file", function(done) {
+    it("should delete a file", function(done) {
 
-     this.timeout(15000);
+     this.timeout(100000);
      var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
      try {
           var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -10770,7 +10868,7 @@ describe("Cloud Files", function() {
     }, function(err) {
       throw "Error uploading file";
     });
-   });*/
+   });
 
     //add ACL on CloudFiles.
     
@@ -10981,62 +11079,6 @@ describe("CloudQuery Include", function () {
         })
 
     });
-
-});
-describe("CloudQuery Include", function () {
-
-
-
-    it("save a relation.", function (done) {
-
-        this.timeout(10000);
-
-        //create an object.
-        var obj = new CB.CloudObject('Custom4');
-        obj.set('newColumn1', 'Course');
-        var obj1 = new CB.CloudObject('student1');
-        obj1.set('name', 'Vipul');
-        var obj2= new CB.CloudObject('student1');
-        obj2.set('name', 'Nawaz');
-        obje=[obj1,obj2];
-        obj.set('newColumn7', obje);
-        obj.save().then(function() {
-            done();
-        }, function () {
-            throw "Relation Save error";
-        });
-
-    });
-
-    it("should include a relation object when include is requested in a query.", function (done) {
-
-        this.timeout(10000);
-
-        var query = new CB.CloudQuery('Custom4');
-        query.equalTo('Custom4.name','Vipul');
-        query.include('newColumn7');
-        query.find().then(function(list){
-            if(list.length>0){
-                for(var i=0;i<list.length;i++){
-                    var student_obj=list[i].get('newColumn7');
-                    for(var j=0;j<student_obj.length;j++)
-                    {
-                        if(!student_obj[j].document.name)
-                        {
-                            throw "Unsuccessful Join";
-                        }
-                    }
-                }
-                done();
-            }else{
-                throw "Cannot retrieve a saved relation.";
-            }
-        }, function(error){
-
-        })
-
-    });
-
 
 });
 describe("CloudQuery", function () {

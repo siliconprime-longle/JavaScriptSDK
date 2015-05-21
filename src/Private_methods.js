@@ -4,18 +4,23 @@ CB._serialize = function(thisObj) {
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
+        
     var obj= CB._clone(thisObj,url);
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile) {
-        throw "Data passed is not an instance of CloudObject or CloudFile";
+    
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
-
+        
+    if(obj instanceof CB.CloudGeoPoint)
+        return obj.document;
+	
     var doc = obj.document;
 
     for (var key in doc) {
-        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
             doc[key] = CB._serialize(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -28,7 +33,7 @@ CB._serialize = function(thisObj) {
         } else if (doc[key] instanceof Array) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
-            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile)) {
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB._serialize(doc[key][i]));
@@ -89,12 +94,19 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else
-                {
+                }else if (data[key].latitude || data[key].longitude) { 
+            
+            		document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
+            	
+    			}else{
+    			
                     document[key] = data[key];
+                    
                 }
-            } else {
+            }else {
+            
                 document[key] = data[key];
+                
             }
         }
 
@@ -110,7 +122,7 @@ CB._deserialize = function(data, thisObj) {
             return thisObj;
         }
 
-    } else {
+    }else {
         //if this is plain json.
         return data;
     }
@@ -183,9 +195,18 @@ CB._clone=function(obj,url){
                 doc2[key]=CB._clone(doc[key],null);
             else if(doc[key] instanceof CB.CloudFile){
                 doc2[key]=CB._clone(doc[key],doc[key].document.url);
+            }else if(doc[key] instanceof CB.CloudGeoPoint){
+            	doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
+        }
+    }else if(obj instanceof CB.CloudGeoPoint){
+    	n_obj = obj;
+        var doc=obj.document;
+        var doc2={};
+        for (var key in doc) {
+        	doc2[key]=doc[key];
         }
     }
     n_obj.document=doc2;
