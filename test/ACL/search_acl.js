@@ -1,8 +1,8 @@
-describe("Search_ACL", function () {
+    describe("Search_ACL", function () {
 
     var obj = new CB.CloudObject('student4');
     obj.isSearchable = true;
-    obj.set('age',105);
+    obj.set('age',150);
 
    it("Should set the public read access", function (done) {
 
@@ -14,7 +14,7 @@ describe("Search_ACL", function () {
             acl=list.get('ACL');
             if(acl.read.length === 0) {
              var cs = new CB.CloudSearch('student4');
-                cs.searchOn('age',105);
+                cs.searchOn('age',150);
                 cs.search().then(function(list){
                     if(list.length>0)
                     {
@@ -40,12 +40,12 @@ describe("Search_ACL", function () {
 
         this.timeout(10000);
         obj.ACL = new CB.ACL();
-        obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
+        obj.ACL.setUserReadAccess("55530158532abda015defe3c",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0) {
+            if(acl.read.indexOf("55530158532abda015defe3c") >= 0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'vipul');
+                user.set('username', 'Xjy9g');
                 user.set('password', 'abcd');
                 user.logIn().then(function(){
                     var cs = new CB.CloudSearch('student4');
@@ -78,7 +78,7 @@ describe("Search_ACL", function () {
             acl=list.get('ACL');
             if(acl.write.indexOf("553e194ac0cc01201658142e")>=0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'vipul');
+                user.set('username', 'Xjy9g');
                 user.set('password', 'abcd');
                 user.logIn().then(function(){
                     var cs = new CB.CloudSearch('student4');

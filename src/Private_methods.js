@@ -162,86 +162,13 @@ CB._validate = function() {
     }
 };
 
-CB._loadSocketio = function(done) {
-
-    var xmlhttp = CB._loadXml();
-    xmlhttp.open("GET","https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.2/socket.io.min.js",true);
-    xmlhttp.send();
-    xmlhttp.onreadystatechange=function(){
-        if(xmlhttp.readyState == xmlhttp.DONE) {
-            if(xmlhttp.status == 200) {
-                eval(xmlhttp.responseText);
-                CB.io=io;
-                done();
-            }
-        }
-    }
-};
-
-CB._initAppSocketConnection = function(done) {
-
-    try {
-        if (!CB.io) {
-            //if socketio is not loaded.
-            CB._loadSocketio(initAppConnection);
-        } else {
-            initAppConnection();
-        }
-    } catch (err) {
-        CB._loadSocketio(initAppConnection);
-    }
-
-
-    function initAppConnection() {
-        //socket io is loaded now.
-        if (CB.Socket)
-            done();
-
-        if(!CB.Socket)
-            CB.Socket = CB.io(CB.serverUrl); //have the server URL here.
-
-        CB.Socket.on('connect', function() {
-            done();
-        });
-    }
-};
-
-CB._isSocketsActivated = function(done) {
-
-    try {
-        if (!CB.io) {
-            //if socketio is not loaded.
-            return false;
-        } else {
-            return true;
-        }
-    } catch (err) {
-        return false;
-    }
-
-};
 
 //to check if its running under node, If yes - then export CB.
 (function () {
-
-    //download socket.io
-    if(!CB.io){
-        CB._initAppSocketConnection(function(){
-            //done!
-        });
-    }
-
-
     // Establish the root object, `window` in the browser, or `global` on the server.
     var root = this;
-    // Create a refeence to this
+    // Create a reference to this
     var _ = new Object();
-    if (typeof module !== 'undefined' && module.exports) {
-        //its nodejs  - export CB.
-        CB._isNode = true;
-    }else{
-        CB._isNode = false;
-    }
 })();
 
 function _all(arrayOfPromises) {
@@ -290,15 +217,21 @@ CB._request=function(method,url,params)
 {
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-
+    if (CB._isNode) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-type','application/json');
+    xmlhttp.setRequestHeader('Content-Type','application/json');
     //res.header('Access-Control-Expose-Headers','sessionID');
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
+    if(CB._isNode)
+        xmlhttp.setRequestHeader("User-Agent",
+            "CB/" + CB.version +
+            " (NodeJS " + process.versions.node + ")");
     xmlhttp.send(params);
-
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
@@ -309,7 +242,8 @@ CB._request=function(method,url,params)
                     localStorage.removeItem('sessionID');
                 def.resolve(xmlhttp.responseText);
             } else {
-                def.reject(xmlhttp.status);
+                console.log(xmlhttp.status);
+                def.reject(xmlhttp.responseText);
             }
         }
     }

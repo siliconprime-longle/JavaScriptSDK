@@ -46,7 +46,7 @@ describe("Query_ACL", function () {
             acl=list.get('ACL');
             if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'vipul');
+                user.set('username', 'Xjy9g');
                 user.set('password', 'abcd');
                 user.logIn().then(function(){
                     var cq = new CB.CloudQuery('student4');
@@ -81,7 +81,7 @@ describe("Query_ACL", function () {
             acl=list.get('ACL');
             if(acl.write.indexOf("553e194ac0cc01201658142e")>=0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'vipul');
+                user.set('username', 'Xjy9g');
                 user.set('password', 'abcd');
                 user.logIn().then(function(){
                     var cq = new CB.CloudQuery('student4');

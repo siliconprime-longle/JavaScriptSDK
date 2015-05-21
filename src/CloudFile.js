@@ -95,10 +95,16 @@ CB.CloudFile.prototype.save = function(callback) {
     var params=formdata;
     url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
     xmlhttp.open('POST',url,true);
+    if (CB._isNode) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+        xmlhttp.setRequestHeader("User-Agent",
+            "CB/" + CB.version +
+            " (NodeJS " + process.versions.node + ")");
+    }
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
-    //  xmlhttp.setRequestHeader('Content-type','multipart/form-data');
     xmlhttp.send(params);
 
     xmlhttp.onreadystatechange = function() {

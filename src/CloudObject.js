@@ -192,7 +192,7 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/save";
-
+    //console.log(params);
     CB._request('POST',url,params).then(function(response){
         CB._deserialize(JSON.parse(response),thisObj);
         if (callback) {
