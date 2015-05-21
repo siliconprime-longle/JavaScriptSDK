@@ -20,7 +20,8 @@ CB.CloudFile = CB.CloudFile || function(file) {
         };
 
     } else if(typeof file === "string") {
-        if (file.match(/(((http|ftp|https):\/\/)|www\.)[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#!]*[\w\-\@?^=%&/~\+#])?/g)) {
+        var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
+        if (regexp.test(file)) {
             this.document = {
                 _type: 'file',
                 name: '',

@@ -4,7 +4,7 @@ describe("Cloud GeoPoint Test", function() {
 		var obj = new CB.CloudObject('Sample');
      	obj.set("name", "ranjeet");
      	var loc = new CB.CloudGeoPoint(17.4,78.3);
-		obj.set("sameRelation", loc);
+		obj.set("location", loc);
 		var loc1 = new CB.CloudGeoPoint(17.4372,78.3444);
 		var loc2 = new CB.CloudGeoPoint(17.3959,78.4312);
 		console.log(loc1.distanceInKMs(loc2) + " Kms");
@@ -23,7 +23,7 @@ describe("Cloud GeoPoint Test", function() {
 		var obj = new CB.CloudObject('Sample');
      	obj.set("name", "ranjeet");
      	var loc = new CB.CloudGeoPoint("17.4","78.3");
-		obj.set("sameRelation", loc);
+		obj.set("location", loc);
 		var loc1 = new CB.CloudGeoPoint("17.4372","78.3444");
 		var loc2 = new CB.CloudGeoPoint("17.3959","78.4312");
 		console.log(loc1.distanceInKMs(loc2) + " Kms");
