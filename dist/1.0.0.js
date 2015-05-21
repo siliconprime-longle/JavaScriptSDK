@@ -9570,7 +9570,7 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
-    get: function() {
+    get: function() {D
         return this.document.coordinates[1];
     },
     set: function(latitude) {

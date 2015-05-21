@@ -10049,7 +10049,7 @@ describe("Cloud Objects Files", function() {
 
       file.save().then(function(file) {
          if(file.url){
-          
+          console.log(file);
            //create a new object.
            var obj = new CB.CloudObject('Sample');
            obj.set('name', 'sample');
@@ -10075,7 +10075,7 @@ describe("Cloud Objects Files", function() {
      });
 
     it("should save an array of files.", function(done) {
-     this.timeout(10000);
+     this.timeout(100000);
      //save file first. 
         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
         try {
@@ -10863,7 +10863,7 @@ describe("CloudExpire", function () {
 
 });
 describe("Cloud Files", function() {
- 
+
     it("should save a new file", function(done) {
 
      this.timeout(10000);
@@ -10886,16 +10886,24 @@ describe("Cloud Files", function() {
         }else{
           throw "Upload success. But cannot find the URL.";
         }
-      }, function(err) {
-         console.log(err);
-        throw "Error uploading file";
-      });
+        var file = new CB.CloudFile(oMyBlob);
+
+        file.save().then(function(file) {
+            if(file.url){
+                done();
+            }else{
+                throw "Upload success. But cannot find the URL.";
+            }
+        }, function(err) {
+            throw "Error uploading file";
+        });
+
     });
    it("should delete a file", function(done) {
 
-  /*  it("should delete a file", function(done) {
+    it("should delete a file", function(done) {
 
-     this.timeout(15000);
+     this.timeout(100000);
      var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
      try {
           var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -10925,7 +10933,7 @@ describe("Cloud Files", function() {
     }, function(err) {
       throw "Error uploading file";
     });
-   });*/
+   });
 
     //add ACL on CloudFiles.
     
