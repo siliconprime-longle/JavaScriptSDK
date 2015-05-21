@@ -2,7 +2,7 @@ describe("Cloud Files", function() {
 
     it("should save a new file", function(done) {
 
-        this.timeout(10000);
+       this.timeout(10000);
         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
         try {
             var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -24,6 +24,7 @@ describe("Cloud Files", function() {
         });
 
     });
+   it("should delete a file", function(done) {
 
     it("should delete a file", function(done) {
 
@@ -41,6 +42,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
       if(file.url){
         //received the blob's url
+        console.log(file.url);
         file.delete().then(function(file) {
           if(file.url === null) {
             done();
