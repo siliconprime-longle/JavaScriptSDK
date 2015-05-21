@@ -8363,11 +8363,11 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
 }
 
 //GeoPoint near query
-CB.Query.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
+CB.CloudQuery.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
 	if(!this.query[columnName]){
 		this.query[columnName] = {};
 		this.query[columnName]['$near'] = {
-			'$geometry': coordinates,
+			'$geometry': coordinates['document'],
 			'$maxDistance': maxDistance,
 			'$minDistance': minDistance
 		};
@@ -8375,41 +8375,37 @@ CB.Query.prototype.near = function(columnName, coordinates, maxDistance, minDist
 };
 
 //GeoPoint geoWithin query
-CB.Query.prototype.geoWithin = function(columnName, geoPointArray, radius){
-	
-	var coordinates = [];
-	//extracting coordinates from each CloudGeoPoint Object
-	if (Object.prototype.toString.call(geoPointArray) === '[object Array]') {
-		for(i=0; i < geoPointArray.length; i++){
-		
-			if (geoPointArray[i].hasOwnProperty('coordinates')) {
-				
-				coordinates[i] = geoPointArray[i]['coordinates'];
-				
-			}
-		}
-	}else{
-		throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
-	}
-	
+CB.CloudQuery.prototype.geoWithin = function(columnName, geoPoint, radius){
+
 	if(!radius){
+		var coordinates = [];
+		//extracting coordinates from each CloudGeoPoint Object
+		if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
+			for(i=0; i < geoPoint.length; i++){
+				if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
+					coordinates[i] = geoPoint[i]['document']['coordinates'];
+				}
+			}
+		}else{
+			throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+		}
 		//2dSphere needs first and last coordinates to be same for polygon type
 		//eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one 
 		coordinates[coordinates.length] = coordinates[0];
-		
+		var type = 'Polygon';
 		if(!this.query[columnName]){
 			this.query[columnName] = {};
 			this.query[columnName]['$geoWithin'] = {};
 			this.query[columnName]['$geoWithin']['$geometry'] = {
-					'type': 'Polygon',
-					'coordinates': coordinates
+					'type': type,
+					'coordinates': [ coordinates ]
 			};
 		}
 	}else{
 		if(!this.query[columnName]){
 			this.query[columnName] = {};
 			this.query[columnName]['$geoWithin'] = {
-				'$centerSphere': [ coordinates, radius ]
+				'$centerSphere': [ geoPoint['document']['coordinates'], radius/3963.2 ]
 			};
 		}
 	}
@@ -11042,13 +11038,8 @@ describe("Cloud GeoPoint Test", function() {
 	it("should save a latitude and longitude when passing data are number type", function(done) {
 		var obj = new CB.CloudObject('Sample');
      	obj.set("name", "ranjeet");
-     	var loc = new CB.CloudGeoPoint(17.4,78.3);
-		obj.set("sameRelation", loc);
-		var loc1 = new CB.CloudGeoPoint(17.4372,78.3444);
-		var loc2 = new CB.CloudGeoPoint(17.3959,78.4312);
-		console.log(loc1.distanceInKMs(loc2) + " Kms");
-		console.log(loc1.distanceInMiles(loc2) + " miles");
-		console.log(loc1.distanceInRadians(loc2) + " radians");
+     	var loc = new CB.CloudGeoPoint(17.3,78.3);
+		obj.set("location", loc);
 		obj.save({
      		success : function(newObj){
      			done();
@@ -11061,8 +11052,8 @@ describe("Cloud GeoPoint Test", function() {
 	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
 		var obj = new CB.CloudObject('Sample');
      	obj.set("name", "ranjeet");
-     	var loc = new CB.CloudGeoPoint("17.4","78.3");
-		obj.set("sameRelation", loc);
+     	var loc = new CB.CloudGeoPoint("17.2","78.3");
+		obj.set("location", loc);
 		var loc1 = new CB.CloudGeoPoint("17.4372","78.3444");
 		var loc2 = new CB.CloudGeoPoint("17.3959","78.4312");
 		console.log(loc1.distanceInKMs(loc2) + " Kms");
@@ -11077,10 +11068,50 @@ describe("Cloud GeoPoint Test", function() {
      	});
 	});
 	
-	it("should get a data from server for near function", function(done) {
+	it("should get data from server for near function", function(done) {
      	var loc = new CB.CloudGeoPoint("17.4","78.3");
         var query = new CB.CloudQuery('Sample');
 		query.near("location", loc, 10);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server Polygon type geoWithi", function(done) {
+     	var loc1 = new CB.CloudGeoPoint("17.2","78.1");
+     	var loc2 = new CB.CloudGeoPoint("17.5","78.1");
+     	var loc3 = new CB.CloudGeoPoint("17.2","78.5");
+        var query = new CB.CloudQuery('Sample');
+		query.geoWithin("location", [loc1, loc2, loc3]);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+        var query = new CB.CloudQuery('Sample');
+		query.geoWithin("location", loc, 10);
 		query.find().then(function(list) {
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
