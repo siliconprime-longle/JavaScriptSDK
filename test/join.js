@@ -7577,11 +7577,13 @@ if(!CB._isNode) {
  */
 CB.CloudApp = CB.CloudApp || {};
 
-CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static function for initialisation of the app
-
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
+CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
+    if(!applicationKey)
+    {
+        applicationKey=applicationId;
+        applicationId=serverUrl;
+    }else {
+        CB.serverUrl=serverUrl;
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7595,14 +7597,6 @@ CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static 
         CB.io = io;
     }
     CB.Socket = CB.io(CB.serverUrl);
-    if (callback) {
-        callback.success();
-    } else {
-        def.resolve();
-    }
-    if (!callback) {
-        return def;
-    }
 };
 /*
  Access Control List (ACL)
@@ -8362,6 +8356,55 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     return this;
 }
 
+//GeoPoint near query
+CB.CloudQuery.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
+	if(!this.query[columnName]){
+		this.query[columnName] = {};
+		this.query[columnName]['$near'] = {
+			'$geometry': coordinates['document'],
+			'$maxDistance': maxDistance,
+			'$minDistance': minDistance
+		};
+	}
+};
+
+//GeoPoint geoWithin query
+CB.CloudQuery.prototype.geoWithin = function(columnName, geoPoint, radius){
+
+	if(!radius){
+		var coordinates = [];
+		//extracting coordinates from each CloudGeoPoint Object
+		if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
+			for(i=0; i < geoPoint.length; i++){
+				if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
+					coordinates[i] = geoPoint[i]['document']['coordinates'];
+				}
+			}
+		}else{
+			throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+		}
+		//2dSphere needs first and last coordinates to be same for polygon type
+		//eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one 
+		coordinates[coordinates.length] = coordinates[0];
+		var type = 'Polygon';
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {};
+			this.query[columnName]['$geoWithin']['$geometry'] = {
+					'type': type,
+					'coordinates': [ coordinates ]
+			};
+		}
+	}else{
+		if(!this.query[columnName]){
+			this.query[columnName] = {};
+			this.query[columnName]['$geoWithin'] = {
+				'$centerSphere': [ geoPoint['document']['coordinates'], radius/3963.2 ]
+			};
+		}
+	}
+};
+
 CB.CloudQuery.prototype.count = function(callback) {
     if (!CB.appId) {
         throw "CB.appId is null.";
@@ -8573,6 +8616,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
         return def;
     }
 };
+
 /*
  CloudSearch (ACL)
  */
@@ -9344,7 +9388,8 @@ CB.CloudFile = CB.CloudFile || function(file) {
         };
 
     } else if(typeof file === "string") {
-        if (file.match(/(((http|ftp|https):\/\/)|www\.)[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#!]*[\w\-\@?^=%&/~\+#])?/g)) {
+        var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
+        if (regexp.test(file)) {
             this.document = {
                 _type: 'file',
                 name: '',
@@ -9513,26 +9558,27 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
 		throw "Longitude "+ longitude+" is not a number type.";
 	
 	this.document = {};
-	this.document.latitude = Number(latitude);
-	this.document.longitude = Number(longitude);
+	this.document.type = "Point";
 	
+	//The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
+	this.document.coordinates = [Number(longitude), Number(latitude)];
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     get: function() {
-        return this.document.latitude;
+        return this.document.coordinates[1];
     },
     set: function(latitude) {
-        this.document.latitude = latitude;
+        this.document.coordinates[1] = latitude;
     }
 });
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     get: function() {
-        return this.document.longitude;
+        return this.document.coordinates[0];
     },
     set: function(longitude) {
-        this.document.longitude = longitude;
+        this.document.coordinates[0] = longitude;
     }
 });
 
@@ -9556,14 +9602,13 @@ CB.CloudGeoPoint.prototype.distanceInRadians = function(point){
 
 function greatCircleFormula(thisObj, point){
 
-	var dLat =(thisObj.document.latitude - point.document.latitude).toRad();
-	var dLon = (thisObj.document.longitude - point.document.longitude).toRad();
-	var lat1 = (point.document.latitude).toRad();
-	var lat2 = (thisObj.document.latitude).toRad();
+	var dLat =(thisObj.document.coordinates[1] - point.document.coordinates[1]).toRad();
+	var dLon = (thisObj.document.coordinates[0] - point.document.coordinates[0]).toRad();
+	var lat1 = (point.document.coordinates[1]).toRad();
+	var lat2 = (thisObj.document.coordinates[1]).toRad();
 	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 	return c;
-	
 }
 
 if (typeof(Number.prototype.toRad) === "undefined") {
@@ -9847,6 +9892,7 @@ CB._request=function(method,url,params)
 	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
+    	this.timeout(10000);
         var xmlhttp;
         this.timeout(10000);
         var req = typeof(require) === 'function' ? require : null;
@@ -9879,16 +9925,12 @@ describe("Server Check",function(){
         }
     });
 });
+
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(100000);
-              CB.CloudApp.init(CB.appId, CB.appKey).then(function(){
-				    done();
-		  }, function(error){
-                  throw 'sdk init failed';
-				//should.fail('SDK Init Failed');
-		  }); 
-		  
+        CB.CloudApp.init(CB.appId, CB.appKey);
+            done();
     });
 });
 
@@ -10814,7 +10856,7 @@ describe("Cloud Files", function() {
 
     it("should save a new file", function(done) {
 
-        this.timeout(10000);
+       this.timeout(10000);
         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
         try {
             var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -10836,6 +10878,7 @@ describe("Cloud Files", function() {
         });
 
     });
+   it("should delete a file", function(done) {
 
     it("should delete a file", function(done) {
 
@@ -10853,6 +10896,7 @@ describe("Cloud Files", function() {
      file.save().then(function(file) {
       if(file.url){
         //received the blob's url
+        console.log(file.url);
         file.delete().then(function(file) {
           if(file.url === null) {
             done();
@@ -10873,6 +10917,7 @@ describe("Cloud Files", function() {
     //add ACL on CloudFiles.
     
 });
+
 
 
 describe("CloudNotification", function() {
@@ -10975,6 +11020,136 @@ describe("CloudNotification", function() {
     });
 
 });
+describe("Cloud GeoPoint Test", function() {
+  	
+	it("should save a latitude and longitude when passing data are number type", function(done) {
+		var obj = new CB.CloudObject('Custom5');
+     	var loc = new CB.CloudGeoPoint(17.9,79.6);
+		obj.set("location", loc);
+        obj.save({
+     		success : function(newObj){
+     			done();
+     		}, error : function(error){
+     			throw 'Error saving the object';
+     		}
+     	});
+	});
+	
+	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
+		var obj = new CB.CloudObject('Custom5');
+     	var loc = new CB.CloudGeoPoint("18.19","79.3");
+		obj.set("location", loc);
+		obj.save({
+     		success : function(newObj){
+     			done();
+     		}, error : function(error){
+     			throw 'Error saving the object';
+     		}
+     	});
+	});
+	
+	it("should get data from server for near function", function(done) {
+     	var loc = new CB.CloudGeoPoint("17.7","80.3");
+        var query = new CB.CloudQuery('Custom5');
+		query.near("location", loc, 100000);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
+     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
+     	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
+        var query = new CB.CloudQuery('Custom5');
+		query.geoWithin("location", [loc1, loc2, loc3]);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin + equal to + limit", function(done) {
+     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
+     	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
+        var query = new CB.CloudQuery('Custom5');
+        query.setLimit(4);
+		query.geoWithin("location", [loc1, loc2, loc3]);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+        var query = new CB.CloudQuery('Custom5');
+		query.geoWithin("location", loc, 1000);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
+     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+        var query = new CB.CloudQuery('Custom5');
+		query.geoWithin("location", loc, 1000);
+		query.setLimit(4);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+});
+
 describe("CloudQuery Include", function () {
     
    

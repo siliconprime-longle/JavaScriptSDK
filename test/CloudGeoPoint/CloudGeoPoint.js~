@@ -1,4 +1,12 @@
 describe("Cloud GeoPoint Test", function() {
+<<<<<<< HEAD
+  	
+	/*it("should save a latitude and longitude when passing data are number type", function(done) {
+		var obj = new CB.CloudObject('Sample');
+     	obj.set("name", "ravi");
+     	var loc = new CB.CloudGeoPoint(17.9,79.6);
+		obj.set("location", loc);
+=======
   
 	it("should save a latitude and longitude when passing data are number type", function(done) {
 		var obj = new CB.CloudObject('Sample');
@@ -10,6 +18,7 @@ describe("Cloud GeoPoint Test", function() {
 		console.log(loc1.distanceInKMs(loc2) + " Kms");
 		console.log(loc1.distanceInMiles(loc2) + " miles");
 		console.log(loc1.distanceInRadians(loc2) + " radians");
+>>>>>>> 636f0ff7eedf7506d29cf283bee9008a6e2f2ba4
 		obj.save({
      		success : function(newObj){
      			done();
@@ -17,14 +26,15 @@ describe("Cloud GeoPoint Test", function() {
      			throw 'Error saving the object';
      		}
      	});
-     	
-     	/*var jsonString = '{"_tableName":"Sample","ACL":{"write":["all"],"read":["all"]},"_type":"custom","name":"ranjeet","sameRelation":{"latitude":"17.4","longitude":"78.3"}, "createdAt":"2015-05-06T06:10:35.507Z","_expires":null,"updatedAt":"2015-05-06T06:10:35.507Z","_id":"5549b05b8e5dc6930dbde2a2"}';
-		
-		console.log(loc1.deserialize(JSON.parse(jsonString), obj1));*/
 	});
 	
 	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
 		var obj = new CB.CloudObject('Sample');
+<<<<<<< HEAD
+     	obj.set("name", "amit");
+     	var loc = new CB.CloudGeoPoint("18.19","79.3");
+		obj.set("location", loc);
+=======
      	obj.set("name", "ranjeet");
      	var loc = new CB.CloudGeoPoint("17.4","78.3");
 		obj.set("sameRelation", loc);
@@ -33,6 +43,7 @@ describe("Cloud GeoPoint Test", function() {
 		console.log(loc1.distanceInKMs(loc2) + " Kms");
 		console.log(loc1.distanceInMiles(loc2) + " miles");
 		console.log(loc1.distanceInRadians(loc2) + " radians");
+>>>>>>> 636f0ff7eedf7506d29cf283bee9008a6e2f2ba4
 		obj.save({
      		success : function(newObj){
      			done();
@@ -40,24 +51,111 @@ describe("Cloud GeoPoint Test", function() {
      			throw 'Error saving the object';
      		}
      	});
+<<<<<<< HEAD
+	});*/
+	
+	it("should get data from server for near function", function(done) {
+     	var loc = new CB.CloudGeoPoint("17.4","78.3");
+        var query = new CB.CloudQuery('Sample');
+		query.near("location", loc, 10);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
 	});
 	
-	it("should not save a latitude and longitude when passing a invalid numberic data as string type", function(done) {
-		var obj = new CB.CloudObject('Sample');
-     	obj.set("name", "ranjeet");
-     	var loc = new CB.CloudGeoPoint("17.4","78.3");
-		obj.set("sameRelation", loc);
-		var loc1 = new CB.CloudGeoPoint("17.4372","78.3444");
-		var loc2 = new CB.CloudGeoPoint("17 3959","78.4312");
-		console.log(loc1.distanceInKMs(loc2) + " Kms");
-		console.log(loc1.distanceInMiles(loc2) + " miles");
-		console.log(loc1.distanceInRadians(loc2) + " radians");
-		obj.save({
-     		success : function(newObj){
-     			done();
-     		}, error : function(error){
-     			throw 'Error saving the object';
-     		}
-     	});
+	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
+     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
+     	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
+        var query = new CB.CloudQuery('Sample');
+		query.geoWithin("location", [loc1, loc2, loc3]);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin + equal to + limit", function(done) {
+     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
+     	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
+        var query = new CB.CloudQuery('Sample');
+        query.equalTo('name', 'ranjeet');
+        query.setLimit(4);
+		query.geoWithin("location", [loc1, loc2, loc3]);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+        var query = new CB.CloudQuery('Sample');
+		query.geoWithin("location", loc, 10);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+	});
+	
+	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
+     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+        var query = new CB.CloudQuery('Sample');
+		query.geoWithin("location", loc, 10);
+		query.equalTo('name', 'ranjeet');
+		query.setLimit(4);
+		query.find().then(function(list) {
+            if(list.length>0){
+                for(var i=0;i<list.length;i++)
+                {
+                	//display data
+                }
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+            done();
+        }, function () {
+            throw "find data error";
+        })
+=======
+>>>>>>> 636f0ff7eedf7506d29cf283bee9008a6e2f2ba4
 	});
 });
