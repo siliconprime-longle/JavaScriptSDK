@@ -7577,11 +7577,13 @@ if(!CB._isNode) {
  */
 CB.CloudApp = CB.CloudApp || {};
 
-CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static function for initialisation of the app
-
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
+CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
+    if(!applicationKey)
+    {
+        applicationKey=applicationId;
+        applicationId=serverUrl;
+    }else {
+        CB.serverUrl=serverUrl;
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7595,14 +7597,6 @@ CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static 
         CB.io = io;
     }
     CB.Socket = CB.io(CB.serverUrl);
-    if (callback) {
-        callback.success();
-    } else {
-        def.resolve();
-    }
-    if (!callback) {
-        return def;
-    }
 };
 /*
  Access Control List (ACL)

@@ -7577,11 +7577,13 @@ if(!CB._isNode) {
  */
 CB.CloudApp = CB.CloudApp || {};
 
-CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static function for initialisation of the app
-
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
+CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
+    if(!applicationKey)
+    {
+        applicationKey=applicationId;
+        applicationId=serverUrl;
+    }else {
+        CB.serverUrl=serverUrl;
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7595,14 +7597,6 @@ CB.CloudApp.init = function(applicationId, applicationKey, callback) { //static 
         CB.io = io;
     }
     CB.Socket = CB.io(CB.serverUrl);
-    if (callback) {
-        callback.success();
-    } else {
-        def.resolve();
-    }
-    if (!callback) {
-        return def;
-    }
 };
 /*
  Access Control List (ACL)
@@ -9935,12 +9929,8 @@ describe("Server Check",function(){
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(100000);
-              CB.CloudApp.init(CB.appId, CB.appKey).then(function(){
-				    done();
-		  }, function(error){
-                  throw 'sdk init failed';
-				//should.fail('SDK Init Failed');
-		  }); 
+        CB.CloudApp.init(CB.appId, CB.appKey);
+            done();
 		  
     });
 });
@@ -11034,8 +11024,7 @@ describe("CloudNotification", function() {
 describe("Cloud GeoPoint Test", function() {
   	
 	it("should save a latitude and longitude when passing data are number type", function(done) {
-		var obj = new CB.CloudObject('Sample');
-     	obj.set("name", "ravi");
+		var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint(17.9,79.6);
 		obj.set("location", loc);
         obj.save({
@@ -11048,8 +11037,7 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
-		var obj = new CB.CloudObject('Sample');
-     	obj.set("name", "amit");
+		var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("18.19","79.3");
 		obj.set("location", loc);
 		obj.save({
@@ -11062,9 +11050,9 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get data from server for near function", function(done) {
-     	var loc = new CB.CloudGeoPoint("17.4","78.3");
-        var query = new CB.CloudQuery('Sample');
-		query.near("location", loc, 10);
+     	var loc = new CB.CloudGeoPoint("17.7","80.3");
+        var query = new CB.CloudQuery('Custom5');
+		query.near("location", loc, 100000);
 		query.find().then(function(list) {
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
@@ -11084,7 +11072,7 @@ describe("Cloud GeoPoint Test", function() {
      	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
-        var query = new CB.CloudQuery('Sample');
+        var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
             if(list.length>0){
@@ -11105,8 +11093,7 @@ describe("Cloud GeoPoint Test", function() {
      	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
-        var query = new CB.CloudQuery('Sample');
-        query.equalTo('name', 'ranjeet');
+        var query = new CB.CloudQuery('Custom5');
         query.setLimit(4);
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
@@ -11126,8 +11113,8 @@ describe("Cloud GeoPoint Test", function() {
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
      	var loc = new CB.CloudGeoPoint(17.3, 78.3);
-        var query = new CB.CloudQuery('Sample');
-		query.geoWithin("location", loc, 10);
+        var query = new CB.CloudQuery('Custom5');
+		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
@@ -11145,9 +11132,8 @@ describe("Cloud GeoPoint Test", function() {
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
      	var loc = new CB.CloudGeoPoint(17.3, 78.3);
-        var query = new CB.CloudQuery('Sample');
-		query.geoWithin("location", loc, 10);
-		query.equalTo('name', 'ranjeet');
+        var query = new CB.CloudQuery('Custom5');
+		query.geoWithin("location", loc, 1000);
 		query.setLimit(4);
 		query.find().then(function(list) {
             if(list.length>0){
