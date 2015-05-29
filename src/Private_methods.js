@@ -222,8 +222,7 @@ CB._request=function(method,url,params)
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-Type','application/json');
-    //res.header('Access-Control-Expose-Headers','sessionID');
+    xmlhttp.setRequestHeader('Content-Type','text/plain');
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);

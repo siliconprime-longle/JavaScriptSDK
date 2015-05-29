@@ -9842,8 +9842,7 @@ CB._request=function(method,url,params)
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-Type','application/json');
-    //res.header('Access-Control-Expose-Headers','sessionID');
+    xmlhttp.setRequestHeader('Content-Type','text/plain');
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
@@ -10126,6 +10125,36 @@ describe("Cloud Objects Files", function() {
    
 
 });
+describe("Cloud Object", function() {
+
+    //Use Sample Table.
+    // -> Which has columns :
+    // name : string : required.
+
+    it("save a relation.", function (done) {
+
+        this.timeout(10000);
+
+        //create an object.
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn1', 'Course');
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'Vipul');
+        var obj2= new CB.CloudObject('student1');
+        obj2.set('name', 'Nawaz');
+        obje=[obj1,obj2];
+        obj.set('newColumn7', obje);
+        obj.save().then(function() {
+            done();
+        }, function () {
+            throw "Relation Save error";
+        });
+
+    });
+
+
+});
+
 describe("Cloud Objects Notification", function() {
   
 	var obj = new CB.CloudObject('Student');
@@ -10335,7 +10364,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should save.", function(done) {
+   it("should save.", function(done) {
 
     	this.timeout('10000');
 
@@ -10455,9 +10484,9 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not save an object with dulplicate values in unique fields.", function(done) {
+    it("should not save an object with duplicate values in unique fields.", function(done) {
 
-    	this.timeout('1000000');
+    	this.timeout('10000');
         
         var text = util.makeString();
 
@@ -11035,7 +11064,7 @@ describe("Cloud GeoPoint Test", function() {
      	});
 	});
 	
-	it("should save a latitude and longitude when passing a valid numberic data as string type", function(done) {
+	it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 		var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("18.19","79.3");
 		obj.set("location", loc);
@@ -11188,7 +11217,7 @@ describe("CloudQuery Include", function () {
                     for(var j=0;j<student_obj.length;j++)
                     {
                         if(!student_obj[j].document.name)
-                        {
+                         {
                             throw "Unsuccessful Join";
                         }
                     }

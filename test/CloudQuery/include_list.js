@@ -36,7 +36,7 @@
                     for(var j=0;j<student_obj.length;j++)
                     {
                         if(!student_obj[j].document.name)
-                        {
+                         {
                             throw "Unsuccessful Join";
                         }
                     }

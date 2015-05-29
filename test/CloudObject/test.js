@@ -4,7 +4,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should save.", function(done) {
+   it("should save.", function(done) {
 
     	this.timeout('10000');
 
@@ -124,9 +124,9 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not save an object with dulplicate values in unique fields.", function(done) {
+    it("should not save an object with duplicate values in unique fields.", function(done) {
 
-    	this.timeout('1000000');
+    	this.timeout('10000');
         
         var text = util.makeString();
 
