@@ -12,7 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 //CB.serverUrl = 'http://localhost:4730';
-CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.serverUrl = 'http://api.cloudboost.io'; // server url.
 
 CB.io = null; //socket.io library is saved here.
 
