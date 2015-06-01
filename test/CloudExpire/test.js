@@ -7,7 +7,6 @@ describe("CloudExpire", function () {
         //create an object.
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'This is a child.');
-        //obj.set('expires',(new Date().getTime()));
         obj.save().then(function() {
             done();
         }, function () {

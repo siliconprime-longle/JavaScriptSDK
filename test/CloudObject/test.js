@@ -27,7 +27,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should update the object after save and update.", function(done) {
+  /*  it("should update the object after save and update.", function(done) {
         
         this.timeout('10000');
 
@@ -470,5 +470,5 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });
+    });*/
 });

@@ -24,8 +24,6 @@ describe("Cloud Files", function() {
         });
 
     });
-   it("should delete a file", function(done) {
-
     it("should delete a file", function(done) {
 
      this.timeout(100000);

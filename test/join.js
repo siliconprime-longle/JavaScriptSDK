@@ -10387,7 +10387,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should update the object after save and update.", function(done) {
+  /*  it("should update the object after save and update.", function(done) {
         
         this.timeout('10000');
 
@@ -10830,7 +10830,7 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });
+    });*/
 });
 
 describe("CloudExpire", function () {
@@ -10842,7 +10842,6 @@ describe("CloudExpire", function () {
         //create an object.
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'This is a child.');
-        //obj.set('expires',(new Date().getTime()));
         obj.save().then(function() {
             done();
         }, function () {
@@ -10907,8 +10906,6 @@ describe("Cloud Files", function() {
         });
 
     });
-   it("should delete a file", function(done) {
-
     it("should delete a file", function(done) {
 
      this.timeout(100000);
