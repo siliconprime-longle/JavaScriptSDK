@@ -9846,7 +9846,7 @@ CB._request=function(method,url,params)
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
-    if(CB._isNode)
+    //if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
