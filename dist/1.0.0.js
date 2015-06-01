@@ -11,7 +11,6 @@ CB.version = "1.0.0";
 CB._isNode = false;
 CB.Socket = null;
 
-//CB.serverUrl = 'http://localhost:4730';
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
 
 CB.io = null; //socket.io library is saved here.
@@ -9850,9 +9849,6 @@ CB._request=function(method,url,params)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
-    else
-        xmlhttp.setRequestHeader("User-Agent",
-            "something");
     xmlhttp.send(params);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
