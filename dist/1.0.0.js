@@ -11,7 +11,7 @@ CB.version = "1.0.0";
 CB._isNode = false;
 CB.Socket = null;
 
-CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.serverUrl = 'https://api.cloudboost.io:443'; // server url.
 
 CB.io = null; //socket.io library is saved here.
 
