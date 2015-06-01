@@ -9842,7 +9842,6 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    xmlhttp.setRequestHeader('Áccept','application/vnd.travis-ci.2+json');
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
@@ -9850,9 +9849,6 @@ CB._request=function(method,url,params)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
-    else
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/1.0.0");
     xmlhttp.send(params);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
