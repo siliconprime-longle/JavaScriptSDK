@@ -12,7 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 //CB.serverUrl = 'http://localhost:4730';
-CB.serverUrl = 'http://api.cloudboost.io'; // server url.
+CB.serverUrl = 'https://api.cloudboost.io'; // server url.
 
 CB.io = null; //socket.io library is saved here.
 
@@ -9846,10 +9846,13 @@ CB._request=function(method,url,params)
     var ssid = localStorage.getItem('sessionID');
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
-    //if(CB._isNode)
+    if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
+    else
+        xmlhttp.setRequestHeader("User-Agent",
+            "something");
     xmlhttp.send(params);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
