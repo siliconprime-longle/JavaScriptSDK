@@ -4,6 +4,26 @@ describe("Query_ACL", function () {
     obj.isSearchable = true;
     obj.set('age',55);
 
+    var username = util.makeString();
+    var passwd = "abcd";
+    var user = new CB.CloudUser();
+    it("Should create new user", function (done) {
+
+        this.timeout(10000);
+        user.set('username', username);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
+            if(list.get('username') === username)
+                done();
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
     it("Should set the public read access", function (done) {
 
         this.timeout(10000);
@@ -41,13 +61,13 @@ describe("Query_ACL", function () {
 
         this.timeout(10000);
         obj1.ACL = new CB.ACL();
-        obj1.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
+        obj1.ACL.setUserReadAccess(user.document._id,false);
         obj1.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0) {
+           // if(acl.read.indexOf(user.document._id) >= 0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'Xjy9g');
-                user.set('password', 'abcd');
+                user.set('username', username);
+                user.set('password', passwd);
                 user.logIn().then(function(){
                     var cq = new CB.CloudQuery('student4');
                     cq.equalTo('age',60);
@@ -59,9 +79,9 @@ describe("Query_ACL", function () {
                 },function(){
                     throw "should login";
                 });
-            }
-            else
-                throw "user read access set error"
+          //  }
+         //   else
+           //     throw "user read access set error"
         }, function () {
             throw "user read access save error";
         });
@@ -72,7 +92,7 @@ describe("Query_ACL", function () {
     obj3.isSearchable = true;
     obj3.set('age',25);
 
-    it("Should allow users of role to read", function (done) {
+    /*it("Should allow users of role to read", function (done) {
 
         this.timeout(10000);
 
@@ -81,8 +101,8 @@ describe("Query_ACL", function () {
             acl=list.get('ACL');
             if(acl.write.indexOf("553e194ac0cc01201658142e")>=0) {
                 var user = new CB.CloudUser();
-                user.set('username', 'Xjy9g');
-                user.set('password', 'abcd');
+                user.set('username', username);
+                user.set('password', passwd);
                 user.logIn().then(function(){
                     var cq = new CB.CloudQuery('student4');
                     cq.equalTo('age',25);
@@ -101,6 +121,6 @@ describe("Query_ACL", function () {
             throw "user role read access save error";
         });
 
-    });
+    });*/
 });
 
