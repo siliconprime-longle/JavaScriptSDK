@@ -4,7 +4,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-   it("should save.", function(done) {
+  it("should save.", function(done) {
 
     	this.timeout('10000');
 
@@ -27,7 +27,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-  /*  it("should update the object after save and update.", function(done) {
+    it("should update the object after save and update.", function(done) {
         
         this.timeout('10000');
 
@@ -36,7 +36,7 @@ describe("Cloud Object", function() {
      	obj.save({
      		success : function(newObj){
 
-     			var oldId = obj.id;
+     			var oldId = newObj.id;
 
      			if(obj.get('name') !== 'sample'){
      				throw 'name is not equal to what was saved.';
@@ -470,5 +470,5 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });*/
+    });
 });

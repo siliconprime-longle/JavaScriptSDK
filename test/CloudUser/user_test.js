@@ -1,13 +1,13 @@
 describe("CloudUser", function () {
-
+    var username = util.makeString();
+    var passwd = "abcd";
    it("Should create new user", function (done) {
 
         this.timeout(10000);
 
         var obj = new CB.CloudUser();
-        var username = util.makeString();
         obj.set('username', username);
-        obj.set('password','abcd');
+        obj.set('password',passwd);
         obj.set('email',util.makeEmail());
         obj.signUp().then(function(list) {
             if(list.get('username') === username)
@@ -33,10 +33,10 @@ describe("CloudUser", function () {
         this.timeout(10000);
 
         var obj = new CB.CloudUser();
-        obj.set('username', 'Xjy9g');
-        obj.set('password','abcd');
+        obj.set('username', username);
+        obj.set('password',passwd);
         obj.logIn().then(function(list) {
-            if(list.get("username") === "Xjy9g")
+            if(list.get("username") === username)
                 done();
         }, function () {
             throw "user login error";
@@ -44,15 +44,6 @@ describe("CloudUser", function () {
 
     });
 
-   it("Should logout current user", function (done) {
-
-        this.timeout(10000);
-       CB.CloudUser.current.logOut().then(function(list){
-                done();
-                },function(){
-                throw "user logout error";
-            });
-    });
     var rolename = util.makeString();
     var role = new CB.CloudRole(rolename);
     role.set('name',rolename);
@@ -70,14 +61,14 @@ describe("CloudUser", function () {
     });
 
 
-  /* it("Should assign role to user", function (done) {
+   it("Should assign role to user", function (done) {
 
         this.timeout(100000);
 
         var obj = new CB.CloudUser();
      //   var role = new CB.CloudRole(rolename);
-        obj.set('username', 'vipul');
-        obj.set('password','abcd');
+        obj.set('username', username);
+        obj.set('password',passwd);
         obj.logIn().then(function(list) {
             role.save().then(function(role){
                 list.addToRole(role).then(function(list){
@@ -92,15 +83,15 @@ describe("CloudUser", function () {
             throw "role create error";
         })
 
-    });*/
+    });
 
     it("Should check if role is assigned to user", function (done) {
 
         this.timeout(10000);
 
         var obj = new CB.CloudUser();
-        obj.set('username', 'vipul');
-        obj.set('password','abcd');
+        obj.set('username', username);
+        obj.set('password',passwd);
         obj.logIn().then(function(list) {
             if(list.get('roles').length>0) {
                 if (CB.CloudUser.current.isInRole(role)) {
@@ -117,16 +108,16 @@ describe("CloudUser", function () {
 
     });
 
-   /* it("Should remove role assigned role to user", function (done) {
+    it("Should remove role assigned role to user", function (done) {
 
         this.timeout(1000000);
 
         var obj = new CB.CloudUser();
         rolename = util.makeString();
-            role.set('name',rolename);
         var role = new CB.CloudRole(rolename);
-        obj.set('username', 'vipul');
-        obj.set('password','abcd');
+        role.set('name',rolename);
+        obj.set('username', username);
+        obj.set('password',passwd);
         obj.logIn().then(function(list) {
             role.save().then(function(role){
                 list.addToRole(role).then(function(list){
@@ -145,7 +136,7 @@ describe("CloudUser", function () {
             throw "user login error";
         });
 
-    });*/
+    });
 
 
 });
