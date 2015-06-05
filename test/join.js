@@ -13,6 +13,7 @@ CB.Socket = null;
 
 //CB.serverUrl = 'http://localhost:4730';
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.socketIoUrl = 'http://realtime.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
@@ -7584,6 +7585,8 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.socketIoUrl=serverUrl;
+
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7596,7 +7599,7 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
-    CB.Socket = CB.io(CB.serverUrl);
+    CB.Socket = CB.io(CB.socketIoUrl);
 };
 /*
  Access Control List (ACL)
@@ -9911,6 +9914,7 @@ describe("Server Check",function(){
                     CB.appId = 'sample123';
                     CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
                     CB.serverUrl = 'http://localhost:4730';
+                    CB.socketIoUrl = CB.serverUrl;
                     CB.apiUrl = CB.serverUrl + '/api';
                     done();
                 }
@@ -10387,7 +10391,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-  /*  it("should update the object after save and update.", function(done) {
+   it("should update the object after save and update.", function(done) {
         
         this.timeout('10000');
 
@@ -10830,7 +10834,7 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });*/
+    });
 });
 
 describe("CloudExpire", function () {

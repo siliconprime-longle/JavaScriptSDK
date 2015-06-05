@@ -11,7 +11,9 @@ CB.version = "1.0.0";
 CB._isNode = false;
 CB.Socket = null;
 
+//CB.serverUrl = 'http://localhost:4730';
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.socketIoUrl = 'http://realtime.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
@@ -7583,6 +7585,8 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.socketIoUrl=serverUrl;
+
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7595,7 +7599,7 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
-    CB.Socket = CB.io(CB.serverUrl);
+    CB.Socket = CB.io(CB.socketIoUrl);
 };
 /*
  Access Control List (ACL)
