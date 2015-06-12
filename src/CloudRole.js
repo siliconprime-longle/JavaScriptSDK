@@ -6,6 +6,7 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._tableName = 'Role';
     this.document._type = 'role';
     this.document.name = roleName;
+    this.document.ACL = new CB.ACL();
 };
 
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
@@ -49,4 +50,3 @@ CB.CloudRole.getRole = function(role, callback) {
         return def;
     }
 };
-

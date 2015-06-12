@@ -1,6 +1,22 @@
 describe("CloudRole", function () {
-	
-    it("Should Retrieve a user", function (done) {
+
+    it("Should create a role", function (done) {
+
+        this.timeout(10000);
+        var role = new CB.CloudRole('nodejs');
+        role.name='nodejs';
+        console.log(role.ACL);
+        role.save().then(function(list){
+            console.log(list);
+            if(!list)
+                throw "Should retrieve the cloud role";
+            done();
+        },function(){
+            throw "Should retrieve the cloud role";
+        });
+    });
+
+    it("Should Retrieve a role", function (done) {
 		
         this.timeout(10000);
         var role = new CB.CloudRole('nodejs');
@@ -14,7 +30,7 @@ describe("CloudRole", function () {
         });
     });
     
-    it("Should not Retrieve a user", function (done) {
+    it("Should not Retrieve a role", function (done) {
 		
         this.timeout(10000);
         var role = new CB.CloudRole('abcd');

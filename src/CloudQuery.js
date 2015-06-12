@@ -271,51 +271,51 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
 
 //GeoPoint near query
 CB.CloudQuery.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
-	if(!this.query[columnName]){
-		this.query[columnName] = {};
-		this.query[columnName]['$near'] = {
-			'$geometry': coordinates['document'],
-			'$maxDistance': maxDistance,
-			'$minDistance': minDistance
-		};
-	}
+    if(!this.query[columnName]){
+        this.query[columnName] = {};
+        this.query[columnName]['$near'] = {
+            '$geometry': coordinates['document'],
+            '$maxDistance': maxDistance,
+            '$minDistance': minDistance
+        };
+    }
 };
 
 //GeoPoint geoWithin query
 CB.CloudQuery.prototype.geoWithin = function(columnName, geoPoint, radius){
 
-	if(!radius){
-		var coordinates = [];
-		//extracting coordinates from each CloudGeoPoint Object
-		if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
-			for(i=0; i < geoPoint.length; i++){
-				if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
-					coordinates[i] = geoPoint[i]['document']['coordinates'];
-				}
-			}
-		}else{
-			throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
-		}
-		//2dSphere needs first and last coordinates to be same for polygon type
-		//eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one 
-		coordinates[coordinates.length] = coordinates[0];
-		var type = 'Polygon';
-		if(!this.query[columnName]){
-			this.query[columnName] = {};
-			this.query[columnName]['$geoWithin'] = {};
-			this.query[columnName]['$geoWithin']['$geometry'] = {
-					'type': type,
-					'coordinates': [ coordinates ]
-			};
-		}
-	}else{
-		if(!this.query[columnName]){
-			this.query[columnName] = {};
-			this.query[columnName]['$geoWithin'] = {
-				'$centerSphere': [ geoPoint['document']['coordinates'], radius/3963.2 ]
-			};
-		}
-	}
+    if(!radius){
+        var coordinates = [];
+        //extracting coordinates from each CloudGeoPoint Object
+        if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
+            for(i=0; i < geoPoint.length; i++){
+                if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
+                    coordinates[i] = geoPoint[i]['document']['coordinates'];
+                }
+            }
+        }else{
+            throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+        }
+        //2dSphere needs first and last coordinates to be same for polygon type
+        //eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one
+        coordinates[coordinates.length] = coordinates[0];
+        var type = 'Polygon';
+        if(!this.query[columnName]){
+            this.query[columnName] = {};
+            this.query[columnName]['$geoWithin'] = {};
+            this.query[columnName]['$geoWithin']['$geometry'] = {
+                'type': type,
+                'coordinates': [ coordinates ]
+            };
+        }
+    }else{
+        if(!this.query[columnName]){
+            this.query[columnName] = {};
+            this.query[columnName]['$geoWithin'] = {
+                '$centerSphere': [ geoPoint['document']['coordinates'], radius/3963.2 ]
+            };
+        }
+    }
 };
 
 CB.CloudQuery.prototype.count = function(callback) {

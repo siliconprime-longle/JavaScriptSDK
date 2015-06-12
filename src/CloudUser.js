@@ -5,8 +5,9 @@ CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
     this.document._type = 'user';
+    this.document.ACL = new CB.ACL();
 };
-CB.CloudUser.prototype = new CB.CloudObject;
+CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
     get: function() {
         return this.document.username;

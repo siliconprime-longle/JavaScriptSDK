@@ -4,19 +4,19 @@ CB._serialize = function(thisObj) {
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
-        
+
     var obj= CB._clone(thisObj,url);
-    
+
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
         throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
-        
+
     if(obj instanceof CB.CloudGeoPoint)
         return obj.document;
-	
+
     var doc = obj.document;
 
     for (var key in doc) {
@@ -94,19 +94,19 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else if (data[key].latitude || data[key].longitude) { 
-            
-            		document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
-            	
-    			}else{
-    			
+                }else if (data[key].latitude || data[key].longitude) {
+
+                    document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
+
+                }else{
+
                     document[key] = data[key];
-                    
+
                 }
             }else {
-            
+
                 document[key] = data[key];
-                
+
             }
         }
 
@@ -196,17 +196,17 @@ CB._clone=function(obj,url){
             else if(doc[key] instanceof CB.CloudFile){
                 doc2[key]=CB._clone(doc[key],doc[key].document.url);
             }else if(doc[key] instanceof CB.CloudGeoPoint){
-            	doc2[key]=CB._clone(doc[key], null);
+                doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-    	n_obj = obj;
+        n_obj = obj;
         var doc=obj.document;
         var doc2={};
         for (var key in doc) {
-        	doc2[key]=doc[key];
+            doc2[key]=doc[key];
         }
     }
     n_obj.document=doc2;

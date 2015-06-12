@@ -1,7 +1,3 @@
-/*
- CloudSearch (ACL)
- */
-
 CB.CloudSearch = function(collectionNames) {
     this.collectionNames = collectionNames;
     this.query={};
@@ -416,44 +412,54 @@ CB.CloudSearch.or = function(searchObj1, searchObj2) {
     var f1 = null;
     var f2 = null;
 
-    if (searchObj1.query.filteredQuery && searchObj1.query.filteredQuery.query) {
-        q1 = searchObj1.query.filteredQuery.query;
-    } else if (searchObj1.query && !searchObj1.query.filteredQuery) {
+    if (searchObj1.query.filtered && searchObj1.query.filtered.query) {
+        q1 = searchObj1.query.filtered.query;
+    } else if (searchObj1.query && !searchObj1.query.filtered) {
         q1 = searchObj1.query;
     }
 
-    if (searchObj2.query.filteredQuery && searchObj2.query.filteredQuery.query) {
-        q2 = searchObj2.query.filteredQuery.query;
-    } else if (searchObj2.query && !searchObj2.query.filteredQuery) {
+    if (searchObj2.query.filtered && searchObj2.query.filtered.query) {
+        q2 = searchObj2.query.filtered.query;
+    } else if (searchObj2.query && !searchObj2.query.filtered) {
         q2 = searchObj2.query;
     }
 
-    if (searchObj1.query.filteredQuery && searchObj1.query.filteredQuery.filter)
-        f1 = searchObj1.query.filteredQuery.filter;
+    if (searchObj1.query.filtered && searchObj1.query.filtered.filter)
+        f1 = searchObj1.query.filtered.filter;
 
-    if (searchObj1.query.filteredQuery && searchObj1.query.filteredQuery.filter)
-        f1 = searchObj1.query.filteredQuery.filter;
+    /* if (searchObj1.query.filteredQuery && searchObj1.query.filteredQuery.filter)
+     f1 = searchObj1.query.filteredQuery.filter;*/
 
-    if (searchObj2.query.filteredQuery && searchObj2.query.filteredQuery.filter)
-        f2 = searchObj2.query.filteredQuery.filter;
+    if (searchObj2.query.filtered && searchObj2.query.filtered.filter)
+        f2 = searchObj2.query.filtered.filter;
 
     if (f1 || f2) { //if any of the filters exist, then...
         obj3._makeFilteredQuery();
         if (f1 && !f2)
-            obj3.query.filteredQuery.filter = f1;
+            obj3.query.filtered.filter = f1;
         else if (f2 && !f1)
-            obj3.query.filteredQuery.filter = f2;
+            obj3.query.filtered.filter = f2;
         else {
             //if both exists.
-            obj3._pushInShould(f1);
-            obj3._pushInShould(f2);
+            obj3._pushInShouldFilter(f1);
+            obj3._pushInShouldFilter(f2);
         }
 
-    } else {
-        //only query exists.
-        obj3._createBoolQuery();
-        obj3._pushInShouldQuery(q1);
-        obj3._pushInShouldQuery(q2);
+    }
+    if(obj3.query.filtered) {
+        if(Object.keys(q1).length>0 || Object.keys(q2).length>0) {
+            if(Object.keys(q1).length>0 && !Object.keys(q2).length>0){
+                obj3.query.filtered.query=q1;
+            }else if(!Object.keys(q1).length>0 && !Object.keys(q2).length>0){
+                obj3.query.filtered.query=q2;
+            }else{
+                obj3.query.filtered.query.bool={"should":[],"must":[],"must_not":[]};
+                obj3.query.filtered.query.bool.should.push(q1);
+                obj3.query.filtered.query.bool.should.push(q2);
+
+            }
+        }
+
     }
 
     return obj3;

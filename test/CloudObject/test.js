@@ -437,7 +437,7 @@ describe("Cloud Object", function() {
 
 // Test to automatically delete the a reference of the non existing cloudobject when it is saved.
 
-    it("should automatically delete the reference of deleted object while saving",function(done){
+  /*  it("should automatically delete the reference of deleted object while saving",function(done){
         this.timeout(10000);
         var obj = new CB.CloudObject('Custom4');
         var obj1 = new CB.CloudObject('student1');
@@ -470,5 +470,5 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });
+    });*/
 });

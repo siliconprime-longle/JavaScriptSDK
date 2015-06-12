@@ -69,6 +69,7 @@ describe("CloudSearch", function (done) {
                 var obj = new CB.CloudObject('Student');
                 obj.set('description', 'This is gautam singh');
                 obj.set('age', 19);
+               // obj.expires=new Date().getTime();
                 obj.set('name', 'Gautam Singh');
                 obj.set('class', 'C#');
                 obj.isSearchable = true;
@@ -77,6 +78,7 @@ describe("CloudSearch", function (done) {
                         var obj = new CB.CloudObject('Student');
                         obj.set('description', 'This is ravi');
                         obj.set('age', 40);
+                   //     obj.expires=new Date().getTime();
                         obj.set('name', 'Ravi');
                         obj.set('class', 'C#');
                         obj.isSearchable = true;
@@ -255,8 +257,8 @@ describe("CloudSearch", function (done) {
 
         this.timeout(10000);
 
-        var cs = new CB.CloudSearch('Student1');
-        cs.exists('exists');
+        var cs = new CB.CloudSearch('Student');
+        cs.exists('name');
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -274,8 +276,8 @@ describe("CloudSearch", function (done) {
 
         this.timeout(10000);
 
-        var cs = new CB.CloudSearch('Student1');
-        cs.doesNotExist('exists');
+        var cs = new CB.CloudSearch('Student');
+        cs.doesNotExist('expire');
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -308,5 +310,4 @@ describe("CloudSearch", function (done) {
             }
         });
     });
-
 });
