@@ -16,6 +16,23 @@ describe("CloudQuery", function () {
 
     });
 
+    it("should run a find one query",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        query.equalTo('name','vipul');
+        query.findOne().then(function(list){
+            if(list.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to get";
+        }, function (err) {
+            console.log(err);
+            throw "should return object";
+        })
+    });
+
     it("Should retrieve data with a particular value.", function (done) {
 
         this.timeout(10000);

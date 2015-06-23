@@ -8595,13 +8595,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
     url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
-        var object= new CB.CloudObject(this.tableName);
-        object.document = response || {};
-        if(response)
-            object.ACL=object.document.ACL;
-        else
-            object.ACL = new CB.ACL();
-        object=CB._deserialize(object);
+        var object = CB._deserialize(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {

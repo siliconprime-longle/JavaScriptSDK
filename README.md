@@ -14,9 +14,17 @@ npm install cloudboost
 
 var CB = require('cloudboost');
 
+// appId,appKey are the ID,key of the Application created in CloudBoost Dashboard
+//This initialises you Application
+CB.CloudApp.init(appID,appKey);
 
+//Create a CloudObject of type 'Dbass'
 var obj = new CB.CloudObject('Dbass');
+
+//Set the property 'name'
 obj.set('name','cloudboost');
+
+//Save the object
 obj.save().then(function(res){
     console.log("object saved successfully");
 },function(err){

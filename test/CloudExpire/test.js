@@ -6,7 +6,7 @@ describe("CloudExpire", function () {
 
         //create an object.
         var obj = new CB.CloudObject('Custom');
-        obj.set('newColumn1', 'This is a child.');
+        obj.set('newColumn1', 'abcd');
         obj.save().then(function() {
             done();
         }, function () {
