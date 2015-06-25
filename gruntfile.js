@@ -6,8 +6,8 @@ module.exports = function(grunt) {
             foo: {
                 // the files to concatenate
 
-                    src: ['src/Promises.js','src/Cloudapp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
-                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/Private_methods.js'],
+                    src: ['src/Promises.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
+                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/PrivateMethods.js'],
 
                 // the location of the resulting JS file
                 dest: 'dist/1.0.0.js'

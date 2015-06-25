@@ -3,8 +3,18 @@ describe("Cloud Object", function() {
     //Use Sample Table.
     // -> Which has columns :
     // name : string : required.
+    it("save a document",function(done){
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn1','course');
+        obj.save().then(function(res){
+            console.log(res)
+        },function(err){
+            console.log(err);
+        });
+    });
 
-    it("save a relation.", function (done) {
+  /*  it("save a relation.", function (done) {
 
         this.timeout(10000);
 
@@ -24,6 +34,6 @@ describe("Cloud Object", function() {
         });
 
     });
-
+*/
 
 });

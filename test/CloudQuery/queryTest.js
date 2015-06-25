@@ -1,12 +1,12 @@
 describe("CloudQuery", function () {
 
 
+    var obj = new CB.CloudObject('student1');
 
    it("Should save data with a particular value.", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.save().then(function() {
             done();
@@ -16,6 +16,23 @@ describe("CloudQuery", function () {
 
     });
 
+    it("should find data with id",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        query.equalTo("id",obj.get('id'));
+        query.find().then(function(list){
+            if(list.length>0){
+                done();
+            }else{
+                throw "unable to retrive data";
+            }
+        },function(err){
+           throw "unable to retrieve data";
+        });
+
+    });
     it("Should retrieve data with a particular value.", function (done) {
 
         this.timeout(10000);
