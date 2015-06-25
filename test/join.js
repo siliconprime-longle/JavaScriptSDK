@@ -8537,7 +8537,12 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         return def;
     }
 };
-CB.CloudQuery.prototype.get = function(objectId, callback) { //find the document(s) matching the given query
+CB.CloudQuery.prototype.get = function(objectId,callback){
+    var query = new CB.CloudQuery(this.tableName);
+    return query.findById(objectId,callback);
+  //return CB.CloudQuery.findById(objectId,callback);
+};
+CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -11245,20 +11250,37 @@ describe("CloudQuery Include", function () {
 });
 describe("CloudQuery", function () {
 
-
+    var obj = new CB.CloudObject('student1');
 
    it("Should save data with a particular value.", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
-        obj.save().then(function() {
-            done();
+        obj.save().then(function(list) {
+            if(list.get('name') === 'vipul')
+                done();
+            else
+                throw "object could not saved properly";
         }, function () {
             throw "data Save error";
         });
 
+    });
+
+    it("should find item by id",function(done){
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        //query.equalTo('id',"kh095kLB");
+        query.get("kh095kLB").then(function(list){
+            if(list.length>0)
+                done();
+            else
+                throw "object could not saved properly";
+        },function(err){
+            console.log(err);
+        });
     });
 
     it("should run a find one query",function(done){
@@ -11268,8 +11290,10 @@ describe("CloudQuery", function () {
         var query = new CB.CloudQuery('student1');
         query.equalTo('name','vipul');
         query.findOne().then(function(list){
-            console.log(list);
-            done();
+            if(list.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to get";
         }, function (err) {
             console.log(err);
             throw "should return object";

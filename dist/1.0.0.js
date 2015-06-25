@@ -8537,7 +8537,12 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         return def;
     }
 };
-CB.CloudQuery.prototype.get = function(objectId, callback) { //find the document(s) matching the given query
+CB.CloudQuery.prototype.get = function(objectId,callback){
+    var query = new CB.CloudQuery(this.tableName);
+    return query.findById(objectId,callback);
+  //return CB.CloudQuery.findById(objectId,callback);
+};
+CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
