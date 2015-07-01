@@ -9,7 +9,7 @@ describe("ACL", function () {
         obj.ACL.setPublicWriteAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.length === 0) {
+            if(acl.write.deny.user.length === 0) {
                 obj.set('age',15);
                 obj.save().then(function(){
                     throw "Should not save object with no right access";
@@ -33,7 +33,7 @@ describe("ACL", function () {
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.length === 0)
+            if(acl.read.deny.user.length === 0)
                 done();
             else
                 throw "public read access set error"
@@ -84,7 +84,7 @@ describe("ACL", function () {
         obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0)
+            if(acl.read.allow.user.indexOf("553903db6aafe5c41dc69732") >= 0)
                 done();
             else
                 throw "user read access set error"
@@ -103,7 +103,7 @@ describe("ACL", function () {
         obj.ACL.setRoleWriteAccess("553e194ac0cc01201658142e",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.write.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
                 done();
             else
                 throw "user role write access set error"
@@ -121,7 +121,7 @@ describe("ACL", function () {
         obj.ACL.setRoleReadAccess("553e194ac0cc01201658142e",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.read.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
                 done();
             else
                 throw "user role read access set error"
