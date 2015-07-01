@@ -8,7 +8,11 @@ describe("Cloud Object", function() {
         var obj = new CB.CloudObject('Custom4');
         obj.set('newColumn1','course');
         obj.save().then(function(res){
-            console.log(res)
+            console.log(res);
+            if(obj.get('newColumn1')==='course')
+                done;
+            else
+                throw "unable to save document";
         },function(err){
             console.log(err);
         });
