@@ -12,6 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.socketIoUrl = 'http://realtime.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
@@ -7582,6 +7583,8 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.socketIoUrl=serverUrl;
+
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7594,7 +7597,7 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
-    CB.Socket = CB.io(CB.serverUrl);
+    CB.Socket = CB.io(CB.socketIoUrl);
 };
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
@@ -8528,7 +8531,12 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         return def;
     }
 };
-CB.CloudQuery.prototype.get = function(objectId, callback) { //find the document(s) matching the given query
+CB.CloudQuery.prototype.get = function(objectId,callback){
+    var query = new CB.CloudQuery(this.tableName);
+    return query.findById(objectId,callback);
+  //return CB.CloudQuery.findById(objectId,callback);
+};
+CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -8586,13 +8594,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
     url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
-        var object= new CB.CloudObject(this.tableName);
-        object.document = response || {};
-        if(response)
-            object.ACL=object.document.ACL;
-        else
-            object.ACL = new CB.ACL();
-        object=CB._deserialize(object);
+        var object = CB._deserialize(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
@@ -9889,42 +9891,6 @@ CB._request=function(method,url,params)
    
 
 	
-describe("Server Check",function(){
-    it("should check for localhost",function(done){
-    	this.timeout(10000);
-        var xmlhttp;
-        this.timeout(10000);
-        var req = typeof(require) === 'function' ? require : null;
-        // Load references to other dependencies
-        if (typeof(XMLHttpRequest) !== 'undefined') {
-             xmlhttp = XMLHttpRequest;
-            } else if (typeof(require) === 'function' &&
-                typeof(require.ensure) === 'undefined') {
-                xmlhttp = req('xmlhttprequest').XMLHttpRequest;
-            }
-            xmlhttp = new xmlhttp();
-        xmlhttp.open('GET','http://localhost:4730',true);
-        xmlhttp.send();
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == xmlhttp.DONE) {
-                if (xmlhttp.status == 200) {
-                    CB.appId = 'sample123';
-                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
-                    CB.serverUrl = 'http://localhost:4730';
-                    CB.apiUrl = CB.serverUrl + '/api';
-                    done();
-                }
-                else {
-                    CB.appId = 'travis123';
-                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-                    done();
-
-                }
-            }
-        }
-    });
-});
-
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(100000);
@@ -10130,8 +10096,22 @@ describe("Cloud Object", function() {
     //Use Sample Table.
     // -> Which has columns :
     // name : string : required.
+    it("save a document",function(done){
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn1','course');
+        obj.save().then(function(res){
+            console.log(res);
+            if(obj.get('newColumn1')==='course')
+                done;
+            else
+                throw "unable to save document";
+        },function(err){
+            console.log(err);
+        });
+    });
 
-    it("save a relation.", function (done) {
+  /*  it("save a relation.", function (done) {
 
         this.timeout(10000);
 
@@ -10151,7 +10131,7 @@ describe("Cloud Object", function() {
         });
 
     });
-
+*/
 
 });
 
@@ -10387,7 +10367,11 @@ describe("Cloud Object", function() {
      	});
     });
 
+<<<<<<< HEAD
     it("should update the object after save and update.", function(done) {
+=======
+   it("should update the object after save and update.", function(done) {
+>>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172
         
         this.timeout('10000');
 
@@ -10830,7 +10814,7 @@ describe("Cloud Object", function() {
             throw "should delete object";
         });
     });
-    });*/
+    });
 });
 
 describe("CloudExpire", function () {
@@ -10841,7 +10825,7 @@ describe("CloudExpire", function () {
 
         //create an object.
         var obj = new CB.CloudObject('Custom');
-        obj.set('newColumn1', 'This is a child.');
+        obj.set('newColumn1', 'abcd');
         obj.save().then(function() {
             done();
         }, function () {
@@ -11284,22 +11268,80 @@ describe("CloudQuery Include", function () {
 });
 describe("CloudQuery", function () {
 
+<<<<<<< HEAD:test/CloudQuery/queryTest.js
 
+=======
+>>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172:test/CloudQuery/queryTest.js
+    var obj = new CB.CloudObject('student1');
 
    it("Should save data with a particular value.", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
-        obj.save().then(function() {
-            done();
+        obj.save().then(function(list) {
+            if(list.get('name') === 'vipul')
+                done();
+            else
+                throw "object could not saved properly";
         }, function () {
             throw "data Save error";
         });
 
     });
 
+<<<<<<< HEAD:test/CloudQuery/queryTest.js
+    it("should find data with id",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        query.equalTo("id",obj.get('id'));
+        query.find().then(function(list){
+            if(list.length>0){
+                done();
+            }else{
+                throw "unable to retrive data";
+            }
+        },function(err){
+           throw "unable to retrieve data";
+        });
+
+    });
+=======
+    it("should find item by id",function(done){
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        query.equalTo('id',obj.get('id'));
+        query.find().then(function(list){
+            if(list.length>0)
+                done();
+            else
+                throw "object could not saved properly";
+        },function(err){
+            console.log(err);
+        });
+    });
+
+    it("should run a find one query",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('student1');
+        query.equalTo('name','vipul');
+        query.findOne().then(function(list){
+            if(list.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to get";
+        }, function (err) {
+            console.log(err);
+            throw "should return object";
+        })
+    });
+
+>>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172:test/CloudQuery/queryTest.js
     it("Should retrieve data with a particular value.", function (done) {
 
         this.timeout(10000);
@@ -12275,6 +12317,141 @@ describe("ACL", function () {
         obj.ACL.setPublicWriteAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
+            if(acl.write.length === 0) {
+                obj.set('age',15);
+                obj.save().then(function(){
+                    throw "Should not save object with no right access";
+                },function(){
+                    done();
+                });
+            }
+            else
+                throw "public write access set error"
+        }, function () {
+            throw "public write access save error";
+        });
+    });
+
+    it("Should set the public read access", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicReadAccess(false);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.read.length === 0)
+                done();
+            else
+                throw "public read access set error"
+        }, function () {
+            throw "public read access save error";
+        });
+
+    });
+
+/*    it("Should set the user write access", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess("553903db6aafe5c41dc69732",true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.write.indexOf("553903db6aafe5c41dc69732") >= 0) {
+                var user = new CB.CloudUser();
+                user.set('username', 'vipul');
+                user.set('password', 'abcd');
+                user.logIn().then(function(){
+                    obj.set('age',15);
+                    obj.save().then(function(){
+                        done();
+                    },function(){
+                        throw "should save object with write access";
+                    });
+                },function(){
+                    throw "should login";
+                });
+            }
+            else
+                throw "user write access set error"
+        }, function () {
+            throw "user write access save error";
+        });
+
+    });*/
+
+    it("Should set the user read access", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0)
+                done();
+            else
+                throw "user read access set error"
+        }, function () {
+            throw "user read access save error";
+        });
+
+    });
+
+    it("Should allow users of role to write", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setRoleWriteAccess("553e194ac0cc01201658142e",true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.write.indexOf("553e194ac0cc01201658142e")>=0)
+                done();
+            else
+                throw "user role write access set error"
+        }, function () {
+            throw "user role write access save error";
+        });
+
+    });
+
+    it("Should allow users of role to read", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL.setRoleReadAccess("553e194ac0cc01201658142e",true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.read.indexOf("553e194ac0cc01201658142e")>=0)
+                done();
+            else
+                throw "user role read access set error"
+        }, function () {
+            throw "user role read access save error";
+        });
+
+    });
+});
+
+
+describe("ACL", function () {
+
+    it("Should set the public write access", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicWriteAccess(false);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
             if(acl.write.length === 0)
                  done();
            else
@@ -12377,345 +12554,6 @@ describe("ACL", function () {
 
     });
 });
-describe("ACL", function () {
-    var username = util.makeString();
-    var passwd = "abcd";
-    it("Should create new user", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.set('email',util.makeEmail());
-        obj.signUp().then(function(list) {
-            if(list.get('username') === username)
-                done();
-            else
-                throw "create user error"
-        }, function () {
-            throw "user create error";
-        });
-
-    });
-    var rolename =  util.makeString();
-    var role = new CB.CloudRole(rolename);
-    it("Should create a role", function (done) {
-
-        this.timeout(10000);
-        role.save().then(function(role){
-            console.log(role);
-            if(!role)
-                throw "Should retrieve the cloud role";
-            done();
-        },function(){
-            throw "Should retrieve the cloud role";
-        });
-    });
-
-
-
-    it("Should set the public write access", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicWriteAccess(false);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.write.allow.user.length === 0) {
-                obj.set('age',15);
-                obj.save().then(function(){
-                    throw "Should not save object with no right access";
-                },function(){
-                    done();
-                });
-            }
-            else
-                throw "public write access set error"
-        }, function () {
-            throw "public write access save error";
-        });
-    });
-
-    it("Should unset the public read access", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicReadAccess(false);
-        CB.CloudUser.current.logOut();
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.read.allow.user.length == 0) {
-                //run a find query here
-                var query = new CB.CloudQuery('student4');
-                query.get(list.id).then(function(list){
-                    if(list) {
-                        if (list.length > 0)
-                            throw "should not return document without public read access.";
-                        else
-                            done();
-                    }else
-                        done();
-                },function(err){
-                        throw "error while finding the object";
-                });
-            }
-            else
-                throw "public read access set error"
-        }, function () {
-            throw "public read access save error";
-        });
-
-    });
-
-    it("Should set the public read access", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicReadAccess(true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.read.allow.user.length>0) {
-                //run a find query here
-                var query = new CB.CloudQuery('student4');
-                query.get(list.id).then(function(list){
-                    if(list) {
-                        if (list.id)
-                            done();
-                        else
-                            throw "should not return document without public read access.";
-                    }else
-                        throw "should not return document without public read access.";
-                },function(err){
-                    throw "error while finding the object";
-                });
-            }
-            else
-                throw "public read access set error"
-        }, function () {
-            throw "public read access save error";
-        });
-
-    });
-
-    it("Should set the user write access", function (done) {
-
-        this.timeout(10000);
-        var user = new CB.CloudUser();
-        user.set('username', username);
-        user.set('password', passwd);
-        user.logIn({
-            success: function(user) {
-                var obj = new CB.CloudObject('student4');
-                 obj.ACL = new CB.ACL();
-                obj.ACL.setUserWriteAccess(CB.CloudUser.current.id,true);
-                obj.save().then(function(list) {
-                    acl=list.get('ACL');
-                    if(acl.write.allow.user.indexOf(CB.CloudUser.current.id) >= 0) {
-                        var user = new CB.CloudUser();
-                        user.set('username', username);
-                        user.set('password', passwd);
-                        user.logIn().then(function(){
-                            obj.set('age',15);
-                            obj.save().then(function(){
-                                done();
-                            },function(){
-                                throw "should save object with write access";
-                            });
-                        },function(){
-                            throw "should login";
-                        });
-                    }
-                    else
-                         throw "user write access set error"
-                }, function () {
-                    throw "user write access save error";
-                });
-            },
-            error: function(err) {
-                throw "Could not login user";
-            }
-        });
-
-    });
-
-    it("Should allow only the user with write access to modify", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess(CB.CloudUser.current.id,true);
-        obj.save().then(function(list) {
-            CB.CloudUser.current.logOut();
-            acl=list.get('ACL');
-            if(acl.write.allow.user.indexOf(CB.CloudUser.current.id) >= 0) {
-                    obj.set('age',15);
-                    obj.save().then(function(){
-                        done();
-                    },function(){
-                        throw "should save object with write access";
-                    });
-            }
-            else
-                throw "user write access set error"
-        }, function () {
-            throw "user write access save error";
-        });
-
-    });
-
-    it("should login the user",function(done){
-        this.timeout(10000);
-
-        var user = new CB.CloudUser();
-        user.set('username', username);
-        user.set('password', passwd);
-        user.logIn({
-            success: function(user) {
-                done();
-            },
-            error: function(err) {
-                throw "Could not login user";
-            }
-        });
-    });
-
-    it("Should set the user read access", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserReadAccess(CB.CloudUser.current.id,true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.read.allow.user.indexOf(CB.CloudUser.current.id) >= 0)
-            //write a find query as well
-                done();
-            else
-                throw "user read access set error"
-        }, function () {
-            throw "user read access save error";
-        });
-
-    });
-
-    it("Should allow users of role to write", function (done) {
-
-        this.timeout(10000);
-        CB.CloudUser.current.addToRole(role).then(function(user){
-            done();
-        },function(err){
-            throw "error while assigning role";
-        });
-    });
-
-    it("Should update object with role access given to user", function (done) {
-
-        this.timeout(10000);
-        CB.CloudUser.current.logOut();
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setRoleWriteAccess(role.id,true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.write.allow.role.indexOf(role.id)>=0) {
-                var user = new CB.CloudUser();
-                user.set('username', username);
-                user.set('password', passwd);
-                user.logIn({
-                    success: function (user) {
-                        obj.save().then(function(){
-                            done();
-                        },function(){
-                            throw "should save the object with allowed role";
-                        });
-                    },
-                    error: function (err) {
-                        throw "Could not login user";
-                    }
-                });
-            }else
-                throw "user role write access set error"
-        }, function () {
-            throw "user role write access save error";
-        });
-
-    });
-    var obj = new CB.CloudObject('student4');
-    it("Should not update object without role access to user", function (done) {
-
-        this.timeout(10000);
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess(CB.CloudUser.current.id,true);
-        CB.CloudUser.current.logOut();
-        obj.ACL.setRoleWriteAccess(role.id,false);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.write.deny.role.indexOf(role.id)>=0) {
-                var user = new CB.CloudUser();
-                user.set('username', username);
-                user.set('password', passwd);
-                user.logIn({
-                    success: function (user) {
-                        obj.save().then(function(list){
-                            done();
-                        },function(){
-                            throw "should save";
-                        });
-                    },
-                    error: function (err) {
-                        throw "Could not login user";
-                    }
-                });
-            }else
-                throw "user role write access set error"
-        }, function () {
-            throw "user role write access save error";
-        });
-
-    });
-
-    it("should allow the user with permission and role denied",function(done){
-
-        this.timeout(10000);
-
-        obj.save().then(function(){
-            done();
-        },function(){
-            throw "should be allowed to update with user write access";
-
-        });
-    });
-
-    it("Should allow users of role to read", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL.setRoleReadAccess(role.id,true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.read.allow.role.indexOf(role.id)>=0)
-                done();
-            else
-                throw "user role read access set error"
-        }, function () {
-            throw "user role read access save error";
-        });
-
-    });
-});
-
-
 describe("Query_ACL", function () {
 
     var obj = new CB.CloudObject('student4');

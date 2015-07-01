@@ -27,8 +27,8 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should update the object after save and update.", function(done) {
-        
+
+   it("should update the object after save and update.", function(done) {
         this.timeout('10000');
 
      	var obj = new CB.CloudObject('Sample');

@@ -12,6 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.socketIoUrl = 'http://realtime.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
@@ -7582,6 +7583,8 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.socketIoUrl=serverUrl;
+
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
@@ -7594,7 +7597,7 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
-    CB.Socket = CB.io(CB.serverUrl);
+    CB.Socket = CB.io(CB.socketIoUrl);
 };
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
@@ -8528,7 +8531,12 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         return def;
     }
 };
-CB.CloudQuery.prototype.get = function(objectId, callback) { //find the document(s) matching the given query
+CB.CloudQuery.prototype.get = function(objectId,callback){
+    var query = new CB.CloudQuery(this.tableName);
+    return query.findById(objectId,callback);
+  //return CB.CloudQuery.findById(objectId,callback);
+};
+CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -8586,13 +8594,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
     url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
-        var object= new CB.CloudObject(this.tableName);
-        object.document = response || {};
-        if(response)
-            object.ACL=object.document.ACL;
-        else
-            object.ACL = new CB.ACL();
-        object=CB._deserialize(object);
+        var object = CB._deserialize(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {

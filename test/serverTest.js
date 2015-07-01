@@ -20,6 +20,7 @@ describe("Server Check",function(){
                     CB.appId = 'sample123';
                     CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
                     CB.serverUrl = 'http://localhost:4730';
+                    CB.socketIoUrl = CB.serverUrl;
                     CB.apiUrl = CB.serverUrl + '/api';
                     done();
                 }
