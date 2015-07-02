@@ -55,7 +55,7 @@ describe("CloudSearch", function (done) {
 
     it("should index test data",function(done){
 
-        this.timeout(10000);
+        this.timeout(50000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('description', 'This is nawaz');
@@ -144,7 +144,7 @@ describe("CloudSearch", function (done) {
 
     it("should limit the number of search results",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.notEqualTo('age', 19);
@@ -308,6 +308,75 @@ describe("CloudSearch", function (done) {
             },error : function(error){
                throw "should search for elements";
             }
+        });
+    });
+
+    it("should unIndex the CloudObject",function(done){
+
+        this.timeout(15000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('age',777);
+        obj.set('isSearchable',true);
+        obj.save().then(function(list){
+            console.log(list);
+            list.set('isSearchable',false);
+            list.save().then(function(list){
+                var searchObj = new CB.CloudSearch('Student');
+                searchObj.equalTo('id',obj.get('id'));
+                searchObj.search().then(function(list){
+                    console.log('here');
+                    if(list.length === 0){
+                        done();
+                    }else{
+                        throw "Unable to UnIndex the CloudObject";
+                    }
+                },function(){
+                    console.log(err);
+                });
+            },function(err){
+                console.log(err);
+            });
+        },function(err){
+            console.log(err);
+        });
+    });
+
+    it("should reIndex the unIndexed CloudObject",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('age',777);
+        obj.set('isSearchable',true);
+        obj.save().then(function(list){
+            console.log(list);
+            list.set('isSearchable',false);
+            list.save().then(function(list){
+                console.log(list);
+                list.set('isSearchable',true);
+                list.save().then(function(list){
+                    var searchObj = new CB.CloudSearch('Student');
+                    searchObj.equalTo('id',obj.get('id'));
+                    searchObj.search().then(function(list){
+                        console.log('here');
+                        if(list.length > 0){
+                            done();
+                        }else{
+                            throw "Unable to UnIndex the CloudObject";
+                        }
+                    },function(){
+                        console.log(err);
+                    });
+                    console.log(list)
+                }, function (err) {
+                    console.log(err);
+                })
+            },function(err){
+                console.log(err);
+            });
+        },function(err){
+            console.log(err);
         });
     });
 });

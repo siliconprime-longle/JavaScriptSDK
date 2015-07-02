@@ -9,7 +9,7 @@ describe("ACL", function () {
         obj.ACL.setPublicWriteAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.length === 0) {
+            if(acl.write.deny.user.length === 0) {
                 obj.set('age',15);
                 obj.save().then(function(){
                     throw "Should not save object with no right access";
@@ -33,7 +33,7 @@ describe("ACL", function () {
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.length === 0)
+            if(acl.read.deny.user.length === 0)
                 done();
             else
                 throw "public read access set error"
@@ -42,38 +42,27 @@ describe("ACL", function () {
         });
 
     });
+    var username = util.makeString();
+    var passwd = "abcd";
+    var userObj = new CB.CloudUser();
 
-/*    it("Should set the user write access", function (done) {
+    it("Should create new user", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess("553903db6aafe5c41dc69732",true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.write.indexOf("553903db6aafe5c41dc69732") >= 0) {
-                var user = new CB.CloudUser();
-                user.set('username', 'vipul');
-                user.set('password', 'abcd');
-                user.logIn().then(function(){
-                    obj.set('age',15);
-                    obj.save().then(function(){
-                        done();
-                    },function(){
-                        throw "should save object with write access";
-                    });
-                },function(){
-                    throw "should login";
-                });
-            }
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(list) {
+            if(list.get('username') === username)
+                done();
             else
-                throw "user write access set error"
+                throw "create user error"
         }, function () {
-            throw "user write access save error";
+            throw "user create error";
         });
 
-    });*/
+    });
 
     it("Should set the user read access", function (done) {
 
@@ -81,10 +70,10 @@ describe("ACL", function () {
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
-        obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
+        obj.ACL.setUserReadAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0)
+            if(acl.read.allow.user.indexOf(userObj.get('id')) >= 0)
                 done();
             else
                 throw "user read access set error"
@@ -100,10 +89,10 @@ describe("ACL", function () {
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
-        obj.ACL.setRoleWriteAccess("553e194ac0cc01201658142e",true);
+        obj.ACL.setRoleWriteAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.write.allow.role.indexOf(userObj.get('id'))>=0)
                 done();
             else
                 throw "user role write access set error"
@@ -118,10 +107,10 @@ describe("ACL", function () {
         this.timeout(10000);
 
         var obj = new CB.CloudObject('student4');
-        obj.ACL.setRoleReadAccess("553e194ac0cc01201658142e",true);
+        obj.ACL.setRoleReadAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.read.allow.role.indexOf(userObj.get('id'))>=0)
                 done();
             else
                 throw "user role read access set error"

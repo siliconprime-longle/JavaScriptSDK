@@ -154,7 +154,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 
     var keywords = ['_tableName', '_type', 'operator'];
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
@@ -166,7 +166,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
 
