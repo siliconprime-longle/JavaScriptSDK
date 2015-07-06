@@ -248,15 +248,3 @@ CB._request=function(method,url,params)
     }
     return def;
 };
-
-CB._modified = function(thisObj,columnName){
-    thisObj.document._isModified = true;
-    if(thisObj.document._modifiedColumns) {
-        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
-            thisObj.document._modifiedColumns.push(columnName);
-        }
-    }else{
-        thisObj.document._modifiedColumns = [];
-        thisObj.document._modifiedColumns.push(columnName);
-    }
-};
