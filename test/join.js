@@ -7794,14 +7794,17 @@ CB.CloudObject = function(tableName) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     get: function() {
         return this.document.ACL;
     },
-    set: function(acl) {
-        this.document.ACL = acl;
+    set: function(ACL) {
+        this.document.ACL = ACL;
+        CB._modified(this,'ACL');
     }
 });
 
@@ -7811,6 +7814,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'id', {
     },
     set: function(id) {
         this.document._id = id;
+        CB._modified(this,'_id');
     }
 });
 
@@ -7820,6 +7824,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
     },
     set: function(createdAt) {
         this.document.createdAt = createdAt;
+        CB._modified(this,'createdAt');
     }
 });
 
@@ -7829,6 +7834,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
     },
     set: function(updatedAt) {
         this.document.updatedAt = updatedAt;
+        CB._modified(this,'updatedAt');
     }
 });
 
@@ -7838,6 +7844,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'isSearchable', {
     },
     set: function(isSearchable) {
         this.document._isSearchable = isSearchable;
+        CB._modified(this,'_isSearchable');
     }
 });
 
@@ -7849,6 +7856,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     },
     set: function(expires) {
         this.document._expires = expires;
+        CB._modified(this,'_expires');
     }
 });
 
@@ -7935,25 +7943,26 @@ CB.CloudObject.off = function(tableName, eventType, done) {
     }
 };
 
-/* Realtime implementation ends here.  */
+/* RealTime implementation ends here.  */
 
 CB.CloudObject.prototype.set = function(columnName, data) { //for setting data for a particular column
 
     var keywords = ['_tableName', '_type', 'operator'];
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
         throw columnName + " is a keyword. Please choose a different column name.";
     }
     this.document[columnName] = data;
+    CB._modified(this,columnName);
 };
 
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
 
@@ -8534,7 +8543,6 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
 CB.CloudQuery.prototype.get = function(objectId,callback){
     var query = new CB.CloudQuery(this.tableName);
     return query.findById(objectId,callback);
-  //return CB.CloudQuery.findById(objectId,callback);
 };
 CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
     if (!CB.appId) {
@@ -9089,6 +9097,8 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._tableName = 'User';
     this.document._type = 'user';
     this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
@@ -9325,6 +9335,8 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
     this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
@@ -9374,6 +9386,9 @@ CB.CloudRole.getRole = function(role, callback) {
  */
 
 CB.CloudFile = CB.CloudFile || function(file) {
+    this.document = {};
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 
     if(!file)
         throw "File is null.";
@@ -9871,6 +9886,18 @@ CB._request=function(method,url,params)
     return def;
 };
 
+CB._modified = function(thisObj,columnName){
+    thisObj.document._isModified = true;
+    if(thisObj.document._modifiedColumns) {
+        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
+            thisObj.document._modifiedColumns.push(columnName);
+        }
+    }else{
+        thisObj.document._modifiedColumns = [];
+        thisObj.document._modifiedColumns.push(columnName);
+    }
+};
+
    var util = {
      makeString : function(){
 	    var text = "";
@@ -10184,13 +10211,16 @@ describe("Cloud Objects Notification", function() {
           CB.CloudObject.off('student4','updated',{success:function(){},error:function(){}});
       }, {
       	success : function(){
-      		obj1.set('age', 15);
-      		obj1.save().then(function(newObj){
-      			obj1 = newObj;
-                obj1.save();
-      		}, function(){
-      			throw 'Error updating an object.';
-      		});
+            obj1.save().then(function(){
+      		    obj1.set('age', 15);
+      		    obj1.save().then(function(newObj){
+      			    obj1 = newObj;
+      		    }, function(){
+      			    throw 'Error Saving an object.';
+      		    });
+            },function(){
+                throw 'Error Saving an object.'
+            });
       	}, error : function(error){
       		throw 'Error listening to an event.';
       	}
@@ -10198,7 +10228,7 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
-    it("should alert when the object is deleted.", function(done) {
+    /*it("should alert when the object is deleted.", function(done) {
 
       this.timeout(10000);
 
@@ -10335,7 +10365,7 @@ describe("Cloud Objects Notification", function() {
       	}
 
       }, 5000);
-    });
+    });*/
 
 });
 describe("Cloud Object", function() {
@@ -10367,12 +10397,8 @@ describe("Cloud Object", function() {
      	});
     });
 
-<<<<<<< HEAD
-    it("should update the object after save and update.", function(done) {
-=======
+
    it("should update the object after save and update.", function(done) {
->>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172
-        
         this.timeout('10000');
 
      	var obj = new CB.CloudObject('Sample');
@@ -10779,44 +10805,182 @@ describe("Cloud Object", function() {
         });
     });
 
-// Test to automatically delete the a reference of the non existing cloudobject when it is saved.
+});
+describe("Version Test",function(done){
 
-  /*  it("should automatically delete the reference of deleted object while saving",function(done){
-        this.timeout(10000);
-        var obj = new CB.CloudObject('Custom4');
-        var obj1 = new CB.CloudObject('student1');
-        var obj2 = new CB.CloudObject('student1');
-        obj1.set('name','vipul');
-        obj1.set('age',15);
-        obj2.set('name','ranjeet');
-        obj2.set('age',24);
-        obj.set('newColumn7',[obj1]);
-        obj.save().then(function(list){
-            obj=list;
-            obj1=list.get('newColumn7')[0];
-            obj1.delete().then(function(){
-                nc7=obj.get('newColumn7');
-                nc7.push(obj2);
-                obj.set('newColumn7',nc7);
-                obj.save().then(function(list){
-                    var check = list.get('newColumn7');
-                    if(check.length === 1) {
-                        if (check[0].get('name') === 'ranjeet')
-                            done();
-                        else
-                            throw "should automatically delete reference of automatically deleted object";
-                    }else
-                        throw "should automatically delete reference of automatically deleted object";
-                },function(err){
-                    console.log(err);
-                });
-            },function(){
-            throw "should delete object";
+    it("should set the Modified array",function(done){
+        var obj = new CB.CloudObject('sample');
+        obj.set('expires',0);
+        obj.set('name','vipul');
+        console.log(obj);
+        if(obj.get('_modifiedColumns').length === 5) {
+            done();
+        }else{
+            throw "Unable to set Modified Array";
+        }
+    });
+
+    var obj = new CB.CloudObject('Sample');
+
+    it("should save.", function(done) {
+
+        this.timeout('10000');
+        obj.set('name', 'sample');
+        obj.save({
+            success : function(newObj){
+                if(obj.get('name') !== 'sample'){
+                    throw 'name is not equal to what was saved.';
+                }
+                if(!obj.id){
+                    throw 'id is not updated after save.';
+                }
+
+                done();
+            }, error : function(error){
+                console.log(error);
+                throw 'Error saving the object';
+            }
         });
     });
+
+    it("should get the saved CO with version",function(done){
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Sample');
+        query.findById(obj.get('id')).then(function(list){
+            console.log(list);
+            var version = list.get('_version');
+            if(version>=0){
+                done();
+            }else{
+                throw "unable to get Version";
+            }
+        },function(){
+            throw "unable to find saved object";
+        });
+    });
+
+    /*it("should not update the version of a saved object if not modified", function (done) {
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Sample');
+        query.equalTo('id',obj.get('id'));
+        query.find().then(function(list){
+            console.log(list);
+            list[0].save().then(function(){
+                var query1 = new CB.CloudQuery('Sample');
+                query1.equalTo('id',obj.get('id'));
+                query1.find().then(function(list){
+                    if(list[0].get('_version') === 1){
+                        done();
+                    }else{
+                        throw "version number should update";
+                    }
+                },function(){
+                    throw "unable to find saved object";
+                })
+            }, function () {
+                throw "unable to save object";
+            })
+        },function(){
+            throw "unable to find saved object";
+        })
+    });*/
+
+    it("should update the version of a saved object", function (done) {
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Sample');
+        query.equalTo('id',obj.get('id'));
+        query.find().then(function(list){
+            console.log(list);
+            list[0].set('name','abcd');
+            list[0].save().then(function(){
+                var query1 = new CB.CloudQuery('Sample');
+                query1.equalTo('id',obj.get('id'));
+                query1.find().then(function(list){
+                    if(list[0].get('_version') === 1){
+                        done();
+                    }else{
+                        throw "version number should update";
+                    }
+                },function(){
+                    throw "unable to find saved object";
+                })
+            }, function () {
+                throw "unable to save object";
+            })
+        },function(){
+            throw "unable to find saved object";
+        })
+    });
+
+    var username = util.makeString();
+    var passwd = "abcd";
+    it("Should create new user with version", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username);
+        obj.set('password',passwd);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username') === username && list.get('_version')>=0){
+                console.log(list);
+                done();
+            }
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
+    var roleName = util.makeString();
+
+    it("Should create a role with version", function (done) {
+
+        this.timeout(10000);
+        var role = new CB.CloudRole(roleName);
+        role.save().then(function (list) {
+            console.log(list);
+            if (!list)
+                throw "Should retrieve the cloud role";
+            if (list.get('_version') >= 0)
+                done();
+            else
+                throw "Unable to save version number with CloudRole";
+        }, function () {
+            throw "Should retrieve the cloud role";
+        });
+    });
+
+    it("Should Store a relation with version",function(done){
+
+        this.timeout(10000);
+        var parent = new CB.CloudObject('Custom4');
+        var child = new CB.CloudObject('student1');
+        child.set('name','vipul');
+        parent.set('newColumn7',[child]);
+        parent.save().then(function(list){
+            if(list)
+            done();
+        },function(err){
+            console.log(err);
+        });
+
+    });
+
+    it("Should Store a saved sub doc through parent",function(done){
+        this.timeout(10000);
+        var query = new CB.CloudQuery('User');
+        query.get('EzkzUJVj').then(function(user){
+            console.log(user);
+            done();
+        },function(){
+            console.log("err");
+        });
     });
 });
-
 describe("CloudExpire", function () {
 
     it("Sets Expire in Cloud Object.", function (done) {
@@ -11033,6 +11197,7 @@ describe("CloudNotification", function() {
 describe("Cloud GeoPoint Test", function() {
   	
 	it("should save a latitude and longitude when passing data are number type", function(done) {
+        this.timeout(10000);
 		var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint(17.9,79.6);
 		obj.set("location", loc);
@@ -11046,7 +11211,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
-		var obj = new CB.CloudObject('Custom5');
+		this.timeout(10000);
+        var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("18.19","79.3");
 		obj.set("location", loc);
 		obj.save({
@@ -11059,7 +11225,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get data from server for near function", function(done) {
-     	var loc = new CB.CloudGeoPoint("17.7","80.3");
+     	this.timeout(10000);
+        var loc = new CB.CloudGeoPoint("17.7","80.3");
         var query = new CB.CloudQuery('Custom5');
 		query.near("location", loc, 100000);
 		query.find().then(function(list) {
@@ -11078,7 +11245,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
-     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	this.timeout(10000);
+        var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
         var query = new CB.CloudQuery('Custom5');
@@ -11099,7 +11267,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin + equal to + limit", function(done) {
-     	var loc1 = new CB.CloudGeoPoint(18.4,78.9);
+     	this.timeout(10000);
+        var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
         var query = new CB.CloudQuery('Custom5');
@@ -11121,7 +11290,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
-     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+     	this.timeout(10000);
+        var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
@@ -11140,7 +11310,8 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
-     	var loc = new CB.CloudGeoPoint(17.3, 78.3);
+     	this.timeout(10000);
+        var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.setLimit(4);
@@ -11268,10 +11439,6 @@ describe("CloudQuery Include", function () {
 });
 describe("CloudQuery", function () {
 
-<<<<<<< HEAD:test/CloudQuery/queryTest.js
-
-=======
->>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172:test/CloudQuery/queryTest.js
     var obj = new CB.CloudObject('student1');
 
    it("Should save data with a particular value.", function (done) {
@@ -11290,7 +11457,6 @@ describe("CloudQuery", function () {
 
     });
 
-<<<<<<< HEAD:test/CloudQuery/queryTest.js
     it("should find data with id",function(done){
 
         this.timeout(10000);
@@ -11308,7 +11474,7 @@ describe("CloudQuery", function () {
         });
 
     });
-=======
+
     it("should find item by id",function(done){
         this.timeout(10000);
 
@@ -11341,7 +11507,6 @@ describe("CloudQuery", function () {
         })
     });
 
->>>>>>> 8ab0aa83775544616dfece3cf54e291c8e09d172:test/CloudQuery/queryTest.js
     it("Should retrieve data with a particular value.", function (done) {
 
         this.timeout(10000);
@@ -12251,29 +12416,6 @@ describe("CloudUser", function () {
 
     });
 
-    it("Should check if role is assigned to user", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.logIn().then(function(list) {
-            if(list.get('roles').length>0) {
-                if (CB.CloudUser.current.isInRole(role)) {
-                    done();
-                }
-                done();
-            }else{
-                throw "role assigned is not checked";
-
-            }
-        },function(){
-            throw "role create error";
-        });
-
-    });
-
     it("Should remove role assigned role to user", function (done) {
 
         this.timeout(1000000);
@@ -12317,7 +12459,7 @@ describe("ACL", function () {
         obj.ACL.setPublicWriteAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.length === 0) {
+            if(acl.write.deny.user.length === 0) {
                 obj.set('age',15);
                 obj.save().then(function(){
                     throw "Should not save object with no right access";
@@ -12341,7 +12483,7 @@ describe("ACL", function () {
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.length === 0)
+            if(acl.read.deny.user.length === 0)
                 done();
             else
                 throw "public read access set error"
@@ -12392,7 +12534,7 @@ describe("ACL", function () {
         obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553903db6aafe5c41dc69732") >= 0)
+            if(acl.read.allow.user.indexOf("553903db6aafe5c41dc69732") >= 0)
                 done();
             else
                 throw "user read access set error"
@@ -12411,7 +12553,7 @@ describe("ACL", function () {
         obj.ACL.setRoleWriteAccess("553e194ac0cc01201658142e",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.write.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
                 done();
             else
                 throw "user role write access set error"
@@ -12429,7 +12571,7 @@ describe("ACL", function () {
         obj.ACL.setRoleReadAccess("553e194ac0cc01201658142e",true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.read.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
                 done();
             else
                 throw "user role read access set error"
@@ -12641,37 +12783,8 @@ describe("Query_ACL", function () {
 
     });
 
-    var obj1 = new CB.CloudObject('es');
-    obj1.isSearchable = true;
-    obj1.set('name','vipul');
 
-    it("Should search object with user read access", function (done) {
 
-        this.timeout(10000);
-        obj1.ACL = new CB.ACL();
-        obj1.ACL.setUserReadAccess(user.id,false);
-        obj1.save().then(function(list) {
-            acl=list.get('ACL');
-            // if(acl.read.indexOf(user.document._id) >= 0) {
-            var user = new CB.CloudUser();
-            user.set('username', username);
-            user.set('password', passwd);
-            user.logIn().then(function(){
-                var cq = new CB.CloudQuery('student4');
-                cq.equalTo('age',60);
-                cq.find().then(function(){
-                    done();
-                },function(){
-                    throw "should retrieve object with user read access";
-                });
-            },function(){
-                throw "should login";
-            });
-        }, function () {
-            throw "user read access save error";
-        });
-
-    });
 });
 
 

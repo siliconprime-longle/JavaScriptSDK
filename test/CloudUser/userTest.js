@@ -85,29 +85,6 @@ describe("CloudUser", function () {
 
     });
 
-    it("Should check if role is assigned to user", function (done) {
-
-        this.timeout(10000);
-
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.logIn().then(function(list) {
-            if(list.get('roles').length>0) {
-                if (CB.CloudUser.current.isInRole(role)) {
-                    done();
-                }
-                done();
-            }else{
-                throw "role assigned is not checked";
-
-            }
-        },function(){
-            throw "role create error";
-        });
-
-    });
-
     it("Should remove role assigned role to user", function (done) {
 
         this.timeout(1000000);

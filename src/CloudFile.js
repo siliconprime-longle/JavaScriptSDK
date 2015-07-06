@@ -3,6 +3,9 @@
  */
 
 CB.CloudFile = CB.CloudFile || function(file) {
+    this.document = {};
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 
     if(!file)
         throw "File is null.";
