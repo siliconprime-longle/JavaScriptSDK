@@ -85,36 +85,7 @@ describe("Query_ACL", function () {
 
     });
 
-    var obj1 = new CB.CloudObject('es');
-    obj1.isSearchable = true;
-    obj1.set('name','vipul');
 
-    it("Should search object with user read access", function (done) {
 
-        this.timeout(10000);
-        obj1.ACL = new CB.ACL();
-        obj1.ACL.setUserReadAccess(user.id,false);
-        obj1.save().then(function(list) {
-            acl=list.get('ACL');
-            // if(acl.read.indexOf(user.document._id) >= 0) {
-            var user = new CB.CloudUser();
-            user.set('username', username);
-            user.set('password', passwd);
-            user.logIn().then(function(){
-                var cq = new CB.CloudQuery('student4');
-                cq.equalTo('age',60);
-                cq.find().then(function(){
-                    done();
-                },function(){
-                    throw "should retrieve object with user read access";
-                });
-            },function(){
-                throw "should login";
-            });
-        }, function () {
-            throw "user read access save error";
-        });
-
-    });
 });
 

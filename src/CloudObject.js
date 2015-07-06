@@ -7,14 +7,17 @@ CB.CloudObject = function(tableName) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     get: function() {
         return this.document.ACL;
     },
-    set: function(acl) {
-        this.document.ACL = acl;
+    set: function(ACL) {
+        this.document.ACL = ACL;
+        CB._modified(this,'ACL');
     }
 });
 
@@ -24,6 +27,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'id', {
     },
     set: function(id) {
         this.document._id = id;
+        CB._modified(this,'_id');
     }
 });
 
@@ -33,6 +37,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
     },
     set: function(createdAt) {
         this.document.createdAt = createdAt;
+        CB._modified(this,'createdAt');
     }
 });
 
@@ -42,6 +47,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
     },
     set: function(updatedAt) {
         this.document.updatedAt = updatedAt;
+        CB._modified(this,'updatedAt');
     }
 });
 
@@ -51,6 +57,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'isSearchable', {
     },
     set: function(isSearchable) {
         this.document._isSearchable = isSearchable;
+        CB._modified(this,'_isSearchable');
     }
 });
 
@@ -62,6 +69,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     },
     set: function(expires) {
         this.document._expires = expires;
+        CB._modified(this,'_expires');
     }
 });
 
@@ -148,25 +156,26 @@ CB.CloudObject.off = function(tableName, eventType, done) {
     }
 };
 
-/* Realtime implementation ends here.  */
+/* RealTime implementation ends here.  */
 
 CB.CloudObject.prototype.set = function(columnName, data) { //for setting data for a particular column
 
     var keywords = ['_tableName', '_type', 'operator'];
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
         throw columnName + " is a keyword. Please choose a different column name.";
     }
     this.document[columnName] = data;
+    CB._modified(this,columnName);
 };
 
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' || columnName === 'isSearchable')
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
 
