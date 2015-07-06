@@ -3,7 +3,7 @@ describe("CloudUser", function () {
     var passwd = "abcd";
    it("Should create new user", function (done) {
 
-        this.timeout(10000);
+        this.timeout(100000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -66,7 +66,6 @@ describe("CloudUser", function () {
         this.timeout(100000);
 
         var obj = new CB.CloudUser();
-     //   var role = new CB.CloudRole(rolename);
         obj.set('username', username);
         obj.set('password',passwd);
         obj.logIn().then(function(list) {

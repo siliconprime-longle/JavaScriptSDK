@@ -8115,18 +8115,18 @@ CB.CloudQuery.or = function(obj1, obj2) {
 
 
 CB.CloudQuery.prototype.equalTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.query[columnName] = data;
 
     return this;
 };
 
 CB.CloudQuery.prototype.include = function (columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
 
@@ -8134,9 +8134,9 @@ CB.CloudQuery.prototype.include = function (columnName, data) {
 };
 
 CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.query[columnName] = {
         $ne: data
     };
@@ -8144,9 +8144,10 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8155,9 +8156,10 @@ CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8166,9 +8168,11 @@ CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.lessThan = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8177,9 +8181,11 @@ CB.CloudQuery.prototype.lessThan = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8189,23 +8195,26 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 };
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.sort[columnName] = 1;
 
     return this;
 };
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.sort[columnName] = -1;
 
     return this;
 };
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
+
     this.limit = data;
     return this;
 };
@@ -8242,9 +8251,10 @@ CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     return this;
 };
 CB.CloudQuery.prototype.containedIn = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
@@ -8280,9 +8290,10 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
@@ -8318,6 +8329,9 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.exists = function(columnName) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8327,6 +8341,9 @@ CB.CloudQuery.prototype.exists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.doesNotExists = function(columnName) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8336,6 +8353,9 @@ CB.CloudQuery.prototype.doesNotExists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.containsAll = function(columnName, values) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {
             "$all": values
@@ -8348,6 +8368,9 @@ CB.CloudQuery.prototype.containsAll = function(columnName, values) {
 }
 
 CB.CloudQuery.prototype.startsWith = function(columnName, value) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var regex = '^' + value;
     if (!this.query[columnName]) {
         this.query[columnName] = {
@@ -8640,19 +8663,27 @@ CB.CloudSearch.prototype.setLimit = function(data) {
     return this;
 };
 
-CB.CloudSearch.prototype.orderByAsc = function(column) {
+CB.CloudSearch.prototype.orderByAsc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var obj = {};
-    obj[column] = {};
-    obj[column]['order'] = 'asc';
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'asc';
     this.sort.push(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.orderByDesc = function(column) {
+CB.CloudSearch.prototype.orderByDesc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var obj = {};
-    obj[column] = {};
-    obj[column]['order'] = 'desc';
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'desc';
     this.sort.push(obj);
 
     return this;
@@ -8904,16 +8935,18 @@ CB.CloudSearch.prototype.search = function(callback) {
     }
 };
 
-CB.CloudSearch.prototype.notEqualTo = function(column, data) {
+CB.CloudSearch.prototype.notEqualTo = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     //data can bean array too!
     var term = {};
     if (data instanceof Array) {
         term.terms = {};
-        term.terms[column] = data;
+        term.terms[columnName] = data;
     } else {
         term.term = {};
-        term.term[column] = data;
+        term.term[columnName] = data;
     }
 
     this._pushInMustNotFilter(term);
@@ -8923,15 +8956,17 @@ CB.CloudSearch.prototype.notEqualTo = function(column, data) {
 
 };
 
-CB.CloudSearch.prototype.equalTo = function(column, data) {
+CB.CloudSearch.prototype.equalTo = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var term = {};
     if (data instanceof Array) {
         term.terms = {};
-        term.terms[column] = data;
+        term.terms[columnName] = data;
     } else {
         term.term = {};
-        term.term[column] = data;
+        term.term[columnName] = data;
     }
 
     this._pushInMustFilter(term);
@@ -8939,11 +8974,13 @@ CB.CloudSearch.prototype.equalTo = function(column, data) {
     return this;
 };
 
-CB.CloudSearch.prototype.exists = function(column) {
+CB.CloudSearch.prototype.exists = function(columnName) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.exists = {};
-    obj.exists.field = column;
+    obj.exists.field = columnName;
 
 
     this._pushInMustFilter(obj);
@@ -8951,56 +8988,68 @@ CB.CloudSearch.prototype.exists = function(column) {
     return this;
 };
 
-CB.CloudSearch.prototype.doesNotExist = function(column) {
+CB.CloudSearch.prototype.doesNotExist = function(columnName) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.missing = {};
-    obj.missing.field = column;
+    obj.missing.field = columnName;
 
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.greaterThanOrEqual = function(column, data) {
+CB.CloudSearch.prototype.greaterThanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['gte'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['gte'] = data;
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.greaterThan = function(column, data) {
+CB.CloudSearch.prototype.greaterThan = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['gt'] = data;
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.lessThan = function(column, data) {
-
-    var obj = {};
-    obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['lt'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['gt'] = data;
 
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.lessthanOrEqual = function(column, data) {
+CB.CloudSearch.prototype.lessThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['lte'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['lt'] = data;
+
+    this._pushInMustFilter(obj);
+
+    return this;
+};
+
+CB.CloudSearch.prototype.lessthanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lte'] = data;
     this._pushInMustFilter(obj);
 
     return this;

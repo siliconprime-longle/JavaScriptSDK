@@ -8115,18 +8115,18 @@ CB.CloudQuery.or = function(obj1, obj2) {
 
 
 CB.CloudQuery.prototype.equalTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.query[columnName] = data;
 
     return this;
 };
 
 CB.CloudQuery.prototype.include = function (columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
 
@@ -8134,9 +8134,9 @@ CB.CloudQuery.prototype.include = function (columnName, data) {
 };
 
 CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.query[columnName] = {
         $ne: data
     };
@@ -8144,9 +8144,10 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8155,9 +8156,10 @@ CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8166,9 +8168,11 @@ CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.lessThan = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8177,9 +8181,11 @@ CB.CloudQuery.prototype.lessThan = function(columnName, data) {
     return this;
 };
 CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8189,23 +8195,26 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 };
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.sort[columnName] = 1;
 
     return this;
 };
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     this.sort[columnName] = -1;
 
     return this;
 };
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
+
     this.limit = data;
     return this;
 };
@@ -8242,9 +8251,10 @@ CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     return this;
 };
 CB.CloudQuery.prototype.containedIn = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
@@ -8280,9 +8290,10 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
-    if (columnName === 'id') {
-        columnName = '_id';
-    }
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
@@ -8318,6 +8329,9 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.exists = function(columnName) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8327,6 +8341,9 @@ CB.CloudQuery.prototype.exists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.doesNotExists = function(columnName) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -8336,6 +8353,9 @@ CB.CloudQuery.prototype.doesNotExists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.containsAll = function(columnName, values) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     if (!this.query[columnName]) {
         this.query[columnName] = {
             "$all": values
@@ -8348,6 +8368,9 @@ CB.CloudQuery.prototype.containsAll = function(columnName, values) {
 }
 
 CB.CloudQuery.prototype.startsWith = function(columnName, value) {
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var regex = '^' + value;
     if (!this.query[columnName]) {
         this.query[columnName] = {
@@ -8640,19 +8663,27 @@ CB.CloudSearch.prototype.setLimit = function(data) {
     return this;
 };
 
-CB.CloudSearch.prototype.orderByAsc = function(column) {
+CB.CloudSearch.prototype.orderByAsc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var obj = {};
-    obj[column] = {};
-    obj[column]['order'] = 'asc';
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'asc';
     this.sort.push(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.orderByDesc = function(column) {
+CB.CloudSearch.prototype.orderByDesc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
     var obj = {};
-    obj[column] = {};
-    obj[column]['order'] = 'desc';
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'desc';
     this.sort.push(obj);
 
     return this;
@@ -8904,16 +8935,18 @@ CB.CloudSearch.prototype.search = function(callback) {
     }
 };
 
-CB.CloudSearch.prototype.notEqualTo = function(column, data) {
+CB.CloudSearch.prototype.notEqualTo = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     //data can bean array too!
     var term = {};
     if (data instanceof Array) {
         term.terms = {};
-        term.terms[column] = data;
+        term.terms[columnName] = data;
     } else {
         term.term = {};
-        term.term[column] = data;
+        term.term[columnName] = data;
     }
 
     this._pushInMustNotFilter(term);
@@ -8923,15 +8956,17 @@ CB.CloudSearch.prototype.notEqualTo = function(column, data) {
 
 };
 
-CB.CloudSearch.prototype.equalTo = function(column, data) {
+CB.CloudSearch.prototype.equalTo = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var term = {};
     if (data instanceof Array) {
         term.terms = {};
-        term.terms[column] = data;
+        term.terms[columnName] = data;
     } else {
         term.term = {};
-        term.term[column] = data;
+        term.term[columnName] = data;
     }
 
     this._pushInMustFilter(term);
@@ -8939,11 +8974,13 @@ CB.CloudSearch.prototype.equalTo = function(column, data) {
     return this;
 };
 
-CB.CloudSearch.prototype.exists = function(column) {
+CB.CloudSearch.prototype.exists = function(columnName) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.exists = {};
-    obj.exists.field = column;
+    obj.exists.field = columnName;
 
 
     this._pushInMustFilter(obj);
@@ -8951,56 +8988,68 @@ CB.CloudSearch.prototype.exists = function(column) {
     return this;
 };
 
-CB.CloudSearch.prototype.doesNotExist = function(column) {
+CB.CloudSearch.prototype.doesNotExist = function(columnName) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.missing = {};
-    obj.missing.field = column;
+    obj.missing.field = columnName;
 
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.greaterThanOrEqual = function(column, data) {
+CB.CloudSearch.prototype.greaterThanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['gte'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['gte'] = data;
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.greaterThan = function(column, data) {
+CB.CloudSearch.prototype.greaterThan = function(columnName, data) {
 
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['gt'] = data;
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.lessThan = function(column, data) {
-
-    var obj = {};
-    obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['lt'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['gt'] = data;
 
     this._pushInMustFilter(obj);
 
     return this;
 };
 
-CB.CloudSearch.prototype.lessthanOrEqual = function(column, data) {
+CB.CloudSearch.prototype.lessThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
     var obj = {};
     obj.range = {};
-    obj.range[column] = {};
-    obj.range[column]['lte'] = data;
+    obj.range[columnName] = {};
+    obj.range[columnName]['lt'] = data;
+
+    this._pushInMustFilter(obj);
+
+    return this;
+};
+
+CB.CloudSearch.prototype.lessthanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lte'] = data;
     this._pushInMustFilter(obj);
 
     return this;
@@ -12073,7 +12122,7 @@ describe("CloudSearch", function (done) {
 
     it("should index test data",function(done){
 
-        this.timeout(10000);
+        this.timeout(50000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('description', 'This is nawaz');
@@ -12162,7 +12211,7 @@ describe("CloudSearch", function (done) {
 
     it("should limit the number of search results",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.notEqualTo('age', 19);
@@ -12328,13 +12377,82 @@ describe("CloudSearch", function (done) {
             }
         });
     });
+
+    it("should unIndex the CloudObject",function(done){
+
+        this.timeout(15000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('age',777);
+        obj.set('isSearchable',true);
+        obj.save().then(function(list){
+            console.log(list);
+            list.set('isSearchable',false);
+            list.save().then(function(list){
+                var searchObj = new CB.CloudSearch('Student');
+                searchObj.equalTo('id',obj.get('id'));
+                searchObj.search().then(function(list){
+                    console.log('here');
+                    if(list.length === 0){
+                        done();
+                    }else{
+                        throw "Unable to UnIndex the CloudObject";
+                    }
+                },function(){
+                    console.log(err);
+                });
+            },function(err){
+                console.log(err);
+            });
+        },function(err){
+            console.log(err);
+        });
+    });
+
+    it("should reIndex the unIndexed CloudObject",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('age',777);
+        obj.set('isSearchable',true);
+        obj.save().then(function(list){
+            console.log(list);
+            list.set('isSearchable',false);
+            list.save().then(function(list){
+                console.log(list);
+                list.set('isSearchable',true);
+                list.save().then(function(list){
+                    var searchObj = new CB.CloudSearch('Student');
+                    searchObj.equalTo('id',obj.get('id'));
+                    searchObj.search().then(function(list){
+                        console.log('here');
+                        if(list.length > 0){
+                            done();
+                        }else{
+                            throw "Unable to UnIndex the CloudObject";
+                        }
+                    },function(){
+                        console.log(err);
+                    });
+                    console.log(list)
+                }, function (err) {
+                    console.log(err);
+                })
+            },function(err){
+                console.log(err);
+            });
+        },function(err){
+            console.log(err);
+        });
+    });
 });
 describe("CloudUser", function () {
     var username = util.makeString();
     var passwd = "abcd";
    it("Should create new user", function (done) {
 
-        this.timeout(10000);
+        this.timeout(100000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -12397,7 +12515,6 @@ describe("CloudUser", function () {
         this.timeout(100000);
 
         var obj = new CB.CloudUser();
-     //   var role = new CB.CloudRole(rolename);
         obj.set('username', username);
         obj.set('password',passwd);
         obj.logIn().then(function(list) {
@@ -12492,38 +12609,27 @@ describe("ACL", function () {
         });
 
     });
+    var username = util.makeString();
+    var passwd = "abcd";
+    var userObj = new CB.CloudUser();
 
-/*    it("Should set the user write access", function (done) {
+    it("Should create new user", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess("553903db6aafe5c41dc69732",true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.write.indexOf("553903db6aafe5c41dc69732") >= 0) {
-                var user = new CB.CloudUser();
-                user.set('username', 'vipul');
-                user.set('password', 'abcd');
-                user.logIn().then(function(){
-                    obj.set('age',15);
-                    obj.save().then(function(){
-                        done();
-                    },function(){
-                        throw "should save object with write access";
-                    });
-                },function(){
-                    throw "should login";
-                });
-            }
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(list) {
+            if(list.get('username') === username)
+                done();
             else
-                throw "user write access set error"
+                throw "create user error"
         }, function () {
-            throw "user write access save error";
+            throw "user create error";
         });
 
-    });*/
+    });
 
     it("Should set the user read access", function (done) {
 
@@ -12531,10 +12637,10 @@ describe("ACL", function () {
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
-        obj.ACL.setUserReadAccess("553903db6aafe5c41dc69732",true);
+        obj.ACL.setUserReadAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.allow.user.indexOf("553903db6aafe5c41dc69732") >= 0)
+            if(acl.read.allow.user.indexOf(userObj.get('id')) >= 0)
                 done();
             else
                 throw "user read access set error"
@@ -12550,10 +12656,10 @@ describe("ACL", function () {
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
-        obj.ACL.setRoleWriteAccess("553e194ac0cc01201658142e",true);
+        obj.ACL.setRoleWriteAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.write.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.write.allow.role.indexOf(userObj.get('id'))>=0)
                 done();
             else
                 throw "user role write access set error"
@@ -12568,10 +12674,10 @@ describe("ACL", function () {
         this.timeout(10000);
 
         var obj = new CB.CloudObject('student4');
-        obj.ACL.setRoleReadAccess("553e194ac0cc01201658142e",true);
+        obj.ACL.setRoleReadAccess(userObj.get('id'),true);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.allow.role.indexOf("553e194ac0cc01201658142e")>=0)
+            if(acl.read.allow.role.indexOf(userObj.get('id'))>=0)
                 done();
             else
                 throw "user role read access set error"
