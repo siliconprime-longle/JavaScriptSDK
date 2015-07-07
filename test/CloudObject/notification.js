@@ -64,7 +64,7 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
-    /*it("should alert when the object is deleted.", function(done) {
+    it("should alert when the object is deleted.", function(done) {
 
       this.timeout(10000);
 
@@ -201,6 +201,6 @@ describe("Cloud Objects Notification", function() {
       	}
 
       }, 5000);
-    });*/
+    });
 
 });

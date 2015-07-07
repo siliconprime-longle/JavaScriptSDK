@@ -4,7 +4,6 @@ describe("Version Test",function(done){
         var obj = new CB.CloudObject('sample');
         obj.set('expires',0);
         obj.set('name','vipul');
-        console.log(obj);
         if(obj.get('_modifiedColumns').length === 5) {
             done();
         }else{
@@ -29,7 +28,6 @@ describe("Version Test",function(done){
 
                 done();
             }, error : function(error){
-                console.log(error);
                 throw 'Error saving the object';
             }
         });
@@ -39,7 +37,6 @@ describe("Version Test",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('Sample');
         query.findById(obj.get('id')).then(function(list){
-            console.log(list);
             var version = list.get('_version');
             if(version>=0){
                 done();
@@ -51,31 +48,6 @@ describe("Version Test",function(done){
         });
     });
 
-    /*it("should not update the version of a saved object if not modified", function (done) {
-        this.timeout(10000);
-        var query = new CB.CloudQuery('Sample');
-        query.equalTo('id',obj.get('id'));
-        query.find().then(function(list){
-            console.log(list);
-            list[0].save().then(function(){
-                var query1 = new CB.CloudQuery('Sample');
-                query1.equalTo('id',obj.get('id'));
-                query1.find().then(function(list){
-                    if(list[0].get('_version') === 1){
-                        done();
-                    }else{
-                        throw "version number should update";
-                    }
-                },function(){
-                    throw "unable to find saved object";
-                })
-            }, function () {
-                throw "unable to save object";
-            })
-        },function(){
-            throw "unable to find saved object";
-        })
-    });*/
 
     it("should update the version of a saved object", function (done) {
         this.timeout(10000);
@@ -116,7 +88,6 @@ describe("Version Test",function(done){
         obj.set('email',util.makeEmail());
         obj.signUp().then(function(list) {
             if(list.get('username') === username && list.get('_version')>=0){
-                console.log(list);
                 done();
             }
             else
@@ -134,7 +105,6 @@ describe("Version Test",function(done){
         this.timeout(10000);
         var role = new CB.CloudRole(roleName);
         role.save().then(function (list) {
-            console.log(list);
             if (!list)
                 throw "Should retrieve the cloud role";
             if (list.get('_version') >= 0)
@@ -157,7 +127,7 @@ describe("Version Test",function(done){
             if(list)
             done();
         },function(err){
-            console.log(err);
+            throw "should save the relation";
         });
 
     });
@@ -166,10 +136,9 @@ describe("Version Test",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('User');
         query.get('EzkzUJVj').then(function(user){
-            console.log(user);
             done();
         },function(){
-            console.log("err");
+            throw "unable to get a doc";
         });
     });
 });

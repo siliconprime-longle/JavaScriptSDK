@@ -55,7 +55,7 @@ describe("CloudSearch", function (done) {
 
     it("should index test data",function(done){
 
-        this.timeout(10000);
+        this.timeout(50000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('description', 'This is nawaz');

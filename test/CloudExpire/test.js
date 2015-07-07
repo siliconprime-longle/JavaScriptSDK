@@ -3,7 +3,6 @@ describe("CloudExpire", function () {
     it("Sets Expire in Cloud Object.", function (done) {
 
         this.timeout(10000);
-
         //create an object.
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
