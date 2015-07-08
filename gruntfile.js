@@ -11,14 +11,22 @@ module.exports = function(grunt) {
 
                 // the location of the resulting JS file
                 dest: 'dist/1.0.0.js'
-            },
+                },
             bar:{
               // the files to concatenate
-                    src: ['dist/1.0.0.js','test/util/util.js','test/server_test.js','test/init/init.js','test/CloudObject/*.js','test/CloudExpire/*.js'
-                        ,'test/CloudExpire/*.js','test/CloudFile/*.js','test/CloudNotification/*.js','test/CloudGeoPoint/*.js', 'test/CloudQuery/*.js','test/CloudSearch/*.js'
+                    src: ['test/nodeTest.js','test/util/util.js','test/serverTest.js','test/init/init.js','test/CloudObject/expire.js','test/CloudObject/test.js',
+                        'test/CloudExpire/*.js','test/CloudObject/notification.js','test/CloudObject/versionTest.js'
+                        ,'test/CloudExpire/*.js','test/CloudNotification/*.js','test/CloudGeoPoint/*.js', 'test/CloudQuery/*.js','test/CloudSearch/*.js'
                     ,'test/CloudUser/*.js','test/ACL/*.js'],
                     dest: 'test/join.js'
-            }
+                },
+            tom:{
+                    src: ['test/nodeTest.js','test/util/util.js','test/stageTest.js','test/init/init.js','test/CloudObject/expire.js','test/CloudObject/test.js',
+                        'test/CloudExpire/*.js','test/CloudObject/notification.js','test/CloudObject/versionTest.js'
+                        ,'test/CloudExpire/*.js','test/CloudNotification/*.js','test/CloudGeoPoint/*.js', 'test/CloudQuery/*.js','test/CloudSearch/*.js'
+                        ,'test/CloudUser/*.js','test/ACL/*.js'],
+                    dest: 'test/stageJoin.js'
+                }
             },
             uglify: {
                 options: {},
@@ -32,6 +40,6 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.registerTask('default',['concat:foo','concat:bar']);
+    grunt.registerTask('default',['concat:foo','concat:bar','concat:tom']);
     grunt.registerTask('ugly',['uglify']);
 };

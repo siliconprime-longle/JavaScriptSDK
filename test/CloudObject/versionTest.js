@@ -4,7 +4,6 @@ describe("Version Test",function(done){
         var obj = new CB.CloudObject('sample');
         obj.set('expires',0);
         obj.set('name','vipul');
-        console.log(obj);
         if(obj.get('_modifiedColumns').length === 5) {
             done();
         }else{
@@ -26,10 +25,8 @@ describe("Version Test",function(done){
                 if(!obj.id){
                     throw 'id is not updated after save.';
                 }
-
                 done();
             }, error : function(error){
-                console.log(error);
                 throw 'Error saving the object';
             }
         });
@@ -39,7 +36,6 @@ describe("Version Test",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('Sample');
         query.findById(obj.get('id')).then(function(list){
-            console.log(list);
             var version = list.get('_version');
             if(version>=0){
                 done();
@@ -51,31 +47,6 @@ describe("Version Test",function(done){
         });
     });
 
-    /*it("should not update the version of a saved object if not modified", function (done) {
-        this.timeout(10000);
-        var query = new CB.CloudQuery('Sample');
-        query.equalTo('id',obj.get('id'));
-        query.find().then(function(list){
-            console.log(list);
-            list[0].save().then(function(){
-                var query1 = new CB.CloudQuery('Sample');
-                query1.equalTo('id',obj.get('id'));
-                query1.find().then(function(list){
-                    if(list[0].get('_version') === 1){
-                        done();
-                    }else{
-                        throw "version number should update";
-                    }
-                },function(){
-                    throw "unable to find saved object";
-                })
-            }, function () {
-                throw "unable to save object";
-            })
-        },function(){
-            throw "unable to find saved object";
-        })
-    });*/
 
     it("should update the version of a saved object", function (done) {
         this.timeout(10000);
@@ -106,17 +77,16 @@ describe("Version Test",function(done){
 
     var username = util.makeString();
     var passwd = "abcd";
+    var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.set('email',util.makeEmail());
-        obj.signUp().then(function(list) {
+        user.set('username', username);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
             if(list.get('username') === username && list.get('_version')>=0){
-                console.log(list);
                 done();
             }
             else
@@ -134,7 +104,6 @@ describe("Version Test",function(done){
         this.timeout(10000);
         var role = new CB.CloudRole(roleName);
         role.save().then(function (list) {
-            console.log(list);
             if (!list)
                 throw "Should retrieve the cloud role";
             if (list.get('_version') >= 0)
@@ -146,30 +115,45 @@ describe("Version Test",function(done){
         });
     });
 
+    var parent = new CB.CloudObject('Custom4');
+    var child = new CB.CloudObject('student1');
+
     it("Should Store a relation with version",function(done){
 
         this.timeout(10000);
-        var parent = new CB.CloudObject('Custom4');
-        var child = new CB.CloudObject('student1');
         child.set('name','vipul');
         parent.set('newColumn7',[child]);
         parent.save().then(function(list){
             if(list)
             done();
         },function(err){
-            console.log(err);
+            throw "should save the relation";
         });
 
     });
-
-    it("Should Store a saved sub doc through parent",function(done){
+    it("Should retrieve a saved user object",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('User');
-        query.get('EzkzUJVj').then(function(user){
-            console.log(user);
-            done();
+        query.get(user.get('id')).then(function (user) {
+            if(user.get('username') === username)
+                done();
+        }, function () {
+            throw "unable to get a doc";
+        });
+    });
+
+    it("Should save object with a relation and don't have a child object",function(){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','vipul');
+        obj.save().then(function(obj1){
+            if(obj1.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to save the object";
         },function(){
-            console.log("err");
+            throw "unable to save object";
         });
     });
 });

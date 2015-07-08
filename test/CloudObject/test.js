@@ -4,7 +4,20 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-  it("should save.", function(done) {
+    it("should not save a string into date column",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('createdAt','abcd');
+        obj.set('name', 'sample');
+        obj.save().then(function(){
+            throw("should not have saved string in datetime field");
+        },function(){
+            done();
+        });
+    });
+
+    it("should save.", function(done) {
 
     	this.timeout('10000');
 
@@ -21,7 +34,6 @@ describe("Cloud Object", function() {
 
      			done();
      		}, error : function(error){
-                console.log(error);
      			throw 'Error saving the object';
      		}
      	});
@@ -109,7 +121,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not save an object with wrong datatype.", function(done) {
+    it("should not save an object with wrong dataType.", function(done) {
        this.timeout('10000');
 
      	var obj = new CB.CloudObject('Sample');
@@ -187,7 +199,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not allow multiple datatypes in an array. ", function(done) {
+    it("should not allow multiple dataTypes in an array. ", function(done) {
     	var text = util.makeString();
 
         var obj = new CB.CloudObject('Sample');
@@ -311,6 +323,33 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should save an array of CloudObject with an empty array", function(done) {
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+
+        var obj2 = new CB.CloudObject('Sample');
+        obj2.set('name','sample');
+        obj2.set('relationArray', []);
+
+
+        obj.save({
+            success : function(newObj){
+
+                obj2.save({success : function(newObj){
+                    done();
+                }, error : function(error){
+                    throw "Cannot save an object in a relation.";
+                }
+                });
+            }});
+    });
+
+
     it("should save an array of CloudObject.", function(done) {
        this.timeout(10000);
 
@@ -336,6 +375,41 @@ describe("Cloud Object", function() {
        		});
     	}});
     });
+
+     it("should modify the list relation of a saved CloudObject.", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+
+        var obj2 = new CB.CloudObject('Sample');
+        obj2.set('name','sample');
+        obj2.set('relationArray', [obj1, obj]);
+
+
+        obj.save({
+        success : function(newObj){
+            obj2.save({success : function(Obj3){
+                var relationArray = Obj3.get('relationArray');
+                if(relationArray.length !== 2)
+                    throw "unable to save relation properly";
+                relationArray.splice(1);
+                Obj3.set('relationArray',relationArray);
+                Obj3.save().then(function(Obj4){
+                    if(relationArray.length === 1)
+                        done();
+                },function(){
+                    throw "should save";
+                });
+            }, error : function(error){
+                throw "Cannot save an object in a relation.";
+            }
+            });
+        }});
+     });
 
     it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
        this.timeout(10000);
