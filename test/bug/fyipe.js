@@ -4,7 +4,7 @@ describe("Fyipe bug tests",function(done){
     var passwd = "abcd";
     var user = new CB.CloudUser();
 
-    it("Should create a user",function(done){
+    /*it("Should create a user",function(done){
         this.timeout(10000);
 
         user.set('username', username);
@@ -83,5 +83,30 @@ describe("Fyipe bug tests",function(done){
         },function(){
 
         });
+    });*/
+
+    it("should save",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('User');
+        query.findById('dS0OgRAF').then(function(obj){
+            console.log(obj);
+            var obj1 = new CB.CloudObject('Feed');
+            obj1.set('user',obj);
+            obj1.set('information','akjdsad');
+            obj1.set('free',null);
+            obj1.set('profession',obj.get('profession'));
+            obj1.set('location',obj.get('location'));
+            obj1.set('price',5);
+            obj1.save().then(function(obj2){
+                console.log(obj2);
+                done();
+            },function(){
+                console.log("err");
+            })
+
+        },function(){
+            console.log(err);
+        })
     });
 });
