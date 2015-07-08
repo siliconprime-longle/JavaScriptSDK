@@ -25,7 +25,6 @@ describe("Version Test",function(done){
                 if(!obj.id){
                     throw 'id is not updated after save.';
                 }
-
                 done();
             }, error : function(error){
                 throw 'Error saving the object';
@@ -78,15 +77,15 @@ describe("Version Test",function(done){
 
     var username = util.makeString();
     var passwd = "abcd";
+    var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.set('email',util.makeEmail());
-        obj.signUp().then(function(list) {
+        user.set('username', username);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
             if(list.get('username') === username && list.get('_version')>=0){
                 done();
             }
@@ -116,11 +115,12 @@ describe("Version Test",function(done){
         });
     });
 
+    var parent = new CB.CloudObject('Custom4');
+    var child = new CB.CloudObject('student1');
+
     it("Should Store a relation with version",function(done){
 
         this.timeout(10000);
-        var parent = new CB.CloudObject('Custom4');
-        var child = new CB.CloudObject('student1');
         child.set('name','vipul');
         parent.set('newColumn7',[child]);
         parent.save().then(function(list){
@@ -131,14 +131,29 @@ describe("Version Test",function(done){
         });
 
     });
-
-    it("Should Store a saved sub doc through parent",function(done){
+    it("Should retrieve a saved user object",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('User');
-        query.get('EzkzUJVj').then(function(user){
-            done();
-        },function(){
+        query.get(user.get('id')).then(function (user) {
+            if(user.get('username') === username)
+                done();
+        }, function () {
             throw "unable to get a doc";
+        });
+    });
+
+    it("Should save object with a relation and don't have a child object",function(){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','vipul');
+        obj.save().then(function(obj1){
+            if(obj1.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to save the object";
+        },function(){
+            throw "unable to save object";
         });
     });
 });
