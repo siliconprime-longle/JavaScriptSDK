@@ -45,7 +45,7 @@ describe("CloudNotification", function() {
       	}
 
       });
-    });*/
+    });
 
 
     it("should stop listening to a channel", function(done) {
@@ -97,6 +97,6 @@ describe("CloudNotification", function() {
 	      });
 
 
-    });
+    });*/
 
 });

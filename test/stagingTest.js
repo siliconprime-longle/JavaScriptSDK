@@ -44,6 +44,7 @@ describe("Server Check",function(){
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(100000);
+
         CB.CloudApp.init(CB.appId, CB.appKey);
             done();
     });
@@ -1107,7 +1108,7 @@ describe("CloudNotification", function() {
       	}
 
       });
-    });*/
+    });
 
 
     it("should stop listening to a channel", function(done) {
@@ -1159,7 +1160,7 @@ describe("CloudNotification", function() {
 	      });
 
 
-    });
+    });*/
 
 });
 describe("Cloud GeoPoint Test", function() {

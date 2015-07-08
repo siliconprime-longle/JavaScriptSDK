@@ -9467,7 +9467,11 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 contentType : ''
             };
         } else if(data){
-
+            this.document={
+                _type: 'file',
+                name: file,
+                size: data
+            };
         }else{
             throw "Invalid File. It should be of type file or blob";
         }
