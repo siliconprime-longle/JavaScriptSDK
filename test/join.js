@@ -154,7 +154,20 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-  it("should save.", function(done) {
+    it("should not save a string into date column",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('createdAt','abcd');
+        obj.set('name', 'sample');
+        obj.save().then(function(){
+            throw("should not have saved string in datetime field");
+        },function(){
+            done();
+        });
+    });
+
+    it("should save.", function(done) {
 
     	this.timeout('10000');
 
@@ -258,7 +271,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not save an object with wrong datatype.", function(done) {
+    it("should not save an object with wrong dataType.", function(done) {
        this.timeout('10000');
 
      	var obj = new CB.CloudObject('Sample');
@@ -336,7 +349,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should not allow multiple datatypes in an array. ", function(done) {
+    it("should not allow multiple dataTypes in an array. ", function(done) {
     	var text = util.makeString();
 
         var obj = new CB.CloudObject('Sample');
@@ -460,6 +473,33 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should save an array of CloudObject with an empty array", function(done) {
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+
+        var obj2 = new CB.CloudObject('Sample');
+        obj2.set('name','sample');
+        obj2.set('relationArray', []);
+
+
+        obj.save({
+            success : function(newObj){
+
+                obj2.save({success : function(newObj){
+                    done();
+                }, error : function(error){
+                    throw "Cannot save an object in a relation.";
+                }
+                });
+            }});
+    });
+
+
     it("should save an array of CloudObject.", function(done) {
        this.timeout(10000);
 
@@ -485,6 +525,41 @@ describe("Cloud Object", function() {
        		});
     	}});
     });
+
+     it("should modify the list relation of a saved CloudObject.", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+
+        var obj2 = new CB.CloudObject('Sample');
+        obj2.set('name','sample');
+        obj2.set('relationArray', [obj1, obj]);
+
+
+        obj.save({
+        success : function(newObj){
+            obj2.save({success : function(Obj3){
+                var relationArray = Obj3.get('relationArray');
+                if(relationArray.length !== 2)
+                    throw "unable to save relation properly";
+                relationArray.splice(1);
+                Obj3.set('relationArray',relationArray);
+                Obj3.save().then(function(Obj4){
+                    if(relationArray.length === 1)
+                        done();
+                },function(){
+                    throw "should save";
+                });
+            }, error : function(error){
+                throw "Cannot save an object in a relation.";
+            }
+            });
+        }});
+     });
 
     it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
        this.timeout(10000);
@@ -864,7 +939,6 @@ describe("Version Test",function(done){
                 if(!obj.id){
                     throw 'id is not updated after save.';
                 }
-
                 done();
             }, error : function(error){
                 throw 'Error saving the object';
@@ -917,15 +991,15 @@ describe("Version Test",function(done){
 
     var username = util.makeString();
     var passwd = "abcd";
+    var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudUser();
-        obj.set('username', username);
-        obj.set('password',passwd);
-        obj.set('email',util.makeEmail());
-        obj.signUp().then(function(list) {
+        user.set('username', username);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
             if(list.get('username') === username && list.get('_version')>=0){
                 done();
             }
@@ -955,11 +1029,12 @@ describe("Version Test",function(done){
         });
     });
 
+    var parent = new CB.CloudObject('Custom4');
+    var child = new CB.CloudObject('student1');
+
     it("Should Store a relation with version",function(done){
 
         this.timeout(10000);
-        var parent = new CB.CloudObject('Custom4');
-        var child = new CB.CloudObject('student1');
         child.set('name','vipul');
         parent.set('newColumn7',[child]);
         parent.save().then(function(list){
@@ -970,14 +1045,29 @@ describe("Version Test",function(done){
         });
 
     });
-
-    it("Should Store a saved sub doc through parent",function(done){
+    it("Should retrieve a saved user object",function(done){
         this.timeout(10000);
         var query = new CB.CloudQuery('User');
-        query.get('EzkzUJVj').then(function(user){
-            done();
-        },function(){
+        query.get(user.get('id')).then(function (user) {
+            if(user.get('username') === username)
+                done();
+        }, function () {
             throw "unable to get a doc";
+        });
+    });
+
+    it("Should save object with a relation and don't have a child object",function(){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','vipul');
+        obj.save().then(function(obj1){
+            if(obj1.get('name') === 'vipul')
+                done();
+            else
+                throw "unable to save the object";
+        },function(){
+            throw "unable to save object";
         });
     });
 });
