@@ -16,24 +16,33 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
     this.document.type = "Point";
 
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
-    this.document.coordinates = [Number(longitude), Number(latitude)];
+    if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180))
+        this.document.coordinates = [Number(latitude), Number(longitude)];
+    else
+        throw "latitude and longitudes are not in range";
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     get: function() {
-        return this.document.coordinates[1];
+        return this.document.coordinates[0];
     },
     set: function(latitude) {
-        this.document.coordinates[1] = latitude;
+        if(Number(latitude)>= -90 && Number(latitude)<=90)
+            this.document.coordinates[0] = latitude;
+        else
+            throw "Latitude is not in Range";
     }
 });
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     get: function() {
-        return this.document.coordinates[0];
+        return this.document.coordinates[1];
     },
     set: function(longitude) {
-        this.document.coordinates[0] = longitude;
+        if(Number(longitude)>= -180 && Number(latitude)<=180)
+            this.document.coordinates[1] = longitude;
+        else
+            throw "Longitude is not in Range";
     }
 });
 
