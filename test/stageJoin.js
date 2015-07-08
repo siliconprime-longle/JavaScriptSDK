@@ -35,7 +35,7 @@ describe("Server Check",function(){
         xmlhttp = new xmlhttp();
         CB.appId = 'travis123';
         CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-        CB.serverUrl = 'http://localhost:4730';
+        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;
         CB.apiUrl = CB.serverUrl + '/api';
         done();

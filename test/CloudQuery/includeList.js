@@ -23,34 +23,6 @@
 
     });
 
-    it("should include a relation object when include is requested in a query.", function (done) {
-
-        this.timeout(10000);
-
-        var query = new CB.CloudQuery('Custom4');
-        query.include('newColumn7');
-        query.find().then(function(list){
-            if(list.length>0){
-                for(var i=0;i<list.length;i++){
-                    var student_obj=list[i].get('newColumn7');
-                    for(var j=0;j<student_obj.length;j++)
-                    {
-                        if(!student_obj[j].document.name)
-                         {
-                            throw "Unsuccessful Join";
-                        }
-                    }
-                }
-                done();
-            }else{
-                throw "Cannot retrieve a saved relation.";
-            }
-        }, function(error){
-
-        })
-
-    });
-
     it("save a Multi-Join.", function (done) {
 
         this.timeout(10000);

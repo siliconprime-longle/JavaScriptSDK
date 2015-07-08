@@ -25,7 +25,7 @@ module.exports = function(grunt) {
                         'test/CloudExpire/*.js','test/CloudObject/notification.js','test/CloudObject/versionTest.js'
                         ,'test/CloudExpire/*.js','test/CloudNotification/*.js','test/CloudGeoPoint/*.js', 'test/CloudQuery/*.js','test/CloudSearch/*.js'
                         ,'test/CloudUser/*.js','test/ACL/*.js'],
-                    dest: 'test/stageJoin.js'
+                    dest: 'test/stagingTest.js'
                 }
             },
             uglify: {
