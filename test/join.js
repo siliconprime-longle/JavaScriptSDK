@@ -67,7 +67,7 @@ describe("Cloud App", function() {
         CB.CloudApp.init(CB.appId, CB.appKey);
         console.log("+++++++++++++++++++ Loaded SDK +++++++++++++++++++++");
         console.log(CB);
-        console.log("++++++++++++++++++++Socket IO +++++++++++++++++++++++++++")
+        console.log("++++++++++++++++++++ Socket IO +++++++++++++++++++++++++++")
         console.log(CB.io);
         done();
     });
