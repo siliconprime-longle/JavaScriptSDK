@@ -6,6 +6,8 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._tableName = 'User';
     this.document._type = 'user';
     this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
@@ -14,6 +16,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'username', {
     },
     set: function(username) {
         this.document.username = username;
+        CB._modified(this,'username');
     }
 });
 Object.defineProperty(CB.CloudUser.prototype, 'password', {
@@ -22,6 +25,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'password', {
     },
     set: function(password) {
         this.document.password = password;
+        CB._modified(this,'password');
     }
 });
 Object.defineProperty(CB.CloudUser.prototype, 'email', {
@@ -30,6 +34,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
     },
     set: function(email) {
         this.document.email = email;
+        CB._modified(this,'email');
     }
 });
 CB.CloudUser.current = new CB.CloudUser();

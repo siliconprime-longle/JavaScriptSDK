@@ -19,6 +19,7 @@ Object.defineProperty(CB.CloudRole.prototype, 'name', {
     },
     set: function(name) {
         this.document.name = name;
+        CB._modified(this,name);
     }
 });
 

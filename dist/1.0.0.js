@@ -7794,6 +7794,8 @@ CB.CloudObject = function(tableName) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
@@ -7802,6 +7804,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     },
     set: function(ACL) {
         this.document.ACL = ACL;
+        CB._modified(this,'ACL');
     }
 });
 
@@ -7811,6 +7814,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'id', {
     },
     set: function(id) {
         this.document._id = id;
+        CB._modified(this,'_id');
     }
 });
 
@@ -7820,6 +7824,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
     },
     set: function(createdAt) {
         this.document.createdAt = createdAt;
+        CB._modified(this,'createdAt');
     }
 });
 
@@ -7829,6 +7834,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
     },
     set: function(updatedAt) {
         this.document.updatedAt = updatedAt;
+        CB._modified(this,'updatedAt');
     }
 });
 
@@ -7838,6 +7844,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'isSearchable', {
     },
     set: function(isSearchable) {
         this.document._isSearchable = isSearchable;
+        CB._modified(this,'_isSearchable');
     }
 });
 
@@ -7849,6 +7856,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     },
     set: function(expires) {
         this.document._expires = expires;
+        CB._modified(this,'_expires');
     }
 });
 
@@ -7948,6 +7956,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
         throw columnName + " is a keyword. Please choose a different column name.";
     }
     this.document[columnName] = data;
+    CB._modified(this,columnName);
 };
 
 
@@ -7956,8 +7965,9 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
-
+    CB._modified(this,columnName);
     return this.document[columnName];
+
 };
 
 CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
@@ -9137,6 +9147,8 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._tableName = 'User';
     this.document._type = 'user';
     this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
@@ -9145,6 +9157,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'username', {
     },
     set: function(username) {
         this.document.username = username;
+        CB._modified(this,'username');
     }
 });
 Object.defineProperty(CB.CloudUser.prototype, 'password', {
@@ -9153,6 +9166,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'password', {
     },
     set: function(password) {
         this.document.password = password;
+        CB._modified(this,'password');
     }
 });
 Object.defineProperty(CB.CloudUser.prototype, 'email', {
@@ -9161,6 +9175,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
     },
     set: function(email) {
         this.document.email = email;
+        CB._modified(this,'email');
     }
 });
 CB.CloudUser.current = new CB.CloudUser();
@@ -9385,6 +9400,7 @@ Object.defineProperty(CB.CloudRole.prototype, 'name', {
     },
     set: function(name) {
         this.document.name = name;
+        CB._modified(this,name);
     }
 });
 
@@ -9919,4 +9935,15 @@ CB._request=function(method,url,params)
         }
     }
     return def;
+};
+CB._modified = function(thisObj,columnName){
+    thisObj.document._isModified = true;
+    if(thisObj.document._modifiedColumns) {
+        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
+            thisObj.document._modifiedColumns.push(columnName);
+        }
+    }else{
+        thisObj.document._modifiedColumns = [];
+        thisObj.document._modifiedColumns.push(columnName);
+    }
 };
