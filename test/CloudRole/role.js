@@ -43,4 +43,6 @@ describe("CloudRole", function () {
             throw "Should retrieve the cloud role";
         });
     });
+
+
 });
