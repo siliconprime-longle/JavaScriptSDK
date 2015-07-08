@@ -11,8 +11,8 @@ describe("Server Check",function(){
             typeof(require.ensure) === 'undefined') {
             xmlhttp = req('xmlhttprequest').XMLHttpRequest;
         }
-        CB.appId = 'sample123';
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+        CB.appId = 'travis123';
+        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;
         CB.apiUrl = CB.serverUrl + '/api';

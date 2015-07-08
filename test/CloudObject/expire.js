@@ -10,9 +10,11 @@ describe("CloudObjectExpires", function () {
         obj.set('age', 10);
         obj.expires=new Date().getTime();
         obj.isSearchable=true;
-        obj.save().then(function() {
-            done();
-        }, function () {
+        obj.save().then(function(obj1) {
+            if(obj1.get('expires'))
+                done();
+        }, function (err) {
+            console.log(err);
             throw "Cannot save an object after expire is set";
         });
 
