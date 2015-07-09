@@ -445,6 +445,7 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
 
 if(!CB._isNode) {
 // Socket.io.js
+    console.log("came in socket io load");
     !function (e) {
         if ("object" == typeof exports && "undefined" != typeof module)module.exports = e(); else if ("function" == typeof define && define.amd)define([], e); else {
             var f;
@@ -7569,6 +7570,7 @@ if(!CB._isNode) {
         }, {}, [1])
         (1)
     });
+    console.log("socket loaded");
 }
 
 /*
@@ -10021,8 +10023,6 @@ describe("Cloud App", function() {
 
         console.log("+++++++++++++++++++ Loaded SDK +++++++++++++++++++++");
         console.log(CB);
-        console.log("++++++++++++++++++++ Socket IO +++++++++++++++++++++++++++")
-        console.log(CB.io);
         done();
     });
 });

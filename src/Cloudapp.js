@@ -1,5 +1,6 @@
 if(!CB._isNode) {
 // Socket.io.js
+    console.log("came in socket io load");
     !function (e) {
         if ("object" == typeof exports && "undefined" != typeof module)module.exports = e(); else if ("function" == typeof define && define.amd)define([], e); else {
             var f;
@@ -7124,6 +7125,7 @@ if(!CB._isNode) {
         }, {}, [1])
         (1)
     });
+    console.log("socket loaded");
 }
 
 /*
