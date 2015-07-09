@@ -7131,6 +7131,7 @@ if(!CB._isNode) {
 /*
  CloudApp
  */
+console.log("in cloudapp");
 CB.CloudApp = CB.CloudApp || {};
 console.log("Check for CloudApp");
 console.log(CB.CloudApp);
