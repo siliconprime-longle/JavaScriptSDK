@@ -1,11 +1,9 @@
-
-
 describe("CloudNotification", function() {
  
     it("should subscribe to a channel", function(done) {
-      CB.CloudNotification.on('sample', 
+      this.timeout(20000);
+        CB.CloudNotification.on('sample',
       function(data){
-      	
       }, 
       {
       	success : function(){
@@ -19,7 +17,9 @@ describe("CloudNotification", function() {
     });
 
     it("should publish data to the channel.", function(done) {
-      CB.CloudNotification.on('sample', 
+
+        this.timeout(20000);
+        CB.CloudNotification.on('sample',
       function(data){
       	if(data === 'data'){
       		done();
@@ -50,7 +50,7 @@ describe("CloudNotification", function() {
 
     it("should stop listening to a channel", function(done) {
 
-    	this.timeout(10000);
+    	this.timeout(20000);
 
      	CB.CloudNotification.on('sample', 
 	      function(data){
@@ -62,38 +62,30 @@ describe("CloudNotification", function() {
 	      		CB.CloudNotification.off('sample', {
 					success : function(){
 						//succesfully stopped listening.
-
 						//now try to publish. 
 						CB.CloudNotification.publish('sample', 'data',{
 							success : function(){
-								//succesfully published. 
-
+								//succesfully published.
 								//wait for 5 seconds.
 								setTimeout(function(){ 
 									done();
 								}, 5000);
-
 							},
 							error : function(err){
 								//error
 								throw 'Error publishing to a channel.';
 							}
 						});
-
-
 					},
 					error : function(err){
 						//error
 						throw 'error in sop listening.';
 					}
 				});
-
-	      		
 	      	}, 
 	      	error : function(){
 	      		throw 'Error subscribing to a CloudNotification.';
 	      	}
-
 	      });
 
 

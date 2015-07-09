@@ -23,7 +23,7 @@ module.exports = function(grunt) {
             tom:{
                     src: ['dist/1.0.0.js','test/util/util.js','test/stageTest.js','test/init/init.js','test/CloudObject/expire.js','test/CloudObject/test.js',
                         'test/CloudExpire/*.js','test/CloudObject/versionTest.js','test/CloudExpire/*.js','test/CloudGeoPoint/*.js', 'test/CloudQuery/*.js','test/CloudSearch/*.js'
-                        ,'test/CloudUser/*.js','test/ACL/*.js','test/CloudObject/notification.js','test/CloudNotification/test.js','test/CloudObject/versionTest.js'],
+                        ,'test/CloudUser/*.js','test/ACL/*.js','test/CloudObject/notification.js','test/CloudNotification/test.js'],
                     dest: 'test/stagingTest.js'
                 }
             },
