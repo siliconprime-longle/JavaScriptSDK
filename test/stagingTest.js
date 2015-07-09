@@ -12490,3 +12490,312 @@ describe("Query_ACL", function () {
     });*/
 });
 
+
+describe("Cloud Objects Notification", function() {
+  
+	var obj = new CB.CloudObject('Student');
+    var obj1 = new CB.CloudObject('student4');
+  it("should alert when the object is created.", function(done) {
+
+      this.timeout(10000);
+
+      CB.CloudObject.on('Student', 'created', function(data){
+       if(data.get('name') === 'sample') {
+           done();
+           CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
+       }
+       else
+        throw "Wrong data received.";
+      }, {
+      	success : function(){
+      		obj.set('name', 'sample');
+      		obj.save().then(function(newObj){
+      			obj = newObj;
+      		});
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+      });
+    });
+
+   it("should throw an error when wrong event type is entered. ", function(done) {
+      
+     	try{
+     	  CB.CloudObject.on('Student', 'wrongtype', function(data){
+	      	throw 'Fired event to wrong type.';
+	      });
+
+	      throw 'Listening to wrong event type.';
+     	}catch(e){
+     		done();
+     	}     
+
+    });
+
+    it("should alert when the object is updated.", function(done) {
+
+      this.timeout(10000);
+      CB.CloudObject.on('student4', 'updated', function(data){
+        done();
+          CB.CloudObject.off('student4','updated',{success:function(){},error:function(){}});
+      }, {
+      	success : function(){
+            obj1.save().then(function(){
+      		    obj1.set('age', 15);
+      		    obj1.save().then(function(newObj){
+      			    obj1 = newObj;
+      		    }, function(){
+      			    throw 'Error Saving an object.';
+      		    });
+            },function(){
+                throw 'Error Saving an object.'
+            });
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+
+      });
+    });
+
+    /*it("should alert when the object is deleted.", function(done) {
+
+      this.timeout(10000);
+
+      CB.CloudObject.on('Student', 'deleted', function(data){
+
+      	if(data instanceof CB.CloudObject) {
+            done();
+            CB.CloudObject.off('Student','deleted',{success:function(){},error:function(){}});
+        }
+        else
+          throw "Wrong data received.";
+         
+
+      }, {
+
+      	success : function(){
+      		obj.set('name', 'sample');
+      		obj.delete();
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+
+      });
+    });*/
+
+    it("should alert when multipe events are passed.", function(done) {
+
+      this.timeout(10000);	
+
+      var cloudObject = new CB.CloudObject('Student');
+
+      var count = 0;
+
+      CB.CloudObject.on('Student', ['created', 'deleted'], function(data){
+      	count++;
+      	if(count === 2){
+      		done();
+      	}
+      }, {
+      	success : function(){
+      		cloudObject.set('name', 'sample');
+      		cloudObject.save({
+      			success: function(newObj){
+      				
+      				cloudObject = newObj;
+
+      				cloudObject.set('name', 'sample1');
+      				cloudObject.save();
+
+      				cloudObject.delete();
+      			}
+      		});
+
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+
+      });
+
+
+    });
+
+    it("should alert when all three events are passed", function(done) {
+
+      this.timeout(10000);
+       
+      var cloudObject = new CB.CloudObject('Student');
+
+      var count = 0;
+
+      CB.CloudObject.on('Student', ['created', 'deleted', 'updated'], function(data){
+      	count++;
+      	if(count === 3){
+      		done();
+      	}
+      }, {
+      	success : function(){
+      		cloudObject.set('name', 'sample');
+      		cloudObject.save({
+      			success : function(newObj){
+      				cloudObject = newObj; 
+      				cloudObject.set('name', 'sample1');
+      				cloudObject.save({success : function(newObj){
+	      				cloudObject = newObj; 
+	      				cloudObject.delete();
+	      			}
+	      			});
+      			}
+      		});
+
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+
+      });
+
+    });
+
+    it("should stop listening.", function(done) {
+
+     this.timeout(10000);
+      
+      var cloudObject = new CB.CloudObject('Student');
+
+      var count = 0;
+
+      CB.CloudObject.on('Student', ['created','updated','deleted'], function(data){
+      	count++;
+      }, {
+      	success : function(){
+
+      		CB.CloudObject.off('Student', ['created','updated','deleted'], {
+		      	success : function(){
+		      		cloudObject.save();
+		      	
+		      	}, error : function(error){
+		      		throw 'Error on stopping listening to an event.';
+		      	}
+		      }); 
+
+
+      	}, error : function(error){
+      		throw 'Error listening to an event.';
+      	}
+
+      });
+
+      setTimeout(function(){
+
+      	if(count ===  0){
+      		done();
+      	}else{
+      		throw 'Listening to events even if its stopped.';
+      	}
+
+      }, 5000);
+    });
+
+});
+
+
+describe("CloudNotification", function() {
+ 
+    it("should subscribe to a channel", function(done) {
+      CB.CloudNotification.on('sample', 
+      function(data){
+      	
+      }, 
+      {
+      	success : function(){
+      		done();
+      	}, 
+      	error : function(){
+      		throw 'Error subscribing to a CloudNotification.';
+      	}
+
+      });
+    });
+
+    /*it("should publish data to the channel.", function(done) {
+      CB.CloudNotification.on('sample', 
+      function(data){
+      	if(data === 'data'){
+      		done();
+      	}else{
+      		throw 'Error wrong data received.';
+      	}
+      }, 
+      {
+      	success : function(){
+      		//publish to a channel. 
+      		CB.CloudNotification.publish('sample', 'data',{
+				success : function(){
+					//succesfully published. //do nothing. 
+				},
+				error : function(err){
+					//error
+					throw 'Error publishing to a channel in CloudNotification.';
+				}
+				});
+      	}, 
+      	error : function(){
+      		throw 'Error subscribing to a CloudNotification.';
+      	}
+
+      });
+    });
+
+
+    it("should stop listening to a channel", function(done) {
+
+    	this.timeout(10000);
+
+     	CB.CloudNotification.on('sample', 
+	      function(data){
+	      	throw 'stopped listening, but still receiving data.';
+	      }, 
+	      {
+	      	success : function(){
+	      		//stop listening to a channel. 
+	      		CB.CloudNotification.off('sample', {
+					success : function(){
+						//succesfully stopped listening.
+
+						//now try to publish. 
+						CB.CloudNotification.publish('sample', 'data',{
+							success : function(){
+								//succesfully published. 
+
+								//wait for 5 seconds.
+								setTimeout(function(){ 
+									done();
+								}, 5000);
+
+							},
+							error : function(err){
+								//error
+								throw 'Error publishing to a channel.';
+							}
+						});
+
+
+					},
+					error : function(err){
+						//error
+						throw 'error in sop listening.';
+					}
+				});
+
+	      		
+	      	}, 
+	      	error : function(){
+	      		throw 'Error subscribing to a CloudNotification.';
+	      	}
+
+	      });
+
+
+    });*/
+
+});
