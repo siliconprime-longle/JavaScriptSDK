@@ -1,6 +1,6 @@
 describe("Server Check",function(){
     it("should check for localhost",function(done){
-        this.timeout(10000);
+        this.timeout(100000);
         var xmlhttp;
         var req = typeof(require) === 'function' ? require : null;
         // Load references to other dependencies
