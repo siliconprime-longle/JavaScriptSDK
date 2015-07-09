@@ -311,7 +311,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    /*it("should unIndex the CloudObject",function(done){
+    it("should unIndex the CloudObject",function(done){
 
         this.timeout(15000);
 
@@ -340,7 +340,7 @@ describe("CloudSearch", function (done) {
         },function(err){
             console.log(err);
         });
-    });*/
+    });
 
     it("should reIndex the unIndexed CloudObject",function(done){
 
