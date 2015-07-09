@@ -7575,6 +7575,8 @@ if(!CB._isNode) {
  CloudApp
  */
 CB.CloudApp = CB.CloudApp || {};
+console.log("Check for CloudApp");
+console.log(CB.CloudApp);
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
     console.log('here1');

@@ -80,11 +80,10 @@ describe("Cloud App", function() {
 
 describe("CloudObjectExpires", function () {
 
-
-
     it("should save a CloudObject after expire is set", function (done) {
 
         this.timeout(10000);
+        console.log(CB);
         var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.set('age', 10);

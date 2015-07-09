@@ -9,8 +9,6 @@ describe("Cloud App", function() {
 
         console.log("+++++++++++++++++++ Loaded SDK +++++++++++++++++++++");
         console.log(CB);
-        console.log("++++++++++++++++++++ Socket IO +++++++++++++++++++++++++++")
-        console.log(CB.io);
         done();
     });
 });
