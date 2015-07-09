@@ -1,4 +1,3 @@
-console.log(CB._isNode);
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -7130,37 +7129,26 @@ if(!CB._isNode) {
 /*
  CloudApp
  */
-console.log("in cloudapp");
 CB.CloudApp = CB.CloudApp || {};
-console.log("Check for CloudApp");
-console.log(CB.CloudApp);
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
-    console.log('here1');
     if(!applicationKey)
     {
         applicationKey=applicationId;
         applicationId=serverUrl;
-        console.log('here2');
     }else {
         CB.serverUrl=serverUrl;
         CB.socketIoUrl=serverUrl;
-        console.log('here3');
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
-    console.log('here4');
     //load socket.io.
     if(CB._isNode)
     {
         CB.io = require('socket.io-client');
-        console.log('here5');
     }
     else {
         CB.io = io;
-        console.log('here4');
     }
     CB.Socket = CB.io(CB.socketIoUrl);
-    console.log('here6');
 };
-console.log('cloudapp loaded');

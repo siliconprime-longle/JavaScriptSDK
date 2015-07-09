@@ -13,12 +13,14 @@ describe("Cloud GeoPoint Test", function() {
      		}
      	});
 	});
-	
+
 	it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 		this.timeout(10000);
         var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("18.19","79.3");
-		obj.set("location", loc);
+		loc.latitude = 78;
+        loc.longitude = 17;
+        obj.set("location", loc);
 		obj.save({
      		success : function(newObj){
      			done();

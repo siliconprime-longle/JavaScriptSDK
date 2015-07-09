@@ -480,7 +480,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-   /* it("should save an array of CloudObject with an empty array", function(done) {
+    it("should save an array of CloudObject with an empty array", function(done) {
         this.timeout(10000);
 
         var obj = new CB.CloudObject('Sample');
@@ -504,7 +504,7 @@ describe("Cloud Object", function() {
                 }
                 });
             }});
-    });*/
+    });
 
 
     it("should save an array of CloudObject.", function(done) {
@@ -1065,7 +1065,7 @@ describe("Version Test",function(done){
         });
     });
 
-    it("Should save object with a relation and don't have a child object",function(){
+    it("Should save object with a relation and don't have a child object",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Sample');
@@ -1197,12 +1197,14 @@ describe("Cloud GeoPoint Test", function() {
      		}
      	});
 	});
-	
+
 	it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 		this.timeout(10000);
         var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("18.19","79.3");
-		obj.set("location", loc);
+		loc.latitude = 78;
+        loc.longitude = 17;
+        obj.set("location", loc);
 		obj.save({
      		success : function(newObj){
      			done();
@@ -2289,7 +2291,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    it("should unIndex the CloudObject",function(done){
+    /*it("should unIndex the CloudObject",function(done){
 
         this.timeout(15000);
 
@@ -2318,7 +2320,7 @@ describe("CloudSearch", function (done) {
         },function(err){
             console.log(err);
         });
-    });
+    });*/
 
     it("should reIndex the unIndexed CloudObject",function(done){
 

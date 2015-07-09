@@ -77,13 +77,6 @@ CB._loadXml = function()
     }
     xmlhttp = new xmlhttp();
     return xmlhttp;
-    /*if(window.XMLHttpRequest){
-     xmlhttp=new XMLHttpRequest();
-     }
-     else {
-     xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-     }
-     return xmlhttp;*/
 };
 CB.Promise = function() {
     this._resolved = false;
@@ -442,5 +435,3 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
         return continuation(null, error);
     });
 };
-console.log("promises loaded");
-console.log(CB);

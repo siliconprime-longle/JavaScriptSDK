@@ -77,13 +77,6 @@ CB._loadXml = function()
     }
     xmlhttp = new xmlhttp();
     return xmlhttp;
-    /*if(window.XMLHttpRequest){
-     xmlhttp=new XMLHttpRequest();
-     }
-     else {
-     xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-     }
-     return xmlhttp;*/
 };
 CB.Promise = function() {
     this._resolved = false;
@@ -442,10 +435,6 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
         return continuation(null, error);
     });
 };
-console.log("promises loaded");
-console.log(CB);
-
-console.log(CB._isNode);
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -7577,42 +7566,29 @@ if(!CB._isNode) {
 /*
  CloudApp
  */
-console.log("in cloudapp");
 CB.CloudApp = CB.CloudApp || {};
-console.log("Check for CloudApp");
-console.log(CB.CloudApp);
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
-    console.log('here1');
     if(!applicationKey)
     {
         applicationKey=applicationId;
         applicationId=serverUrl;
-        console.log('here2');
     }else {
         CB.serverUrl=serverUrl;
         CB.socketIoUrl=serverUrl;
-        console.log('here3');
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
-    console.log('here4');
     //load socket.io.
     if(CB._isNode)
     {
         CB.io = require('socket.io-client');
-        console.log('here5');
     }
     else {
         CB.io = io;
-        console.log('here4');
     }
     CB.Socket = CB.io(CB.socketIoUrl);
-    console.log('here6');
 };
-console.log('cloudapp loaded');
-
-console.log('in acl');
 
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
@@ -9481,14 +9457,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 url: file,
                 contentType : ''
             };
-        } else if(data){
-            this.document={
-                _type: 'file',
-                name: file,
-                size: data
-            };
-        }else{
-            throw "Invalid File. It should be of type file or blob";
         }
     }
     else{
@@ -9649,21 +9617,24 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
 
     this.document = {};
     this.document.type = "Point";
-
+    this.document.latitude = longitude;
+    this.document.longitude = latitude;
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
     if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180))
-        this.document.coordinates = [Number(latitude), Number(longitude)];
+        this.document.coordinates = [Number(longitude), Number(latitude)];
     else
         throw "latitude and longitudes are not in range";
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     get: function() {
-        return this.document.coordinates[0];
+        return this.document.coordinates[1];
     },
     set: function(latitude) {
-        if(Number(latitude)>= -90 && Number(latitude)<=90)
-            this.document.coordinates[0] = latitude;
+        if(Number(latitude)>= -90 && Number(latitude)<=90) {
+            this.document.latitude = latitude;
+            this.document.coordinates[1] = latitude;
+        }
         else
             throw "Latitude is not in Range";
     }
@@ -9671,11 +9642,13 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     get: function() {
-        return this.document.coordinates[1];
+        return this.document.coordinates[0];
     },
     set: function(longitude) {
-        if(Number(longitude)>= -180 && Number(latitude)<=180)
-            this.document.coordinates[1] = longitude;
+        if(Number(longitude)>= -180 && Number(longitude)<=180) {
+            this.document.longitude = longitude;
+            this.document.coordinates[0] = longitude;
+        }
         else
             throw "Longitude is not in Range";
     }

@@ -142,7 +142,7 @@ describe("Version Test",function(done){
         });
     });
 
-    it("Should save object with a relation and don't have a child object",function(){
+    it("Should save object with a relation and don't have a child object",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Sample');

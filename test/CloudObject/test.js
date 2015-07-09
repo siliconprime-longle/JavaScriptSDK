@@ -323,7 +323,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-   /* it("should save an array of CloudObject with an empty array", function(done) {
+    it("should save an array of CloudObject with an empty array", function(done) {
         this.timeout(10000);
 
         var obj = new CB.CloudObject('Sample');
@@ -347,7 +347,7 @@ describe("Cloud Object", function() {
                 }
                 });
             }});
-    });*/
+    });
 
 
     it("should save an array of CloudObject.", function(done) {

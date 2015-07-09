@@ -1,4 +1,4 @@
-describe("CloudRole", function () {
+describe("CloudRole", function (done) {
     var roleName = util.makeString();
     var role = new CB.CloudRole(roleName);
     it("Should create a role", function (done) {
