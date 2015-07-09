@@ -2,7 +2,7 @@
  CloudFiles
  */
 
-CB.CloudFile = CB.CloudFile || function(file) {
+CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
     if(!file)
         throw "File is null.";
@@ -29,8 +29,6 @@ CB.CloudFile = CB.CloudFile || function(file) {
                 url: file,
                 contentType : ''
             };
-        } else {
-            throw "Invalid File. It should be of type file or blob";
         }
     }
     else{

@@ -77,13 +77,6 @@ CB._loadXml = function()
     }
     xmlhttp = new xmlhttp();
     return xmlhttp;
-    /*if(window.XMLHttpRequest){
-     xmlhttp=new XMLHttpRequest();
-     }
-     else {
-     xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
-     }
-     return xmlhttp;*/
 };
 CB.Promise = function() {
     this._resolved = false;
@@ -441,8 +434,7 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
     }, function(error) {
         return continuation(null, error);
     });
-}
-
+};
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -7584,11 +7576,9 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     }else {
         CB.serverUrl=serverUrl;
         CB.socketIoUrl=serverUrl;
-
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
-
     //load socket.io.
     if(CB._isNode)
     {
@@ -7599,6 +7589,7 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     }
     CB.Socket = CB.io(CB.socketIoUrl);
 };
+
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
     this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
@@ -9439,7 +9430,7 @@ CB.CloudRole.getRole = function(role, callback) {
  CloudFiles
  */
 
-CB.CloudFile = CB.CloudFile || function(file) {
+CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
     if(!file)
         throw "File is null.";
@@ -9466,8 +9457,6 @@ CB.CloudFile = CB.CloudFile || function(file) {
                 url: file,
                 contentType : ''
             };
-        } else {
-            throw "Invalid File. It should be of type file or blob";
         }
     }
     else{
@@ -9628,9 +9617,13 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
 
     this.document = {};
     this.document.type = "Point";
-
+    this.document.latitude = longitude;
+    this.document.longitude = latitude;
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
-    this.document.coordinates = [Number(longitude), Number(latitude)];
+    if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180))
+        this.document.coordinates = [Number(longitude), Number(latitude)];
+    else
+        throw "latitude and longitudes are not in range";
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
@@ -9638,7 +9631,12 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
         return this.document.coordinates[1];
     },
     set: function(latitude) {
-        this.document.coordinates[1] = latitude;
+        if(Number(latitude)>= -90 && Number(latitude)<=90) {
+            this.document.latitude = latitude;
+            this.document.coordinates[1] = latitude;
+        }
+        else
+            throw "Latitude is not in Range";
     }
 });
 
@@ -9647,7 +9645,12 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
         return this.document.coordinates[0];
     },
     set: function(longitude) {
-        this.document.coordinates[0] = longitude;
+        if(Number(longitude)>= -180 && Number(longitude)<=180) {
+            this.document.longitude = longitude;
+            this.document.coordinates[0] = longitude;
+        }
+        else
+            throw "Longitude is not in Range";
     }
 });
 

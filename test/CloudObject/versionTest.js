@@ -4,7 +4,7 @@ describe("Version Test",function(done){
         var obj = new CB.CloudObject('sample');
         obj.set('expires',0);
         obj.set('name','vipul');
-        if(obj.get('_modifiedColumns').length === 5) {
+        if(obj.get('_modifiedColumns').length > 0) {
             done();
         }else{
             throw "Unable to set Modified Array";
@@ -142,7 +142,7 @@ describe("Version Test",function(done){
         });
     });
 
-    it("Should save object with a relation and don't have a child object",function(){
+    it("Should save object with a relation and don't have a child object",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Sample');

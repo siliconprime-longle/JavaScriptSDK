@@ -7139,11 +7139,9 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     }else {
         CB.serverUrl=serverUrl;
         CB.socketIoUrl=serverUrl;
-
     }
     CB.appId = applicationId;
     CB.appKey = applicationKey;
-
     //load socket.io.
     if(CB._isNode)
     {
