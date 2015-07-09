@@ -178,7 +178,6 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    CB._modified(this,columnName);
     return this.document[columnName];
 
 };

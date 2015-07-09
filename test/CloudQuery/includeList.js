@@ -75,4 +75,27 @@
 
     });
 
+    it("should query over a linked column if a object is passed in equalTo",function(done){
+            this.timeout(100000);
+
+            var hostel = new CB.CloudObject('hostel');
+            var student = new CB.CloudObject('student1');
+            hostel.set('room',789);
+            student.set('newColumn',hostel);
+            student.save().then(function(list){
+                var query1 = new CB.CloudQuery('student1');
+                var temp = list.get('newColumn');
+                query1.equalTo('newColumn',temp);
+                query1.find().then(function(obj){
+                    console.log(obj);
+                    done();
+                }, function () {
+                    throw "";
+                })
+                console.log(list);
+            },function(){
+                throw "unable to save data";
+            })
+    });
+
 });

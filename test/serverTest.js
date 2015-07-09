@@ -25,10 +25,10 @@ describe("Server Check",function(){
                     done();
                 }
                 else {
-                    //CB.appId = 'fyipe';
-                    //CB.appKey = 'w+UJxnEbMDexTVzM2RcSbw==';
-                    CB.appId = 'travis123';
-                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+                    CB.appId = 'fyipe';
+                    CB.appKey = 'w+UJxnEbMDexTVzM2RcSbw==';
+                    //CB.appId = 'travis123';
+                    //CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
                     done();
 
                 }

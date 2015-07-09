@@ -7956,7 +7956,6 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    CB._modified(this,columnName);
     return this.document[columnName];
 
 };
@@ -8110,6 +8109,11 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
 
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
+
+    if(data.constructor === CB.CloudObject){
+        columnName = columnName+'._id';
+        data = data.get('id');
+    }
 
     this.query[columnName] = data;
 
@@ -9617,11 +9621,12 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
 
     this.document = {};
     this.document.type = "Point";
-    this.document.latitude = longitude;
-    this.document.longitude = latitude;
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
-    if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180))
+    if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180)) {
         this.document.coordinates = [Number(longitude), Number(latitude)];
+        this.document.latitude = Number(longitude);
+        this.document.longitude = Number(latitude);
+    }
     else
         throw "latitude and longitudes are not in range";
 };
@@ -9632,8 +9637,8 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     },
     set: function(latitude) {
         if(Number(latitude)>= -90 && Number(latitude)<=90) {
-            this.document.latitude = latitude;
-            this.document.coordinates[1] = latitude;
+            this.document.longitude = Number(latitude);
+            this.document.coordinates[1] = Number(latitude);
         }
         else
             throw "Latitude is not in Range";
@@ -9646,14 +9651,42 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     },
     set: function(longitude) {
         if(Number(longitude)>= -180 && Number(longitude)<=180) {
-            this.document.longitude = longitude;
-            this.document.coordinates[0] = longitude;
+            this.document.latitude = Number(longitude);
+            this.document.coordinates[0] = Number(longitude);
         }
         else
             throw "Longitude is not in Range";
     }
 });
 
+CB.CloudGeoPoint.prototype.get = function(name) { //for getting data of a particular column
+
+    if(name === 'latitude')
+        return this.document.longitude;
+    else
+        return this.document.latitude;
+
+};
+
+CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a particular column
+
+    if(name === 'latitude') {
+        if(Number(value)>= -90 && Number(value)<=90) {
+            this.document.longitude = Number(value);
+            this.document.coordinates[1] = Number(value);
+        }
+        else
+            throw "Latitude is not in Range";
+    }
+    else {
+        if(Number(value)>= -180 && Number(value)<=180) {
+            this.document.latitude = Number(value);
+            this.document.coordinates[0] = Number(value);
+        }
+        else
+            throw "Latitude is not in Range";
+    }
+};
 CB.CloudGeoPoint.prototype.distanceInKMs = function(point) {
 
     var earthRedius = 6371; //in Kilometer
@@ -11018,6 +11051,29 @@ describe("CloudQuery Include", function () {
 
         })
 
+    });
+
+    it("should query over a linked column if a object is passed in equalTo",function(done){
+            this.timeout(100000);
+
+            var hostel = new CB.CloudObject('hostel');
+            var student = new CB.CloudObject('student1');
+            hostel.set('room',789);
+            student.set('newColumn',hostel);
+            student.save().then(function(list){
+                var query1 = new CB.CloudQuery('student1');
+                var temp = list.get('newColumn');
+                query1.equalTo('newColumn',temp);
+                query1.find().then(function(obj){
+                    console.log(obj);
+                    done();
+                }, function () {
+                    throw "";
+                })
+                console.log(list);
+            },function(){
+                throw "unable to save data";
+            })
     });
 
 });

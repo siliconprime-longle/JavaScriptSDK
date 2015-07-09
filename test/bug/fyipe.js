@@ -83,7 +83,7 @@ describe("Fyipe bug tests",function(done){
         },function(){
 
         });
-    });*/
+    });
 
     it("should save",function(done){
 
@@ -108,5 +108,27 @@ describe("Fyipe bug tests",function(done){
         },function(){
             console.log(err);
         })
+    });*/
+
+    it("should get the relation",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Location');
+        query.find().then(function(list){
+            var query1 = new CB.CloudQuery('Group');
+            var temp = {};
+            temp._type = list[0]._type;
+            temp._tableName = list[0]._tableName;
+            temp._id = list[0]._id;
+            query1.equalTo('Location',temp);
+            query1.find().then(function(obj){
+                console.log(obj);
+                done();
+            },function(){
+                throw "unable to get the relation";
+            })
+        },function(){
+           throw "should have get the relation back";
+        });
     });
 });

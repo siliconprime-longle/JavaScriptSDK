@@ -26,6 +26,11 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
+    if(data.constructor === CB.CloudObject){
+        columnName = columnName+'._id';
+        data = data.get('id');
+    }
+
     this.query[columnName] = data;
 
     return this;
