@@ -9461,6 +9461,22 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 url: file,
                 contentType : ''
             };
+        }else{
+            if(data){
+                this.data = data;
+                if(!type){
+                    type = file.split('.')[file.split('.').length-1];
+                }
+                this.document = {
+                    _type: 'file',
+                    name: file,
+                    size: '',
+                    url: '',
+                    contentType : type
+                };
+            }else{
+                throw "Invalid File. It should be of type file or blob";
+            }
         }
     }
     else{
@@ -12557,7 +12573,7 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
-    /*it("should alert when the object is deleted.", function(done) {
+    it("should alert when the object is deleted.", function(done) {
 
       this.timeout(10000);
 
@@ -12581,9 +12597,9 @@ describe("Cloud Objects Notification", function() {
       	}
 
       });
-    });*/
+    });
 
-    it("should alert when multipe events are passed.", function(done) {
+    it("should alert when multiple events are passed.", function(done) {
 
       this.timeout(10000);	
 
@@ -12717,7 +12733,7 @@ describe("CloudNotification", function() {
       });
     });
 
-    /*it("should publish data to the channel.", function(done) {
+    it("should publish data to the channel.", function(done) {
       CB.CloudNotification.on('sample', 
       function(data){
       	if(data === 'data'){
@@ -12796,6 +12812,6 @@ describe("CloudNotification", function() {
 	      });
 
 
-    });*/
+    });
 
 });
