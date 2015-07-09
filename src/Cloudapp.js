@@ -7163,3 +7163,4 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     CB.Socket = CB.io(CB.socketIoUrl);
     console.log('here6');
 };
+console.log('cloudapp loaded');

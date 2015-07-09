@@ -441,7 +441,8 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
     }, function(error) {
         return continuation(null, error);
     });
-}
+};
+console.log("promises loaded");
 
 if(!CB._isNode) {
 // Socket.io.js
@@ -7608,6 +7609,10 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     CB.Socket = CB.io(CB.socketIoUrl);
     console.log('here6');
 };
+console.log('cloudapp loaded');
+
+console.log('in acl');
+
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
     this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
