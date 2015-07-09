@@ -443,3 +443,4 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
     });
 };
 console.log("promises loaded");
+console.log(CB);
