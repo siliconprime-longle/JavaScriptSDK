@@ -49,7 +49,6 @@ CB._serialize = function(thisObj) {
 CB._deserialize = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
-
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
 
@@ -94,27 +93,25 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else if (data[key].latitude || data[key].longitude) {
-
-                    document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
-
                 }else{
-
                     document[key] = data[key];
-
                 }
             }else {
-
                 document[key] = data[key];
-
             }
         }
 
         if(!thisObj){
             var url=null;
+            var latitude = null;
+            var longitude = null;
             if(document._type === "file")
                 url=document.url;
-            var obj = CB._getObjectByType(document._type,url);
+            if(document._type === "point"){
+                latitude = document.longitude;
+                longitude = document.latitude;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
             obj.document = document;
             return obj;
         }else{
@@ -128,7 +125,7 @@ CB._deserialize = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url){
+CB._getObjectByType = function(type,url,latitude,longitude){
 
     var obj = null;
 
@@ -148,8 +145,11 @@ CB._getObjectByType = function(type,url){
         obj = new CB.CloudFile(url);
     }
 
+    if(type === 'point'){
+        obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
     return obj;
-}
+};
 
 
 CB._validate = function() {
@@ -186,7 +186,7 @@ if(CB._isNode){
 
 CB._clone=function(obj,url){
     var n_obj = null;
-    if(obj.document._type) {
+    if(obj.document._type && obj.document._type != 'point') {
         n_obj = CB._getObjectByType(obj.document._type,url);
         var doc=obj.document;
         var doc2={};
@@ -202,12 +202,8 @@ CB._clone=function(obj,url){
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = obj;
-        var doc=obj.document;
-        var doc2={};
-        for (var key in doc) {
-            doc2[key]=doc[key];
-        }
+        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        return n_obj;
     }
     n_obj.document=doc2;
     return n_obj;

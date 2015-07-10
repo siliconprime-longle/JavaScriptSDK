@@ -12,7 +12,6 @@ describe("CloudNotification", function() {
       	error : function(){
       		throw 'Error subscribing to a CloudNotification.';
       	}
-
       });
     });
 

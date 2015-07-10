@@ -135,4 +135,25 @@ describe("Cloud GeoPoint Test", function() {
             throw "find data error";
         })
 	});
+
+    it("should update a saved GeoPoint", function(done) {
+        this.timeout(30000);
+        var obj = new CB.CloudObject('Custom5');
+        var loc = new CB.CloudGeoPoint(17.9,79.6);
+        obj.set("location", loc);
+        obj.save({
+            success : function(newObj){
+                obj = newObj;
+                obj.get('location').set('latitude',55);
+                obj.save().then(function(obj1){
+                    console.log(obj1);
+                    done()
+                },function(){
+                    throw "";
+                });
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    });
 });

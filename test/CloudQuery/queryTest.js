@@ -576,4 +576,41 @@ describe("CloudQuery", function () {
 
     });
 
+    it("Should not give element with a given relation",function(done){
+
+        this.timeout(10000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            if(obj){
+                obj1 = obj;
+            }else{
+                throw "should save the object";
+            }
+            obj = new CB.CloudObject('student1');
+            obj.set('newColumn',obj1);
+            obj.save().then(function(list){
+                console.log(list)
+                var query = new CB.CloudQuery('student1');
+                query.notEqualTo('newColumn',obj1);
+                query.find().then(function (list) {
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].get('newColumn')) {
+                            if (list[i].get('newColumn').get('id') === obj1.get('id'))
+                                throw "Should not get the id in not equal to";
+                        }
+                    }
+                    done();
+                }, function () {
+                    throw "should do query";
+                });
+            },function(){
+                throw "should save the object";
+            });
+        },function(){
+           throw "should save the object";
+        });
+    });
+
 });

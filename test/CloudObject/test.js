@@ -509,4 +509,34 @@ describe("Cloud Object", function() {
         });
     });
 
+    it("should save list of numbers",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom14');
+        obj.set('List_Number',[1,2,3]);
+        obj.save().then(function(list){
+            console.log(list);
+           done();
+        },function(){
+            throw "should save the list of numbers";
+        });
+    });
+
+    it("should save a list of GeoPoint",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom14');
+        var GP1 = new CB.CloudGeoPoint(17,89);
+        var GP2 = new CB.CloudGeoPoint(66,78);
+        obj.set('List_GeoPoint',[GP1,GP2]);
+        obj.save().then(function(list){
+           console.log(list);
+            done();
+        },function(){
+            throw "should save list of geopoint";
+        });
+    });
+
 });

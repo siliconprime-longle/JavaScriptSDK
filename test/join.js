@@ -158,7 +158,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should not save a string into date column",function(done){
+    /*it("should not save a string into date column",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Sample');
@@ -661,6 +661,36 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save JSON object in cloud";
         });
+    });*/
+
+    it("should save list of numbers",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom14');
+        obj.set('List_Number',[1,2,3]);
+        obj.save().then(function(list){
+            console.log(list);
+           done();
+        },function(){
+            throw "should save the list of numbers";
+        });
+    });
+
+    it("should save a list of GeoPoint",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom14');
+        var GP1 = new CB.CloudGeoPoint(17,89);
+        var GP2 = new CB.CloudGeoPoint(66,78);
+        obj.set('List_GeoPoint',[GP1,GP2]);
+        obj.save().then(function(list){
+           console.log(list);
+            done();
+        },function(){
+            throw "should save list of geopoint";
+        });
     });
 
 });
@@ -1064,7 +1094,6 @@ describe("CloudNotification", function() {
       	error : function(){
       		throw 'Error subscribing to a CloudNotification.';
       	}
-
       });
     });
 
@@ -1281,6 +1310,27 @@ describe("Cloud GeoPoint Test", function() {
             throw "find data error";
         })
 	});
+
+    it("should update a saved GeoPoint", function(done) {
+        this.timeout(30000);
+        var obj = new CB.CloudObject('Custom5');
+        var loc = new CB.CloudGeoPoint(17.9,79.6);
+        obj.set("location", loc);
+        obj.save({
+            success : function(newObj){
+                obj = newObj;
+                obj.get('location').set('latitude',55);
+                obj.save().then(function(obj1){
+                    console.log(obj1);
+                    done()
+                },function(){
+                    throw "";
+                });
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    });
 });
 
 describe("CloudQuery Include", function () {
@@ -1962,6 +2012,43 @@ describe("CloudQuery", function () {
 
     });
 
+    it("Should not give element with a given relation",function(done){
+
+        this.timeout(10000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            if(obj){
+                obj1 = obj;
+            }else{
+                throw "should save the object";
+            }
+            obj = new CB.CloudObject('student1');
+            obj.set('newColumn',obj1);
+            obj.save().then(function(list){
+                console.log(list)
+                var query = new CB.CloudQuery('student1');
+                query.notEqualTo('newColumn',obj1);
+                query.find().then(function (list) {
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].get('newColumn')) {
+                            if (list[i].get('newColumn').get('id') === obj1.get('id'))
+                                throw "Should not get the id in not equal to";
+                        }
+                    }
+                    done();
+                }, function () {
+                    throw "should do query";
+                });
+            },function(){
+                throw "should save the object";
+            });
+        },function(){
+           throw "should save the object";
+        });
+    });
+
 });
 describe("CloudSearch", function (done) {
 
@@ -2276,7 +2363,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    /*it("should unIndex the CloudObject",function(done){
+    it("should unIndex the CloudObject",function(done){
 
         this.timeout(15000);
 
@@ -2305,7 +2392,7 @@ describe("CloudSearch", function (done) {
         },function(err){
             console.log(err);
         });
-    });*/
+    });
 
     it("should reIndex the unIndexed CloudObject",function(done){
 

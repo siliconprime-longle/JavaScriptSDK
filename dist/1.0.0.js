@@ -8133,6 +8133,11 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
     if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
         columnName = '_' + columnName;
 
+    if(data.constructor === CB.CloudObject){
+        columnName = columnName+'._id';
+        data = data.get('id');
+    }
+
     this.query[columnName] = {
         $ne: data
     };
@@ -9636,7 +9641,8 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
         throw "Longitude "+ longitude+" is not a number type.";
 
     this.document = {};
-    this.document.type = "Point";
+    this.document._type = "point";
+    this.document._isModified = true;
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
     if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180)) {
         this.document.coordinates = [Number(longitude), Number(latitude)];
@@ -9655,6 +9661,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
         if(Number(latitude)>= -90 && Number(latitude)<=90) {
             this.document.longitude = Number(latitude);
             this.document.coordinates[1] = Number(latitude);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
@@ -9669,6 +9676,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
         if(Number(longitude)>= -180 && Number(longitude)<=180) {
             this.document.latitude = Number(longitude);
             this.document.coordinates[0] = Number(longitude);
+            this.document._isModified = true;
         }
         else
             throw "Longitude is not in Range";
@@ -9690,6 +9698,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
         if(Number(value)>= -90 && Number(value)<=90) {
             this.document.longitude = Number(value);
             this.document.coordinates[1] = Number(value);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
@@ -9698,6 +9707,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
         if(Number(value)>= -180 && Number(value)<=180) {
             this.document.latitude = Number(value);
             this.document.coordinates[0] = Number(value);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
@@ -9789,7 +9799,6 @@ CB._serialize = function(thisObj) {
 CB._deserialize = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
-
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
 
@@ -9834,27 +9843,25 @@ CB._deserialize = function(data, thisObj) {
                         document[key] = CB._deserialize(data[key], thisObj.get(key));
                     else
                         document[key] = CB._deserialize(data[key]);
-                }else if (data[key].latitude || data[key].longitude) {
-
-                    document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
-
                 }else{
-
                     document[key] = data[key];
-
                 }
             }else {
-
                 document[key] = data[key];
-
             }
         }
 
         if(!thisObj){
             var url=null;
+            var latitude = null;
+            var longitude = null;
             if(document._type === "file")
                 url=document.url;
-            var obj = CB._getObjectByType(document._type,url);
+            if(document._type === "point"){
+                latitude = document.longitude;
+                longitude = document.latitude;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
             obj.document = document;
             return obj;
         }else{
@@ -9868,7 +9875,7 @@ CB._deserialize = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url){
+CB._getObjectByType = function(type,url,latitude,longitude){
 
     var obj = null;
 
@@ -9888,8 +9895,11 @@ CB._getObjectByType = function(type,url){
         obj = new CB.CloudFile(url);
     }
 
+    if(type === 'point'){
+        obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
     return obj;
-}
+};
 
 
 CB._validate = function() {
@@ -9926,7 +9936,7 @@ if(CB._isNode){
 
 CB._clone=function(obj,url){
     var n_obj = null;
-    if(obj.document._type) {
+    if(obj.document._type && obj.document._type != 'point') {
         n_obj = CB._getObjectByType(obj.document._type,url);
         var doc=obj.document;
         var doc2={};
@@ -9942,12 +9952,8 @@ CB._clone=function(obj,url){
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = obj;
-        var doc=obj.document;
-        var doc2={};
-        for (var key in doc) {
-            doc2[key]=doc[key];
-        }
+        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        return n_obj;
     }
     n_obj.document=doc2;
     return n_obj;
