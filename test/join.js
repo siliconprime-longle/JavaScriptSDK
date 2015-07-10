@@ -2451,7 +2451,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    it("should reIndex the unIndexed CloudObject",function(done){
+   /* it("should reIndex the unIndexed CloudObject",function(done){
 
         this.timeout(50000);
 
@@ -2489,7 +2489,7 @@ describe("CloudSearch", function (done) {
         },function(err){
             throw "unable to save object";
         });
-    });
+    });*/
 });
 describe("CloudUser", function () {
     var username = util.makeString();
