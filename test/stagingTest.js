@@ -11065,10 +11065,10 @@ describe("Cloud GeoPoint Test", function() {
         var obj = new CB.CloudGeoPoint(10,20);
         try{
             obj.set('latitude',-100);
+            throw "should take latitude in range";
         }catch(err){
             done();
         }
-        throw "should take latitude in range";
     });
 
     it("should take longitude in range",function(done){
@@ -11078,10 +11078,10 @@ describe("Cloud GeoPoint Test", function() {
         var obj = new CB.CloudGeoPoint(10,20);
         try{
             obj.set('longitude',-200);
+            throw "should take longitude in range";
         }catch(err){
             done();
         }
-        throw "should take longitude in range";
     });
 });
 
