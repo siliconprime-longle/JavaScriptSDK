@@ -158,7 +158,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    /*it("should not save a string into date column",function(done){
+    it("should not save a string into date column",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Sample');
@@ -661,7 +661,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save JSON object in cloud";
         });
-    });*/
+    });
 
     it("should save list of numbers",function(done){
 
@@ -693,6 +693,32 @@ describe("Cloud Object", function() {
         });
     });
 
+    it("should save the relation",function(done){
+
+        this.timeout(10000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            if(obj){
+                obj1 = obj;
+            }else{
+                throw "should save the object";
+            }
+            obj = new CB.CloudObject('student1');
+            obj2 = new CB.CloudObject('hostel');
+            obj2.set('id',obj1.get('id'));
+            obj.set('newColumn',obj2);
+            obj.save().then(function(list){
+                console.log(list);
+                    done();
+            },function(){
+                throw "should save the object";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
 });
 describe("CloudExpire", function () {
 
@@ -1330,6 +1356,32 @@ describe("Cloud GeoPoint Test", function() {
                 throw 'Error saving the object';
             }
         });
+    });
+
+    it("should take latitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('latitude',-100);
+        }catch(err){
+            done();
+        }
+        throw "should take latitude in range";
+    });
+
+    it("should take longitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('longitude',-200);
+        }catch(err){
+            done();
+        }
+        throw "should take longitude in range";
     });
 });
 
@@ -2365,32 +2417,37 @@ describe("CloudSearch", function (done) {
 
     it("should unIndex the CloudObject",function(done){
 
-        this.timeout(15000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('age',777);
         obj.set('isSearchable',true);
         obj.save().then(function(list){
-            console.log(list);
-            list.set('isSearchable',false);
-            list.save().then(function(list){
-                var searchObj = new CB.CloudSearch('Student');
-                searchObj.equalTo('id',obj.get('id'));
-                searchObj.search().then(function(list){
-                    console.log('here');
-                    if(list.length === 0){
-                        done();
-                    }else{
-                        throw "Unable to UnIndex the CloudObject";
+            if(list.get('isSearchable') === true) {
+                list.set('isSearchable', false);
+                list.save().then(function (list1) {
+                    if(list1.get('isSearchable') === false) {
+                        var searchObj = new CB.CloudSearch('Student');
+                        searchObj.equalTo('id', list1.get('id'));
+                        searchObj.search().then(function (list2) {
+                            console.log('here');
+                            if (list2.length === 0) {
+                                done();
+                            } else {
+                                throw "Unable to UnIndex the CloudObject";
+                            }
+                        }, function () {
+                            throw "Unable to search object";
+                        });
                     }
-                },function(){
-                    console.log(err);
+                }, function (err) {
+                    throw "unable to save object";
                 });
-            },function(err){
-                console.log(err);
-            });
+            }else
+                throw "unable to save the data property";
+
         },function(err){
-            console.log(err);
+            throw "unable to save object";
         });
     });
 
@@ -2402,33 +2459,35 @@ describe("CloudSearch", function (done) {
         obj.set('age',777);
         obj.set('isSearchable',true);
         obj.save().then(function(list){
-            console.log(list);
-            list.set('isSearchable',false);
-            list.save().then(function(list){
-                console.log(list);
-                list.set('isSearchable',true);
-                list.save().then(function(list){
-                    var searchObj = new CB.CloudSearch('Student');
-                    searchObj.equalTo('id',obj.get('id'));
-                    searchObj.search().then(function(list){
-                        console.log('here');
-                        if(list.length > 0){
-                            done();
-                        }else{
-                            throw "Unable to UnIndex the CloudObject";
-                        }
-                    },function(){
-                        console.log(err);
-                    });
-                    console.log(list)
+            if(list.get('isSearchable') === true) {
+                list.set('isSearchable', false);
+                list.save().then(function (list1) {
+                    if(list1.get('isSearchable') === false) {
+                        list1.set('isSearchable', true);
+                        list1.save().then(function (list2) {
+                            if(list2.get('isSearchable') === true) {
+                                var searchObj = new CB.CloudSearch('Student');
+                                searchObj.equalTo('id', list2.get('id'));
+                                searchObj.search().then(function (list3) {
+                                    if (list3.length > 0) {
+                                        done();
+                                    } else {
+                                        throw "Unable to UnIndex the CloudObject";
+                                    }
+                                }, function () {
+                                    console.log(err);
+                                });
+                            }
+                        }, function (err) {
+                            throw "unable to save object";
+                        })
+                    }
                 }, function (err) {
-                    console.log(err);
-                })
-            },function(err){
-                console.log(err);
-            });
+                    throw "unable to save object";
+                });
+            }
         },function(err){
-            console.log(err);
+            throw "unable to save object";
         });
     });
 });

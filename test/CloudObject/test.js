@@ -539,4 +539,30 @@ describe("Cloud Object", function() {
         });
     });
 
+    it("should save the relation",function(done){
+
+        this.timeout(10000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            if(obj){
+                obj1 = obj;
+            }else{
+                throw "should save the object";
+            }
+            obj = new CB.CloudObject('student1');
+            obj2 = new CB.CloudObject('hostel');
+            obj2.set('id',obj1.get('id'));
+            obj.set('newColumn',obj2);
+            obj.save().then(function(list){
+                console.log(list);
+                    done();
+            },function(){
+                throw "should save the object";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
 });

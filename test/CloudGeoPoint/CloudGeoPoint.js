@@ -156,4 +156,30 @@ describe("Cloud GeoPoint Test", function() {
             }
         });
     });
+
+    it("should take latitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('latitude',-100);
+        }catch(err){
+            done();
+        }
+        throw "should take latitude in range";
+    });
+
+    it("should take longitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('longitude',-200);
+        }catch(err){
+            done();
+        }
+        throw "should take longitude in range";
+    });
 });
