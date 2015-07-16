@@ -30,8 +30,8 @@ describe("Cloud GeoPoint Test", function() {
      	});
 	});
 	
-	/*it("should get data from server for near function", function(done) {
-     	this.timeout(10000);
+	it("should get data from server for near function", function(done) {
+     	this.timeout(20000);
         var loc = new CB.CloudGeoPoint("17.7","80.3");
         var query = new CB.CloudQuery('Custom5');
 		query.near("location", loc, 100000);
@@ -48,7 +48,7 @@ describe("Cloud GeoPoint Test", function() {
         }, function () {
             throw "find data error";
         })
-	});*/
+	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
      	this.timeout(10000);

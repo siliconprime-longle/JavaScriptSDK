@@ -8,8 +8,9 @@ CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
     this.select = {};
     this.sort = {};
     this.skip = 0;
-    this.limit = -1; //limit to 20 documents by default.
+    this.limit = 10; //default limit is 10
 };
+
 // Logical operations
 CB.CloudQuery.or = function(obj1, obj2) {
     if (!obj1.tableName === obj2.tableName) {
@@ -23,21 +24,27 @@ CB.CloudQuery.or = function(obj1, obj2) {
 
 CB.CloudQuery.prototype.equalTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
-    if(data.constructor === CB.CloudObject){
-        columnName = columnName+'._id';
-        data = data.get('id');
-    }
+    if(data){
+        if( data.constructor === CB.CloudObject){
+            columnName = columnName+'._id';
+            data = data.get('id');
+        }
 
-    this.query[columnName] = data;
+        this.query[columnName] = data;
+    }else{
+
+        //This is for people who code : obj.equalTo('column', null);
+        this.doesNotExists(columnName);
+    }
 
     return this;
 };
 
 CB.CloudQuery.prototype.include = function (columnName, data) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
@@ -46,23 +53,29 @@ CB.CloudQuery.prototype.include = function (columnName, data) {
 };
 
 CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if(data.constructor === CB.CloudObject){
-        columnName = columnName+'._id';
-        data = data.get('id');
-    }
+    if(data){
 
-    this.query[columnName] = {
-        $ne: data
-    };
+        if(data.constructor === CB.CloudObject){
+            columnName = columnName+'._id';
+            data = data.get('id');
+        }
+
+        this.query[columnName] = {
+            $ne: data
+        };
+    }else{
+        //This is for people who code : obj.notEqualTo('column', null);
+        this.exists(columnName); 
+    }
 
     return this;
 };
 CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -74,7 +87,7 @@ CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -86,7 +99,7 @@ CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
 
@@ -99,7 +112,7 @@ CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
 
@@ -113,7 +126,7 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     this.sort[columnName] = 1;
@@ -122,7 +135,7 @@ CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 };
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     this.sort[columnName] = -1;
@@ -169,12 +182,23 @@ CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
 };
 CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
+    if(data instanceof CB.CloudObject){
+
+        if(!data.id){
+            throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+        }
+
+        columnName = columnName+'._id';
+        data = data._id;
+    }
+
+    else if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
@@ -208,7 +232,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
 CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
@@ -246,7 +270,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.exists = function(columnName) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -258,7 +282,7 @@ CB.CloudQuery.prototype.exists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.doesNotExists = function(columnName) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -270,7 +294,7 @@ CB.CloudQuery.prototype.doesNotExists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.containsAll = function(columnName, values) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -285,7 +309,7 @@ CB.CloudQuery.prototype.containsAll = function(columnName, values) {
 }
 
 CB.CloudQuery.prototype.startsWith = function(columnName, value) {
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     var regex = '^' + value;
@@ -303,11 +327,11 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
 }
 
 //GeoPoint near query
-CB.CloudQuery.prototype.near = function(columnName, coordinates, maxDistance, minDistance){
+CB.CloudQuery.prototype.near = function(columnName, geoPoint, maxDistance, minDistance){
     if(!this.query[columnName]){
         this.query[columnName] = {};
         this.query[columnName]['$near'] = {
-            '$geometry': coordinates['document'],
+            '$geometry': { coordinates: geoPoint['document'].coordinates, type:'Point'},
             '$maxDistance': maxDistance,
             '$minDistance': minDistance
         };
@@ -372,6 +396,7 @@ CB.CloudQuery.prototype.count = function(callback) {
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/count';
 
     CB._request('POST',url,params).then(function(response){
+        response = parseInt(response);
         if (callback) {
             callback.success(response);
         } else {

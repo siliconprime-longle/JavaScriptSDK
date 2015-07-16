@@ -28,6 +28,30 @@ describe("CloudUser", function () {
             throw "err";
         });
     });
+
+
+     it('should encrypt user password',function (done){
+        
+        this.timeout(100000);
+
+        var pass = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', util.makeString());
+        obj.set('password',pass);
+        obj.set('email',util.makeEmail());
+        obj.save().then(function(obj) {
+            if(obj.get('password') === pass)
+                throw "Password is not encrypted.";
+            else
+               done();
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
+
    it("Should login user", function (done) {
 
         this.timeout(10000);

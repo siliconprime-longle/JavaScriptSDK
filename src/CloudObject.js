@@ -2,13 +2,22 @@
  CloudObject
  */
 
-CB.CloudObject = function(tableName) { //object for documents
+CB.CloudObject = function(tableName, id) { //object for documents
+    
     this.document = {};
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
-    this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+
+    if(!id){
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._isModified = true;
+    }
+    else{
+        this.document._modifiedColumns = [];
+        this.document._isModified = false;
+        this.document._id = id;
+    }
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
@@ -24,10 +33,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
 Object.defineProperty(CB.CloudObject.prototype, 'id', {
     get: function() {
         return this.document._id;
-    },
-    set: function(id) {
-        this.document._id = id;
-        CB._modified(this,'_id');
     }
 });
 
@@ -51,15 +56,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
     }
 });
 
-Object.defineProperty(CB.CloudObject.prototype, 'isSearchable', {
-    get: function() {
-        return this.document._isSearchable;
-    },
-    set: function(isSearchable) {
-        this.document._isSearchable = isSearchable;
-        CB._modified(this,'_isSearchable');
-    }
-});
 
 /* For Expire of objects */
 
@@ -162,7 +158,10 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 
     var keywords = ['_tableName', '_type', 'operator'];
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
@@ -175,7 +174,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
     return this.document[columnName];
@@ -298,7 +297,6 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
             def.reject(err);
         }
     });
-
 
     if (!callback) {
         return def;

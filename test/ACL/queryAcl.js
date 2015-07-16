@@ -9,7 +9,7 @@ describe("Query_ACL", function () {
     var user = new CB.CloudUser();
     it("Should create new user", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         user.set('username', username);
         user.set('password',passwd);
         user.set('email',util.makeEmail());
@@ -26,7 +26,7 @@ describe("Query_ACL", function () {
 
     it("Should set the public read access", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         obj.ACL = new CB.ACL();
         obj.ACL.setPublicReadAccess(false);
@@ -59,7 +59,7 @@ describe("Query_ACL", function () {
     obj1.set('age',60);
     it("Should search object with user read access", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         obj1.ACL = new CB.ACL();
         obj1.ACL.setUserReadAccess(user.document._id,false);
         obj1.save().then(function(list) {

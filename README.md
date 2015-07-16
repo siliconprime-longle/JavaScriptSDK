@@ -1,28 +1,58 @@
-# CloudBoost: Hybrid No-Sql Database as a Service
+# CloudBoost.io : Hybrid No-Sql Database as a Service
 
 
 
-## Installation
+## NPM Installation
 ```
 npm install cloudboost
 ```
 
 
-### Usage
+### NodeJS Usage
 
 ``` js
 
 var CB = require('cloudboost');
 
-// appId,appKey are the ID,key of the Application created in CloudBoost Dashboard
-//This initializes your Application
+// AppID and AppKey are your App ID and kKy of the application created in CloudBoost Dashboard.
+
+//Init your Application
 CB.CloudApp.init('YourAppId','YourAppKey');
 
-//Create a CloudObject of type 'Custom'
-//Before you do this go to the table designer and create table first
+//Data Storage : Create a CloudObject of type 'Custom' (Note: You need to create a table 'Custom' on CloudBoost Dashboard)
+
 var obj = new CB.CloudObject('Custom');
 
-//Set the property 'name'
+//Set the property 'name' (Note: Create a column 'name' of type text on CloudBoost Dashboard)
+obj.set('name','CloudBoost');
+
+//Save the object
+obj.save({
+    success:function(res){
+        console.log("object saved successfully");
+    },
+    error:function(err){
+        console.log("error while saving object");
+    }
+});
+
+```
+
+
+### JavaScript Usage
+
+``` js
+
+// AppID and AppKey are your App ID and kKy of the application created in CloudBoost Dashboard.
+
+//Init your Application
+CB.CloudApp.init('YourAppId','YourAppKey');
+
+//Data Storage : Create a CloudObject of type 'Custom' (Note: You need to create a table 'Custom' on CloudBoost Dashboard)
+
+var obj = new CB.CloudObject('Custom');
+
+//Set the property 'name' (Note: Create a column 'name' of type text on CloudBoost Dashboard)
 obj.set('name','CloudBoost');
 
 //Save the object

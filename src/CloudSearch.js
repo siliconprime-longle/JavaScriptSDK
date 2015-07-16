@@ -1,14 +1,450 @@
-CB.CloudSearch = function(collectionNames) {
+
+CB.SearchFilter = function(){
+
+    this.bool = {};
+    this.bool.must = []; //and
+    this.bool.should = []; //or
+    this.bool.must_not = []; //not
+};
+
+
+CB.SearchFilter.prototype.notEqualTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    //data can bean array too!
+    var term = {};
+    if (data instanceof Array) {
+        term.terms = {};
+        term.terms[columnName] = data;
+    } else {
+        term.term = {};
+        term.term[columnName] = data;
+    }
+
+    this.bool.must_not.push(term);
+
+    return this;
+
+};
+
+CB.SearchFilter.prototype.equalTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var term = {};
+    if (data instanceof Array) {
+        term.terms = {};
+        term.terms[columnName] = data;
+    } else {
+        term.term = {};
+        term.term[columnName] = data;
+    }
+
+    this.bool.must.push(term);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.exists = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.exists = {};
+    obj.exists.field = columnName;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.doesNotExist = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.missing = {};
+    obj.missing.field = columnName;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.greaterThanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['gte'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.greaterThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['gt'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.lessThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lt'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lte'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+
+//And logical function. 
+CB.SearchFilter.prototype.and = function(searchFilter) {
+
+    if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+    }
+
+    this.bool.must.push(searchFilter);
+};
+
+//OR Logical function
+CB.SearchFilter.prototype.or = function(searchFilter) {
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+    }
+
+    this.bool.should.push(searchFilter);
+};
+
+
+//NOT logical function
+CB.SearchFilter.prototype.not = function(searchFilter) {
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+    }
+
+    this.bool.must_not.push(searchFilter);
+};
+
+
+/* This is Search Query*/
+
+CB.SearchQuery = function(){
+    this.bool = {};
+    this.bool.must = []; //and
+    this.bool.should = []; //or
+    this.bool.must_not = []; //not
+};
+
+CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boost) {
+
+    var obj = _buildSearchOn(columns, query, null, null,null,boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'phrase';
+        if(slop){
+            obj.multi_match.slop = slop;
+        }
+     } else {
+        obj.match[columns].type = 'phrase';
+        if(slop){
+            obj.match[columns].slop = slop;
+        }
+     }
+
+     return obj;
+
+}
+
+
+CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'best_fields';
+     } else {
+        obj.match[columns].type = 'best_fields';
+     }
+
+     return obj;
+};
+
+CB.SearchQuery.prototype._buildMostColumns = function(columns, query, fuzziness,  operator, match_percent, boost) {
+
+    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'most_fields';
+     } else {
+        obj.match[columns].type = 'most_fields';
+     }
+
+     return obj;
+};
+
+CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    var obj = {};
+
+        if (columns instanceof Array) {
+            //if columns is an array.
+            obj.multi_match = {};
+            obj.multi_match.query = query;
+            obj.multi_match.fields = columns;
+            
+            if (operator) {
+                obj.multi_match.operator = operator;
+            } 
+
+            if(match_percent){
+                obj.multi_match.minimum_should_match = match_percent;
+            }
+            
+            if(boost){
+                obj.multi_match.boost = boost;
+            }
+
+            if(fuzziness){
+                obj.multi_match.fuzziness = fuzziness;
+            }
+
+        } else {
+
+            obj.match = {};
+            obj.match[columns] = {};
+            obj.match[columns].query = query;
+            
+            if (operator) {
+                obj.match[columns].operator = operator;
+            }
+
+            if(match_percent){
+                obj.match[columns].minimum_should_match = match_percent;
+            }
+
+            if(boost){
+                obj.match[columns].boost = boost;
+            }
+
+            if(fuzziness){
+                obj.match[columns].fuzziness = fuzziness;
+            }
+        }
+
+        return obj;
+
+}
+
+CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+        
+    var obj = this._buildSearchOn(columns,query, fuzziness,operator,match_percent,boost);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
+
+        
+    var obj = this._buildSearchPhrase(columns, query,slop, boost);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    if(!columns instanceof Array || columns.length>1)
+           throw "There should be more than one columns in-order to use this function";
+
+    var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    if(!columns instanceof Array || columns.length>1)
+           throw "There should be more than one columns in-order to use this function";
+
+    var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.prefix = function(column, value, boost) {
+
+    var obj = {};
+    obj.prefix = {};
+    obj.prefix[column] = {};
+    obj.prefix[column].value = value;
+    
+    if(boost){
+        obj.prefix[column].boost = boost;
+    }
+
+    this.bool.must.push(obj);
+};
+
+CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
+
+    var obj = {};
+    obj.wildcard = {};
+    obj.wildcard[column] = {};
+    obj.wildcard[column].value = value;
+    
+    if(boost){
+        obj.wildcard[column].boost = boost;
+    }
+
+    this.bool.must.push(obj);
+};
+
+
+
+CB.SearchQuery.prototype.regexp = function(column, value, boost) {
+
+    var obj = {};
+    obj.regexp = {};
+    obj.regexp[column] = {};
+    obj.regexp[column].value = value;
+    
+    if(boost){
+        obj.regexp[column].boost = boost;
+    }
+
+    this.bool.must.push(obj);
+};
+
+//And logical function. 
+CB.SearchQuery.prototype.and = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.must.push(searchQuery);
+};
+
+//OR Logical function
+CB.SearchQuery.prototype.or = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.should.push(searchQuery);
+};
+
+
+//NOT logical function
+CB.SearchQuery.prototype.not = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.must_not.push(searchQuery);
+};
+
+
+/* This is CloudSearch Function, 
+
+Params : 
+CollectionNames : string or string[] of collection names. (Required)
+SearchQuery : CB.SearchQuery Object (optional)
+SearchFilter : CB.SearchFilter Object (optional)
+*/
+
+CB.CloudSearch = function(collectionNames, searchQuery, searchFilter) {
+
     this.collectionNames = collectionNames;
-    this.query={};
+    //make a filterd query in elastic search.
+
+    this.query = {};
+    this.query.filtered = {};
+    
+    
+    if(searchQuery){
+        this.query.filtered.query = searchQuery;
+    }else{
+        this.query.filtered.query = {};
+    }
+
+    if(searchFilter){
+        this.query.filtered.filter = searchFilter;
+    }else{
+        this.query.filtered.filter = {};
+    }
+
     this.from = 0; //this is skip in usual terms.
     this.size = 10; //this is take in usual terms.
     this.sort = [];
 };
 
+Object.defineProperty(CB.CloudSearch.prototype, 'searchFilter', {
+    get: function() {
+        return this.query.filtered.filter;
+    },
+    set: function(searchFilter) {
+        this.query.filtered.filter = searchFilter;
+    }
+});
+
+
+Object.defineProperty(CB.CloudSearch.prototype, 'searchQuery', {
+    get: function() {
+        return this.query.filtered.query;
+    },
+    set: function(searchQuery) {
+        this.query.filtered.query = searchQuery;
+    }
+});
+
 CB.CloudSearch.prototype.setSkip = function(data) {
     this.from = data;
-
     return this;
 };
 
@@ -44,206 +480,6 @@ CB.CloudSearch.prototype.orderByDesc = function(columnName) {
 };
 
 
-
-CB.CloudSearch.prototype._makeFilteredQuery = function() {
-
-    if (!this.query)
-        this.query = {};
-
-    if (!this.query.filtered) {
-        var prevQuery = this.query;
-        this.query = {};
-        this.query.filtered = {};
-        this.query.filtered.query = prevQuery;
-        this.query.filtered.filter = {};
-    }
-
-    this._isFilteredQuery = true;
-};
-
-CB.CloudSearch.prototype._getFilterItem = function() {
-
-    for (var key in this.query.filtered.filter) {
-        //if you have objects in this object then,
-        return this.query.filtered.filter;
-    }
-
-    //else
-    return null;
-};
-
-CB.CloudSearch.prototype._deleteFilterItems = function() {
-    this.query.filtered.filter = {};
-};
-
-CB.CloudSearch.prototype._createBoolFilter = function() {
-    if (!this.query.filtered.filter.bool)
-        this.query.filtered.filter.bool = {};
-    if (!this.query.filtered.filter.bool.must)
-        this.query.filtered.filter.bool.must = [];
-    if (!this.query.filtered.filter.bool.should)
-        this.query.filtered.filter.bool.should = [];
-
-    if (!this.query.filtered.filter.bool.must_not)
-        this.query.filtered.filter.bool.must_not = [];
-
-};
-
-CB.CloudSearch.prototype._createBoolQuery = function() {
-    if (!this.query.filtered) {
-        if (!this.query.bool)
-            this.query.bool = {};
-
-        if (!this.query.bool.must)
-            this.query.bool.must = [];
-
-        if (!this.query.bool.must_not)
-            this.query.bool.must_not = [];
-
-        if (!this.query.bool.should)
-            this.query.bool.should = [];
-
-    } else {
-        if (!this.query.filtered.query.bool)
-            this.query.filtered.query.bool = {};
-
-        if (!this.query.filtered.query.bool.must)
-            this.query.filtered.query.bool.must = [];
-
-        if (!this.query.filtered.query.bool.must_not)
-            this.query.filtered.query.bool.must_not = [];
-
-        if (!this.query.filtered.query.bool.should)
-            this.query.filtered.query.bool.should = [];
-    }
-
-
-
-};
-
-CB.CloudSearch.prototype._appendPrevFilterToBool = function() {
-    var prevTerm = this._getFilterItem();
-    this._deleteFilterItems();
-    this._createBoolFilter();
-    this.query.filtered.filter.bool.must.push(prevTerm);
-};
-
-CB.CloudSearch.prototype._pushInMustFilter = function(obj) {
-    this._makeFilteredQuery();
-
-
-    if (this.query.filtered.filter.bool && this.query.filtered.filter.bool.must) {
-        //attach this term to an array of 'must'.
-        this.query.filtered.filter.bool.must.push(obj);
-    } else if (this._getFilterItem()) {
-        //if I already have a exists, then :
-        //create a bool and and all of these.
-        this._appendPrevFilterToBool();
-        this.query.filtered.filter.bool.must.push(obj);
-
-    } else {
-        this.query.filtered.filter = obj;
-    }
-};
-
-CB.CloudSearch.prototype._pushInShouldFilter = function(obj) {
-    this._makeFilteredQuery();
-
-
-    if (this.query.filtered.filter.bool && this.query.filtered.filter.bool.should) {
-        //attach this term to an array of 'must'.
-        this.query.filtered.filter.bool.should.push(obj);
-    } else if (this._getFilterItem()) {
-        //if I already have a exists, then :
-        //create a bool and and all of these.
-        this._appendPrevFilterToBool();
-        this.query.filtered.filter.bool.should.push(obj);
-
-    } else {
-        this._createBoolFilter();
-        this.query.filtered.filter.bool.must_not.push(obj);
-    }
-};
-
-CB.CloudSearch.prototype._pushInShouldQuery = function(obj) {
-    this._makeFilteredQuery();
-
-
-    if (this.query.filtered.filter.bool && this.query.filtered.filter.bool.should) {
-        //attach this term to an array of 'must'.
-        this.query.filtered.filter.bool.should.push(obj);
-    } else if (this._getFilterItem()) {
-        //if I already have a exists, then :
-        //create a bool and and all of these.
-        this._appendPrevFilterToBool();
-        this.query.filtered.filter.bool.should.push(obj);
-
-    } else {
-        this._createBoolFilter();
-        this.query.filtered.filter.bool.must_not.push(obj);
-    }
-};
-
-
-CB.CloudSearch.prototype._pushInMustNotFilter = function(obj) {
-    this._makeFilteredQuery();
-    if (this.query.filtered.filter.bool && this.query.filtered.filter.bool.must_not) {
-        //attach this term to an array of 'must'.
-        this.query.filtered.filter.bool.must_not.push(obj);
-    } else if (this._getFilterItem()) {
-        //if I already have a term, then :
-        //create a bool and and all of these.
-        this._appendPrevFilterToBool();
-        this.query.filtered.filter.bool.must_not.push(obj);
-
-    } else {
-        this._createBoolFilter();
-        this.query.filtered.filter.bool.must_not.push(obj);
-    }
-};
-
-CB.CloudSearch.prototype.searchOn = function(columns, query, precision) {
-
-    if (this._isFilteredQuery) {
-        if (columns instanceof Array) {
-            //if columns is an array.
-            this.query.query.multi_match = {};
-            this.query.query.multi_match.query = query;
-            this.query.query.multi_match.fields = columns;
-            if (precision) {
-                this.query.query.multi_match.operator = precision;
-            }
-
-        } else {
-            this.query.query.match = {};
-            this.query.query.match[columns] = query;
-            if (precision) {
-                this.query.query.match.operator = precision;
-            }
-        }
-    } else {
-        if (columns instanceof Array) {
-            //if columns is an array.
-            this.query.multi_match = {};
-            this.query.multi_match.query = query;
-            this.query.multi_match.fields = columns;
-            if (precision) {
-                this.query.multi_match.operator = precision;
-            }
-
-        } else {
-            this.query.match = {};
-            this.query.match[columns] = query;
-            if (precision) {
-                this.query.match.operator = precision;
-            }
-        }
-    }
-
-    return this;
-};
-
-
 CB.CloudSearch.prototype.search = function(callback) {
 
     CB._validate();
@@ -260,6 +496,8 @@ CB.CloudSearch.prototype.search = function(callback) {
     } else {
         collectionName = this.collectionNames;
     }
+
+
     var params=JSON.stringify({
         collectionName: collectionName,
         query: this.query,
@@ -268,6 +506,7 @@ CB.CloudSearch.prototype.search = function(callback) {
         skip: this.from,
         key: CB.appKey
     });
+
     url = CB.apiUrl + "/" + CB.appId + "/search" ;
 
     CB._request('POST',url,params).then(function(response){
@@ -287,207 +526,4 @@ CB.CloudSearch.prototype.search = function(callback) {
     if(!callback) {
         return def;
     }
-};
-
-CB.CloudSearch.prototype.notEqualTo = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    //data can bean array too!
-    var term = {};
-    if (data instanceof Array) {
-        term.terms = {};
-        term.terms[columnName] = data;
-    } else {
-        term.term = {};
-        term.term[columnName] = data;
-    }
-
-    this._pushInMustNotFilter(term);
-
-    return this;
-
-
-};
-
-CB.CloudSearch.prototype.equalTo = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var term = {};
-    if (data instanceof Array) {
-        term.terms = {};
-        term.terms[columnName] = data;
-    } else {
-        term.term = {};
-        term.term[columnName] = data;
-    }
-
-    this._pushInMustFilter(term);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.exists = function(columnName) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.exists = {};
-    obj.exists.field = columnName;
-
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.doesNotExist = function(columnName) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.missing = {};
-    obj.missing.field = columnName;
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.greaterThanOrEqual = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.range = {};
-    obj.range[columnName] = {};
-    obj.range[columnName]['gte'] = data;
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.greaterThan = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.range = {};
-    obj.range[columnName] = {};
-    obj.range[columnName]['gt'] = data;
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.lessThan = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.range = {};
-    obj.range[columnName] = {};
-    obj.range[columnName]['lt'] = data;
-
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.prototype.lessthanOrEqual = function(columnName, data) {
-
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
-        columnName = '_' + columnName;
-    var obj = {};
-    obj.range = {};
-    obj.range[columnName] = {};
-    obj.range[columnName]['lte'] = data;
-    this._pushInMustFilter(obj);
-
-    return this;
-};
-
-CB.CloudSearch.or = function(searchObj1, searchObj2) {
-
-    var collectionNames = [];
-
-    if (searchObj1.collectionNames instanceof Array) {
-        collectionNames.append(searchObj1.collectionNames);
-    } else {
-        collectionNames.push(searchObj1.collectionNames);
-    }
-
-    if (searchObj2.collectionNames instanceof Array) {
-        //check for duplicates.
-        for (var i = 0; i < searchObj2.collectionNames; i++) {
-            if (collectionNames.indexOf(searchObj2.collectionNames[i]) < 0)
-                collectionNames.push(searchObj2.collectionNames[i]);
-        }
-    } else {
-        if (collectionNames.indexOf(searchObj2.collectionNames) < 0)
-            collectionNames.push(searchObj2.collectionNames);
-    }
-
-    var obj3 = new CB.CloudSearch(collectionNames);
-    //merge both of the objects.
-
-    var q1 = null;
-    var q2 = null;
-    var f1 = null;
-    var f2 = null;
-
-    if (searchObj1.query.filtered && searchObj1.query.filtered.query) {
-        q1 = searchObj1.query.filtered.query;
-    } else if (searchObj1.query && !searchObj1.query.filtered) {
-        q1 = searchObj1.query;
-    }
-
-    if (searchObj2.query.filtered && searchObj2.query.filtered.query) {
-        q2 = searchObj2.query.filtered.query;
-    } else if (searchObj2.query && !searchObj2.query.filtered) {
-        q2 = searchObj2.query;
-    }
-
-    if (searchObj1.query.filtered && searchObj1.query.filtered.filter)
-        f1 = searchObj1.query.filtered.filter;
-
-    /* if (searchObj1.query.filteredQuery && searchObj1.query.filteredQuery.filter)
-     f1 = searchObj1.query.filteredQuery.filter;*/
-
-    if (searchObj2.query.filtered && searchObj2.query.filtered.filter)
-        f2 = searchObj2.query.filtered.filter;
-
-    if (f1 || f2) { //if any of the filters exist, then...
-        obj3._makeFilteredQuery();
-        if (f1 && !f2)
-            obj3.query.filtered.filter = f1;
-        else if (f2 && !f1)
-            obj3.query.filtered.filter = f2;
-        else {
-            //if both exists.
-            obj3._pushInShouldFilter(f1);
-            obj3._pushInShouldFilter(f2);
-        }
-
-    }
-    if(obj3.query.filtered) {
-        if(Object.keys(q1).length>0 || Object.keys(q2).length>0) {
-            if(Object.keys(q1).length>0 && !Object.keys(q2).length>0){
-                obj3.query.filtered.query=q1;
-            }else if(!Object.keys(q1).length>0 && !Object.keys(q2).length>0){
-                obj3.query.filtered.query=q2;
-            }else{
-                obj3.query.filtered.query.bool={"should":[],"must":[],"must_not":[]};
-                obj3.query.filtered.query.bool.should.push(q1);
-                obj3.query.filtered.query.bool.should.push(q2);
-
-            }
-        }
-
-    }
-
-    return obj3;
-
 };

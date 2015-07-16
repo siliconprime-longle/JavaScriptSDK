@@ -2,7 +2,7 @@ describe("CloudObjectExpires", function () {
 
     it("should save a CloudObject after expire is set", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.set('age', 10);
@@ -20,7 +20,7 @@ describe("CloudObjectExpires", function () {
 
     it("objects expired should not show up in query", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         var curr=new Date().getTime();
         var query1 = new CB.CloudQuery('student1');
         query1.equalTo('name','vipul');
@@ -54,13 +54,22 @@ describe("CloudObjectExpires", function () {
 
     it("objects expired should not show up in Search", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         var curr=new Date().getTime();
-        var query1 = new CB.CloudSearch('student1');
-        query1.equalTo('name','vipul');
-       var query2 = new CB.CloudSearch('student1');
-        query2.lessThan('age',12);
-        var query = CB.CloudSearch.or(query1,query2);
+        var query = new CB.CloudSearch('student1');
+        
+        var searchFilter1 = new CB.SearchFilter();
+        searchFilter1.equalTo('name','vipul');
+
+        var searchFilter2 = new CB.SearchFilter();
+        searchFilter2.lessThan('age',12);
+
+        var searchFilter = new CB.SearchFilter();
+        searchFilter.or(searchFilter1);
+        searchFilter.or(searchFilter2);
+
+        query.searchFilter = searchFilter;
+        
         query.search({
             success:function(list){
             if(list.length>0) {

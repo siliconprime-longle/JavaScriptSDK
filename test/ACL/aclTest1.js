@@ -2,7 +2,7 @@ describe("ACL", function () {
 
     it("Should set the public write access", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
@@ -26,7 +26,7 @@ describe("ACL", function () {
 
     it("Should set the public read access", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
@@ -48,7 +48,7 @@ describe("ACL", function () {
 
     it("Should create new user", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         userObj.set('username', username);
         userObj.set('password',passwd);
@@ -66,7 +66,7 @@ describe("ACL", function () {
 
     it("Should set the user read access", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
@@ -85,7 +85,7 @@ describe("ACL", function () {
 
     it("Should allow users of role to write", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
@@ -104,7 +104,7 @@ describe("ACL", function () {
 
     it("Should allow users of role to read", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('student4');
         obj.ACL.setRoleReadAccess(userObj.get('id'),true);
