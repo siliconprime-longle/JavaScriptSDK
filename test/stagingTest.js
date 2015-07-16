@@ -7836,7 +7836,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 
 
 /* For Expire of objects */
-
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
         return this.document._expires;
@@ -7848,7 +7847,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 });
 
 /* This is Real time implementation of CloudObjects */
-
 CB.CloudObject.on = function(tableName, eventType, callback, done) {
 
     var def;
@@ -7961,6 +7959,7 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
 
 CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
     this.document[columnName] = null;
+    CB._modified(this,columnName);
 };
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
@@ -10438,6 +10437,7 @@ describe("Cloud Object", function() {
      	});
     });
 
+
     it("should not allow multiple dataTypes in an array. ", function(done) {
 
         this.timeout(20000);
@@ -10804,6 +10804,23 @@ describe("Cloud Object", function() {
             });
         },function(){
             throw "should save the object";
+        });
+    });
+
+    it("should display correct error message when you save a string in a number field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom7');
+        obj.set('requiredNumber','sample');
+       
+        obj.save({
+            success : function(newObj){
+                throw 'Wrong datatype in an array saved.';
+            }, error : function(error){
+                console.log(error);
+                done();
+            }
         });
     });
 });

@@ -406,6 +406,7 @@ describe("Cloud Object", function() {
      	});
     });
 
+
     it("should not allow multiple dataTypes in an array. ", function(done) {
 
         this.timeout(20000);
@@ -772,6 +773,23 @@ describe("Cloud Object", function() {
             });
         },function(){
             throw "should save the object";
+        });
+    });
+
+    it("should display correct error message when you save a string in a number field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom7');
+        obj.set('requiredNumber','sample');
+       
+        obj.save({
+            success : function(newObj){
+                throw 'Wrong datatype in an array saved.';
+            }, error : function(error){
+                console.log(error);
+                done();
+            }
         });
     });
 });

@@ -7836,7 +7836,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 
 
 /* For Expire of objects */
-
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
         return this.document._expires;
@@ -7848,7 +7847,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 });
 
 /* This is Real time implementation of CloudObjects */
-
 CB.CloudObject.on = function(tableName, eventType, callback, done) {
 
     var def;
@@ -7961,6 +7959,7 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
 
 CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
     this.document[columnName] = null;
+    CB._modified(this,columnName);
 };
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
