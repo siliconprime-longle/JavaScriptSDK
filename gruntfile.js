@@ -39,6 +39,5 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.registerTask('default',['concat:foo','concat:bar','concat:tom']);
-    grunt.registerTask('ugly',['uglify']);
+    grunt.registerTask('default',['concat:foo','concat:bar','concat:tom','uglify']);
 };

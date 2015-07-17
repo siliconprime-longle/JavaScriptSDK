@@ -301,6 +301,63 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should save a CloudObject as a relation with relate function. ", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+        obj1.save({
+            success : function(newObj){
+                obj.relate('sameRelation', 'Sample', newObj.id); //saving with sample text
+
+                obj.save({
+                    success : function(newObj){
+                        done();
+                    }, error : function(error){
+                        throw "Error saving object. ";
+                    }
+                });
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+    it("should keep relations intact.", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn2',new CB.CloudObject('Custom3'));
+
+        obj.set('newColumn7',new CB.CloudObject('student1'));
+        
+        obj.save({
+            success : function(newObj){
+
+               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1')
+               {
+                    done();
+               }
+
+               throw "Wrong Relationship retrieved.";
+
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+
+
      it("should not save a a wrong relation.", function(done) {
        this.timeout(20000);
 
@@ -628,6 +685,61 @@ describe("Cloud Object", function() {
                 console.log(error);
                 done();
             }
+        });
+    });
+
+     it("should unset the field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+
+     it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
         });
     });
 });

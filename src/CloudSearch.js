@@ -172,7 +172,7 @@ CB.SearchQuery = function(){
 
 CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boost) {
 
-    var obj = _buildSearchOn(columns, query, null, null,null,boost);
+    var obj = this._buildSearchOn(columns, query, null, null,null,boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'phrase';
@@ -193,7 +193,7 @@ CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boo
 
 CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'best_fields';
@@ -206,7 +206,7 @@ CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness,
 
 CB.SearchQuery.prototype._buildMostColumns = function(columns, query, fuzziness,  operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'most_fields';
@@ -292,7 +292,7 @@ CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
 
 CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -304,7 +304,7 @@ CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, opera
 
 CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -339,7 +339,7 @@ CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
         obj.wildcard[column].boost = boost;
     }
 
-    this.bool.must.push(obj);
+    this.bool.should.push(obj);
 };
 
 

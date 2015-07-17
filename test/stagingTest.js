@@ -7948,6 +7948,25 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 };
 
 
+CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        throw "You cannot link an object to this column";
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+
+    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+    CB._modified(this,columnName);
+};
+
+
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
     if (columnName === 'id' ||  columnName === 'expires')
@@ -8841,7 +8860,7 @@ CB.SearchQuery = function(){
 
 CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boost) {
 
-    var obj = _buildSearchOn(columns, query, null, null,null,boost);
+    var obj = this._buildSearchOn(columns, query, null, null,null,boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'phrase';
@@ -8862,7 +8881,7 @@ CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boo
 
 CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'best_fields';
@@ -8875,7 +8894,7 @@ CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness,
 
 CB.SearchQuery.prototype._buildMostColumns = function(columns, query, fuzziness,  operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'most_fields';
@@ -8961,7 +8980,7 @@ CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
 
 CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -8973,7 +8992,7 @@ CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, opera
 
 CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -9008,7 +9027,7 @@ CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
         obj.wildcard[column].boost = boost;
     }
 
-    this.bool.must.push(obj);
+    this.bool.should.push(obj);
 };
 
 
@@ -10494,6 +10513,63 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should save a CloudObject as a relation with relate function. ", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+        obj1.save({
+            success : function(newObj){
+                obj.relate('sameRelation', 'Sample', newObj.id); //saving with sample text
+
+                obj.save({
+                    success : function(newObj){
+                        done();
+                    }, error : function(error){
+                        throw "Error saving object. ";
+                    }
+                });
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+    it("should keep relations intact.", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn2',new CB.CloudObject('Custom3'));
+
+        obj.set('newColumn7',new CB.CloudObject('student1'));
+        
+        obj.save({
+            success : function(newObj){
+
+               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1')
+               {
+                    done();
+               }
+
+               throw "Wrong Relationship retrieved.";
+
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+
+
      it("should not save a a wrong relation.", function(done) {
        this.timeout(20000);
 
@@ -10821,6 +10897,61 @@ describe("Cloud Object", function() {
                 console.log(error);
                 done();
             }
+        });
+    });
+
+     it("should unset the field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+
+     it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
         });
     });
 });
@@ -12176,6 +12307,114 @@ describe("CloudSearch", function (done) {
             }
         });
     });
+
+
+    it("should search for object with a phrase",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.phrase('name', 'Gautam Singh');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a wildcard",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.wildcard('name', 'G*');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+
+    it("should search for object with a prefix",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.prefix('name', 'G');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+     it("should search for object with a mostcolumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.mostColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a bestColumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.bestColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
 
     it("should search values which are not equal to a given value",function(done){
 

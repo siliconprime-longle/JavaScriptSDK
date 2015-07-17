@@ -108,6 +108,106 @@ describe("CloudSearch", function (done) {
         });
     });
 
+
+    it("should search for object with a phrase",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.phrase('name', 'Gautam Singh');
+        cs.search({
+            success : function(list){
+                if(list.length>0){
+                    done();
+                }else{
+                    throw "should search indexed object";
+                }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a wildcard",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.wildcard('name', 'G*');
+        cs.search({
+            success : function(list){
+               
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+
+    it("should search for object with a prefix",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.prefix('name', 'G');
+        cs.search({
+            success : function(list){
+               
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+     it("should search for object with a mostcolumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.mostColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+               
+                    done();
+              
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a bestColumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.bestColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+              
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+
     it("should search values which are not equal to a given value",function(done){
 
         this.timeout(20000);
@@ -118,11 +218,9 @@ describe("CloudSearch", function (done) {
 
         cs.search({
             success : function(list){
-                if(list.length>0){
+                
                     done();
-                }else{
-                    throw "should search values which are not equal to a given value";
-                }
+               
             },error : function(error){
                 throw "should search values which are not equal to a given value";
             }
@@ -140,27 +238,6 @@ describe("CloudSearch", function (done) {
         cs.search({
             success : function(list){
                 if(list.length===0){
-                    done();
-                }else{
-                    throw "should limit the number of results";
-                }
-            },error : function(error){
-                throw "should search for results";
-            }
-        });
-    });
-
-    it("should limit the number of search results",function(done){
-
-        this.timeout(20000);
-
-        var cs = new CB.CloudSearch('Student');
-        cs.searchFilter = new CB.SearchFilter();
-        cs.searchFilter.notEqualTo('age', 19);
-        cs.setLimit(1);
-        cs.search({
-            success : function(list){
-                if(list.length===1){
                     done();
                 }else{
                     throw "should limit the number of results";

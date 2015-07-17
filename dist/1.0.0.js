@@ -7948,6 +7948,25 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 };
 
 
+CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        throw "You cannot link an object to this column";
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+
+    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+    CB._modified(this,columnName);
+};
+
+
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
     if (columnName === 'id' ||  columnName === 'expires')
@@ -8841,7 +8860,7 @@ CB.SearchQuery = function(){
 
 CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boost) {
 
-    var obj = _buildSearchOn(columns, query, null, null,null,boost);
+    var obj = this._buildSearchOn(columns, query, null, null,null,boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'phrase';
@@ -8862,7 +8881,7 @@ CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boo
 
 CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'best_fields';
@@ -8875,7 +8894,7 @@ CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness,
 
 CB.SearchQuery.prototype._buildMostColumns = function(columns, query, fuzziness,  operator, match_percent, boost) {
 
-    var obj = _buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
 
      if (columns instanceof Array) {
         obj.multi_match.type = 'most_fields';
@@ -8961,7 +8980,7 @@ CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
 
 CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -8973,7 +8992,7 @@ CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, opera
 
 CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
 
-    if(!columns instanceof Array || columns.length>1)
+    if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
     var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
@@ -9008,7 +9027,7 @@ CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
         obj.wildcard[column].boost = boost;
     }
 
-    this.bool.must.push(obj);
+    this.bool.should.push(obj);
 };
 
 

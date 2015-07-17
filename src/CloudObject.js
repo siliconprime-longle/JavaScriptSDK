@@ -170,6 +170,25 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 };
 
 
+CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        throw "You cannot link an object to this column";
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+
+    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+    CB._modified(this,columnName);
+};
+
+
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
     if (columnName === 'id' ||  columnName === 'expires')
