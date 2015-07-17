@@ -7871,7 +7871,7 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
             CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
-                callback(CB._deserialize(data));
+                callback(CB.fromJSON(data));
             });
 
             if(done && done.success)
@@ -7992,13 +7992,13 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
     var thisObj = this;
     var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/save";
     //console.log(params);
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -8041,7 +8041,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -8076,7 +8076,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document: CB._serialize(thisObj)
+        document: CB.toJSON(thisObj)
     });
     url = CB.apiUrl + "/" + CB.appId +"/delete/";
 
@@ -8541,7 +8541,7 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB._deserialize(JSON.parse(response));
+        var object = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
@@ -8586,7 +8586,7 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB._deserialize(JSON.parse(response));
+        var object = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
@@ -8630,9 +8630,9 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
             response = response[0];
         }
         if (callback) {
-            callback.success(CB._deserialize(JSON.parse(response)));
+            callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
-            def.resolve(CB._deserialize(JSON.parse(response)));
+            def.resolve(CB.fromJSON(JSON.parse(response)));
         }
     },function(err){
         if(callback){
@@ -8667,7 +8667,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
     url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB._deserialize(JSON.parse(response));
+        var object = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
@@ -9198,7 +9198,7 @@ CB.CloudSearch.prototype.search = function(callback) {
     url = CB.apiUrl + "/" + CB.appId + "/search" ;
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB._deserialize(JSON.parse(response));
+        var object = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
@@ -9273,13 +9273,13 @@ CB.CloudUser.prototype.signUp = function(callback) {
     }
     //now call the signup API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = thisObj;
         if (callback) {
             callback.success(thisObj);
@@ -9313,13 +9313,13 @@ CB.CloudUser.prototype.logIn = function(callback) {
     }
     //now call the signup API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = thisObj;
         if (callback) {
             callback.success(thisObj);
@@ -9352,13 +9352,13 @@ CB.CloudUser.prototype.logOut = function(callback) {
     }
     //now call the logout API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = null;
         if (callback) {
             callback.success(thisObj);
@@ -9389,14 +9389,14 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     }
     //Call the addToRole API
     var params=JSON.stringify({
-        user: CB._serialize(thisObj),
-        role: CB._serialize(role),
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
 
     CB._request('PUT',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -9431,14 +9431,14 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     }
     //now call the removeFromRole API.
     var params=JSON.stringify({
-        user: CB._serialize(thisObj),
-        role: CB._serialize(role),
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
 
     CB._request('PUT',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -9493,7 +9493,7 @@ CB.CloudRole.getRole = function(role, callback) {
     url = CB.apiUrl + "/" + CB.appId + "/role/getRole/" + roleName ;
 
     CB._request('POST',url,params).then(function(response){
-        var thisObj = CB._deserialize((JSON.parse(response)));
+        var thisObj = CB.fromJSON((JSON.parse(response)));
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -9810,7 +9810,7 @@ if (typeof(Number.prototype.toRad) === "undefined") {
 }
 
 /* PRIVATE METHODS */
-CB._serialize = function(thisObj) {
+CB.toJSON = function(thisObj) {
 
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
@@ -9833,7 +9833,7 @@ CB._serialize = function(thisObj) {
     for (var key in doc) {
         if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
-            doc[key] = CB._serialize(doc[key]); //serialize this object.
+            doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
             //if this is an ACL, then. Convert this from CB.ACL object to JSON - to strip all the ACL Methods.
             var acl = {
@@ -9847,7 +9847,7 @@ CB._serialize = function(thisObj) {
             if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
-                    arr.push(CB._serialize(doc[key][i]));
+                    arr.push(CB.toJSON(doc[key][i]));
                 }
                 doc[key] = arr;
             }
@@ -9857,7 +9857,7 @@ CB._serialize = function(thisObj) {
     return doc;
 };
 
-CB._deserialize = function(data, thisObj) {
+CB.fromJSON = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
@@ -9873,7 +9873,7 @@ CB._deserialize = function(data, thisObj) {
             var arr = [];
 
             for (var i = 0; i < data.length; i++) {
-                obj = CB._deserialize(data[i]);
+                obj = CB.fromJSON(data[i]);
                 arr.push(obj);
             }
 
@@ -9891,7 +9891,7 @@ CB._deserialize = function(data, thisObj) {
 
         for (var key in data) {
             if(data[key] instanceof Array) {
-                document[key]=CB._deserialize(data[key]);
+                document[key]=CB.fromJSON(data[key]);
             }else if (data[key] instanceof Object) {
                 if (key === 'ACL') {
                     //this is an ACL.
@@ -9901,9 +9901,9 @@ CB._deserialize = function(data, thisObj) {
 
                 } else if(data[key]._type) {
                     if(thisObj)
-                        document[key] = CB._deserialize(data[key], thisObj.get(key));
+                        document[key] = CB.fromJSON(data[key], thisObj.get(key));
                     else
-                        document[key] = CB._deserialize(data[key]);
+                        document[key] = CB.fromJSON(data[key]);
                 }else{
                     document[key] = data[key];
                 }

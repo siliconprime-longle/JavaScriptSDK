@@ -93,7 +93,7 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
             CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
-                callback(CB._deserialize(data));
+                callback(CB.fromJSON(data));
             });
 
             if(done && done.success)
@@ -214,13 +214,13 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
     var thisObj = this;
     var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/save";
     //console.log(params);
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -263,7 +263,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -298,7 +298,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document: CB._serialize(thisObj)
+        document: CB.toJSON(thisObj)
     });
     url = CB.apiUrl + "/" + CB.appId +"/delete/";
 

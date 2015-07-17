@@ -35,7 +35,7 @@ CB.CloudRole.getRole = function(role, callback) {
     url = CB.apiUrl + "/" + CB.appId + "/role/getRole/" + roleName ;
 
     CB._request('POST',url,params).then(function(response){
-        var thisObj = CB._deserialize((JSON.parse(response)));
+        var thisObj = CB.fromJSON((JSON.parse(response)));
         if (callback) {
             callback.success(thisObj);
         } else {

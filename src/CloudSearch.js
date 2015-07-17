@@ -510,7 +510,7 @@ CB.CloudSearch.prototype.search = function(callback) {
     url = CB.apiUrl + "/" + CB.appId + "/search" ;
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB._deserialize(JSON.parse(response));
+        var object = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(object);
         } else {
