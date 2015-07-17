@@ -129,4 +129,35 @@
             
     });
 
+
+     it("should run containedIn over list of CloudObjects by passing a list of CloudObjects",function(done){
+
+            this.timeout(100000);
+
+            var obj = new CB.CloudObject('Custom');
+            var obj1 = new CB.CloudObject('Custom');
+
+            var obj2 = new CB.CloudObject('Custom');
+
+            obj.set('newColumn7', [obj2,obj1]);
+
+            obj.save().then(function(obj){
+                var query = new CB.CloudQuery('Custom');
+                query.containedIn('newColumn7', obj.get('newColumn7'));
+                query.find().then(function(list){
+                    if(list.length>0){
+                        done();
+                    }else{
+                        throw "Cannot query";
+                    }
+                }, function(error){
+                    throw "Cannot query";
+                });
+            }, function(error){
+                throw "Cannot save an object";
+            });
+
+            
+    });
+
 });

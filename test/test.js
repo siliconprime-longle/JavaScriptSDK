@@ -1701,6 +1701,37 @@ describe("CloudQuery Include", function () {
             
     });
 
+
+     it("should run containedIn over list of CloudObjects by passing a list of CloudObjects",function(done){
+
+            this.timeout(100000);
+
+            var obj = new CB.CloudObject('Custom');
+            var obj1 = new CB.CloudObject('Custom');
+
+            var obj2 = new CB.CloudObject('Custom');
+
+            obj.set('newColumn7', [obj2,obj1]);
+
+            obj.save().then(function(obj){
+                var query = new CB.CloudQuery('Custom');
+                query.containedIn('newColumn7', obj.get('newColumn7'));
+                query.find().then(function(list){
+                    if(list.length>0){
+                        done();
+                    }else{
+                        throw "Cannot query";
+                    }
+                }, function(error){
+                    throw "Cannot query";
+                });
+            }, function(error){
+                throw "Cannot save an object";
+            });
+
+            
+    });
+
 });
 describe("CloudQuery", function () {
 
@@ -2419,6 +2450,29 @@ describe("CloudQuery", function () {
         });
     });
 
+    it("Should query over boolean datatype",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn1',false);
+            obj1.save().then(function(obj){
+                var cbQuery = new CB.CloudQuery('Custom1');
+                cbQuery.equalTo('newColumn1', false);
+                cbQuery.find({
+                  success: function(objList){
+                    if(objList.length>0)
+                        done();
+                    else
+                        throw "Cannot query over boolean datatype ";
+                  },
+                  error: function(err){
+                     throw "Error querying object.";
+                  }
+                });
+               
+            },function(){
+               throw "should save the object";
+            });
+        });
 });
 describe("CloudSearch", function (done) {
 

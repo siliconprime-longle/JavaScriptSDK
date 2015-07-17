@@ -8285,25 +8285,33 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if(data instanceof CB.CloudObject){
+   
+    
 
-        if(!data.id){
-            throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
-        }
-
-        columnName = columnName+'._id';
-        data = data._id;
-    }
-
-    else if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
 
-    if (!this.query[columnName]) {
-        this.query[columnName] = {};
-    }
-
+    
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+                }
+                columnName = columnName+'._id';
+                data[i] = data[i]._id;
+
+                
+            }
+        }
+
+        if (!this.query[columnName]) {
+                    this.query[columnName] = {};
+        }
+
         this.query[columnName]["$in"] = data;
         thisObj = this;
         if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing dublicates
@@ -8314,6 +8322,23 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             });
         }
     } else { //if the argument is a string then push if it is not present already
+
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+            }
+
+            columnName = columnName+'._id';
+            data = data._id;
+        }
+
+        if (!this.query[columnName]) {
+                this.query[columnName] = {};
+        }
+
+
         if (!this.query[columnName]["$in"]) {
             this.query[columnName]["$in"] = [];
         }
@@ -8326,6 +8351,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
         }
     }
+    
 
     return this;
 }
@@ -8335,14 +8361,32 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if (Object.prototype.toString.call(data) === '[object Object]') { //if object is passed as an argument
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
         throw 'Array or string expected as an argument';
     }
+
     if (!this.query[columnName]) {
         this.query[columnName] = {};
     }
 
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+                }
+                columnName = columnName+'._id';
+                data[i] = data[i]._id;
+
+                 if (!this.query[columnName]) {
+                    this.query[columnName] = {};
+                 }
+            }
+        }
+
         this.query[columnName]["$nin"] = data;
         if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing dublicates
             thisObj = this;
@@ -8353,6 +8397,22 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
             });
         }
     } else { //if the argument is a string then push if it is not present already
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+            }
+
+            columnName = columnName+'._id';
+            data = data._id;
+
+            if (!this.query[columnName]) {
+                    this.query[columnName] = {};
+            }
+        }
+
+
         if (!this.query[columnName]["$nin"]) {
             this.query[columnName]["$nin"] = [];
         }
