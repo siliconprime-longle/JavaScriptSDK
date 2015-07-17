@@ -8302,7 +8302,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
                 columnName = columnName+'._id';
-                data[i] = data[i]._id;
+                data[i] = data[i].id;
 
                 
             }
@@ -8331,7 +8331,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data._id;
+            data = data.id;
         }
 
         if (!this.query[columnName]) {
@@ -8365,10 +8365,6 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
         throw 'Array or string expected as an argument';
     }
 
-    if (!this.query[columnName]) {
-        this.query[columnName] = {};
-    }
-
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
 
@@ -8379,13 +8375,13 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
                 columnName = columnName+'._id';
-                data[i] = data[i]._id;
-
-                 if (!this.query[columnName]) {
-                    this.query[columnName] = {};
-                 }
+                data[i] = data[i].id;                
             }
         }
+
+         if (!this.query[columnName]) {
+            this.query[columnName] = {};
+         }
 
         this.query[columnName]["$nin"] = data;
         if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing dublicates
@@ -8405,11 +8401,11 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data._id;
+            data = data.id;
+        }
 
-            if (!this.query[columnName]) {
-                    this.query[columnName] = {};
-            }
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
         }
 
 

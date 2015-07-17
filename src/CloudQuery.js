@@ -202,7 +202,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
                 columnName = columnName+'._id';
-                data[i] = data[i]._id;
+                data[i] = data[i].id;
 
                 
             }
@@ -231,7 +231,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data._id;
+            data = data.id;
         }
 
         if (!this.query[columnName]) {
@@ -275,7 +275,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
                 columnName = columnName+'._id';
-                data[i] = data[i]._id;                
+                data[i] = data[i].id;                
             }
         }
 
@@ -301,7 +301,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data._id;
+            data = data.id;
         }
 
         if (!this.query[columnName]) {
