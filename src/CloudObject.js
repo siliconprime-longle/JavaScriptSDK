@@ -2,13 +2,22 @@
  CloudObject
  */
 
-CB.CloudObject = function(tableName) { //object for documents
+CB.CloudObject = function(tableName, id) { //object for documents
+    
     this.document = {};
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
-    this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+
+    if(!id){
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._isModified = true;
+    }
+    else{
+        this.document._modifiedColumns = [];
+        this.document._isModified = false;
+        this.document._id = id;
+    }
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
@@ -24,10 +33,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
 Object.defineProperty(CB.CloudObject.prototype, 'id', {
     get: function() {
         return this.document._id;
-    },
-    set: function(id) {
-        this.document._id = id;
-        CB._modified(this,'_id');
     }
 });
 
@@ -51,18 +56,8 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
     }
 });
 
-Object.defineProperty(CB.CloudObject.prototype, 'isSearchable', {
-    get: function() {
-        return this.document._isSearchable;
-    },
-    set: function(isSearchable) {
-        this.document._isSearchable = isSearchable;
-        CB._modified(this,'_isSearchable');
-    }
-});
 
 /* For Expire of objects */
-
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
         return this.document._expires;
@@ -74,7 +69,6 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 });
 
 /* This is Real time implementation of CloudObjects */
-
 CB.CloudObject.on = function(tableName, eventType, callback, done) {
 
     var def;
@@ -99,7 +93,7 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
             CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
-                callback(CB._deserialize(data));
+                callback(CB.fromJSON(data));
             });
 
             if(done && done.success)
@@ -162,7 +156,10 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 
     var keywords = ['_tableName', '_type', 'operator'];
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
@@ -173,9 +170,28 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
 };
 
 
+CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        throw "You cannot link an object to this column";
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+
+    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+    CB._modified(this,columnName);
+};
+
+
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+    if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
     return this.document[columnName];
@@ -184,6 +200,7 @@ CB.CloudObject.prototype.get = function(columnName) { //for getting data of a pa
 
 CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
     this.document[columnName] = null;
+    CB._modified(this,columnName);
 };
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
@@ -197,13 +214,13 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
     var thisObj = this;
     var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/save";
     //console.log(params);
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -246,7 +263,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -281,7 +298,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document: CB._serialize(thisObj)
+        document: CB.toJSON(thisObj)
     });
     url = CB.apiUrl + "/" + CB.appId +"/delete/";
 
@@ -298,7 +315,6 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
             def.reject(err);
         }
     });
-
 
     if (!callback) {
         return def;

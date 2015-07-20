@@ -55,13 +55,13 @@ CB.CloudUser.prototype.signUp = function(callback) {
     }
     //now call the signup API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = thisObj;
         if (callback) {
             callback.success(thisObj);
@@ -95,13 +95,13 @@ CB.CloudUser.prototype.logIn = function(callback) {
     }
     //now call the signup API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = thisObj;
         if (callback) {
             callback.success(thisObj);
@@ -134,13 +134,13 @@ CB.CloudUser.prototype.logOut = function(callback) {
     }
     //now call the logout API.
     var params=JSON.stringify({
-        document: CB._serialize(thisObj),
+        document: CB.toJSON(thisObj),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = null;
         if (callback) {
             callback.success(thisObj);
@@ -171,14 +171,14 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     }
     //Call the addToRole API
     var params=JSON.stringify({
-        user: CB._serialize(thisObj),
-        role: CB._serialize(role),
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
 
     CB._request('PUT',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -213,14 +213,14 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     }
     //now call the removeFromRole API.
     var params=JSON.stringify({
-        user: CB._serialize(thisObj),
-        role: CB._serialize(role),
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
 
     CB._request('PUT',url,params).then(function(response){
-        CB._deserialize(JSON.parse(response),thisObj);
+        CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {

@@ -1,11 +1,10 @@
 describe("CloudSearch", function (done) {
 
-    this.timeout(10000);
+    this.timeout(20000);
 
     it("should index object for search", function (done) {
         var obj = new CB.CloudObject('Custom1');
         obj.set('description', 'wi-fi');
-        obj.isSearchable = true;
         obj.save({
             success : function(obj){
                 done();
@@ -17,10 +16,11 @@ describe("CloudSearch", function (done) {
 
     it("should search indexed object", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Custom1');
-        cs.searchOn('description', 'wi-fi');
+        cs.searchQuery = new CB.SearchQuery();
+        cs.searchQuery.searchOn('description', 'wi-fi');
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -34,24 +34,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    it("should search indexed object", function (done) {
-
-        this.timeout(10000);
-
-        var cs = new CB.CloudSearch('Custom1');
-        cs.searchOn('description', 'wi-fi');
-        cs.search({
-            success : function(list){
-                if(list.length>0){
-                    done();
-                }else{
-                    throw "should search indexed object";
-                }
-            },error : function(error){
-                throw "should search indexed object";
-            }
-        });
-    });
+   
 
     it("should index test data",function(done){
 
@@ -62,7 +45,7 @@ describe("CloudSearch", function (done) {
         obj.set('age', 19);
         obj.set('name', 'Nawaz Dhandala');
         obj.set('class', 'Java');
-        obj.isSearchable = true;
+       
         obj.save({
             success : function(obj){
                 //now search on this object.
@@ -72,7 +55,7 @@ describe("CloudSearch", function (done) {
                // obj.expires=new Date().getTime();
                 obj.set('name', 'Gautam Singh');
                 obj.set('class', 'C#');
-                obj.isSearchable = true;
+                
                 obj.save({
                     success : function(obj){
                         var obj = new CB.CloudObject('Student');
@@ -81,7 +64,7 @@ describe("CloudSearch", function (done) {
                    //     obj.expires=new Date().getTime();
                         obj.set('name', 'Ravi');
                         obj.set('class', 'C#');
-                        obj.isSearchable = true;
+                       
 
                         obj.save({
                             success : function(obj){
@@ -106,10 +89,12 @@ describe("CloudSearch", function (done) {
 
     it("should search for object for a given value",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.equalTo('age', 19);
+        cs.searchFilter = new CB.SearchFilter();
+
+        cs.searchFilter .equalTo('age', 19);
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -123,19 +108,119 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    it("should search values which are not equal to a given value",function(done){
 
-        this.timeout(10000);
+    it("should search for object with a phrase",function(done){
+
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.notEqualTo('age', 19);
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.phrase('name', 'Gautam Singh');
         cs.search({
             success : function(list){
                 if(list.length>0){
                     done();
                 }else{
-                    throw "should search values which are not equal to a given value";
+                    throw "should search indexed object";
                 }
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a wildcard",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.wildcard('name', 'G*');
+        cs.search({
+            success : function(list){
+               
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+
+    it("should search for object with a prefix",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.prefix('name', 'G');
+        cs.search({
+            success : function(list){
+               
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+     it("should search for object with a mostcolumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.mostColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+               
+                    done();
+              
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+    it("should search for object with a bestColumns",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchQuery = new CB.SearchQuery();
+
+        cs.searchQuery.bestColumns(['name','description'], 'G');
+        cs.search({
+            success : function(list){
+              
+                    done();
+               
+            },error : function(error){
+                throw "should search indexed object";
+            }
+        });
+    });
+
+
+    it("should search values which are not equal to a given value",function(done){
+
+        this.timeout(20000);
+
+        var cs = new CB.CloudSearch('Student');
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.notEqualTo('age', 19);
+
+        cs.search({
+            success : function(list){
+                
+                    done();
+               
             },error : function(error){
                 throw "should search values which are not equal to a given value";
             }
@@ -147,7 +232,8 @@ describe("CloudSearch", function (done) {
         this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.notEqualTo('age', 19);
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.notEqualTo('age', 19);
         cs.setLimit(0);
         cs.search({
             success : function(list){
@@ -162,38 +248,20 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    it("should limit the number of search results",function(done){
-
-        this.timeout(10000);
-
-        var cs = new CB.CloudSearch('Student');
-        cs.notEqualTo('age', 19);
-        cs.setLimit(1);
-        cs.search({
-            success : function(list){
-                if(list.length===1){
-                    done();
-                }else{
-                    throw "should limit the number of results";
-                }
-            },error : function(error){
-                throw "should search for results";
-            }
-        });
-    });
-
     it("should skip elements",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.notEqualTo('age', 19);
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.notEqualTo('age', 19);
         cs.setSkip(9999999);
         cs.search({
             success : function(list){
                 if(list.length===0){
                     var cs = new CB.CloudSearch('Student');
-                    cs.notEqualTo('age', 19);
+                    cs.searchFilter = new CB.SearchFilter();
+                    cs.searchFilter.notEqualTo('age', 19);
                     cs.setSkip(1);
                     cs.search({
                         success : function(list){
@@ -217,7 +285,7 @@ describe("CloudSearch", function (done) {
 
     it("should sort the results in ascending order",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.orderByAsc('age');
@@ -236,7 +304,7 @@ describe("CloudSearch", function (done) {
 
     it("should sort elements in descending order",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.orderByDesc('age');
@@ -255,10 +323,11 @@ describe("CloudSearch", function (done) {
 
     it("should give elements in which a particular column exists",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.exists('name');
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.exists('name');
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -274,10 +343,11 @@ describe("CloudSearch", function (done) {
 
     it("should search for records which do not have a certain column",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.doesNotExist('expire');
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.doesNotExist('expire');
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -293,11 +363,12 @@ describe("CloudSearch", function (done) {
 
     it("should give records within a certain range",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
-        cs.greaterThan('age',19);
-        cs.lessThan('age',50);
+        cs.searchFilter = new CB.SearchFilter();
+        cs.searchFilter.greaterThan('age',19);
+        cs.searchFilter.lessThan('age',50);
         cs.search({
             success : function(list){
                 if(list.length>0){
@@ -311,72 +382,235 @@ describe("CloudSearch", function (done) {
         });
     });
 
-    /*it("should unIndex the CloudObject",function(done){
 
-        this.timeout(15000);
+    it("OR should work between tables",function(done){
 
-        var obj = new CB.CloudObject('Student');
-        obj.set('age',777);
-        obj.set('isSearchable',true);
-        obj.save().then(function(list){
-            console.log(list);
-            list.set('isSearchable',false);
-            list.save().then(function(list){
-                var searchObj = new CB.CloudSearch('Student');
-                searchObj.equalTo('id',obj.get('id'));
-                searchObj.search().then(function(list){
-                    console.log('here');
-                    if(list.length === 0){
-                        done();
-                    }else{
-                        throw "Unable to UnIndex the CloudObject";
-                    }
-                },function(){
-                    console.log(err);
-                });
-            },function(err){
-                console.log(err);
-            });
-        },function(err){
-            console.log(err);
-        });
-    });*/
+        this.timeout(20000);
 
-    it("should reIndex the unIndexed CloudObject",function(done){
-
-        this.timeout(50000);
 
         var obj = new CB.CloudObject('Student');
-        obj.set('age',777);
-        obj.set('isSearchable',true);
-        obj.save().then(function(list){
-            console.log(list);
-            list.set('isSearchable',false);
-            list.save().then(function(list){
-                console.log(list);
-                list.set('isSearchable',true);
-                list.save().then(function(list){
-                    var searchObj = new CB.CloudSearch('Student');
-                    searchObj.equalTo('id',obj.get('id'));
-                    searchObj.search().then(function(list){
-                        console.log('here');
-                        if(list.length > 0){
+        obj.set('name', 'RAVI');
+
+         var obj1 = new CB.CloudObject('hostel');
+         obj1.set('room', 509);
+
+         obj.save().then(function(obj){
+            obj1.save().then(function(obj1){
+                
+                var tableNames = ['Student','hostel'];
+
+                
+                var sq = new CB.SearchQuery();
+                sq.searchOn('name','ravi');
+
+                var sq1 = new CB.SearchQuery();
+                sq1.searchOn('room',509);
+
+                var cs = new CB.CloudSearch(tableNames);
+                cs.searchQuery = new CB.SearchQuery();
+                cs.searchQuery.or(sq);
+                cs.searchQuery.or(sq1);
+
+                cs.setLimit(9999);
+
+                cs.search({
+                    success : function(list){
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].document._tableName){
+                                if(tableNames.indexOf(list[i].document._tableName)>-1){
+                                    tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                                }
+                            }
+                        }
+
+
+                        if(tableNames.length===0){
+                            //test passed. 
                             done();
                         }else{
-                            throw "Unable to UnIndex the CloudObject";
+                            throw "Search on both tables with OR failed.";
                         }
-                    },function(){
-                        console.log(err);
-                    });
-                    console.log(list)
-                }, function (err) {
-                    console.log(err);
+
+                    }, error: function(error){
+                        console.log(error);
+                        throw "Error while search.";
+                    }
                 })
-            },function(err){
-                console.log(err);
-            });
-        },function(err){
-            console.log(err);
-        });
+
+
+             }, function(error){
+                throw "Cannot save an object";
+             });
+         }, function(error){
+            throw "Cannot save an object";
+         });
+
+       
+
+        
+        
     });
+
+
+
+    it("should run operator (precision) queries",function(done){
+
+         this.timeout(20000);
+
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name', 'RAVI');
+
+         
+
+         obj.save().then(function(obj){
+           
+                
+                var tableNames = ['Student'];
+
+               
+                var cs = new CB.CloudSearch(['Student']);
+                cs.searchQuery = new CB.SearchQuery();
+
+                
+                cs.searchQuery.searchOn('name','ravi',null,'and'); //Precision search.
+
+                cs.setLimit(9999);
+
+                cs.search({
+                    success : function(list){
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].document._tableName){
+                                if(tableNames.indexOf(list[i].document._tableName)>-1){
+                                    tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                                }
+                            }
+                        }
+
+                        if(tableNames.length===0){
+                            //test passed. 
+                            done();
+                        }else{
+                            throw "Search with precision passed.";
+                        }
+
+                    }, error: function(error){
+                        console.log(error);
+                        throw "Error while search.";
+                    }
+                });
+         }, function(error){
+            throw "Cannot save an object";
+         });
+        
+        });
+
+
+    it("should run minimum percent (precision) queries",function(done){
+
+         this.timeout(20000);
+
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name', 'RAVI');
+
+         obj.save().then(function(obj){
+           
+                
+                var tableNames = ['Student'];
+
+               
+                var cs = new CB.CloudSearch(['Student']);
+                cs.searchQuery = new CB.SearchQuery();
+                cs.searchQuery.searchOn('name','ravi',null, null,'75%'); //Precision search.
+
+                cs.setLimit(9999);
+
+                cs.search({
+                    success : function(list){
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].document._tableName){
+                                if(tableNames.indexOf(list[i].document._tableName)>-1){
+                                    tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                                }
+                            }
+                        }
+
+                        if(tableNames.length===0){
+                            //test passed. 
+                            done();
+                        }else{
+                            throw "Search with precision passed.";
+                        }
+
+                    }, error: function(error){
+                        console.log(error);
+                        throw "Error while search.";
+                    }
+                });
+         }, function(error){
+            throw "Cannot save an object";
+         });
+        
+        });
+
+
+        it("multi table search",function(done){
+
+         this.timeout(30000);
+
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name', 'RAVI');
+
+         var obj1 = new CB.CloudObject('hostel');
+         obj1.set('name', 'ravi');
+
+         obj.save().then(function(obj){
+            obj1.save().then(function(obj1){
+                
+                var tableNames = ['Student','hostel'];
+
+               
+                var cs = new CB.CloudSearch(['Student','hostel']);
+                cs.searchQuery = new CB.SearchQuery();
+                cs.searchQuery.searchOn('name','ravi');
+
+                cs.setLimit(9999);
+
+                cs.search({
+                    success : function(list){
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].document._tableName){
+                                if(tableNames.indexOf(list[i].document._tableName)>-1){
+                                    tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                                }
+                            }
+                        }
+
+
+                        if(tableNames.length===0){
+                            //test passed. 
+                            done();
+                        }else{
+                            throw "Search on multi tables failed.";
+                        }
+
+                    }, error: function(error){
+                        console.log(error);
+                        throw "Error while search.";
+                    }
+                })
+
+
+             }, function(error){
+                throw "Cannot save an object";
+             });
+         }, function(error){
+            throw "Cannot save an object";
+         });
+
+    
+    });
+
 });

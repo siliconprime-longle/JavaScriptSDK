@@ -4,9 +4,11 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
+
+
     it("should not save a string into date column",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
         obj.set('createdAt','abcd');
         obj.set('name', 'sample');
@@ -17,9 +19,22 @@ describe("Cloud Object", function() {
         });
     });
 
+    it("should not set the id",function(done){
+
+        try{
+            this.timeout(20000);
+            var obj = new CB.CloudObject('Sample');
+            obj.set('id', '123');
+            throw "CLoudObject can set the id";
+        }catch(e){
+            done();
+        }
+    
+    });
+
     it("should save.", function(done) {
 
-    	this.timeout('10000');
+    	this.timeout('20000');
 
      	var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -41,7 +56,7 @@ describe("Cloud Object", function() {
 
 
    it("should update the object after save and update.", function(done) {
-        this.timeout('10000');
+        this.timeout('20000');
 
      	var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -86,9 +101,39 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should update a saved CloudObject",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('student1');
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',8787);
+        obj1.save().then(function(res){
+            console.log(res);
+            obj1 = res;
+            obj.set('name','vipul');
+            obj.save().then(function(res){
+                console.log(res);
+                obj = res;
+                obj.set('newColumn',obj1);
+                obj.save().then(function(res){
+                    console.log(res);
+                    done();
+                },function(err){
+                    console.log(err);
+                    throw "Should save";
+                });
+            },function(){
+                throw "Error while saving";
+            });
+        },function(){
+            throw "Error";
+        });
+    });
+
     it("should delete an object after save.", function(done) {
 
-    	this.timeout('10000');
+    	this.timeout('20000');
         
         var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -108,7 +153,7 @@ describe("Cloud Object", function() {
     });
 
     it("should not save an object which has required column which is missing. ", function(done) {
-        this.timeout('10000');
+        this.timeout('20000');
 
      	var obj = new CB.CloudObject('Sample');
    		//name is required which is missing.
@@ -122,7 +167,7 @@ describe("Cloud Object", function() {
     });
 
     it("should not save an object with wrong dataType.", function(done) {
-       this.timeout('10000');
+       this.timeout('20000');
 
      	var obj = new CB.CloudObject('Sample');
    		//name is string and we have a wrong datatype here.
@@ -138,7 +183,7 @@ describe("Cloud Object", function() {
 
     it("should not save an object with duplicate values in unique fields.", function(done) {
 
-    	this.timeout('10000');
+    	this.timeout('20000');
         
         var text = util.makeString();
 
@@ -167,7 +212,7 @@ describe("Cloud Object", function() {
 
     it("should save an array.", function(done) {
 
-    	this.timeout('10000');
+    	this.timeout('20000');
 
         var text = util.makeString();
 
@@ -185,7 +230,7 @@ describe("Cloud Object", function() {
 
     it("should not save wrong datatype in an  array.", function(done) {
        	
-       	this.timeout(10000);
+       	this.timeout(20000);
 
 		var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -199,7 +244,11 @@ describe("Cloud Object", function() {
      	});
     });
 
+
     it("should not allow multiple dataTypes in an array. ", function(done) {
+
+        this.timeout(20000);
+
     	var text = util.makeString();
 
         var obj = new CB.CloudObject('Sample');
@@ -216,7 +265,7 @@ describe("Cloud Object", function() {
 
     it("should save an array with JSON objects. ", function(done) {
 
-    	this.timeout(10000);
+    	this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -233,7 +282,7 @@ describe("Cloud Object", function() {
     });
 
     it("should save a CloudObject as a relation. ", function(done) {
-       	this.timeout(10000);
+       	this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -252,8 +301,65 @@ describe("Cloud Object", function() {
      	});
     });
 
+    it("should save a CloudObject as a relation with relate function. ", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name','sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name','sample');
+        obj1.save({
+            success : function(newObj){
+                obj.relate('sameRelation', 'Sample', newObj.id); //saving with sample text
+
+                obj.save({
+                    success : function(newObj){
+                        done();
+                    }, error : function(error){
+                        throw "Error saving object. ";
+                    }
+                });
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+    it("should keep relations intact.", function(done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn2',new CB.CloudObject('Custom3'));
+
+        obj.set('newColumn7',new CB.CloudObject('student1'));
+        
+        obj.save({
+            success : function(newObj){
+
+               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1')
+               {
+                    done();
+               }
+
+               throw "Wrong Relationship retrieved.";
+
+            }, error : function(error){
+                throw "Error saving object. ";
+            }
+        });
+
+        
+    });
+
+
+
+
      it("should not save a a wrong relation.", function(done) {
-       this.timeout(10000);
+       this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -273,7 +379,7 @@ describe("Cloud Object", function() {
     });
 
     it("should not save a CloudObject Relation when the schema of a related object is wrong. ", function(done) {
-       this.timeout(10000);
+       this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -294,7 +400,7 @@ describe("Cloud Object", function() {
 
     it("should not save a duplicate relation in unique fields. ", function(done) {
 
-       this.timeout(10000);
+       this.timeout(20000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -324,7 +430,7 @@ describe("Cloud Object", function() {
     });
 
     it("should save an array of CloudObject with an empty array", function(done) {
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -351,7 +457,7 @@ describe("Cloud Object", function() {
 
 
     it("should save an array of CloudObject.", function(done) {
-       this.timeout(10000);
+       this.timeout(20000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -412,7 +518,7 @@ describe("Cloud Object", function() {
      });
 
     it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
-       this.timeout(10000);
+       this.timeout(20000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -440,7 +546,7 @@ describe("Cloud Object", function() {
     });
 
     it("should not save an array of different CloudObjects.", function(done) {
-        this.timeout(10000);
+        this.timeout(20000);
 
        var obj = new CB.CloudObject('Student');
        obj.set('name','sample');
@@ -469,7 +575,7 @@ describe("Cloud Object", function() {
 
  // Test for error of getting duplicate objects while saving a object after updating
     it("Should not duplicate the values in a list after updating",function(done){
-        this.timeout(10000);
+        this.timeout(20000);
         var obj = new CB.CloudObject('student1');
         obj.set('age',5);
         obj.set('name','abcd');
@@ -494,7 +600,7 @@ describe("Cloud Object", function() {
 
 // Test Case for error saving an object in a column
     it("should save a JSON object in a column",function(done){
-        this.timeout(10000);
+        this.timeout(20000);
         var json= {"name":"vipul","location":"uoh","age":10};
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn6',json);
@@ -509,4 +615,131 @@ describe("Cloud Object", function() {
         });
     });
 
+    it("should save list of numbers",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom14');
+        obj.set('List_Number',[1,2,3]);
+        obj.save().then(function(list){
+            console.log(list);
+           done();
+        },function(){
+            throw "should save the list of numbers";
+        });
+    });
+
+    it("should save a list of GeoPoint",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom14');
+        var GP1 = new CB.CloudGeoPoint(17,89);
+        var GP2 = new CB.CloudGeoPoint(66,78);
+        obj.set('List_GeoPoint',[GP1,GP2]);
+        obj.save().then(function(list){
+           console.log(list);
+            done();
+        },function(){
+            throw "should save list of geopoint";
+        });
+    });
+
+    it("should save the relation",function(done){
+
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            if(obj){
+                obj1 = obj;
+            }else{
+                throw "should save the object";
+            }
+            obj = new CB.CloudObject('student1');
+            obj2 = new CB.CloudObject('hostel',obj1.get('id'));
+            obj.set('newColumn',obj2);
+            obj.save().then(function(list){
+                console.log(list);
+                    done();
+            },function(){
+                throw "should save the object";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+    it("should display correct error message when you save a string in a number field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Custom7');
+        obj.set('requiredNumber','sample');
+       
+        obj.save({
+            success : function(newObj){
+                throw 'Wrong datatype in an array saved.';
+            }, error : function(error){
+                console.log(error);
+                done();
+            }
+        });
+    });
+
+     it("should unset the field. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+
+     it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('hostel');
+        obj1.set('room',123);
+        obj1.save().then(function(obj){
+            
+            if(obj.get('room')===123){
+                obj.unset('room');
+                obj1.save().then(function(obj){
+                    if(!obj.get('room')){
+                        done();
+                    }else
+                        throw "Didnot unset the data from an object";
+
+                },function(){
+                    throw "should save the object";
+                });
+            }else
+                throw "Didnot set the data to an object";
+
+        },function(){
+            throw "should save the object";
+        });
+    });
 });

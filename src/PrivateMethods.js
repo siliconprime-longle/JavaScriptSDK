@@ -1,5 +1,5 @@
 /* PRIVATE METHODS */
-CB._serialize = function(thisObj) {
+CB.toJSON = function(thisObj) {
 
     var url=null;
     if(thisObj instanceof  CB.CloudFile)
@@ -22,7 +22,7 @@ CB._serialize = function(thisObj) {
     for (var key in doc) {
         if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
             //if something is a relation.
-            doc[key] = CB._serialize(doc[key]); //serialize this object.
+            doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
             //if this is an ACL, then. Convert this from CB.ACL object to JSON - to strip all the ACL Methods.
             var acl = {
@@ -36,7 +36,7 @@ CB._serialize = function(thisObj) {
             if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
-                    arr.push(CB._serialize(doc[key][i]));
+                    arr.push(CB.toJSON(doc[key][i]));
                 }
                 doc[key] = arr;
             }
@@ -46,10 +46,9 @@ CB._serialize = function(thisObj) {
     return doc;
 };
 
-CB._deserialize = function(data, thisObj) {
+CB.fromJSON = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
-
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
 
@@ -63,7 +62,7 @@ CB._deserialize = function(data, thisObj) {
             var arr = [];
 
             for (var i = 0; i < data.length; i++) {
-                obj = CB._deserialize(data[i]);
+                obj = CB.fromJSON(data[i]);
                 arr.push(obj);
             }
 
@@ -81,7 +80,7 @@ CB._deserialize = function(data, thisObj) {
 
         for (var key in data) {
             if(data[key] instanceof Array) {
-                document[key]=CB._deserialize(data[key]);
+                document[key]=CB.fromJSON(data[key]);
             }else if (data[key] instanceof Object) {
                 if (key === 'ACL') {
                     //this is an ACL.
@@ -91,30 +90,28 @@ CB._deserialize = function(data, thisObj) {
 
                 } else if(data[key]._type) {
                     if(thisObj)
-                        document[key] = CB._deserialize(data[key], thisObj.get(key));
+                        document[key] = CB.fromJSON(data[key], thisObj.get(key));
                     else
-                        document[key] = CB._deserialize(data[key]);
-                }else if (data[key].latitude || data[key].longitude) {
-
-                    document[key] = new CB.CloudGeoPoint(data[key].latitude, data[key].longitude);
-
+                        document[key] = CB.fromJSON(data[key]);
                 }else{
-
                     document[key] = data[key];
-
                 }
             }else {
-
                 document[key] = data[key];
-
             }
         }
 
         if(!thisObj){
             var url=null;
+            var latitude = null;
+            var longitude = null;
             if(document._type === "file")
                 url=document.url;
-            var obj = CB._getObjectByType(document._type,url);
+            if(document._type === "point"){
+                latitude = document.longitude;
+                longitude = document.latitude;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
             obj.document = document;
             return obj;
         }else{
@@ -128,7 +125,7 @@ CB._deserialize = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url){
+CB._getObjectByType = function(type,url,latitude,longitude){
 
     var obj = null;
 
@@ -148,8 +145,11 @@ CB._getObjectByType = function(type,url){
         obj = new CB.CloudFile(url);
     }
 
+    if(type === 'point'){
+        obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
     return obj;
-}
+};
 
 
 CB._validate = function() {
@@ -186,7 +186,7 @@ if(CB._isNode){
 
 CB._clone=function(obj,url){
     var n_obj = null;
-    if(obj.document._type) {
+    if(obj.document._type && obj.document._type != 'point') {
         n_obj = CB._getObjectByType(obj.document._type,url);
         var doc=obj.document;
         var doc2={};
@@ -202,12 +202,8 @@ CB._clone=function(obj,url){
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = obj;
-        var doc=obj.document;
-        var doc2={};
-        for (var key in doc) {
-            doc2[key]=doc[key];
-        }
+        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        return n_obj;
     }
     n_obj.document=doc2;
     return n_obj;

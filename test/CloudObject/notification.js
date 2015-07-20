@@ -4,7 +4,7 @@ describe("Cloud Objects Notification", function() {
     var obj1 = new CB.CloudObject('student4');
   it("should alert when the object is created.", function(done) {
 
-      this.timeout(10000);
+      this.timeout(20000);
 
       CB.CloudObject.on('Student', 'created', function(data){
        if(data.get('name') === 'sample') {
@@ -26,7 +26,8 @@ describe("Cloud Objects Notification", function() {
     });
 
    it("should throw an error when wrong event type is entered. ", function(done) {
-      
+
+       this.timeout(20000);
      	try{
      	  CB.CloudObject.on('Student', 'wrongtype', function(data){
 	      	throw 'Fired event to wrong type.';
@@ -41,7 +42,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should alert when the object is updated.", function(done) {
 
-      this.timeout(10000);
+      this.timeout(20000);
       CB.CloudObject.on('student4', 'updated', function(data){
         done();
           CB.CloudObject.off('student4','updated',{success:function(){},error:function(){}});
@@ -64,40 +65,31 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
-    /*it("should alert when the object is deleted.", function(done) {
+    it("should alert when the object is deleted.", function(done) {
 
-      this.timeout(10000);
+      this.timeout(50000);
 
       CB.CloudObject.on('Student', 'deleted', function(data){
-
       	if(data instanceof CB.CloudObject) {
             done();
             CB.CloudObject.off('Student','deleted',{success:function(){},error:function(){}});
         }
         else
           throw "Wrong data received.";
-         
-
       }, {
-
       	success : function(){
       		obj.set('name', 'sample');
       		obj.delete();
       	}, error : function(error){
       		throw 'Error listening to an event.';
       	}
-
       });
-    });*/
+    });
 
-    it("should alert when multipe events are passed.", function(done) {
-
-      this.timeout(10000);	
-
+    it("should alert when multiple events are passed.", function(done) {
+      this.timeout(20000);
       var cloudObject = new CB.CloudObject('Student');
-
       var count = 0;
-
       CB.CloudObject.on('Student', ['created', 'deleted'], function(data){
       	count++;
       	if(count === 2){
@@ -108,12 +100,9 @@ describe("Cloud Objects Notification", function() {
       		cloudObject.set('name', 'sample');
       		cloudObject.save({
       			success: function(newObj){
-      				
       				cloudObject = newObj;
-
       				cloudObject.set('name', 'sample1');
       				cloudObject.save();
-
       				cloudObject.delete();
       			}
       		});
@@ -121,20 +110,15 @@ describe("Cloud Objects Notification", function() {
       	}, error : function(error){
       		throw 'Error listening to an event.';
       	}
-
       });
-
-
     });
 
     it("should alert when all three events are passed", function(done) {
 
-      this.timeout(10000);
+      this.timeout(20000);
        
       var cloudObject = new CB.CloudObject('Student');
-
       var count = 0;
-
       CB.CloudObject.on('Student', ['created', 'deleted', 'updated'], function(data){
       	count++;
       	if(count === 3){
@@ -154,46 +138,35 @@ describe("Cloud Objects Notification", function() {
 	      			});
       			}
       		});
-
       	}, error : function(error){
       		throw 'Error listening to an event.';
       	}
-
       });
-
     });
 
     it("should stop listening.", function(done) {
 
-     this.timeout(10000);
+     this.timeout(20000);
       
       var cloudObject = new CB.CloudObject('Student');
-
       var count = 0;
-
       CB.CloudObject.on('Student', ['created','updated','deleted'], function(data){
-      	count++;
+          count++;
       }, {
       	success : function(){
-
       		CB.CloudObject.off('Student', ['created','updated','deleted'], {
 		      	success : function(){
 		      		cloudObject.save();
-		      	
 		      	}, error : function(error){
 		      		throw 'Error on stopping listening to an event.';
 		      	}
-		      }); 
-
-
+		      });
       	}, error : function(error){
       		throw 'Error listening to an event.';
       	}
-
       });
 
       setTimeout(function(){
-
       	if(count ===  0){
       		done();
       	}else{

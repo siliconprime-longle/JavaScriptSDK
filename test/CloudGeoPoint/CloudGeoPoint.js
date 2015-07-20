@@ -30,8 +30,8 @@ describe("Cloud GeoPoint Test", function() {
      	});
 	});
 	
-	/*it("should get data from server for near function", function(done) {
-     	this.timeout(10000);
+	it("should get data from server for near function", function(done) {
+     	this.timeout(20000);
         var loc = new CB.CloudGeoPoint("17.7","80.3");
         var query = new CB.CloudQuery('Custom5');
 		query.near("location", loc, 100000);
@@ -48,7 +48,7 @@ describe("Cloud GeoPoint Test", function() {
         }, function () {
             throw "find data error";
         })
-	});*/
+	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
      	this.timeout(10000);
@@ -135,4 +135,51 @@ describe("Cloud GeoPoint Test", function() {
             throw "find data error";
         })
 	});
+
+    it("should update a saved GeoPoint", function(done) {
+        this.timeout(30000);
+        var obj = new CB.CloudObject('Custom5');
+        var loc = new CB.CloudGeoPoint(17.9,79.6);
+        obj.set("location", loc);
+        obj.save({
+            success : function(newObj){
+                obj = newObj;
+                obj.get('location').set('latitude',55);
+                obj.save().then(function(obj1){
+                    console.log(obj1);
+                    done()
+                },function(){
+                    throw "";
+                });
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    });
+
+    it("should take latitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('latitude',-100);
+            throw "should take latitude in range";
+        }catch(err){
+            done();
+        }
+    });
+
+    it("should take longitude in range",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudGeoPoint(10,20);
+        try{
+            obj.set('longitude',-200);
+            throw "should take longitude in range";
+        }catch(err){
+            done();
+        }
+    });
 });

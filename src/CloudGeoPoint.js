@@ -13,7 +13,8 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
         throw "Longitude "+ longitude+" is not a number type.";
 
     this.document = {};
-    this.document.type = "Point";
+    this.document._type = "point";
+    this.document._isModified = true;
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
     if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180)) {
         this.document.coordinates = [Number(longitude), Number(latitude)];
@@ -32,6 +33,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
         if(Number(latitude)>= -90 && Number(latitude)<=90) {
             this.document.longitude = Number(latitude);
             this.document.coordinates[1] = Number(latitude);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
@@ -46,6 +48,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
         if(Number(longitude)>= -180 && Number(longitude)<=180) {
             this.document.latitude = Number(longitude);
             this.document.coordinates[0] = Number(longitude);
+            this.document._isModified = true;
         }
         else
             throw "Longitude is not in Range";
@@ -67,6 +70,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
         if(Number(value)>= -90 && Number(value)<=90) {
             this.document.longitude = Number(value);
             this.document.coordinates[1] = Number(value);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
@@ -75,6 +79,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
         if(Number(value)>= -180 && Number(value)<=180) {
             this.document.latitude = Number(value);
             this.document.coordinates[0] = Number(value);
+            this.document._isModified = true;
         }
         else
             throw "Latitude is not in Range";
