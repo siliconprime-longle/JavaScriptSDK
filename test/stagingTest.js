@@ -8297,16 +8297,14 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
         for(var i=0; i<data.length; i++){
              if(data[i] instanceof CB.CloudObject){
-
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
-                columnName = columnName+'._id';
-                data[i] = data[i].id;
-
-                
             }
         }
+
+        columnName = columnName+'._id';
+        data[i] = data[i].id;
 
         if (!this.query[columnName]) {
                     this.query[columnName] = {};
@@ -8374,10 +8372,12 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
-                columnName = columnName+'._id';
-                data[i] = data[i].id;                
+                           
             }
         }
+
+         columnName = columnName+'._id';
+         data[i] = data[i].id;    
 
          if (!this.query[columnName]) {
             this.query[columnName] = {};
