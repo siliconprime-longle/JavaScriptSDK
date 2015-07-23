@@ -160,4 +160,39 @@
             
     });
 
+    it("should inclue with findById",function(done){
+
+            this.timeout(100000);
+
+            var obj = new CB.CloudObject('Custom');
+            var obj1 = new CB.CloudObject('Custom');
+
+
+            var obj2 = new CB.CloudObject('Custom');
+            obj2.set('newColumn1','sample');
+            obj.set('newColumn7', [obj2,obj1]);
+
+            obj.save().then(function(obj){
+                var query = new CB.CloudQuery('Custom');
+                query.include('newColumn7');
+                query.findById(obj.id).then(function(obj){
+                   if(obj.get('newColumn7').length>0){
+                     if(obj.get('newColumn7')[0].get('newColumn1') === 'sample'){
+                        done();
+                     }else{
+                        throw "did not include sub documents";
+                     }
+                   }else{
+                        throw "Cannot get the list";
+                   }
+                }, function(error){
+                    throw "Cannot query";
+                });
+            }, function(error){
+                throw "Cannot save an object";
+            });
+
+            
+    });
+
 });

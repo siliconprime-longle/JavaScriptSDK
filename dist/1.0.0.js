@@ -8282,6 +8282,8 @@ CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
 };
 CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
+    var isCloudObject = false;
+
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8297,6 +8299,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
         for(var i=0; i<data.length; i++){
              if(data[i] instanceof CB.CloudObject){
+                isCloudObject = true;
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
@@ -8305,7 +8308,9 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
         }
 
-        columnName = columnName+'._id';
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
         
 
         if (!this.query[columnName]) {
@@ -8358,6 +8363,8 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
 CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 
+    var isCloudObject = false;
+
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8367,19 +8374,20 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
-
-
         for(var i=0; i<data.length; i++){
              if(data[i] instanceof CB.CloudObject){
+                isCloudObject = true;
                 if(!data[i].id){
-                    throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+                    throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
                 }
 
                 data[i] = data[i].id;           
             }
         }
 
-         columnName = columnName+'._id';
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
            
 
          if (!this.query[columnName]) {
@@ -8400,7 +8408,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
         if(data instanceof CB.CloudObject){
 
             if(!data.id){
-                throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+                throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
             }
 
             columnName = columnName+'._id';
@@ -8452,16 +8460,68 @@ CB.CloudQuery.prototype.doesNotExists = function(columnName) {
     return this;
 }
 
-CB.CloudQuery.prototype.containsAll = function(columnName, values) {
+CB.CloudQuery.prototype.containsAll = function(columnName, data) {
+
+    var isCloudObject = false;
+
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if (!this.query[columnName]) {
-        this.query[columnName] = {
-            "$all": values
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
+        throw 'Array or string expected as an argument';
+    }
+
+    if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+                
+                isCloudObject = true;
+
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+                }
+
+                data[i] = data[i].id;           
+            }
         }
-    } else {
-        this.query[columnName]["$all"] = values;
+
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
+
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
+         }
+
+        this.query[columnName]["$all"] = data;
+        
+    } else { //if the argument is a string then push if it is not present already
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+            }
+
+            columnName = columnName+'._id';
+            data = data.id;
+        }
+
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
+        }
+
+
+        if (!this.query[columnName]["$all"]) {
+            this.query[columnName]["$all"] = [];
+        }
+        if (this.query[columnName]["$all"].indexOf(data) === -1) {
+            this.query[columnName]["$all"].push(data);
+        }
+        
     }
 
     return this;
@@ -8642,6 +8702,7 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         skip: thisObj.skip,
         key: CB.appKey
     });
+
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
@@ -8664,11 +8725,16 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         return def;
     }
 };
+
 CB.CloudQuery.prototype.get = function(objectId,callback){
     var query = new CB.CloudQuery(this.tableName);
     return query.findById(objectId,callback);
 };
+
 CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
+    
+    var thisObj = this;
+
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -8679,19 +8745,41 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
     if (!callback) {
         def = new CB.Promise();
     }
+
+    if(thisObj.skip && !thisObj.skip !== 0){
+        throw "You cannot use skip and find object by Id in the same query";
+    }
+
+    if(thisObj.limit && thisObj.limit === 0){
+        throw "You cannot use limit and find object by Id in the same query";
+    }
+
+    if(thisObj.sort && Object.getOwnPropertyNames(thisObj.sort).length > 0){
+        throw "You cannot use sort and find object by Id in the same query";
+    }
+
+    thisObj.equalTo('id',objectId);
+
     var params=JSON.stringify({
-        key: CB.appKey
+        query: thisObj.query,
+        select: thisObj.select,
+        key: CB.appKey,
+        limit : 1,
+        skip : 0,
+        sort : {}
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + "/get/" + objectId;
+
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
+        response = JSON.parse(response);
         if (Object.prototype.toString.call(response) === '[object Array]') {
             response = response[0];
         }
         if (callback) {
-            callback.success(CB.fromJSON(JSON.parse(response)));
+            callback.success(CB.fromJSON(response));
         } else {
-            def.resolve(CB.fromJSON(JSON.parse(response)));
+            def.resolve(CB.fromJSON(response));
         }
     },function(err){
         if(callback){
@@ -9017,73 +9105,86 @@ CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, op
 
 }
 
-CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, all_words, match_percent, priority) {
+
+    //this is actually 'operator'
+    if(all_words){
+        all_words='and';
+    }
+        
+    var obj = this._buildSearchOn(columns,query, fuzziness,all_words,match_percent,priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+    
+};
+
+CB.SearchQuery.prototype.phrase = function(columns, query,fuzziness, priority) {
 
         
-    var obj = this._buildSearchOn(columns,query, fuzziness,operator,match_percent,boost);
+    var obj = this._buildSearchPhrase(columns, query,fuzziness, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
-
-        
-    var obj = this._buildSearchPhrase(columns, query,slop, boost);
-    //save in query 'and' clause.
-    this.bool.should.push(obj); 
-
-    return this;
-};
-
-CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
 
     if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
-    var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildBestColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
 
     if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
-    var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildMostColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.prefix = function(column, value, boost) {
+CB.SearchQuery.prototype.startsWith = function(column, value, priority) {
 
     var obj = {};
     obj.prefix = {};
     obj.prefix[column] = {};
     obj.prefix[column].value = value;
     
-    if(boost){
-        obj.prefix[column].boost = boost;
+    if(priority){
+        obj.prefix[column].boost = priority;
     }
 
     this.bool.must.push(obj);
 };
 
-CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
+CB.SearchQuery.prototype.wildcard = function(column, value, priority) {
 
     var obj = {};
     obj.wildcard = {};
     obj.wildcard[column] = {};
     obj.wildcard[column].value = value;
     
-    if(boost){
-        obj.wildcard[column].boost = boost;
+    if(priority){
+        obj.wildcard[column].boost = priority;
     }
 
     this.bool.should.push(obj);
@@ -9091,15 +9192,15 @@ CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
 
 
 
-CB.SearchQuery.prototype.regexp = function(column, value, boost) {
+CB.SearchQuery.prototype.regexp = function(column, value, priority) {
 
     var obj = {};
     obj.regexp = {};
     obj.regexp[column] = {};
     obj.regexp[column].value = value;
     
-    if(boost){
-        obj.regexp[column].boost = boost;
+    if(priority){
+        obj.regexp[column].boost = priority;
     }
 
     this.bool.must.push(obj);

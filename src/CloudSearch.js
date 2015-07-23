@@ -270,73 +270,86 @@ CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, op
 
 }
 
-CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, all_words, match_percent, priority) {
+
+    //this is actually 'operator'
+    if(all_words){
+        all_words='and';
+    }
+        
+    var obj = this._buildSearchOn(columns,query, fuzziness,all_words,match_percent,priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+    
+};
+
+CB.SearchQuery.prototype.phrase = function(columns, query,fuzziness, priority) {
 
         
-    var obj = this._buildSearchOn(columns,query, fuzziness,operator,match_percent,boost);
+    var obj = this._buildSearchPhrase(columns, query,fuzziness, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.phrase = function(columns, query,slop, boost) {
-
-        
-    var obj = this._buildSearchPhrase(columns, query,slop, boost);
-    //save in query 'and' clause.
-    this.bool.should.push(obj); 
-
-    return this;
-};
-
-CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
 
     if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
-    var obj = this._buildBestColumns(columns, query, fuzziness, operator, match_percent, boost);
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildBestColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
 
     if(!columns instanceof Array || columns.length<2)
            throw "There should be more than one columns in-order to use this function";
 
-    var obj = this._buildMostColumns(columns, query, fuzziness, operator, match_percent, boost);
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildMostColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
     this.bool.should.push(obj); 
 
     return this;
 };
 
-CB.SearchQuery.prototype.prefix = function(column, value, boost) {
+CB.SearchQuery.prototype.startsWith = function(column, value, priority) {
 
     var obj = {};
     obj.prefix = {};
     obj.prefix[column] = {};
     obj.prefix[column].value = value;
     
-    if(boost){
-        obj.prefix[column].boost = boost;
+    if(priority){
+        obj.prefix[column].boost = priority;
     }
 
     this.bool.must.push(obj);
 };
 
-CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
+CB.SearchQuery.prototype.wildcard = function(column, value, priority) {
 
     var obj = {};
     obj.wildcard = {};
     obj.wildcard[column] = {};
     obj.wildcard[column].value = value;
     
-    if(boost){
-        obj.wildcard[column].boost = boost;
+    if(priority){
+        obj.wildcard[column].boost = priority;
     }
 
     this.bool.should.push(obj);
@@ -344,15 +357,15 @@ CB.SearchQuery.prototype.wildcard = function(column, value, boost) {
 
 
 
-CB.SearchQuery.prototype.regexp = function(column, value, boost) {
+CB.SearchQuery.prototype.regexp = function(column, value, priority) {
 
     var obj = {};
     obj.regexp = {};
     obj.regexp[column] = {};
     obj.regexp[column].value = value;
     
-    if(boost){
-        obj.regexp[column].boost = boost;
+    if(priority){
+        obj.regexp[column].boost = priority;
     }
 
     this.bool.must.push(obj);

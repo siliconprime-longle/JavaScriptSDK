@@ -4,8 +4,6 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-
-
     it("should not save a string into date column",function(done){
 
         this.timeout(20000);
@@ -738,6 +736,20 @@ describe("Cloud Object", function() {
             }else
                 throw "Didnot set the data to an object";
 
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+
+     it("should save a required number with 0.", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('Custom18');
+        obj1.set('number',0);
+        obj1.save().then(function(obj){
+            done();
         },function(){
             throw "should save the object";
         });
