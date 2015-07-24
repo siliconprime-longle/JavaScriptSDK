@@ -166,8 +166,6 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-
-
     it("should not save a string into date column",function(done){
 
         this.timeout(20000);
@@ -900,6 +898,20 @@ describe("Cloud Object", function() {
             }else
                 throw "Didnot set the data to an object";
 
+        },function(){
+            throw "should save the object";
+        });
+    });
+
+
+     it("should save a required number with 0.", function(done) {
+        
+        this.timeout(20000);
+
+        var obj1 = new CB.CloudObject('Custom18');
+        obj1.set('number',0);
+        obj1.save().then(function(obj){
+            done();
         },function(){
             throw "should save the object";
         });
@@ -1732,6 +1744,41 @@ describe("CloudQuery Include", function () {
             
     });
 
+    it("should inclue with findById",function(done){
+
+            this.timeout(100000);
+
+            var obj = new CB.CloudObject('Custom');
+            var obj1 = new CB.CloudObject('Custom');
+
+
+            var obj2 = new CB.CloudObject('Custom');
+            obj2.set('newColumn1','sample');
+            obj.set('newColumn7', [obj2,obj1]);
+
+            obj.save().then(function(obj){
+                var query = new CB.CloudQuery('Custom');
+                query.include('newColumn7');
+                query.findById(obj.id).then(function(obj){
+                   if(obj.get('newColumn7').length>0){
+                     if(obj.get('newColumn7')[0].get('newColumn1') === 'sample'){
+                        done();
+                     }else{
+                        throw "did not include sub documents";
+                     }
+                   }else{
+                        throw "Cannot get the list";
+                   }
+                }, function(error){
+                    throw "Cannot query";
+                });
+            }, function(error){
+                throw "Cannot save an object";
+            });
+
+            
+    });
+
 });
 describe("CloudQuery", function () {
 
@@ -1928,30 +1975,6 @@ describe("CloudQuery", function () {
 
     });
 
-    it("Should retrieve data matching with several different values", function (done) {
-
-        this.timeout(20000);
-
-
-        var obj = new CB.CloudQuery('student1');
-        obj.containedIn('name',['vipul','nawaz']);
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    if(list[i].get('name') != 'vipul' && list[i].get('name')!= 'nawaz')
-                        throw "should retrieve saved data with particular value ";
-                }
-            } else{
-                throw "should retrieve data matching a set of values ";
-            }
-            done();
-        }, function () {
-            throw "find data error";
-        });
-
-    });
-
     it("Should save list with in column", function (done) {
 
         this.timeout(20000);
@@ -1969,27 +1992,34 @@ describe("CloudQuery", function () {
     it("Should retrieve list matching with several different values", function (done) {
 
         this.timeout(20000);
-
-        var obj = new CB.CloudQuery('student4');
-        obj.containsAll('subject',['java','python']);
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    var subject=list[i].get('subject');
-                    for(var j=0;j<subject.length;j++) {
-                        if (subject[j] != 'java' && subject[j] != 'python')
-                            throw "should retrieve saved data with particular value ";
-
+        var obj = new CB.CloudObject('student4');
+        obj.set('subject',['java','python']);
+        obj.save().then(function() {
+            var obj = new CB.CloudQuery('student4');
+            obj.containsAll('subject',['java','python']);
+            obj.find().then(function(list) {
+                if(list.length>0){
+                    for(var i=0;i<list.length;i++)
+                    {
+                        var subject=list[i].get('subject');
+                        for(var j=0;j<subject.length;j++) {
+                            if (subject[j] != 'java' && subject[j] != 'python')
+                                throw "should retrieve saved data with particular value ";
+                        }
                     }
+                } else{
+                    throw "should retrieve data matching a set of values ";
                 }
-            } else{
-                throw "should retrieve data matching a set of values ";
-            }
             done();
         }, function () {
             throw "find data error";
         });
+        }, function () {
+            throw "list Save error";
+        });
+
+
+        
 
     });
 
@@ -2626,14 +2656,14 @@ describe("CloudSearch", function (done) {
     });
 
 
-    it("should search for object with a prefix",function(done){
+    it("should search for object with a startsWith",function(done){
 
         this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
 
-        cs.searchQuery.prefix('name', 'G');
+        cs.searchQuery.startsWith('name', 'G');
         cs.search({
             success : function(list){
                
@@ -3188,11 +3218,11 @@ describe("CloudUser", function () {
             role.save().then(function(role){
                 list.addToRole(role).then(function(list){
                     done();
-                },function(){
-                    throw "user role set error";
+                },function(error){
+                    throw error;
                 });
-            }, function () {
-                throw "user role error";
+            }, function (error) {
+                throw error;
             });
         },function(){
             throw "role create error";

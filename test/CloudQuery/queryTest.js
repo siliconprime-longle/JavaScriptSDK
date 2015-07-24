@@ -193,30 +193,6 @@ describe("CloudQuery", function (done) {
 
     });
 
-    it("Should retrieve data matching with several different values", function (done) {
-
-        this.timeout(20000);
-
-
-        var obj = new CB.CloudQuery('student1');
-        obj.containedIn('name',['vipul','nawaz']);
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    if(list[i].get('name') != 'vipul' && list[i].get('name')!= 'nawaz')
-                        throw "should retrieve saved data with particular value ";
-                }
-            } else{
-                throw "should retrieve data matching a set of values ";
-            }
-            done();
-        }, function () {
-            throw "find data error";
-        });
-
-    });
-
     it("Should save list with in column", function (done) {
 
         this.timeout(20000);
@@ -234,27 +210,34 @@ describe("CloudQuery", function (done) {
     it("Should retrieve list matching with several different values", function (done) {
 
         this.timeout(20000);
-
-        var obj = new CB.CloudQuery('student4');
-        obj.containsAll('subject',['java','python']);
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    var subject=list[i].get('subject');
-                    for(var j=0;j<subject.length;j++) {
-                        if (subject[j] != 'java' && subject[j] != 'python')
-                            throw "should retrieve saved data with particular value ";
-
+        var obj = new CB.CloudObject('student4');
+        obj.set('subject',['java','python']);
+        obj.save().then(function() {
+            var obj = new CB.CloudQuery('student4');
+            obj.containsAll('subject',['java','python']);
+            obj.find().then(function(list) {
+                if(list.length>0){
+                    for(var i=0;i<list.length;i++)
+                    {
+                        var subject=list[i].get('subject');
+                        for(var j=0;j<subject.length;j++) {
+                            if (subject[j] != 'java' && subject[j] != 'python')
+                                throw "should retrieve saved data with particular value ";
+                        }
                     }
+                } else{
+                    throw "should retrieve data matching a set of values ";
                 }
-            } else{
-                throw "should retrieve data matching a set of values ";
-            }
             done();
         }, function () {
             throw "find data error";
         });
+        }, function () {
+            throw "list Save error";
+        });
+
+
+        
 
     });
 

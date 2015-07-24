@@ -150,14 +150,14 @@ describe("CloudSearch", function (done) {
     });
 
 
-    it("should search for object with a prefix",function(done){
+    it("should search for object with a startsWith",function(done){
 
         this.timeout(20000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
 
-        cs.searchQuery.prefix('name', 'G');
+        cs.searchQuery.startsWith('name', 'G');
         cs.search({
             success : function(list){
                

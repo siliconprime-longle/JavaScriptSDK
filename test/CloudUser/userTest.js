@@ -14,8 +14,8 @@ describe("CloudUser", function () {
                 done();
             else
                 throw "create user error"
-        }, function () {
-            throw "user create error";
+        }, function (error) {
+            throw error;
         });
 
     });
@@ -96,11 +96,11 @@ describe("CloudUser", function () {
             role.save().then(function(role){
                 list.addToRole(role).then(function(list){
                     done();
-                },function(){
-                    throw "user role set error";
+                },function(error){
+                    throw error;
                 });
-            }, function () {
-                throw "user role error";
+            }, function (error) {
+                throw error;
             });
         },function(){
             throw "role create error";
