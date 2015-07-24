@@ -18,6 +18,66 @@ describe("CloudQuery", function () {
 
     });
 
+   it("select column should work on find",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj){
+                var cbQuery = new CB.CloudQuery('Custom1');
+                cbQuery.equalTo('id', obj.id);
+                cbQuery.selectColumn('newColumn');
+                
+                cbQuery.find({
+                  success: function(objList){
+                    if(objList.length>0)
+                        if(!objList[0].get('description'))
+                            done();
+                        else
+                            throw "Select doesn't work";
+                    else
+                        throw "Cannot query over select ";
+                  },
+                  error: function(err){
+                     throw "Error querying object.";
+                  }
+                });
+               
+            },function(){
+               throw "should save the object";
+            });
+        });
+
+        it("select column should work on distinct",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj){
+                var cbQuery = new CB.CloudQuery('Custom1');
+                cbQuery.equalTo('id', obj.id);
+                cbQuery.selectColumn('newColumn');
+                
+                cbQuery.distinct('id',{
+                  success: function(objList){
+                    if(objList.length>0)
+                        if(!objList[0].get('description'))
+                            done();
+                        else
+                            throw "Select doesn't work";
+                    else
+                        throw "Cannot query over select ";
+                  },
+                  error: function(err){
+                     throw "Error querying object.";
+                  }
+                });
+               
+            },function(){
+               throw "should save the object";
+            });
+        });
+
      it("should retrieve items when column name is null (from equalTo function)",function(done){
         this.timeout(20000);
 
@@ -721,4 +781,6 @@ describe("CloudQuery", function () {
                throw "should save the object";
             });
         });
+
+    
 });

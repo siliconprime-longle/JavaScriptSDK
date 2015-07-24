@@ -8255,6 +8255,18 @@ CB.CloudQuery.prototype.setSkip = function(data) {
 
 //select/deselect columns to show
 CB.CloudQuery.prototype.selectColumn = function(columnNames) {
+
+    if(Object.keys(this.select).length === 0){
+        this.select = {
+            _id : 1,
+            createdAt : 1,
+            updatedAt : 1,
+            ACL : 1,
+            _type : 1,
+            _tableName : 1
+        }
+    }
+
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
     } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
@@ -8637,6 +8649,12 @@ CB.CloudQuery.prototype.count = function(callback) {
 };
 
 CB.CloudQuery.prototype.distinct = function(keys, callback) {
+
+
+    if(keys === 'id'){
+        keys = '_id';
+    }
+
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -8650,11 +8668,16 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
     if (!callback) {
         def = new CB.Promise();
     }
+
     var thisObj = this;
+    
     var params=JSON.stringify({
         onKey: keys,
         query: thisObj.query,
-        sort: this.sort,
+        select: thisObj.select,
+        sort: thisObj.sort,
+        limit: thisObj.limit,
+        skip: thisObj.skip,
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
@@ -11738,6 +11761,66 @@ describe("CloudQuery", function () {
 
     });
 
+   it("select column should work on find",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj){
+                var cbQuery = new CB.CloudQuery('Custom1');
+                cbQuery.equalTo('id', obj.id);
+                cbQuery.selectColumn('newColumn');
+                
+                cbQuery.find({
+                  success: function(objList){
+                    if(objList.length>0)
+                        if(!objList[0].get('description'))
+                            done();
+                        else
+                            throw "Select doesn't work";
+                    else
+                        throw "Cannot query over select ";
+                  },
+                  error: function(err){
+                     throw "Error querying object.";
+                  }
+                });
+               
+            },function(){
+               throw "should save the object";
+            });
+        });
+
+        it("select column should work on distinct",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj){
+                var cbQuery = new CB.CloudQuery('Custom1');
+                cbQuery.equalTo('id', obj.id);
+                cbQuery.selectColumn('newColumn');
+                
+                cbQuery.distinct('id',{
+                  success: function(objList){
+                    if(objList.length>0)
+                        if(!objList[0].get('description'))
+                            done();
+                        else
+                            throw "Select doesn't work";
+                    else
+                        throw "Cannot query over select ";
+                  },
+                  error: function(err){
+                     throw "Error querying object.";
+                  }
+                });
+               
+            },function(){
+               throw "should save the object";
+            });
+        });
+
      it("should retrieve items when column name is null (from equalTo function)",function(done){
         this.timeout(20000);
 
@@ -12441,6 +12524,8 @@ describe("CloudQuery", function () {
                throw "should save the object";
             });
         });
+
+    
 });
 describe("CloudSearch", function (done) {
 
@@ -13074,8 +13159,8 @@ describe("CloudUser", function () {
                 done();
             else
                 throw "create user error"
-        }, function () {
-            throw "user create error";
+        }, function (error) {
+            throw error;
         });
 
     });
