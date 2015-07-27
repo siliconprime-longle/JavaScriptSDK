@@ -7,8 +7,10 @@ describe("CloudExpire", function () {
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
         obj.save().then(function(obj1) {
+            if(obj1)
                 done();
-            throw "unable to save expires";
+            else
+                throw "unable to save expires";
         }, function (err) {
             console.log(err);
             throw "Relation Expire error";
