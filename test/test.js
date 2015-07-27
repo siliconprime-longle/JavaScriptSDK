@@ -9717,6 +9717,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
         };
 
     } else if(typeof file === "string") {
+
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
@@ -9726,6 +9727,22 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 url: file,
                 contentType : ''
             };
+        } else{
+            if(data){
+                this.data = data;
+                if(!type){
+                    type = file.split('.')[file.split('.').length-1];
+                }
+                this.document = {
+                    _type: 'file',
+                    name: file,
+                    size: '',
+                    url: '',
+                    contentType : type
+                };
+            }else{
+                throw "Invalid File. It should be of type file or blob";
+            }
         }
     }
     else{
@@ -9779,52 +9796,78 @@ CB.CloudFile.prototype.save = function(callback) {
 
 
     var thisObj = this;
-    var formdata = new FormData();
 
-    if(!this.fileObj)
+
+    if(!this.fileObj && !this.data)
         throw "You cannot save a file which is null";
 
-    formdata.append("fileToUpload", this.fileObj);
-    formdata.append("key", CB.appKey);
+    if(!this.data) {
+        var formdata = new FormData();
+        formdata.append("fileToUpload", this.fileObj);
+        formdata.append("key", CB.appKey);
 
-    var xmlhttp = CB._loadXml();
-    var params=formdata;
-    url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
-    xmlhttp.open('POST',url,true);
-    if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
-        localStorage = new LocalStorage('./scratch');
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/" + CB.version +
-            " (NodeJS " + process.versions.node + ")");
-    }
-    var ssid = localStorage.getItem('sessionID');
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
-    xmlhttp.send(params);
+        var xmlhttp = CB._loadXml();
+        var params = formdata;
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        xmlhttp.open('POST', url, true);
+        if (CB._isNode) {
+            var LocalStorage = require('node-localstorage').LocalStorage;
+            localStorage = new LocalStorage('./scratch');
+            xmlhttp.setRequestHeader("User-Agent",
+                "CB/" + CB.version +
+                " (NodeJS " + process.versions.node + ")");
+        }
+        var ssid = localStorage.getItem('sessionID');
+        if (ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+        xmlhttp.send(params);
 
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                thisObj.url = JSON.parse(xmlhttp.responseText)._url;
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
-                if (callback) {
-                    callback.success(thisObj);
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == xmlhttp.DONE) {
+                if (xmlhttp.status == 200) {
+                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if (sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                    if (callback) {
+                        callback.success(thisObj);
+                    } else {
+                        def.resolve(thisObj);
+                    }
                 } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
+                    if (callback) {
+                        callback.error(xmlhttp.responseText);
+                    } else {
+                        def.reject(xmlhttp.responseText);
+                    }
                 }
             }
         }
+    }else{
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            data: this.data,
+            key: CB.appKey
+        });
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        //console.log(params);
+        CB._request('POST',url,params).then(function(response){
+            thisObj.url = JSON.parse(response)._url;
+            delete thisObj.data;
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
     }
 
 
@@ -10271,22 +10314,38 @@ CB._modified = function(thisObj,columnName){
 	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
-        this.timeout(100000);
+    	this.timeout(10000);
         var xmlhttp;
+        this.timeout(10000);
         var req = typeof(require) === 'function' ? require : null;
         // Load references to other dependencies
         if (typeof(XMLHttpRequest) !== 'undefined') {
-            xmlhttp = XMLHttpRequest;
-        } else if (typeof(require) === 'function' &&
-            typeof(require.ensure) === 'undefined') {
-            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+             xmlhttp = XMLHttpRequest;
+            } else if (typeof(require) === 'function' &&
+                typeof(require.ensure) === 'undefined') {
+                xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+            }
+            xmlhttp = new xmlhttp();
+        xmlhttp.open('GET','http://localhost:4730',true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == xmlhttp.DONE) {
+                if (xmlhttp.status == 200) {
+                    CB.appId = 'sample123';
+                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+                    CB.serverUrl = 'http://localhost:4730';
+                    CB.socketIoUrl = CB.serverUrl;
+                    CB.apiUrl = CB.serverUrl + '/api';
+                    done();
+                }
+                else {
+                    CB.appId = 'travis123';
+                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+                    done();
+
+                }
+            }
         }
-        CB.appId = 'travis123';
-        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-        CB.socketIoUrl = CB.serverUrl;
-        CB.apiUrl = CB.serverUrl + '/api';
-        done();
     });
 });
 
@@ -10298,6 +10357,97 @@ describe("Cloud App", function() {
 
         done();
     });
+});
+
+describe("Cloud Files", function(done) {
+
+    it("Should Save a file with file data and name",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
+                done();
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+    try {
+
+        if (window) {
+            it("should save a new file", function (done) {
+
+                this.timeout(20000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
+            it("should delete a file", function (done) {
+
+                this.timeout(200000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        //received the blob's url
+                        console.log(file.url);
+                        file.delete().then(function (file) {
+                            if (file.url === null) {
+                                done();
+                            } else {
+                                throw "File deleted, url in SDK not deleted";
+                            }
+                        }, function (err) {
+                            throw "Error deleting file";
+                        })
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+            });
+        }
+    }catch(e){
+        console.log('In node');
+    }
+    //add ACL on CloudFiles.
+    
 });
 
 describe("CloudObject - Encryption", function () {
