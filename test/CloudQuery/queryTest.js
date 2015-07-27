@@ -57,7 +57,6 @@ describe("CloudQuery", function () {
                 var cbQuery = new CB.CloudQuery('Custom1');
                 cbQuery.equalTo('id', obj.id);
                 cbQuery.selectColumn('newColumn');
-                
                 cbQuery.distinct('id',{
                   success: function(objList){
                     if(objList.length>0)
@@ -758,7 +757,7 @@ describe("CloudQuery", function () {
         });
     });
 
-    it("Should query over boolean datatype",function(done){
+    it("Should query over boolean dataType",function(done){
             this.timeout(20000);
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn1',false);

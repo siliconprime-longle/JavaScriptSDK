@@ -11362,7 +11362,7 @@ describe("Cloud GeoPoint Test", function() {
 	it("should save a latitude and longitude when passing data are number type", function(done) {
         this.timeout(30000);
 		var obj = new CB.CloudObject('Custom5');
-     	var loc = new CB.CloudGeoPoint(17.9,79.6);
+     	var loc = new CB.CloudGeoPoint(17.7,78.9);
 		obj.set("location", loc);
         obj.save({
      		success : function(newObj){
@@ -11388,7 +11388,8 @@ describe("Cloud GeoPoint Test", function() {
      		}
      	});
 	});
-	
+
+
 	it("should get data from server for near function", function(done) {
      	this.timeout(20000);
         var loc = new CB.CloudGeoPoint("17.7","80.3");
@@ -11800,7 +11801,6 @@ describe("CloudQuery", function () {
                 var cbQuery = new CB.CloudQuery('Custom1');
                 cbQuery.equalTo('id', obj.id);
                 cbQuery.selectColumn('newColumn');
-                
                 cbQuery.distinct('id',{
                   success: function(objList){
                     if(objList.length>0)
@@ -12501,7 +12501,7 @@ describe("CloudQuery", function () {
         });
     });
 
-    it("Should query over boolean datatype",function(done){
+    it("Should query over boolean dataType",function(done){
             this.timeout(20000);
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn1',false);
