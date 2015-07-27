@@ -155,6 +155,18 @@ CB.CloudQuery.prototype.setSkip = function(data) {
 
 //select/deselect columns to show
 CB.CloudQuery.prototype.selectColumn = function(columnNames) {
+
+    if(Object.keys(this.select).length === 0){
+        this.select = {
+            _id : 1,
+            createdAt : 1,
+            updatedAt : 1,
+            ACL : 1,
+            _type : 1,
+            _tableName : 1
+        }
+    }
+
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
     } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
@@ -537,6 +549,12 @@ CB.CloudQuery.prototype.count = function(callback) {
 };
 
 CB.CloudQuery.prototype.distinct = function(keys, callback) {
+
+
+    if(keys === 'id'){
+        keys = '_id';
+    }
+
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
@@ -550,11 +568,16 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
     if (!callback) {
         def = new CB.Promise();
     }
+
     var thisObj = this;
+    
     var params=JSON.stringify({
         onKey: keys,
         query: thisObj.query,
-        sort: this.sort,
+        select: thisObj.select,
+        sort: thisObj.sort,
+        limit: thisObj.limit,
+        skip: thisObj.skip,
         key: CB.appKey
     });
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
