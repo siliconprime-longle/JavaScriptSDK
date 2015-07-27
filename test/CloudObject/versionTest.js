@@ -49,7 +49,7 @@ describe("Version Test",function(done){
 
 
     it("should update the version of a saved object", function (done) {
-        this.timeout(10000);
+        this.timeout(15000);
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
