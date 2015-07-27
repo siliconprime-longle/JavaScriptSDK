@@ -27,4 +27,18 @@ describe("Query over Orient",function(done){
             throw "Unable to save Data";
         });
     });
+
+    it("should select specific columns from document",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.selectColumn('Company.Name');
+        query.find().then(function(obj){
+            console.log(obj);
+            done();
+        },function(){
+           throw "Unable to do query";
+        });
+    });
 });
