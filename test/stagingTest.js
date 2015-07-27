@@ -11512,7 +11512,7 @@ describe("Version Test",function(done){
 
 
     it("should update the version of a saved object", function (done) {
-        this.timeout(10000);
+        this.timeout(15000);
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
@@ -11629,8 +11629,10 @@ describe("CloudExpire", function () {
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
         obj.save().then(function(obj1) {
+            if(obj1)
                 done();
-            throw "unable to save expires";
+            else
+                throw "unable to save expires";
         }, function (err) {
             console.log(err);
             throw "Relation Expire error";
@@ -12115,6 +12117,51 @@ describe("CloudQuery Include", function () {
         }, function(error){
 
         })
+
+    });
+
+
+    it("should include a relation on distinct.", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'text');
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'Vipul');
+        var obj2= new CB.CloudObject('student1');
+        obj2.set('name', 'Nawaz');
+        obje=[obj1,obj2];
+        obj.set('newColumn7', obje);
+    
+        obj.save({
+            success : function(obj){
+                var query = new CB.CloudQuery('Custom2');
+                query.include('newColumn7');
+                query.distinct('newColumn1').then(function(list){
+                    if(list.length>0){
+                        for(var i=0;i<list.length;i++){
+                            var student_obj=list[i].get('newColumn7');
+                            if(!student_obj.get('name'))
+                                throw "Unsuccessful Join";
+                            else
+                                done();
+                        }    
+                    }else{
+                        throw "Cannot retrieve a saved relation.";
+                    }
+                }, function(error){
+                    throw "Unsuccessful join"
+                });
+            }, error : function(error){
+                throw "Cannot save a CloudObject";
+
+            }
+
+        })
+
+       
 
     });
 

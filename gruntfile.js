@@ -52,11 +52,13 @@ module.exports = function(grunt) {
                         'dist/1.0.0.min.js': ['dist/1.0.0.js']
                     }
                 }
-            }
+            },
+            bumpup: 'package.json' //update the version of package.json
         });
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.registerTask('default',['concat:sdk','concat:test','concat:stagingTest','uglify']);
+    grunt.loadNpmTasks('grunt-bumpup');
+    grunt.registerTask('default',['concat:sdk','concat:test','concat:stagingTest','uglify','bumpup']);
 
 };
