@@ -1,6 +1,6 @@
 describe("Graph DB",function(done){
 
-    /*it("Should Create node",function(done){
+    it("Should Create node",function(done){
 
         this.timeout(10000);
 
@@ -34,7 +34,7 @@ describe("Graph DB",function(done){
             console.log(err);
             throw "Unable to save data";
         })
-    });*/
+    });
 
     it("should save list of data",function(done){
 
@@ -58,7 +58,7 @@ describe("Graph DB",function(done){
 
     });
 
-   /* it("Should update a saved Record",function(done){
+    it("Should update a saved Record",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Employee');
@@ -104,7 +104,7 @@ describe("Graph DB",function(done){
         })
     });
 
-   /* it("should save list with relation",function(done){
+    it("should update the list of relation",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Company');
@@ -113,11 +113,11 @@ describe("Graph DB",function(done){
         var obj2 = new CB.CloudObject('Employee');
         obj2.set('Name','Vipul');
         obj.set('Employee',[obj1,obj2]);
-        var obj3 = new CB.CloudObject('orientrelation');
-        obj3.set('Name','relation');
-        obj.set('Rel',obj3);
+        var emp = [];
+        emp.push(obj.get('Employee')[0]);
+        obj.set('Employee',emp);
         obj.save().then(function(nobj){
-            if(obj.get('List').length === 2 && obj.get('Rel').get('Name') === 'relation')
+            if(nobj.get('Employee').length === 1 && nobj.get('Employee')[0].get('Name') === 'abcd')
                 done();
             else
                 throw "Unable to Save Object";
@@ -131,8 +131,8 @@ describe("Graph DB",function(done){
     it("Should query over relation",function(done){
 
         this.timeout(10000);
-        var query = new CB.CloudQuery('Orient');
-        query.equalTo('Rel.Name','vipul');
+        var query = new CB.CloudQuery('Employee');
+        query.equalTo('#Company.Name','Progress');
         query.find().then(function(list){
             console.log(list);
             done();
@@ -140,6 +140,6 @@ describe("Graph DB",function(done){
             console.log(err);
             throw "Unable to Save the Object";
         });
-    });*/
+    });
 
 });
