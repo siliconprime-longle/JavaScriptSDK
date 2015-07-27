@@ -10271,38 +10271,22 @@ CB._modified = function(thisObj,columnName){
 	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
-    	this.timeout(10000);
+        this.timeout(100000);
         var xmlhttp;
-        this.timeout(10000);
         var req = typeof(require) === 'function' ? require : null;
         // Load references to other dependencies
         if (typeof(XMLHttpRequest) !== 'undefined') {
-             xmlhttp = XMLHttpRequest;
-            } else if (typeof(require) === 'function' &&
-                typeof(require.ensure) === 'undefined') {
-                xmlhttp = req('xmlhttprequest').XMLHttpRequest;
-            }
-            xmlhttp = new xmlhttp();
-        xmlhttp.open('GET','http://localhost:4730',true);
-        xmlhttp.send();
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == xmlhttp.DONE) {
-                if (xmlhttp.status == 200) {
-                    CB.appId = 'sample123';
-                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
-                    CB.serverUrl = 'http://localhost:4730';
-                    CB.socketIoUrl = CB.serverUrl;
-                    CB.apiUrl = CB.serverUrl + '/api';
-                    done();
-                }
-                else {
-                    CB.appId = 'travis123';
-                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-                    done();
-
-                }
-            }
+            xmlhttp = XMLHttpRequest;
+        } else if (typeof(require) === 'function' &&
+            typeof(require.ensure) === 'undefined') {
+            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
         }
+        CB.appId = 'travis123';
+        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+        CB.socketIoUrl = CB.serverUrl;
+        CB.apiUrl = CB.serverUrl + '/api';
+        done();
     });
 });
 
@@ -11528,7 +11512,7 @@ describe("Version Test",function(done){
 
 
     it("should update the version of a saved object", function (done) {
-        this.timeout(10000);
+        this.timeout(15000);
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
@@ -11645,8 +11629,10 @@ describe("CloudExpire", function () {
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
         obj.save().then(function(obj1) {
+            if(obj1)
                 done();
-            throw "unable to save expires";
+            else
+                throw "unable to save expires";
         }, function (err) {
             console.log(err);
             throw "Relation Expire error";

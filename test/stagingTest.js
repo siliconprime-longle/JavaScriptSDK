@@ -11512,7 +11512,7 @@ describe("Version Test",function(done){
 
 
     it("should update the version of a saved object", function (done) {
-        this.timeout(10000);
+        this.timeout(15000);
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
@@ -11629,8 +11629,10 @@ describe("CloudExpire", function () {
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
         obj.save().then(function(obj1) {
+            if(obj1)
                 done();
-            throw "unable to save expires";
+            else
+                throw "unable to save expires";
         }, function (err) {
             console.log(err);
             throw "Relation Expire error";

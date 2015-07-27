@@ -15,7 +15,7 @@ module.exports = function(grunt) {
             test:{
               // the files to concatenate
                     src: [
-                    'test/nodeTest.js',
+                    'dist/1.0.0.js',
                     'test/util/util.js',
                     'test/serverTest.js',
                     'test/init/init.js',
