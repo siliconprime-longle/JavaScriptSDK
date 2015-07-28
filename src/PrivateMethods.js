@@ -219,7 +219,7 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = localStorage.getItem('sessionID');
+    var ssid = CB._getSessionId();
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
     if(CB._isNode)
@@ -244,6 +244,11 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
+CB._getSessionId = function(){
+    return localStorage.getItem('sessionID');
+};
+
 CB._modified = function(thisObj,columnName){
     thisObj.document._isModified = true;
     if(thisObj.document._modifiedColumns) {

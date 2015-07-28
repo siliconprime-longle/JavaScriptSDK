@@ -1895,10 +1895,7 @@ describe("CloudQuery Include", function () {
 
         var obj1 = new CB.CloudObject('student1');
         obj1.set('name', 'Vipul');
-        var obj2= new CB.CloudObject('student1');
-        obj2.set('name', 'Nawaz');
-        obje=[obj1,obj2];
-        obj.set('newColumn7', obje);
+        obj.set('newColumn7', obj1);
     
         obj.save({
             success : function(obj){
@@ -3712,6 +3709,35 @@ describe("ACL", function () {
                 throw "user role read access set error"
         }, function () {
             throw "user role read access save error";
+        });
+
+    });
+});
+
+
+describe("ACL on CloudObject Notifications", function () {
+
+    it("Should create new user and listen to CLoudNotifiction events.", function (done) {
+
+        this.timeout(20000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            if(user.get('username') === username){
+                CB.CloudObject.on('User', 'created', function(){
+                    done();
+                });
+            }
+            else
+                throw "Create user error"
+        }, function () {
+            throw "user create error";
         });
 
     });

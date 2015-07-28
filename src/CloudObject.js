@@ -91,7 +91,13 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
     } else {
         eventType = eventType.toLowerCase();
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
-            CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
+
+            var payload = {
+                room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
+                sessionId : CB._getSessionId()
+            };
+
+            CB.Socket.emit('join-object-channel',payload);
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
                 callback(CB.fromJSON(data));
             });

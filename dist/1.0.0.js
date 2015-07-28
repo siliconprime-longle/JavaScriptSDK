@@ -7869,7 +7869,13 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
     } else {
         eventType = eventType.toLowerCase();
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
-            CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
+
+            var payload = {
+                room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
+                sessionId : CB._getSessionId()
+            };
+
+            CB.Socket.emit('join-object-channel',payload);
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
                 callback(CB.fromJSON(data));
             });
@@ -10213,7 +10219,7 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = localStorage.getItem('sessionID');
+    var ssid = CB._getSessionId();
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
     if(CB._isNode)
@@ -10238,6 +10244,11 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
+CB._getSessionId = function(){
+    return localStorage.getItem('sessionID');
+};
+
 CB._modified = function(thisObj,columnName){
     thisObj.document._isModified = true;
     if(thisObj.document._modifiedColumns) {
