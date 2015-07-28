@@ -21,6 +21,34 @@ describe("Cloud Files", function(done) {
         });
     });
 
+    it("Should delete a file with file data and name",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
+                file.delete().then(function(file){
+                    if(file.url === null)
+                        done();
+                    else
+                        throw "file delete error"
+                },function(err){
+                    throw "unable to delete file";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
     try {
 
         if (window) {
