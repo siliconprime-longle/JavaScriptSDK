@@ -12286,6 +12286,48 @@ describe("CloudQuery Include", function () {
 
     });
 
+
+    it("should include a relation on distinct.", function (done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'text');
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'Vipul');
+        obj.set('newColumn7', obj1);
+    
+        obj.save({
+            success : function(obj){
+                var query = new CB.CloudQuery('Custom2');
+                query.include('newColumn7');
+                query.distinct('newColumn1').then(function(list){
+                    if(list.length>0){
+                        for(var i=0;i<list.length;i++){
+                            var student_obj=list[i].get('newColumn7');
+                            if(!student_obj.get('name'))
+                                throw "Unsuccessful Join";
+                            else
+                                done();
+                        }    
+                    }else{
+                        throw "Cannot retrieve a saved relation.";
+                    }
+                }, function(error){
+                    throw "Unsuccessful join"
+                });
+            }, error : function(error){
+                throw "Cannot save a CloudObject";
+
+            }
+
+        })
+
+       
+
+    });
+
     it("should query over a linked column if a object is passed in equalTo",function(done){
             this.timeout(100000);
 
