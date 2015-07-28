@@ -9723,6 +9723,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
         };
 
     } else if(typeof file === "string") {
+
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
@@ -9732,6 +9733,22 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 url: file,
                 contentType : ''
             };
+        } else{
+            if(data){
+                this.data = data;
+                if(!type){
+                    type = file.split('.')[file.split('.').length-1];
+                }
+                this.document = {
+                    _type: 'file',
+                    name: file,
+                    size: '',
+                    url: '',
+                    contentType : type
+                };
+            }else{
+                throw "Invalid File. It should be of type file or blob";
+            }
         }
     }
     else{
@@ -9785,52 +9802,78 @@ CB.CloudFile.prototype.save = function(callback) {
 
 
     var thisObj = this;
-    var formdata = new FormData();
 
-    if(!this.fileObj)
+
+    if(!this.fileObj && !this.data)
         throw "You cannot save a file which is null";
 
-    formdata.append("fileToUpload", this.fileObj);
-    formdata.append("key", CB.appKey);
+    if(!this.data) {
+        var formdata = new FormData();
+        formdata.append("fileToUpload", this.fileObj);
+        formdata.append("key", CB.appKey);
 
-    var xmlhttp = CB._loadXml();
-    var params=formdata;
-    url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
-    xmlhttp.open('POST',url,true);
-    if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
-        localStorage = new LocalStorage('./scratch');
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/" + CB.version +
-            " (NodeJS " + process.versions.node + ")");
-    }
-    var ssid = localStorage.getItem('sessionID');
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
-    xmlhttp.send(params);
+        var xmlhttp = CB._loadXml();
+        var params = formdata;
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        xmlhttp.open('POST', url, true);
+        if (CB._isNode) {
+            var LocalStorage = require('node-localstorage').LocalStorage;
+            localStorage = new LocalStorage('./scratch');
+            xmlhttp.setRequestHeader("User-Agent",
+                "CB/" + CB.version +
+                " (NodeJS " + process.versions.node + ")");
+        }
+        var ssid = localStorage.getItem('sessionID');
+        if (ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+        xmlhttp.send(params);
 
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                thisObj.url = JSON.parse(xmlhttp.responseText)._url;
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
-                if (callback) {
-                    callback.success(thisObj);
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == xmlhttp.DONE) {
+                if (xmlhttp.status == 200) {
+                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if (sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                    if (callback) {
+                        callback.success(thisObj);
+                    } else {
+                        def.resolve(thisObj);
+                    }
                 } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
+                    if (callback) {
+                        callback.error(xmlhttp.responseText);
+                    } else {
+                        def.reject(xmlhttp.responseText);
+                    }
                 }
             }
         }
+    }else{
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            data: this.data,
+            key: CB.appKey
+        });
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        //console.log(params);
+        CB._request('POST',url,params).then(function(response){
+            thisObj.url = JSON.parse(response)._url;
+            delete thisObj.data;
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
     }
 
 
@@ -10311,6 +10354,124 @@ describe("Cloud App", function() {
     });
 });
 
+describe("Cloud Files", function(done) {
+
+    it("Should Save a file with file data and name",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
+                done();
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+    it("Should delete a file with file data and name",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                file.delete().then(function(file){
+                    console.log(file);
+                    if(file.url === null)
+                        done();
+                    else
+                        throw "file delete error"
+                },function(err){
+                    throw "unable to delete file";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+    try {
+
+        if (window) {
+            it("should save a new file", function (done) {
+
+                this.timeout(20000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
+            it("should delete a file", function (done) {
+
+                this.timeout(200000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        //received the blob's url
+                        console.log(file.url);
+                        file.delete().then(function (file) {
+                            if (file.url === null) {
+                                done();
+                            } else {
+                                throw "File deleted, url in SDK not deleted";
+                            }
+                        }, function (err) {
+                            throw "Error deleting file";
+                        })
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+            });
+        }
+    }catch(e){
+        console.log('In node');
+    }
+    //add ACL on CloudFiles.
+    
+});
+
 describe("CloudObject - Encryption", function () {
 
     it("should encrypt passwords", function (done) {
@@ -10429,111 +10590,115 @@ describe("CloudObjectExpires", function () {
     });
 });
 describe("Cloud Objects Files", function() {
-  
-	var obj = new CB.CloudObject('Student');
 
-     it("should save a file inside of an object", function(done) {
+    try {
+        if(window) {
+            var obj = new CB.CloudObject('Student');
 
-     this.timeout(20000);
+            it("should save a file inside of an object", function (done) {
 
-       //save file first. 
-         var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-         try {
-             var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-         } catch (e) {
-             var builder = new WebKitBlobBuilder();
-             builder.append(aFileParts);
-             var oMyBlob = builder.getBlob();
-         }
-      var file = new CB.CloudFile(oMyBlob);
+                this.timeout(20000);
 
-      file.save().then(function(file) {
-         if(file.url){
-          console.log(file);
-           //create a new object.
-           var obj = new CB.CloudObject('Sample');
-           obj.set('name', 'sample');
-           obj.set('file', file);
+                //save file first.
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
 
-           obj.save().then(function(newobj){
-             if(newobj.get('file') instanceof CB.CloudFile && newobj.get('file').url){
-               done();
-             }else{
-               throw "object saved but didnot return file.";
-             }
-           }, function(error){
-             throw "error saving an object.";
-           });
+                file.save().then(function (file) {
+                    if (file.url) {
+                        console.log(file);
+                        //create a new object.
+                        var obj = new CB.CloudObject('Sample');
+                        obj.set('name', 'sample');
+                        obj.set('file', file);
 
-         }else{
-           throw "upload success. but cannot find the url.";
-         }
-       }, function(err) {
-         throw "error uploading file";
-       });
+                        obj.save().then(function (newobj) {
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').url) {
+                                done();
+                            } else {
+                                throw "object saved but didnot return file.";
+                            }
+                        }, function (error) {
+                            throw "error saving an object.";
+                        });
 
-     });
+                    } else {
+                        throw "upload success. but cannot find the url.";
+                    }
+                }, function (err) {
+                    throw "error uploading file";
+                });
 
-    it("should save an array of files.", function(done) {
-     this.timeout(200000);
-     //save file first. 
-        var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-        try {
-            var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-        } catch (e) {
-            var builder = new WebKitBlobBuilder();
-            builder.append(aFileParts);
-            var oMyBlob = builder.getBlob();
+            });
+
+            it("should save an array of files.", function (done) {
+                this.timeout(200000);
+                //save file first.
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+
+                        var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                        try {
+                            var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                        } catch (e) {
+                            var builder = new WebKitBlobBuilder();
+                            builder.append(aFileParts);
+                            var oMyBlob = builder.getBlob();
+                        }
+                        var file1 = new CB.CloudFile(oMyBlob);
+
+                        file1.save().then(function (file1) {
+                            if (file1.url) {
+
+                                //create a new object.
+                                var obj = new CB.CloudObject('Sample');
+                                obj.set('name', 'sample');
+                                obj.set('fileList', [file, file1]);
+
+                                obj.save().then(function (newObj) {
+                                    done();
+                                }, function (error) {
+                                    throw "Error Saving an object.";
+                                });
+
+                            } else {
+                                throw "Upload success. But cannot find the URL.";
+                            }
+                        }, function (err) {
+                            throw "Error uploading file";
+                        });
+
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+            });
+
+            it("should save an object with unsaved file.", function (done) {
+                done();
+            });
         }
-     var file = new CB.CloudFile(oMyBlob);
-
-     file.save().then(function(file) {
-        if(file.url){
-
-            var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-            try {
-                var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-            } catch (e) {
-                var builder = new WebKitBlobBuilder();
-                builder.append(aFileParts);
-                var oMyBlob = builder.getBlob();
-            }
-         var file1 = new CB.CloudFile(oMyBlob);
-
-         file1.save().then(function(file1) {
-            if(file1.url){
-              
-              //create a new object.
-              var obj = new CB.CloudObject('Sample');
-              obj.set('name', 'sample');
-              obj.set('fileList', [file, file1]);
-
-              obj.save().then(function(newObj){
-                  done();
-              }, function(error){
-                throw "Error Saving an object.";
-              });
-
-            }else{
-              throw "Upload success. But cannot find the URL.";
-            }
-          }, function(err) {
-            throw "Error uploading file";
-          });
-
-        }else{
-          throw "Upload success. But cannot find the URL.";
-        }
-      }, function(err) {
-        throw "Error uploading file";
-      });
-    });
-
-    it("should save an object with unsaved file.", function(done) {
-      done();
-    });
-
-   
+    }catch(e){
+        console.log("Not in Browser");
+    }
 
 });
 describe("Cloud Objects Notification", function() {
@@ -13963,7 +14128,7 @@ describe("ACL", function () {
 
 describe("ACL on CloudObject Notifications", function () {
 
-    it("Should create new user and listen to CLoudNotifiction events.", function (done) {
+    it("Should create new user and listen to CloudNotifiction events.", function (done) {
 
         this.timeout(20000);
 
@@ -13975,15 +14140,187 @@ describe("ACL on CloudObject Notifications", function () {
         userObj.set('password',passwd);
         userObj.set('email',util.makeEmail());
         userObj.signUp().then(function(user) {
-            if(user.get('username') === username){
-                CB.CloudObject.on('User', 'created', function(){
-                    done();
-                });
-            }
-            else
-                throw "Create user error"
-        }, function () {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                done();
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.save();
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should NOT receieve a  notification when public read access is false;", function (done) {
+
+        this.timeout(30000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(data){
+                CB.CloudObject.off('User','created');
+                done("Sent notification when set public read access is false");
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(false);
+
+            userObj.save();
+
+            setTimeout(function(){ 
+                console.log('Done!');
+                done(); 
+
+            }, 1000); //wait for sometime and done! 
+           
+        }, function (error) {
             throw "user create error";
+        });
+
+    });
+
+    it("Should NOT receivee an event when user read access is false;", function (done) {
+
+        this.timeout(30000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                done("Sent notification when set public read access is false");
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setUserReadAccess(user.id, false);
+
+            userObj.save();
+
+            setTimeout(function(){ 
+               done();
+            }, 10000); //wait for sometime and done! 
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should NOT receieve a  notification when public read access is true but user is false;", function (done) {
+
+        this.timeout(30000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                done("Sent notification when set public read access is false");
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(true);
+            userObj.ACL.setUserReadAccess(user.id, false);
+
+            userObj.save();
+
+            setTimeout(function(){ done(); }, 10000); //wait for sometime and done! 
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+
+    it("Should receieve a notification when public read access is false but user is true;", function (done) {
+
+        this.timeout(30000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+               CB.CloudObject.off('User','created');
+               done();
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(false);
+            userObj.ACL.setUserReadAccess(user.id, true);
+
+            userObj.save();
+
+        }, function (error) {
+            done("user create error");
         });
 
     });

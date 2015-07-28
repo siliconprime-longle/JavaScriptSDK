@@ -20,6 +20,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
         };
 
     } else if(typeof file === "string") {
+
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
@@ -29,6 +30,22 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 url: file,
                 contentType : ''
             };
+        } else{
+            if(data){
+                this.data = data;
+                if(!type){
+                    type = file.split('.')[file.split('.').length-1];
+                }
+                this.document = {
+                    _type: 'file',
+                    name: file,
+                    size: '',
+                    url: '',
+                    contentType : type
+                };
+            }else{
+                throw "Invalid File. It should be of type file or blob";
+            }
         }
     }
     else{
@@ -82,52 +99,78 @@ CB.CloudFile.prototype.save = function(callback) {
 
 
     var thisObj = this;
-    var formdata = new FormData();
 
-    if(!this.fileObj)
+
+    if(!this.fileObj && !this.data)
         throw "You cannot save a file which is null";
 
-    formdata.append("fileToUpload", this.fileObj);
-    formdata.append("key", CB.appKey);
+    if(!this.data) {
+        var formdata = new FormData();
+        formdata.append("fileToUpload", this.fileObj);
+        formdata.append("key", CB.appKey);
 
-    var xmlhttp = CB._loadXml();
-    var params=formdata;
-    url = CB.serverUrl+'/file/' + CB.appId + '/upload' ;
-    xmlhttp.open('POST',url,true);
-    if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
-        localStorage = new LocalStorage('./scratch');
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/" + CB.version +
-            " (NodeJS " + process.versions.node + ")");
-    }
-    var ssid = localStorage.getItem('sessionID');
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
-    xmlhttp.send(params);
+        var xmlhttp = CB._loadXml();
+        var params = formdata;
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        xmlhttp.open('POST', url, true);
+        if (CB._isNode) {
+            var LocalStorage = require('node-localstorage').LocalStorage;
+            localStorage = new LocalStorage('./scratch');
+            xmlhttp.setRequestHeader("User-Agent",
+                "CB/" + CB.version +
+                " (NodeJS " + process.versions.node + ")");
+        }
+        var ssid = localStorage.getItem('sessionID');
+        if (ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+        xmlhttp.send(params);
 
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                thisObj.url = JSON.parse(xmlhttp.responseText)._url;
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
-                if (callback) {
-                    callback.success(thisObj);
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == xmlhttp.DONE) {
+                if (xmlhttp.status == 200) {
+                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if (sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                    if (callback) {
+                        callback.success(thisObj);
+                    } else {
+                        def.resolve(thisObj);
+                    }
                 } else {
-                    def.resolve(thisObj);
-                }
-            } else {
-                if (callback) {
-                    callback.error(xmlhttp.responseText);
-                } else {
-                    def.reject(xmlhttp.responseText);
+                    if (callback) {
+                        callback.error(xmlhttp.responseText);
+                    } else {
+                        def.reject(xmlhttp.responseText);
+                    }
                 }
             }
         }
+    }else{
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            data: this.data,
+            key: CB.appKey
+        });
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        //console.log(params);
+        CB._request('POST',url,params).then(function(response){
+            thisObj.url = JSON.parse(response)._url;
+            delete thisObj.data;
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
     }
 
 
