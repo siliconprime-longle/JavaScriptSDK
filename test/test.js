@@ -10392,9 +10392,8 @@ describe("Cloud Files", function(done) {
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
             if(file.url) {
-                console.log(file);
-                console.log("Saved file");
                 file.delete().then(function(file){
+                    console.log(file);
                     if(file.url === null)
                         done();
                     else
