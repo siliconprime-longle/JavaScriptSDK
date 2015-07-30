@@ -10628,6 +10628,16 @@ describe("Server Check",function(){
     });
 });
 
+describe("Cloud App", function() {
+    it("should init the CloudApp and SDK.", function(done) {
+        this.timeout(500000);
+
+        CB.CloudApp.init(CB.appId, CB.appKey);
+
+        done();
+    });
+});
+
 describe("ACL", function () {
 
     it("Should set the public write access", function (done) {
@@ -11184,16 +11194,6 @@ describe("Query_ACL", function () {
     });
 });
 
-
-describe("Cloud App", function() {
-    it("should init the CloudApp and SDK.", function(done) {
-        this.timeout(500000);
-
-        CB.CloudApp.init(CB.appId, CB.appKey);
-
-        done();
-    });
-});
 
 describe("Cloud Files", function(done) {
 
