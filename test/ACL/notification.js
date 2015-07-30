@@ -2,6 +2,8 @@ describe("ACL on CloudObject Notifications", function () {
 
     it("Should create new user and listen to CloudNotifiction events.", function (done) {
 
+        var isDone = false;
+
         this.timeout(20000);
 
         var username = util.makeString();
@@ -15,7 +17,11 @@ describe("ACL on CloudObject Notifications", function () {
             
             CB.CloudObject.on('User', 'created', function(){
                 CB.CloudObject.off('User','created');
-                done();
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
+                
             });
 
             var username = util.makeString();
@@ -36,6 +42,8 @@ describe("ACL on CloudObject Notifications", function () {
 
     it("Should NOT receieve a  notification when public read access is false;", function (done) {
 
+        var isDone = false;
+
         this.timeout(30000);
 
         var username = util.makeString();
@@ -49,7 +57,10 @@ describe("ACL on CloudObject Notifications", function () {
             
             CB.CloudObject.on('User', 'created', function(data){
                 CB.CloudObject.off('User','created');
-                done("Sent notification when set public read access is false");
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
             });
 
             var username = util.makeString();
@@ -67,7 +78,10 @@ describe("ACL on CloudObject Notifications", function () {
 
             setTimeout(function(){ 
                 console.log('Done!');
-                done(); 
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
 
             }, 1000); //wait for sometime and done! 
            
@@ -81,6 +95,8 @@ describe("ACL on CloudObject Notifications", function () {
 
         this.timeout(30000);
 
+        var isDone = false;
+
         var username = util.makeString();
         var passwd = "abcd";
         var userObj = new CB.CloudUser();
@@ -92,7 +108,10 @@ describe("ACL on CloudObject Notifications", function () {
             
             CB.CloudObject.on('User', 'created', function(){
                 CB.CloudObject.off('User','created');
-                done("Sent notification when set public read access is false");
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
             });
 
             var username = util.makeString();
@@ -109,7 +128,10 @@ describe("ACL on CloudObject Notifications", function () {
             userObj.save();
 
             setTimeout(function(){ 
-               done();
+               if(!isDone){
+                    isDone=true;
+                    done();
+                }
             }, 10000); //wait for sometime and done! 
            
         }, function (error) {
@@ -122,6 +144,8 @@ describe("ACL on CloudObject Notifications", function () {
 
         this.timeout(30000);
 
+        var isDone = false;
+
         var username = util.makeString();
         var passwd = "abcd";
         var userObj = new CB.CloudUser();
@@ -133,7 +157,11 @@ describe("ACL on CloudObject Notifications", function () {
             
             CB.CloudObject.on('User', 'created', function(){
                 CB.CloudObject.off('User','created');
-                done("Sent notification when set public read access is false");
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
+               
             });
 
             var username = util.makeString();
@@ -150,7 +178,12 @@ describe("ACL on CloudObject Notifications", function () {
 
             userObj.save();
 
-            setTimeout(function(){ done(); }, 10000); //wait for sometime and done! 
+            setTimeout(function(){ 
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
+             }, 10000); //wait for sometime and done! 
            
         }, function (error) {
             done("user create error");
@@ -163,6 +196,8 @@ describe("ACL on CloudObject Notifications", function () {
 
         this.timeout(30000);
 
+        var isDone = false;
+
         var username = util.makeString();
         var passwd = "abcd";
         var userObj = new CB.CloudUser();
@@ -174,7 +209,10 @@ describe("ACL on CloudObject Notifications", function () {
             
             CB.CloudObject.on('User', 'created', function(){
                CB.CloudObject.off('User','created');
-               done();
+               if(!isDone){
+                    isDone=true;
+                    done();
+                }
             });
 
             var username = util.makeString();

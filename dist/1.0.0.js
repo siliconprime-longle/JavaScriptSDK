@@ -7874,22 +7874,10 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
             throw "CloudQuery TableName and CloudNotification TableName should be same.";
         }
 
-        if(cloudQuery.limit !== 10){
-            throw "You cannot pass the query with limit in CloudNotifications.";
-        }
-
-        if(cloudQuery.skip > 0){
-            throw "You cannot pass the query with skip in CloudNotifications.";
-        }
-
         if(cloudQuery.query){
             if(cloudQuery.query.$include.length>0){
                 throw "Include with CloudNotificaitons is not supported right now.";
             }
-        }
-
-        if(cloudQuery.skip !== 0){
-            throw "You cannot pass the query with skip in CloudNotifications.";
         }
 
         if(Object.keys(cloudQuery.select).length > 0){
