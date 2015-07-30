@@ -132,7 +132,7 @@ describe("Graph DB",function(done){
 
         this.timeout(10000);
         var query = new CB.CloudQuery('Employee');
-        query.equalTo('#Company.Name','Progress');
+        query.equalTo('Company.Name','Progress');
         query.find().then(function(list){
             console.log(list);
             done();
