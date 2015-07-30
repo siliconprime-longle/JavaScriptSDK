@@ -8952,7 +8952,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                 }else{
 
                         for(var objectKeys in value){
-                            //not equalTo query
+                             //not equalTo query
                             if(objectKeys === '$ne'){
                                 if(cloudObject.get(key) === query[key]['$ne']){
                                     return false;
@@ -9026,17 +9026,31 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
 
                             //containedIn. 
                             if(objectKeys === '$in'){
+
                                 if(query[key][objectKeys]){
                                     var arr =  query[key][objectKeys];
-                                    var value = cloudObject.get(key);
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
 
                                     if( Object.prototype.toString.call( value ) === '[object Array]' ) {
                                         var exists = false;
                                         for(var i=0;i<value.length;i++){
-                                            if(arr.indexOf(value[i])>-1){
-                                                exists = true;
-                                                break;
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)>-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])>-1){
+                                                    exists = true;
+                                                    break;
+                                                }
                                             }
+                                           
                                         }
 
                                         if(!exists){
@@ -9054,17 +9068,30 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
 
                             //doesNot containedIn. 
                             if(objectKeys === '$nin'){
-                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                if(query[key][objectKeys]){
                                     var arr =  query[key][objectKeys];
-                                    var value = cloudObject.get(key);
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
 
                                     if( Object.prototype.toString.call( value ) === '[object Array]' ) {
                                         var exists = false;
                                         for(var i=0;i<value.length;i++){
-                                            if(arr.indexOf(value[i])!==-1){
-                                                exists = true;
-                                                break;
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)!==-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])!==-1){
+                                                    exists = true;
+                                                    break;
+                                                }
                                             }
+                                            
                                         }
                                         
                                         if(exists){
@@ -9082,14 +9109,25 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
 
                             //containsAll. 
                              if(objectKeys === '$all'){
-                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                if(query[key][objectKeys]){
                                     var arr =  query[key][objectKeys];
-                                    var value = cloudObject.get(key);
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
 
                                     if( Object.prototype.toString.call( value ) === '[object Array]' ) {
                                         for(var i=0;i<value.length;i++){
-                                            if(arr.indexOf(value[i])===-1){
-                                                return false;
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)===-1){
+                                                    return false;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])===-1){
+                                                    return false;
+                                                }
                                             }
                                         }
                                     }else{
@@ -9105,9 +9143,21 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                 }
             }else{
                 //it might be a plain equalTo query. 
-                if(cloudObject.get(key) !== query[key]){
-                    return false;
+                if(key.indexOf('.')!==-1){ // for keys with "key._id" - This is for CloudObjects.
+                    var temp = key.substring(0, key.indexOf('.'));
+                    if(!cloudObject.get(temp)){
+                        return false;
+                    }
+
+                    if(cloudObject.get(temp).id !== query[key]){
+                        return false;
+                    }
+                }else{
+                    if(cloudObject.get(key) !== query[key]){
+                        return false;
+                    }
                 }
+                
             }
         }
         
