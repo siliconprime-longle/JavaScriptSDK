@@ -19,6 +19,7 @@ module.exports = function(grunt) {
                     'test/util/util.js',
                     'test/serverTest.js',
                     'test/init/init.js',
+                    'test/ACL/*.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudObject/*.js',
                     'test/CloudExpire/*.js',
@@ -26,14 +27,15 @@ module.exports = function(grunt) {
                     'test/CloudGeoPoint/*.js',
                     'test/CloudQuery/*.js',
                     'test/CloudSearch/*.js',
-                    'test/CloudUser/*.js',
-                    'test/ACL/*.js'],
+                    'test/CloudUser/*.js'
+                    ],
                     dest: 'test/test.js'
                 },
             stagingTest:{
                     src: ['dist/1.0.0.js',
                     'test/util/util.js',
                     'test/stageTest.js',
+                    'test/ACL/*.js',
                     'test/init/init.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudObject/*.js',
@@ -42,8 +44,8 @@ module.exports = function(grunt) {
                     'test/CloudGeoPoint/*.js',
                     'test/CloudQuery/*.js',
                     'test/CloudSearch/*.js',
-                    'test/CloudUser/*.js',
-                    'test/ACL/*.js'],
+                    'test/CloudUser/*.js'
+                    ],
                     dest: 'test/stagingTest.js'
                 }
             },
