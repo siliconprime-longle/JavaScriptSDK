@@ -15,7 +15,7 @@ describe("Version Test",function(done){
 
     it("should save.", function(done) {
 
-        this.timeout('10000');
+        this.timeout(20000);
         obj.set('name', 'sample');
         obj.save({
             success : function(newObj){
@@ -33,7 +33,7 @@ describe("Version Test",function(done){
     });
 
     it("should get the saved CO with version",function(done){
-        this.timeout(10000);
+        this.timeout(20000);
         var query = new CB.CloudQuery('Sample');
         query.findById(obj.get('id')).then(function(list){
             var version = list.get('_version');
@@ -80,7 +80,7 @@ describe("Version Test",function(done){
     var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         user.set('username', username);
         user.set('password',passwd);
@@ -101,7 +101,7 @@ describe("Version Test",function(done){
 
     it("Should create a role with version", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
         var role = new CB.CloudRole(roleName);
         role.save().then(function (list) {
             if (!list)
@@ -120,7 +120,7 @@ describe("Version Test",function(done){
 
     it("Should Store a relation with version",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
         child.set('name','vipul');
         parent.set('newColumn7',[child]);
         parent.save().then(function(list){
@@ -132,7 +132,7 @@ describe("Version Test",function(done){
 
     });
     it("Should retrieve a saved user object",function(done){
-        this.timeout(10000);
+        this.timeout(20000);
         var query = new CB.CloudQuery('User');
         query.get(user.get('id')).then(function (user) {
             if(user.get('username') === username)
@@ -144,7 +144,7 @@ describe("Version Test",function(done){
 
     it("Should save object with a relation and don't have a child object",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
         obj.set('name','vipul');
         obj.save().then(function(obj1){

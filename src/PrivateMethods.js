@@ -260,3 +260,14 @@ CB._modified = function(thisObj,columnName){
         thisObj.document._modifiedColumns.push(columnName);
     }
 };
+
+
+function trimStart(character, string) {
+    var startIndex = 0;
+
+    while (string[startIndex] === character) {
+        startIndex++;
+    }
+
+    return string.substr(startIndex);
+}

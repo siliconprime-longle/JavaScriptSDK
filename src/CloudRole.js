@@ -22,34 +22,3 @@ Object.defineProperty(CB.CloudRole.prototype, 'name', {
         CB._modified(this,name);
     }
 });
-
-CB.CloudRole.getRole = function(role, callback) {
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
-    }
-    var roleName = role.document.name;
-    var params=JSON.stringify({
-        key: CB.appKey
-    });
-    url = CB.apiUrl + "/" + CB.appId + "/role/getRole/" + roleName ;
-
-    CB._request('POST',url,params).then(function(response){
-        var thisObj = CB.fromJSON((JSON.parse(response)));
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-
-    if (!callback) {
-        return def;
-    }
-};

@@ -192,6 +192,7 @@ CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
     var isCloudObject = false;
@@ -199,11 +200,8 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-   
-    
-
     if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
-        throw 'Array or string expected as an argument';
+        throw 'Array / value / CloudObject expected as an argument';
     }
 
     
@@ -445,15 +443,12 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
 
     var regex = '^' + value;
     if (!this.query[columnName]) {
-        this.query[columnName] = {
-            $regex: regex,
-            $options: "im"
-        }
-    } else {
-        this.query[columnName]["$regex"] = regex;
-        this.query[columnName]["$options"] = 'im';
-    }
+        this.query[columnName] = {};
+    } 
 
+    this.query[columnName]["$regex"] = regex;
+    this.query[columnName]["$options"] = 'im';
+    
     return this;
 }
 
@@ -754,4 +749,194 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
     if (!callback) {
         return def;
     }
+};
+
+
+CB.CloudQuery._validateQuery = function(cloudObject, query){
+    //validate query. 
+   for(var key in query){
+        
+        if(query[key]){
+            var value = query[key];
+            if(typeof value === 'object'){
+
+                if(key === '$or'){
+                    if(query[key].length>0){
+                        var isTrue = false;
+                        for(var i=0;i<query[key].length;i++){
+                            if(CB.CloudQuery._validateQuery(cloudObject,query[key][i])){
+                                isTrue = true;
+                                break;
+                            }
+                        }
+
+                        if(!isTrue){
+                            return false;
+                        }
+                    }
+                }else{
+
+                        for(var objectKeys in value){
+                            //not equalTo query
+                            if(objectKeys === '$ne'){
+                                if(cloudObject.get(key) === query[key]['$ne']){
+                                    return false;
+                                }
+                            }
+
+                            //greater than
+                            if(objectKeys === '$gt'){
+                                if(cloudObject.get(key) <= query[key]['$gt']){
+                                    return false;
+                                }
+                            }
+
+                            //less than
+                            if(objectKeys === '$lt'){
+                                if(cloudObject.get(key) >= query[key]['$lt']){
+                                    return false;
+                                }
+                            }
+
+                            //greater than and equalTo. 
+                            if(objectKeys === '$gte'){
+                                if(cloudObject.get(key) < query[key]['$gte']){
+                                    return false;
+                                }
+                            }
+
+
+                            //less than and equalTo. 
+                            if(objectKeys === '$lte'){
+                                if(cloudObject.get(key) > query[key]['$lte']){
+                                    return false;
+                                }
+                            }
+
+                            //exists 
+                            if(objectKeys === '$exists'){
+                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                    //do nothing.
+                                }else if(query[key][objectKeys]!==false){
+                                    return false;
+                                }
+                            }
+
+                            //doesNot exists. 
+                            if(objectKeys === '$exists'){
+                                if(!query[key][objectKeys] && cloudObject.get(key)){
+                                    return false;
+                                }
+                            }
+
+                            //startsWith. 
+                            if(objectKeys === '$regex'){
+
+                                var reg = new RegExp(query[key][objectKeys]);
+
+                                if(!query[key]['$options'] ){
+                                    if(!reg.test(cloudObject.get(key))) //test actial regex. 
+                                        return false;
+                                }else{
+                                    if(query[key]['$options']==='im'){ //test starts with.
+                                         //starts with.
+                                        var value = trimStart('^', query[key][objectKeys]);
+                                        if(cloudObject.get(key).indexOf(value)!==0)
+                                            return false;
+                                        }
+                                }
+
+                            }
+
+
+                            //containedIn. 
+                            if(objectKeys === '$in'){
+                                if(query[key][objectKeys]){
+                                    var arr =  query[key][objectKeys];
+                                    var value = cloudObject.get(key);
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        var exists = false;
+                                        for(var i=0;i<value.length;i++){
+                                            if(arr.indexOf(value[i])>-1){
+                                                exists = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if(!exists){
+                                            return false;
+                                        }
+
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)===-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+
+                            //doesNot containedIn. 
+                            if(objectKeys === '$nin'){
+                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                    var arr =  query[key][objectKeys];
+                                    var value = cloudObject.get(key);
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        var exists = false;
+                                        for(var i=0;i<value.length;i++){
+                                            if(arr.indexOf(value[i])!==-1){
+                                                exists = true;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if(exists){
+                                            return false;
+                                        }
+
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)!==-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+
+                            //containsAll. 
+                             if(objectKeys === '$all'){
+                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                    var arr =  query[key][objectKeys];
+                                    var value = cloudObject.get(key);
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        for(var i=0;i<value.length;i++){
+                                            if(arr.indexOf(value[i])===-1){
+                                                return false;
+                                            }
+                                        }
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)===-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+                        }
+                    
+                }
+            }else{
+                //it might be a plain equalTo query. 
+                if(cloudObject.get(key) !== query[key]){
+                    return false;
+                }
+            }
+        }
+        
+   }
+
+   return true;
 };
