@@ -15,11 +15,11 @@ module.exports = function(grunt) {
             test:{
               // the files to concatenate
                     src: [
+                    'test/ACL/*.js',
                     'dist/1.0.0.js',
                     'test/util/util.js',
                     'test/serverTest.js',
                     'test/init/init.js',
-                    'test/ACL/*.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudObject/*.js',
                     'test/CloudExpire/*.js',
@@ -32,10 +32,11 @@ module.exports = function(grunt) {
                     dest: 'test/test.js'
                 },
             stagingTest:{
-                    src: ['dist/1.0.0.js',
+                    src: [
+                    'test/ACL/*.js',
+                    'dist/1.0.0.js',
                     'test/util/util.js',
                     'test/stageTest.js',
-                    'test/ACL/*.js',
                     'test/init/init.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudObject/*.js',
