@@ -14178,7 +14178,7 @@ describe("CloudQuery - Encryption", function () {
     });
 
 });
-describe("CloudQuery Include", function () {
+describe("CloudQuery Include", function (done) {
     
    
     
@@ -15860,6 +15860,52 @@ describe("CloudUser", function () {
                 throw "create user error"
         }, function (error) {
             throw error;
+        });
+
+    });
+
+    it("Should create a user and get version",function(done){
+        this.timeout(10000);
+        var user = new CB.CloudUser();
+        var usrname = util.makeString();
+        var passwd = "abcd";
+        user.set('username', usrname);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
+            if(list.get('username') === usrname && list.get('_version')>=0){
+                done();
+            }
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
+        });
+    });
+
+    it("should do a query on user",function(done){
+
+        this.timeout(10000);
+        var user = new CB.CloudUser();
+        var usrname = util.makeString();
+        var passwd = "abcd";
+        user.set('username', usrname);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
+            if(list.get('username') === usrname && list.get('_version')>=0){
+                var query = new CB.CloudQuery('User');
+                query.findById(user.get('id')).then(function(obj){
+                    console.log(obj);
+                    done();
+                },function(err){
+                    console.log(err);
+                });
+            }
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
         });
 
     });
