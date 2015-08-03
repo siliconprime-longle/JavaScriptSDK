@@ -9,7 +9,7 @@
    }
 
    if(dataType){
-     columnDataTypeValidation(dataType);
+     //columnDataTypeValidation(dataType);
      this.dataType = dataType;
    }else{
      this.dataType = "Text";
@@ -20,8 +20,8 @@
    else
      this.required = false;
 
-   if(typeof(required) === 'boolean')
-     this.required = unique;
+   if(typeof(unique) === 'boolean')
+     this.unique = unique;
    else
      this.unique = false;
 
@@ -33,31 +33,22 @@
      this.id = makeId();
 }
 
-Object.defineProperty(CB.Column.prototype, 'dataType', {
+/*Object.defineProperty(CB.Column.prototype, 'dataType', {
     get: function() {
         return this.dataType;
     },
     set: function(dataType){
       if(dataType){
-        columnDataTypeValidation(dataType);
+        //columnDataTypeValidation(dataType);
         this.dataType = dataType;
       }
     }
-});
+});*/
 
-Object.defineProperty(CB.Column.prototype, 'relatedTo', {
+/*Object.defineProperty(CB.Column.prototype, 'relatedTo', {
     set: function(relatedTo){
       if(relatedTo){
-        columnRelationValidation(relatedTo);
-        this.relatedTo = relatedTo;
-      }
-    }
-});
-
-Object.defineProperty(CB.Column.prototype, 'relatedTo', {
-    set: function(relatedTo){
-      if(relatedTo){
-        columnRelationValidation(relatedTo);
+        //columnRelationValidation(relatedTo);
         this.relatedTo = relatedTo;
       }
     }
@@ -66,7 +57,7 @@ Object.defineProperty(CB.Column.prototype, 'relatedTo', {
 Object.defineProperty(CB.Column.prototype, 'relationType', {
     set: function(relationType){
       if(relationType){
-        columnRelationValidation(relatedTo);
+        //columnRelationValidation(relatedTo);
         this.relatedTo = relatedTo;
       }
     }
@@ -89,7 +80,7 @@ Object.defineProperty(CB.Column.prototype, 'unique', {
         throw "incorrect value for unique property, enter true/false";
     }
 });
-
+*/
 function columnNameValidation(columnName){
   if(!columnName) //if table name is empty
     throw "table name cannot be empty";
