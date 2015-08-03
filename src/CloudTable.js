@@ -25,7 +25,7 @@ CB.CloudTable.prototype.addColumn = function(column){
       this.columns.push(column);
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       this.columns.concat(column);
-      //yet to tested
+      //yet to test
   }
 }
 
@@ -33,7 +33,10 @@ CB.CloudTable.prototype.deleteColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
       this.columns = this.columns.filter(function(index){return index.name != column.name });
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      //this.columns.concat(column);
+      //yet to test
+      for(var i=0; i<column.length; i++){
+        this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+      }
   }
 }
 
@@ -128,7 +131,7 @@ CB.CloudTable.get = function(table, callback){
 
     }
   } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot delete array of tables";
+    throw "cannot fetch array of tables";
   }
 }
 
@@ -186,9 +189,7 @@ CB.CloudTable.prototype.save = function(callback){
   if (!callback) {
       def = new CB.Promise();
   }
-
   CB._validate();
-
   var thisObj = this;
   var params=JSON.stringify({
       columns:thisObj.columns,

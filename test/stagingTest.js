@@ -10073,6 +10073,9 @@ CB.CloudTable.prototype.deleteColumn = function(column){
       this.columns = this.columns.filter(function(index){return index.name != column.name });
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       //this.columns.concat(column);
+      for(var i=0; i<column.length; i++){
+        this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+      }
   }
 }
 
@@ -10167,7 +10170,7 @@ CB.CloudTable.get = function(table, callback){
 
     }
   } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot delete array of tables";
+    throw "cannot fetch array of tables";
   }
 }
 
@@ -10225,9 +10228,7 @@ CB.CloudTable.prototype.save = function(callback){
   if (!callback) {
       def = new CB.Promise();
   }
-
   CB._validate();
-
   var thisObj = this;
   var params=JSON.stringify({
       columns:thisObj.columns,
@@ -10569,7 +10570,7 @@ function defaultColumns(type){
    }
 
    if(dataType){
-     //columnDataTypeValidation(dataType);
+     columnDataTypeValidation(dataType);
      this.dataType = dataType;
    }else{
      this.dataType = "Text";
@@ -10584,63 +10585,14 @@ function defaultColumns(type){
      this.unique = unique;
    else
      this.unique = false;
-
+     this.relatedTo = null;
+     this.relationType = null;
      this.isDeletable = true;
      this.isEditable = true;
      this.isRenamable = true;
-     this.relatedTo = null;
-     this.relationType = null;
      this.id = makeId();
 }
 
-/*Object.defineProperty(CB.Column.prototype, 'dataType', {
-    get: function() {
-        return this.dataType;
-    },
-    set: function(dataType){
-      if(dataType){
-        //columnDataTypeValidation(dataType);
-        this.dataType = dataType;
-      }
-    }
-});*/
-
-/*Object.defineProperty(CB.Column.prototype, 'relatedTo', {
-    set: function(relatedTo){
-      if(relatedTo){
-        //columnRelationValidation(relatedTo);
-        this.relatedTo = relatedTo;
-      }
-    }
-});
-
-Object.defineProperty(CB.Column.prototype, 'relationType', {
-    set: function(relationType){
-      if(relationType){
-        //columnRelationValidation(relatedTo);
-        this.relatedTo = relatedTo;
-      }
-    }
-});
-
-Object.defineProperty(CB.Column.prototype, 'required', {
-    set: function(required){
-      if(typeof(required) === 'boolean')
-        this.required = required;
-      else
-        throw "incorrect value for required property, enter true/false";
-    }
-});
-
-Object.defineProperty(CB.Column.prototype, 'unique', {
-    set: function(unique){
-      if(typeof(unique) === 'boolean')
-        this.unique = unique;
-      else
-        throw "incorrect value for unique property, enter true/false";
-    }
-});
-*/
 function columnNameValidation(columnName){
   if(!columnName) //if table name is empty
     throw "table name cannot be empty";
@@ -14990,10 +14942,11 @@ describe("Cloud Table", function(){
         var obj = new CB.CloudTable('Table');
         CB.CloudTable.get(obj, {
           success: function(table){
-            var column1 = new CB.Column('Name2', 'Text', true, false);
+            var column1 = new CB.Column('Name4', 'Relation', true, false);
+            column1.relatedTo = 'Table2';
             table.addColumn(column1);
             table.save().then(function(newTable){
-              var column2 = new CB.Column('Name2');
+              var column2 = new CB.Column('Name4');
               newTable.deleteColumn(column2);
               newTable.save().then(function(){
                 done();

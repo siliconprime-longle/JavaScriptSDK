@@ -50,10 +50,11 @@ describe("Cloud Table", function(){
         var obj = new CB.CloudTable('Table');
         CB.CloudTable.get(obj, {
           success: function(table){
-            var column1 = new CB.Column('Name2', 'Text', true, false);
+            var column1 = new CB.Column('Name4', 'Relation', true, false);
+            column1.relatedTo = 'Table2';
             table.addColumn(column1);
             table.save().then(function(newTable){
-              var column2 = new CB.Column('Name2');
+              var column2 = new CB.Column('Name4');
               newTable.deleteColumn(column2);
               newTable.save().then(function(){
                 done();
