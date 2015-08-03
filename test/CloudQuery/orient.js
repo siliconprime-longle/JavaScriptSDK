@@ -1,6 +1,6 @@
 describe("Query over Orient",function(done){
 
-    it("Should Query over related Document",function(done){
+   it("Should Query over related Document",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Employee');
@@ -352,22 +352,6 @@ describe("Query over Orient",function(done){
         });
     });
 
-    it("Should do an OR query over relation",function(done){
-
-        this.timeout(10000);
-        var query1 = new CB.CloudQuery('Employee');
-        query1.equalTo('Company.Name','CloudBoost');
-        var query2 = new CB.CloudQuery('Employee');
-        query2.equalTo('Company.Name','CloudBoost');
-        var query = CB.CloudQuery.or(query1,query2);
-        query.find().then(function(res){
-            console.log(res);
-            done();
-        },function(){
-           done('Unable to Find');
-        });
-    });
-
     it("Should query over starts with on a column",function(done){
 
         this.timeout(10000);
@@ -380,6 +364,25 @@ describe("Query over Orient",function(done){
         },function(){
             done("unable to find");
         })
+    });
+
+    it("Should do an OR query over relation",function(done){
+
+        this.timeout(10000);
+        var query1 = new CB.CloudQuery('Employee');
+        query1.equalTo('Company.Name','CloudBoost');
+        var query2 = new CB.CloudQuery('Employee');
+        query2.equalTo('Company.Name','CloudBoost');
+        var query = CB.CloudQuery.or(query1,query2);
+        query.find().then(function(res){
+            if(res.length>0){
+                done();
+            }else{
+                done("Did not Get Records Back");
+            }
+        },function(){
+            done('Unable to Find');
+        });
     });
 
 
