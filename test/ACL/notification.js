@@ -234,5 +234,119 @@ describe("ACL on CloudObject Notifications", function () {
         });
 
     });
+
+    it("Should NOT receieve a notification when user is logged out.", function (done) {
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('Custom1', 'created', function(){
+               CB.CloudObject.off('Custom1','created');
+               if(!isDone){
+                    isDone=true;
+                    done("Wrong event fired");
+                }
+            });
+
+            var obj = new CB.CloudObject('Custom1'); 
+            obj.set('newColumn', 'Sample');
+            obj.ACL = new CB.ACL();
+            obj.ACL.setPublicReadAccess(false);
+            obj.ACL.setPublicWriteAccess(true);
+            obj.ACL.setUserReadAccess(user.id, true);
+
+            user.logOut({
+                success: function(user){
+
+                    obj.save();
+
+                    setTimeout(function(){ 
+                        if(!isDone){
+                            isDone=true;
+                            done();
+                        }
+                     }, 10000); //wait for sometime and done! 
+
+                }, error : function(error){
+                    done("Error");
+                }
+            });
+
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should receieve a notification when user is logged out and logged back in.", function (done) {
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('Custom1', 'created', function(){
+               CB.CloudObject.off('Custom1','created');
+               if(!isDone){
+                    isDone=true;
+                    done("Wrong event fired");
+                }
+            });
+
+            var obj = new CB.CloudObject('Custom1'); 
+            obj.set('newColumn', 'Sample');
+            obj.ACL = new CB.ACL();
+            obj.ACL.setPublicReadAccess(false);
+            obj.ACL.setPublicWriteAccess(true);
+            obj.ACL.setUserReadAccess(user.id, true);
+
+            user.logOut({
+                success: function(user){
+
+                    user.login({
+                        success : function(){
+                             obj.save();
+
+                            setTimeout(function(){ 
+                                if(!isDone){
+                                    isDone=true;
+                                    done();
+                                }
+                             }, 10000); //wait for sometime and done! 
+                        }, error: function(){
+                            done("Failed to login a user");
+                        }
+                    });
+
+                   
+
+                }, error : function(error){
+                    done("Error");
+                }
+            });
+
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
 });
 

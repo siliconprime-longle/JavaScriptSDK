@@ -123,6 +123,7 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
     return this;
 };
+
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
@@ -133,6 +134,7 @@ CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     if (columnName === 'id' || columnName === 'expires')
@@ -142,6 +144,7 @@ CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     return this;
 };
+
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
 
@@ -179,6 +182,7 @@ CB.CloudQuery.prototype.selectColumn = function(columnNames) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
