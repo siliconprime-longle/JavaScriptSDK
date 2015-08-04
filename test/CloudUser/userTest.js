@@ -20,6 +20,15 @@ describe("CloudUser", function () {
 
     });
 
+    it('should logout the user',function (done){
+        this.timeout(10000);
+        CB.CloudUser.current.logOut().then(function(){
+            done();
+        },function(){
+            throw "err";
+        });
+    });
+
     it("Should create a user and get version",function(done){
         this.timeout(10000);
         var user = new CB.CloudUser();
