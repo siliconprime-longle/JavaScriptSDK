@@ -8218,7 +8218,7 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     return this;
 };
 
-CB.CloudQuery.prototype.include = function (columnName, data) {
+CB.CloudQuery.prototype.include = function (columnName) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8298,6 +8298,7 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
     return this;
 };
+
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
@@ -8308,6 +8309,7 @@ CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     if (columnName === 'id' || columnName === 'expires')
@@ -8317,6 +8319,7 @@ CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     return this;
 };
+
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
 
@@ -8354,6 +8357,7 @@ CB.CloudQuery.prototype.selectColumn = function(columnNames) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
@@ -9166,12 +9170,17 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
    return true;
 };
 
+
+
+
+
 CB.SearchFilter = function(){
 
     this.bool = {};
     this.bool.must = []; //and
     this.bool.should = []; //or
     this.bool.must_not = []; //not
+    this.$include = []; //include
 };
 
 
@@ -9299,32 +9308,65 @@ CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
 //And logical function. 
 CB.SearchFilter.prototype.and = function(searchFilter) {
 
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over AND. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
     if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.must.push(searchFilter);
+
+    return this;
 };
 
 //OR Logical function
 CB.SearchFilter.prototype.or = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over OR. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+    if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.should.push(searchFilter);
+
+    return this;
 };
 
 
 //NOT logical function
 CB.SearchFilter.prototype.not = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
-        throw "data should be of type CB.SearchFilter";
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over NOT. Have an CloudSearch Include over parent SearchFilter instead.";
     }
 
-    this.bool.must_not.push(searchFilter);
+    delete searchFilter.$include;
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+   }
+
+   this.bool.must_not.push(searchFilter);
+
+   return this;
+};
+
+CB.SearchFilter.prototype.include = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.$include.push(columnName);
+
+    return this;
 };
 
 

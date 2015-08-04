@@ -1,6 +1,5 @@
 describe("CloudSearch", function (done) {
 
-    this.timeout(20000);
 
     it("should index object for search", function (done) {
         var obj = new CB.CloudObject('Custom1');
