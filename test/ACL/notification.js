@@ -1,6 +1,6 @@
 describe("ACL on CloudObject Notifications", function () {
 
-    it("Should create new user and listen to CloudNotifiction events.", function (done) {
+    it("Should create new user and listen to CloudNotification events.", function (done) {
 
         var isDone = false;
 
@@ -307,7 +307,7 @@ describe("ACL on CloudObject Notifications", function () {
                CB.CloudObject.off('Custom1','created');
                if(!isDone){
                     isDone=true;
-                    done("Wrong event fired");
+                    done();
                 }
             });
 
@@ -320,17 +320,12 @@ describe("ACL on CloudObject Notifications", function () {
 
             user.logOut({
                 success: function(user){
-
-                    user.login({
+                console.log(user);
+                    user.set("password",passwd);
+                    user.logIn({
                         success : function(){
                              obj.save();
 
-                            setTimeout(function(){ 
-                                if(!isDone){
-                                    isDone=true;
-                                    done();
-                                }
-                             }, 10000); //wait for sometime and done! 
                         }, error: function(){
                             done("Failed to login a user");
                         }
