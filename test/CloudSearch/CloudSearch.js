@@ -15,7 +15,7 @@ describe("CloudSearch", function (done) {
 
     it("should search indexed object", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Custom1');
         cs.searchQuery = new CB.SearchQuery();
@@ -34,7 +34,6 @@ describe("CloudSearch", function (done) {
     });
 
    
-
     it("should index test data",function(done){
 
         this.timeout(50000);
@@ -88,7 +87,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for object for a given value",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -110,7 +109,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for object with a phrase",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
@@ -131,7 +130,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for object with a wildcard",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
@@ -151,7 +150,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for object with a startsWith",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
@@ -170,7 +169,7 @@ describe("CloudSearch", function (done) {
 
      it("should search for object with a mostcolumns",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
@@ -189,7 +188,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for object with a bestColumns",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchQuery = new CB.SearchQuery();
@@ -209,7 +208,7 @@ describe("CloudSearch", function (done) {
 
     it("should search values which are not equal to a given value",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -228,7 +227,7 @@ describe("CloudSearch", function (done) {
 
     it("should limit the number of search results",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -249,7 +248,7 @@ describe("CloudSearch", function (done) {
 
     it("should skip elements",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -284,7 +283,7 @@ describe("CloudSearch", function (done) {
 
     it("should sort the results in ascending order",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.orderByAsc('age');
@@ -303,7 +302,7 @@ describe("CloudSearch", function (done) {
 
     it("should sort elements in descending order",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.orderByDesc('age');
@@ -322,7 +321,7 @@ describe("CloudSearch", function (done) {
 
     it("should give elements in which a particular column exists",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -342,7 +341,7 @@ describe("CloudSearch", function (done) {
 
     it("should search for records which do not have a certain column",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -362,7 +361,7 @@ describe("CloudSearch", function (done) {
 
     it("should give records within a certain range",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var cs = new CB.CloudSearch('Student');
         cs.searchFilter = new CB.SearchFilter();
@@ -384,7 +383,7 @@ describe("CloudSearch", function (done) {
 
     it("OR should work between tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
 
         var obj = new CB.CloudObject('Student');
@@ -454,7 +453,7 @@ describe("CloudSearch", function (done) {
 
     it("should run operator (precision) queries",function(done){
 
-         this.timeout(20000);
+         this.timeout(30000);
 
 
         var obj = new CB.CloudObject('Student');
@@ -507,7 +506,7 @@ describe("CloudSearch", function (done) {
 
     it("should run minimum percent (precision) queries",function(done){
 
-         this.timeout(20000);
+         this.timeout(30000);
 
 
         var obj = new CB.CloudObject('Student');
