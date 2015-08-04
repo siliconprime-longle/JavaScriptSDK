@@ -10064,7 +10064,7 @@ CB.CloudTable.prototype.addColumn = function(column){
       this.columns.push(column);
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       this.columns.concat(column);
-      //yet to tested
+      //yet to test
   }
 }
 
@@ -10072,7 +10072,7 @@ CB.CloudTable.prototype.deleteColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
       this.columns = this.columns.filter(function(index){return index.name != column.name });
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      //this.columns.concat(column);
+      //yet to test
       for(var i=0; i<column.length; i++){
         this.columns = this.columns.filter(function(index){return index.name != column[i].name });
       }
