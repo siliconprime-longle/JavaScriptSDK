@@ -70,4 +70,14 @@ describe("Cloud Table", function(){
           }
         });
     });
+
+    it("should not rename a column",function(done){
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Address');
+        CB.CloudTable.get(obj).then(function(){
+            done();
+        },function(){
+            throw("should have create the table");
+        });
+    });
 });

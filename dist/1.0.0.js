@@ -10175,7 +10175,6 @@ CB.CloudTable.get = function(table, callback){
 }
 
 CB.CloudTable.delete = function(table, callback){
-  //check existance of table
   if (Object.prototype.toString.call(table) === '[object Object]') {
     if(table.type == "user"){
       throw "cannot delete user table";

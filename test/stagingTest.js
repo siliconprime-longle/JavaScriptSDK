@@ -10175,7 +10175,6 @@ CB.CloudTable.get = function(table, callback){
 }
 
 CB.CloudTable.delete = function(table, callback){
-  //check existance of table
   if (Object.prototype.toString.call(table) === '[object Object]') {
     if(table.type == "user"){
       throw "cannot delete user table";
@@ -14960,6 +14959,16 @@ describe("Cloud Table", function(){
           error: function(err){
               throw("should have create the table");
           }
+        });
+    });
+
+    it("should not rename a column",function(done){
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Address');
+        CB.CloudTable.get(obj).then(function(){
+            done();
+        },function(){
+            throw("should have create the table");
         });
     });
 });
