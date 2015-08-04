@@ -43,7 +43,7 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     return this;
 };
 
-CB.CloudQuery.prototype.include = function (columnName, data) {
+CB.CloudQuery.prototype.include = function (columnName) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -994,3 +994,6 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
 
    return true;
 };
+
+
+

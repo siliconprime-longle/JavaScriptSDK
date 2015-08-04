@@ -796,10 +796,6 @@ describe("Query on Cloud Object Notifications ", function() {
     });
 
 
-     
-
-    
-
     it("EqualTo over CloudObjects : 1",function(done){
 
         var isDone = false;
