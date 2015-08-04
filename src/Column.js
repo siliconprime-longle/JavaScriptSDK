@@ -33,8 +33,15 @@
 }
 
 function columnNameValidation(columnName){
+
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+
   if(!columnName) //if table name is empty
     throw "table name cannot be empty";
+
+  var index = defaultColumn.indexOf(columnName.toLowerCase());
+  if(index >= 0)
+    throw "this columnname is already in use";
 
   if(!isNaN(columnName[0]))
     throw "table name should not start with a number";
@@ -44,12 +51,17 @@ function columnNameValidation(columnName){
 
   var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
   if(pattern.test(columnName))
-    throw "table not shoul not contain special characters";
+    throw "table not should not contain special characters";
 }
 
 function columnDataTypeValidation(dataType){
-  dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
+
+  if(!dataType)
+    throw "data type cannot be empty";
+
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
   var index = dataTypeList.indexOf(dataType);
   if(index < 0)
     throw "invalid data type";
+
 }

@@ -19,23 +19,46 @@ CB.CloudTable = function(tableName){  //new table constructor
   this.id = makeId();
 }
 
+CB.CloudTable.prototype._columnValidation = function(column){
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+  if(this.type == 'user'){
+    defaultColumn.concat(['username', 'email', 'password', 'roles']);
+  }else if(this.type == 'role'){
+    defaultColumn.push('name');
+  }
+
+  var index = defaultColumn.indexOf(column.toLowerCase());
+  if(index < 0)
+    return true;
+  else
+    return false;
+}
 
 CB.CloudTable.prototype.addColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
+    if(this._columnValidation(column))
       this.columns.push(column);
+
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      this.columns.concat(column);
-      //yet to test
+      for(var i=0; i<column.length; i++){
+        if(this._columnValidation(column[i]))
+          this.columns.push(column[i]);
+      }
   }
 }
 
 CB.CloudTable.prototype.deleteColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
-      this.columns = this.columns.filter(function(index){return index.name != column.name });
+        if(this._columnValidation(column)){
+          this.columns = this.columns.filter(function(index){return index.name != column.name });
+        }
+
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       //yet to test
       for(var i=0; i<column.length; i++){
-        this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+        if(this._columnValidation(column[i])){
+          this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+        }
       }
   }
 }
