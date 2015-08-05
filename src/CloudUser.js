@@ -9,7 +9,9 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._isModified = true;
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
+
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
     get: function() {
         return this.document.username;
@@ -37,8 +39,15 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
         CB._modified(this,'email');
     }
 });
+
 CB.CloudUser.current = new CB.CloudUser();
+
 CB.CloudUser.prototype.signUp = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot signup the user on the server. Use CloudUser.save() instead.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -82,6 +91,11 @@ CB.CloudUser.prototype.signUp = function(callback) {
     }
 };
 CB.CloudUser.prototype.logIn = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot login the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -121,6 +135,11 @@ CB.CloudUser.prototype.logIn = function(callback) {
     }
 };
 CB.CloudUser.prototype.logOut = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot logOut the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }

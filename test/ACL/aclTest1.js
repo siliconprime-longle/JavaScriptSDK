@@ -48,6 +48,12 @@ describe("ACL", function () {
 
     it("Should create new user", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
 
         userObj.set('username', username);
@@ -65,6 +71,12 @@ describe("ACL", function () {
     });
 
     it("Should set the user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(20000);
 
@@ -84,6 +96,12 @@ describe("ACL", function () {
     });
 
     it("Should allow users of role to write", function (done) {
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
 
         this.timeout(20000);
 
@@ -103,6 +121,12 @@ describe("ACL", function () {
     });
 
     it("Should allow users of role to read", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
 
         this.timeout(20000);
 

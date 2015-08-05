@@ -1,6 +1,6 @@
 {
   "name": "cloudboost",
-  "version": "1.0.74",
+  "version": "1.0.79",
   "description": "Cloudboost is a hybrid No-Sql database as a service ",
   "main": "lib/cloudboost",
   "engines": {
@@ -31,7 +31,7 @@
   "devDependencies": {
     "grunt-bump": "^0.3.1",
     "mocha": "^2.2.4",
-    "mocha-phantomjs": "^3.5.3",
-    "phantomjs": "^1.9.16"
+    "phantomjs": "~1.9.1",
+    "mocha-phantomjs": "*"
   }
 }

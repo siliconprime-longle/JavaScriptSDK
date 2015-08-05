@@ -80,6 +80,12 @@ describe("Version Test",function(done){
     var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
 
         user.set('username', username);
@@ -132,6 +138,13 @@ describe("Version Test",function(done){
 
     });
     it("Should retrieve a saved user object",function(done){
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+         
         this.timeout(20000);
         var query = new CB.CloudQuery('User');
         query.get(user.get('id')).then(function (user) {

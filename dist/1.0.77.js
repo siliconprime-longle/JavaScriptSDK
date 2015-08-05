@@ -8249,8 +8249,8 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     if (columnName === 'id' ||  columnName === 'expires')
         columnName = '_' + columnName;
 
-    if(data !== null){
-        if( data.constructor === CB.CloudObject){
+    if(data !== null && typeof data === 'undefined'){
+        if(data.constructor === CB.CloudObject){
             columnName = columnName+'._id';
             data = data.get('id');
         }
@@ -8278,8 +8278,7 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
-    if(data !== null){
-
+    if(data !== null && typeof data === 'undefined'){
         if(data.constructor === CB.CloudObject){
             columnName = columnName+'._id';
             data = data.get('id');

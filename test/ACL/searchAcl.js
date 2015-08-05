@@ -8,6 +8,12 @@
         var user = new CB.CloudUser();
         it("Should create new user", function (done) {
 
+            if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
             this.timeout(20000);
             user.set('username', username);
             user.set('password',passwd);
@@ -25,6 +31,12 @@
 
 
    it("Should set the public read access to false", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
 
         this.timeout(20000);
 
@@ -61,6 +73,12 @@
 
    it("Should search object with user read access", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
         this.timeout(20000);
        var user = new CB.CloudUser();
        user.set('username', username);
@@ -87,15 +105,5 @@
 
     });
 
-
-    it("Should allow users of role to read", function (done) {
-
-        this.timeout(20000);
-
-        //TODO 
-
-        done();
-
-    });
 });
 

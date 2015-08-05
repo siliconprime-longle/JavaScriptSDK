@@ -100,6 +100,12 @@ describe("ACL", function () {
 
     it("Should create new user", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
 
         userObj.set('username', username);
@@ -117,6 +123,12 @@ describe("ACL", function () {
     });
 
     it("Should set the user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(20000);
 
@@ -136,6 +148,12 @@ describe("ACL", function () {
     });
 
     it("Should allow users of role to write", function (done) {
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
 
         this.timeout(20000);
 
@@ -155,6 +173,12 @@ describe("ACL", function () {
     });
 
     it("Should allow users of role to read", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
 
         this.timeout(20000);
 
@@ -177,6 +201,12 @@ describe("ACL", function () {
 describe("ACL on CloudObject Notifications", function () {
 
     it("Should create new user and listen to CloudNotification events.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         var isDone = false;
 
@@ -217,6 +247,12 @@ describe("ACL on CloudObject Notifications", function () {
     });
 
     it("Should NOT receieve a  notification when public read access is false;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         var isDone = false;
 
@@ -269,6 +305,12 @@ describe("ACL on CloudObject Notifications", function () {
 
     it("Should NOT receivee an event when user read access is false;", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(30000);
 
         var isDone = false;
@@ -317,6 +359,12 @@ describe("ACL on CloudObject Notifications", function () {
     });
 
     it("Should NOT receieve a  notification when public read access is true but user is false;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(30000);
 
@@ -370,6 +418,12 @@ describe("ACL on CloudObject Notifications", function () {
 
     it("Should receieve a notification when public read access is false but user is true;", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(30000);
 
         var isDone = false;
@@ -412,6 +466,12 @@ describe("ACL on CloudObject Notifications", function () {
     });
 
     it("Should NOT receieve a notification when user is logged out.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(30000);
 
@@ -465,6 +525,12 @@ describe("ACL on CloudObject Notifications", function () {
     });
 
     it("Should receieve a notification when user is logged out and logged back in.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(30000);
 
@@ -533,6 +599,12 @@ describe("Query_ACL", function () {
     var user = new CB.CloudUser();
     it("Should create new user", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
         user.set('username', username);
         user.set('password',passwd);
@@ -549,6 +621,13 @@ describe("Query_ACL", function () {
     });
 
     it("Should set the public read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
 
         this.timeout(20000);
 
@@ -582,6 +661,12 @@ describe("Query_ACL", function () {
     obj1.isSearchable = true;
     obj1.set('age',60);
     it("Should search object with user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(20000);
         obj1.ACL = new CB.ACL();
@@ -624,6 +709,12 @@ describe("Query_ACL", function () {
         var user = new CB.CloudUser();
         it("Should create new user", function (done) {
 
+            if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
             this.timeout(20000);
             user.set('username', username);
             user.set('password',passwd);
@@ -641,6 +732,12 @@ describe("Query_ACL", function () {
 
 
    it("Should set the public read access to false", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
 
         this.timeout(20000);
 
@@ -677,6 +774,12 @@ describe("Query_ACL", function () {
 
    it("Should search object with user read access", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
         this.timeout(20000);
        var user = new CB.CloudUser();
        user.set('username', username);
@@ -703,16 +806,6 @@ describe("Query_ACL", function () {
 
     });
 
-
-    it("Should allow users of role to read", function (done) {
-
-        this.timeout(20000);
-
-        //TODO 
-
-        done();
-
-    });
 });
 
 
@@ -3195,6 +3288,12 @@ describe("Version Test",function(done){
     var user = new CB.CloudUser();
     it("Should create new user with version", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
 
         user.set('username', username);
@@ -3247,6 +3346,13 @@ describe("Version Test",function(done){
 
     });
     it("Should retrieve a saved user object",function(done){
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+         
         this.timeout(20000);
         var query = new CB.CloudQuery('User');
         query.get(user.get('id')).then(function (user) {
@@ -4747,6 +4853,9 @@ describe("CloudSearch", function (done) {
 
 
     it("should index object for search", function (done) {
+
+        this.timeout(30000);
+
         var obj = new CB.CloudObject('Custom1');
         obj.set('description', 'wi-fi');
         obj.save({
@@ -5404,9 +5513,16 @@ describe("Inlcude in CloudSearch", function (done) {
 describe("CloudUser", function () {
     var username = util.makeString();
     var passwd = "abcd";
-   it("Should create new user", function (done) {
 
-        this.timeout(100000);
+    
+
+   it("Should create new user", function (done) {
+         if(CB._isNode){
+            done();
+            return;
+         }
+
+         this.timeout(100000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -5424,6 +5540,12 @@ describe("CloudUser", function () {
     });
 
     it('should logout the user',function (done){
+
+        if(CB._isNode){
+            done();
+            return;
+         }
+
         this.timeout(10000);
         CB.CloudUser.current.logOut().then(function(){
             done();
@@ -5433,6 +5555,12 @@ describe("CloudUser", function () {
     });
 
     it("Should create a user and get version",function(done){
+
+        if(CB._isNode){
+            done();
+            return;
+         }
+
         this.timeout(10000);
         var user = new CB.CloudUser();
         var usrname = util.makeString();
@@ -5452,6 +5580,13 @@ describe("CloudUser", function () {
     });
 
     it("should do a query on user",function(done){
+
+
+        if(CB._isNode){
+            done();
+            return;
+         }
+
 
         this.timeout(10000);
         var user = new CB.CloudUser();
@@ -5479,6 +5614,13 @@ describe("CloudUser", function () {
     });
 
     it('should logout the user',function (done){
+
+        if(CB._isNode){
+            done();
+            return;
+         }
+
+
         this.timeout(10000);
         CB.CloudUser.current.logOut().then(function(){
             done();
@@ -5488,29 +5630,12 @@ describe("CloudUser", function () {
     });
 
 
-     it('should encrypt user password',function (done){
-        
-        this.timeout(100000);
+     it("Should login user", function (done) {
 
-        var pass = passwd;
-
-        var obj = new CB.CloudUser();
-        obj.set('username', util.makeString());
-        obj.set('password',pass);
-        obj.set('email',util.makeEmail());
-        obj.save().then(function(obj) {
-            if(obj.get('password') === pass)
-                throw "Password is not encrypted.";
-            else
-               done();
-        }, function () {
-            throw "user create error";
-        });
-
-    });
-
-
-   it("Should login user", function (done) {
+        if(CB._isNode){
+            done();
+            return;
+         }
 
         this.timeout(10000);
 
@@ -5545,6 +5670,11 @@ describe("CloudUser", function () {
 
    it("Should assign role to user", function (done) {
 
+        if(CB._isNode){
+            done();
+            return;
+         }
+
         this.timeout(100000);
 
         var obj = new CB.CloudUser();
@@ -5567,6 +5697,12 @@ describe("CloudUser", function () {
     });
 
     it("Should remove role assigned role to user", function (done) {
+
+         if(CB._isNode){
+            done();
+            return;
+         }
+         
 
         this.timeout(1000000);
 
@@ -5593,6 +5729,94 @@ describe("CloudUser", function () {
         },function(){
             throw "user login error";
         });
+
+    });
+     
+
+
+     it('should encrypt user password',function (done){
+        
+        this.timeout(100000);
+
+        var pass = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', util.makeString());
+        obj.set('password',pass);
+        obj.set('email',util.makeEmail());
+        obj.save().then(function(obj) {
+            if(obj.get('password') === pass)
+                throw "Password is not encrypted.";
+            else
+               done();
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
+
+  
+
+
+});
+describe("CloudRole", function (done) {
+    var roleName = util.makeString();
+    var role = new CB.CloudRole(roleName);
+    it("Should create a role", function (done) {
+
+        this.timeout(20000);
+        console.log(role.ACL);
+        role.save().then(function(list){
+            console.log(list);
+            if(!list)
+                throw "Should retrieve the cloud role";
+            done();
+        },function(){
+            throw "Should retrieve the cloud role";
+        });
+    });
+
+    it("Should Retrieve a role", function (done) {
+		
+        this.timeout(20000);
+        var query = new CB.CloudQuery('Role');
+        query.equalTo('id',role.get('id'));
+        query.find().then(function(list){
+        	console.log(list);
+        	if(!list)
+        		throw "Should retrieve the cloud role";
+            done();
+        },function(){
+            throw "Should retrieve the cloud role";
+        });
+    });
+});
+
+describe("CloudApp Socket Test", function () {
+
+    it("Should fire an event when disconnect", function (done) {
+       this.timeout(40000);
+
+       CB.CloudApp.onDisconnect(function(){
+        done();
+       });
+
+       CB.CloudApp.disconnect();
+
+    });
+
+    it("Should fire an event when connect.", function (done) {
+
+       this.timeout(30000);
+
+       CB.CloudApp.disconnect();
+
+       CB.CloudApp.onConnect(function(){
+        done();
+       });
+
+       CB.CloudApp.connect();
 
     });
 

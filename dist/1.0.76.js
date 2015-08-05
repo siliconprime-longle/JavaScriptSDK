@@ -9808,9 +9808,7 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._isModified = true;
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
-
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
-
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
     get: function() {
         return this.document.username;
@@ -9838,9 +9836,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
         CB._modified(this,'email');
     }
 });
-
 CB.CloudUser.current = new CB.CloudUser();
-
 CB.CloudUser.prototype.signUp = function(callback) {
 
     if(CB._isNode){
