@@ -16,9 +16,6 @@ var CB = require('../lib/cloudboost.js');
 
    };
 
-   
-
-	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
         this.timeout(100000);
@@ -5819,6 +5816,4 @@ describe("CloudApp Socket Test", function () {
        CB.CloudApp.connect();
 
     });
-
-
 });
