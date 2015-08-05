@@ -7567,6 +7567,7 @@ if(!CB._isNode) {
  CloudApp
  */
 CB.CloudApp = CB.CloudApp || {};
+CB.CloudApp._isConnected = false;
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
@@ -7587,9 +7588,55 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
+
     CB.Socket = CB.io(CB.socketIoUrl);
+    CB.CloudApp._isConnected = true;
 };
 
+CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('connect', functionToFire);
+    
+
+};
+
+CB.CloudApp.onDisconnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('disconnect', functionToFire);
+
+};
+
+CB.CloudApp.connect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.connect();
+    CB.CloudApp._isConnected = true;
+};
+
+CB.CloudApp.disconnect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.emit('socket-disconnect',CB.appId);
+    CB.CloudApp._isConnected = false;
+};
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
     this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
@@ -10408,7 +10455,6 @@ CB.fromJSON = function(data, thisObj) {
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
-
     if (!data)
         return null;
 
@@ -10568,6 +10614,12 @@ CB._clone=function(obj,url){
 
 CB._request=function(method,url,params)
 {
+
+    CB._validate();
+
+    if(!CB.CloudApp._isConnected)
+        throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
     if (CB._isNode) {

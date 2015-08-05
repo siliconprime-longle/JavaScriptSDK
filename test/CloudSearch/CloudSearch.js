@@ -2,6 +2,9 @@ describe("CloudSearch", function (done) {
 
 
     it("should index object for search", function (done) {
+
+        this.timeout(30000);
+
         var obj = new CB.CloudObject('Custom1');
         obj.set('description', 'wi-fi');
         obj.save({

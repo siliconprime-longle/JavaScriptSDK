@@ -7130,6 +7130,7 @@ if(!CB._isNode) {
  CloudApp
  */
 CB.CloudApp = CB.CloudApp || {};
+CB.CloudApp._isConnected = false;
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
@@ -7150,5 +7151,52 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
+
     CB.Socket = CB.io(CB.socketIoUrl);
+    CB.CloudApp._isConnected = true;
+};
+
+CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('connect', functionToFire);
+    
+
+};
+
+CB.CloudApp.onDisconnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('disconnect', functionToFire);
+
+};
+
+CB.CloudApp.connect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.connect();
+    CB.CloudApp._isConnected = true;
+};
+
+CB.CloudApp.disconnect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.emit('socket-disconnect',CB.appId);
+    CB.CloudApp._isConnected = false;
 };
