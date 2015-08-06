@@ -24,12 +24,12 @@
      this.unique = unique;
    else
      this.unique = false;
-     this.relatedTo = null;
-     this.relationType = null;
-     this.isDeletable = true;
-     this.isEditable = true;
-     this.isRenamable = true;
-     this.id = makeId();
+   this.relatedTo = null;
+   this.relationType = null;
+   this.isDeletable = true;
+   this.isEditable = true;
+   this.isRenamable = true;
+   this.id = makeId();
 }
 
 function columnNameValidation(columnName){
