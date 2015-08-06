@@ -266,7 +266,6 @@ CB._modified = function(thisObj,columnName){
     }
 };
 
-
 function trimStart(character, string) {
     var startIndex = 0;
 
@@ -276,3 +275,4 @@ function trimStart(character, string) {
 
     return string.substr(startIndex);
 }
+

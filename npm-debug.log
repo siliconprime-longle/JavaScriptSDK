@@ -1,0 +1,69 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.40
+4 verbose node symlink /usr/bin/node
+5 warn package.json cloudboost@1.0.25 No repository field.
+6 verbose readDependencies using package.json deps
+7 verbose install where, deps [ '/media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK',
+7 verbose install   [ 'grunt',
+7 verbose install     'grunt-bumpup',
+7 verbose install     'grunt-contrib-concat',
+7 verbose install     'grunt-contrib-uglify',
+7 verbose install     'grunt-contrib-watch',
+7 verbose install     'node-localstorage',
+7 verbose install     'socket.io-client',
+7 verbose install     'xmlhttprequest',
+7 verbose install     'grunt-bump',
+7 verbose install     'mocha',
+7 verbose install     'mocha-phantomjs',
+7 verbose install     'phantomjs' ] ]
+8 info preinstall cloudboost@1.0.25
+9 verbose readDependencies using package.json deps
+10 verbose already installed skipping grunt-contrib-concat@^0.5.1 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+11 verbose already installed skipping grunt-contrib-uglify@^0.9.1 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+12 verbose already installed skipping grunt-contrib-watch@^0.6.1 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+13 verbose already installed skipping node-localstorage@^0.5.0 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+14 verbose already installed skipping socket.io-client@^1.3.5 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+15 verbose already installed skipping xmlhttprequest@^1.7.0 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+16 verbose already installed skipping grunt-bump@^0.3.1 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+17 verbose already installed skipping mocha@^2.2.4 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+18 verbose already installed skipping mocha-phantomjs@^3.5.3 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+19 verbose already installed skipping phantomjs@^1.9.16 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+20 verbose already installed skipping grunt@~0.4.5 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+21 verbose already installed skipping grunt-bumpup@^0.6.2 /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+22 silly resolved []
+23 info build /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+24 verbose linkStuff [ false,
+24 verbose linkStuff   false,
+24 verbose linkStuff   false,
+24 verbose linkStuff   '/media/ranjeet/CED23D64D23D52476/cloudboost' ]
+25 info linkStuff cloudboost@1.0.25
+26 verbose linkBins cloudboost@1.0.25
+27 verbose linkMans cloudboost@1.0.25
+28 verbose rebuildBundles cloudboost@1.0.25
+29 verbose rebuildBundles [ '.bin',
+29 verbose rebuildBundles   'grunt',
+29 verbose rebuildBundles   'grunt-bump',
+29 verbose rebuildBundles   'grunt-bumpup',
+29 verbose rebuildBundles   'grunt-contrib-concat',
+29 verbose rebuildBundles   'grunt-contrib-uglify',
+29 verbose rebuildBundles   'grunt-contrib-watch',
+29 verbose rebuildBundles   'mocha',
+29 verbose rebuildBundles   'mocha-phantomjs',
+29 verbose rebuildBundles   'node-localstorage',
+29 verbose rebuildBundles   'phantomjs',
+29 verbose rebuildBundles   'socket.io-client',
+29 verbose rebuildBundles   'xmlhttprequest' ]
+30 info install cloudboost@1.0.25
+31 info postinstall cloudboost@1.0.25
+32 info prepublish cloudboost@1.0.25
+33 error peerinvalid The package phantomjs does not satisfy its siblings' peerDependencies requirements!
+33 error peerinvalid Peer mocha-phantomjs@3.6.0 wants phantomjs@1.9.1 - 1.9.7-15
+34 error System Linux 3.13.0-53-generic
+35 error command "/usr/bin/node" "/usr/bin/npm" "install"
+36 error cwd /media/ranjeet/CED23D64D23D52476/cloudboost/JavaScriptSDK
+37 error node -v v0.10.40
+38 error npm -v 1.4.28
+39 error code EPEERINVALID
+40 verbose exit [ 1, true ]
