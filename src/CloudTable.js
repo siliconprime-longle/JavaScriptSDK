@@ -79,7 +79,7 @@ CB.CloudTable.getAll = function(callback){
   });
 
   url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
     response = JSON.parse(response);
     var objArray = [];
     for(var i=0; i<response.length; i++){
@@ -130,7 +130,7 @@ CB.CloudTable.get = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/"+table.name;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
           response = JSON.parse(response);
           var obj = new CB.CloudTable(response.name);
           obj.columns = response.columns;
@@ -180,7 +180,7 @@ CB.CloudTable.delete = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/delete/" + CB.appId;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
         response = JSON.parse(response);
 
         if (callback) {
@@ -223,7 +223,7 @@ CB.CloudTable.prototype.save = function(callback){
   });
 
   url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
       var obj = new CB.CloudTable(response.name);
       obj.columns = response.columns;

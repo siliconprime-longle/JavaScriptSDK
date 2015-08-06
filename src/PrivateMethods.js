@@ -208,7 +208,7 @@ CB._clone=function(obj,url){
     return n_obj;
 };
 
-CB._request=function(method,url,params)
+CB._request=function(method,url,params,isServiceUrl)
 {
 
     CB._validate();
@@ -224,9 +224,12 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = CB._getSessionId();
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
+
+    if(!isServiceUrl){
+        var ssid = CB._getSessionId();
+        if(ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+    }
     if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
@@ -235,11 +238,13 @@ CB._request=function(method,url,params)
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
+                if(!isServiceUrl){
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if(sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                }
                 def.resolve(xmlhttp.responseText);
             } else {
                 console.log(xmlhttp.status);

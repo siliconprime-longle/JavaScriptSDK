@@ -1,6 +1,6 @@
    var util = {
      makeString : function(){
-	    var text = "";
+	    var text = "x";
 	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 	    for( var i=0; i < 5; i++ )

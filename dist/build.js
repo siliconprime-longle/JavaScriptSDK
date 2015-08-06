@@ -10504,7 +10504,7 @@ CB.CloudTable.getAll = function(callback){
   });
 
   url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
     response = JSON.parse(response);
     var objArray = [];
     for(var i=0; i<response.length; i++){
@@ -10555,7 +10555,7 @@ CB.CloudTable.get = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/"+table.name;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
           response = JSON.parse(response);
           var obj = new CB.CloudTable(response.name);
           obj.columns = response.columns;
@@ -10605,7 +10605,7 @@ CB.CloudTable.delete = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/delete/" + CB.appId;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
         response = JSON.parse(response);
 
         if (callback) {
@@ -10648,7 +10648,7 @@ CB.CloudTable.prototype.save = function(callback){
   });
 
   url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
       var obj = new CB.CloudTable(response.name);
       obj.columns = response.columns;
@@ -11245,7 +11245,7 @@ CB._clone=function(obj,url){
     return n_obj;
 };
 
-CB._request=function(method,url,params)
+CB._request=function(method,url,params,isServiceUrl)
 {
 
     CB._validate();
@@ -11261,9 +11261,12 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = CB._getSessionId();
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
+
+    if(!isServiceUrl){
+        var ssid = CB._getSessionId();
+        if(ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+    }
     if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
@@ -11272,11 +11275,13 @@ CB._request=function(method,url,params)
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
+                if(!isServiceUrl){
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if(sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                }
                 def.resolve(xmlhttp.responseText);
             } else {
                 console.log(xmlhttp.status);
