@@ -257,6 +257,37 @@ CB._request=function(method,url,params,isServiceUrl)
 
 CB._getSessionId = function(){
     return localStorage.getItem('sessionID');
+
+CB._columnValidation = function(column, cloudtable){
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+  if(cloudtable.type == 'user'){
+    defaultColumn.concat(['username', 'email', 'password', 'roles']);
+  }else if(cloudtable.type == 'role'){
+    defaultColumn.push('name');
+  }
+
+  var index = defaultColumn.indexOf(column.name.toLowerCase());
+  if(index < 0)
+    return true;
+  else
+    return false;
+};
+
+CB._tableValidation = function(tableName){
+
+  if(!tableName) //if table name is empty
+    throw "table name cannot be empty";
+
+  if(!isNaN(tableName[0]))
+    throw "table name should not start with a number";
+
+  if(!tableName.match(/^\S+$/))
+    throw "table name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(tableName))
+    throw "table not shoul not contain special characters";
+
 };
 
 CB._modified = function(thisObj,columnName){
@@ -271,6 +302,7 @@ CB._modified = function(thisObj,columnName){
     }
 };
 
+
 function trimStart(character, string) {
     var startIndex = 0;
 
@@ -281,3 +313,296 @@ function trimStart(character, string) {
     return string.substr(startIndex);
 }
 
+CB._columnNameValidation = function(columnName){
+
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+
+  if(!columnName) //if table name is empty
+    throw "table name cannot be empty";
+
+  var index = defaultColumn.indexOf(columnName.toLowerCase());
+  if(index >= 0)
+    throw "this columnname is already in use";
+
+  if(!isNaN(columnName[0]))
+    throw "table name should not start with a number";
+
+  if(!columnName.match(/^\S+$/))
+    throw "table name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(columnName))
+    throw "table not should not contain special characters";
+};
+
+CB._columnDataTypeValidation = function(dataType){
+
+  if(!dataType)
+    throw "data type cannot be empty";
+
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
+  var index = dataTypeList.indexOf(dataType);
+  if(index < 0)
+    throw "invalid data type";
+
+};
+
+CB._defaultColumns = function(type){
+  if(type == "custom")
+     return [{
+                  name: 'id',
+                  dataType: 'Id',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+
+   if(type == "user")
+      return  [{
+                  name: 'id',
+                  dataType: 'Id',
+                  
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'username',
+                  dataType: 'Text',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'email',
+                  dataType: 'Email',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'password',
+                  dataType: 'Password',
+                  
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'roles',
+                  dataType: 'List',
+                  relatedTo:null,
+                  relatedToType :'role',
+                  relationType: 'table',
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                 
+                  relatedToType :null,
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                 
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+
+   if(type == "role")
+      return [{
+                  name: 'id',
+                  dataType: 'Id',
+                  relatedTo: null,
+                  relatedToType :null,
+                  
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'name',
+                  dataType: 'Text',
+                  relatedTo: null,
+                  relatedToType :null,
+                 
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                  relatedToType :null,
+                  
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                 
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+};
