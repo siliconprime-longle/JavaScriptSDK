@@ -1,6 +1,9 @@
 describe("Cloud Table", function(){
 	
-	  
+	before(function(){
+    	CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+  	});
+  	
     it("should not create duplicate table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table');
@@ -244,5 +247,9 @@ describe("Cloud Table", function(){
           });
       });
     });
+    
+    after(function() {
+    	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+  	});
 
 });

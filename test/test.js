@@ -10924,7 +10924,7 @@ describe("Server Check",function(){
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
                     CB.appId = 'sample123';
-                    CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
                     CB.serverUrl = 'http://localhost:4730';
                     CB.serviceUrl = 'http://localhost:3000';
                     CB.socketIoUrl = CB.serverUrl;
@@ -14920,7 +14920,9 @@ describe("Query_ACL", function () {
 
 describe("Cloud Table", function(){
 	
-	  
+	before(function(){
+    	CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+  	});
     it("should not create duplicate table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table');
@@ -14947,6 +14949,21 @@ describe("Cloud Table", function(){
 
     });
 	
+	/*it("should add a column to an existing table",function(done){
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Table2');
+        CB.CloudTable.get(obj).then(function(table){
+        	var column1 = new CB.Column('city', 'Text', true, false);
+		    table.addColumn(column1);
+		    table.save().then(function(table){
+		          done();
+		    });
+        },function(){
+            done("should fetch the table");
+        });
+        
+    });*/
+    
 	it("should add a column to the table after save.",function(done){
         this.timeout(20000);
         var tableName = util.makeString();
@@ -15002,9 +15019,9 @@ describe("Cloud Table", function(){
         });
     });
 
-   /* it("should not rename a table",function(done){
+    it("should not rename a table",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           table.name = "NewName";
           table.save().then(function(newTable){
@@ -15034,7 +15051,7 @@ describe("Cloud Table", function(){
 
     it("should not rename a column",function(done){
         this.timeout(20000);
-        var obj = new CB.CloudTable('Table12');
+        var obj = new CB.CloudTable('Table2');
         CB.CloudTable.get(obj).then(function(table){
             table.columns[0].name = "abcd";
             table.save().then(function(){
@@ -15049,7 +15066,7 @@ describe("Cloud Table", function(){
 
     it("should not change data type of a column",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           table.columns[0].dataType = "abcd";
           table.save().then(function(){
@@ -15064,7 +15081,7 @@ describe("Cloud Table", function(){
 
     it("should not change unique property of a default column",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           table.columns[0].unique = false;
           table.save().then(function(){
@@ -15079,7 +15096,7 @@ describe("Cloud Table", function(){
 
     it("should not change required property of a default column",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           table.columns[0].required = false;
           table.save().then(function(){
@@ -15094,7 +15111,7 @@ describe("Cloud Table", function(){
 
     it("should change unique property of a user defined column",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           if(table.columns[5].unique)
             table.columns[5].unique = false;
@@ -15115,7 +15132,7 @@ describe("Cloud Table", function(){
 
     it("should change required property of a user defined column",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           if(table.columns[5].required)
             table.columns[5].required = false;
@@ -15138,7 +15155,7 @@ describe("Cloud Table", function(){
 
     it("should not delete a default column of a table",function(done){
       this.timeout(20000);
-      var obj = new CB.CloudTable('Table12');
+      var obj = new CB.CloudTable('Table2');
       CB.CloudTable.get(obj).then(function(table){
           table.columns[2] = "";
           table.save().then(function(newTable){
@@ -15148,6 +15165,10 @@ describe("Cloud Table", function(){
               done();
           });
       });
-    });*/
+    });
+    
+    after(function() {
+    	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+  	});
 
 });

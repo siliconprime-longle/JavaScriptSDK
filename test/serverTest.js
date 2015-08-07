@@ -18,7 +18,7 @@ describe("Server Check",function(){
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
                     CB.appId = 'sample123';
-                    CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
                     CB.serverUrl = 'http://localhost:4730';
                     CB.serviceUrl = 'http://localhost:3000';
                     CB.socketIoUrl = CB.serverUrl;
