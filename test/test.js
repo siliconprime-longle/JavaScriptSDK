@@ -10043,7 +10043,7 @@ if (typeof(Number.prototype.toRad) === "undefined") {
 
 CB.CloudTable = function(tableName){  //new table constructor
 
-  tableValidation(tableName);
+  CB._tableValidation(tableName);
   this.name = tableName;
   this.appId = CB.appId;
 
@@ -10054,27 +10054,34 @@ CB.CloudTable = function(tableName){  //new table constructor
   else
     this.type = "custom";
 
-  this.columns = defaultColumns(this.type);
-  this.id = makeId();
+  this.columns = CB._defaultColumns(this.type);
 }
-
 
 CB.CloudTable.prototype.addColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
+    if(CB._columnValidation(column, this))
       this.columns.push(column);
+
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      this.columns.concat(column);
-      //yet to test
+      for(var i=0; i<column.length; i++){
+        if(CB._columnValidation(column[i], this))
+          this.columns.push(column[i]);
+      }
   }
 }
 
 CB.CloudTable.prototype.deleteColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
-      this.columns = this.columns.filter(function(index){return index.name != column.name });
+        if(CB._columnValidation(column, this)){
+          this.columns = this.columns.filter(function(index){return index.name != column.name });
+        }
+
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       //yet to test
       for(var i=0; i<column.length; i++){
-        this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+        if(CB._columnValidation(column[i], this)){
+          this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+        }
       }
   }
 }
@@ -10176,11 +10183,6 @@ CB.CloudTable.get = function(table, callback){
 
 CB.CloudTable.delete = function(table, callback){
   if (Object.prototype.toString.call(table) === '[object Object]') {
-    if(table.type == "user"){
-      throw "cannot delete user table";
-    }else if(table.type == "role"){
-      throw "cannot delete role table";
-    }else{
       if (!CB.appId) {
           throw "CB.appId is null.";
       }
@@ -10214,8 +10216,6 @@ CB.CloudTable.delete = function(table, callback){
       if (!callback) {
           return def;
       }
-
-    }
   } else if (Object.prototype.toString.call(table) === '[object Array]') {
     throw "cannot delete array of tables";
   }
@@ -10263,300 +10263,8 @@ CB.CloudTable.prototype.save = function(callback){
   }
 }
 
-//validation
-function tableValidation(tableName){
 
-  if(!tableName) //if table name is empty
-    throw "table name cannot be empty";
 
-  if(!isNaN(tableName[0]))
-    throw "table name should not start with a number";
-
-  if(!tableName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(tableName))
-    throw "table not shoul not contain special characters";
-}
-
-//generate a unique Id
-function makeId(){
-  //creates a random string of 8 char long.
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for( var i=0; i < 8; i++ )
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return 'x'+text; //should start with char.
-}
-
-function defaultColumns(type){
-  if(type == "custom")
-     return [{
-                  name: 'id',
-                  id : makeId(),
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "user")
-      return  [{
-                  name: 'id',
-                  dataType: 'Id',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'username',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'email',
-                  dataType: 'Email',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'password',
-                  dataType: 'Password',
-                  id : makeId(),
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'roles',
-                  dataType: 'List',
-                  relatedTo:null,
-                  id : makeId(),
-                  relatedToType :'role',
-                  relationType: 'table',
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  id : makeId(),
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "role")
-      return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  id : makeId(),
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'name',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  relatedToType :null,
-                  id : makeId(),
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  id : makeId(),
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  id : makeId(),
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  id : makeId(),
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  id : makeId(),
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-}
 
 /*
  Column.js
@@ -10564,12 +10272,12 @@ function defaultColumns(type){
 
  CB.Column = function(columnName, dataType, required, unique){
    if(columnName){
-     columnNameValidation(columnName);
+     CB._columnNameValidation(columnName);
      this.name = columnName;
    }
 
    if(dataType){
-     columnDataTypeValidation(dataType);
+     CB._columnDataTypeValidation(dataType);
      this.dataType = dataType;
    }else{
      this.dataType = "Text";
@@ -10584,34 +10292,11 @@ function defaultColumns(type){
      this.unique = unique;
    else
      this.unique = false;
-     this.relatedTo = null;
-     this.relationType = null;
-     this.isDeletable = true;
-     this.isEditable = true;
-     this.isRenamable = true;
-     this.id = makeId();
-}
-
-function columnNameValidation(columnName){
-  if(!columnName) //if table name is empty
-    throw "table name cannot be empty";
-
-  if(!isNaN(columnName[0]))
-    throw "table name should not start with a number";
-
-  if(!columnName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(columnName))
-    throw "table not shoul not contain special characters";
-}
-
-function columnDataTypeValidation(dataType){
-  dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
-  var index = dataTypeList.indexOf(dataType);
-  if(index < 0)
-    throw "invalid data type";
+   this.relatedTo = null;
+   this.relationType = null;
+   this.isDeletable = true;
+   this.isEditable = true;
+   this.isRenamable = true;
 }
 
 /* PRIVATE METHODS */
@@ -10860,6 +10545,38 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
+CB._columnValidation = function(column, cloudtable){
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+  if(cloudtable.type == 'user'){
+    defaultColumn.concat(['username', 'email', 'password', 'roles']);
+  }else if(cloudtable.type == 'role'){
+    defaultColumn.push('name');
+  }
+
+  var index = defaultColumn.indexOf(column.name.toLowerCase());
+  if(index < 0)
+    return true;
+  else
+    return false;
+};
+
+CB._tableValidation = function(tableName){
+
+  if(!tableName) //if table name is empty
+    throw "table name cannot be empty";
+
+  if(!isNaN(tableName[0]))
+    throw "table name should not start with a number";
+
+  if(!tableName.match(/^\S+$/))
+    throw "table name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(tableName))
+    throw "table not shoul not contain special characters";
+};
+
 CB._modified = function(thisObj,columnName){
     thisObj.document._isModified = true;
     if(thisObj.document._modifiedColumns) {
@@ -10872,6 +10589,300 @@ CB._modified = function(thisObj,columnName){
     }
 };
 
+CB._columnNameValidation = function(columnName){
+
+  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+
+  if(!columnName) //if table name is empty
+    throw "table name cannot be empty";
+
+  var index = defaultColumn.indexOf(columnName.toLowerCase());
+  if(index >= 0)
+    throw "this columnname is already in use";
+
+  if(!isNaN(columnName[0]))
+    throw "table name should not start with a number";
+
+  if(!columnName.match(/^\S+$/))
+    throw "table name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(columnName))
+    throw "table not should not contain special characters";
+};
+
+CB._columnDataTypeValidation = function(dataType){
+
+  if(!dataType)
+    throw "data type cannot be empty";
+
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
+  var index = dataTypeList.indexOf(dataType);
+  if(index < 0)
+    throw "invalid data type";
+
+};
+
+CB._defaultColumns = function(type){
+  if(type == "custom")
+     return [{
+                  name: 'id',
+                  dataType: 'Id',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+
+   if(type == "user")
+      return  [{
+                  name: 'id',
+                  dataType: 'Id',
+                  
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'username',
+                  dataType: 'Text',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'email',
+                  dataType: 'Email',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'password',
+                  dataType: 'Password',
+                  
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'roles',
+                  dataType: 'List',
+                  relatedTo:null,
+                  relatedToType :'role',
+                  relationType: 'table',
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                 
+                  relatedToType :null,
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                 
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+
+   if(type == "role")
+      return [{
+                  name: 'id',
+                  dataType: 'Id',
+                  relatedTo: null,
+                  relatedToType :null,
+                  
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'name',
+                  dataType: 'Text',
+                  relatedTo: null,
+                  relatedToType :null,
+                 
+                  relationType: null,
+                  required: true,
+                  unique: true,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'isSearchable',
+                  dataType: 'Boolean',
+                  relatedTo: null,
+                  relatedToType :null,
+                  
+                  relationType: null,
+                  required: false,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'createdAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                 
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'updatedAt',
+                  dataType: 'DateTime',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              },
+              {
+                  name: 'ACL',
+                  dataType: 'ACL',
+                  relatedTo: null,
+                  relatedToType :null,
+                  relationType: null,
+                  required: true,
+                  unique: false,
+                  isRenamable: false,
+                  isEditable: false,
+                  isDeletable: false,
+              }];
+};
+
    var util = {
      makeString : function(){
 	    var text = "";
@@ -10880,7 +10891,7 @@ CB._modified = function(thisObj,columnName){
 	    for( var i=0; i < 5; i++ )
 	        text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-	    return text;
+	    return 'x'+text;
 	},	
 
 	makeEmail : function(){
@@ -10892,6 +10903,7 @@ CB._modified = function(thisObj,columnName){
    
 
 	
+
 describe("Server Check",function(){
     it("should check for localhost",function(done){
     	this.timeout(10000);
@@ -14907,12 +14919,13 @@ describe("Query_ACL", function () {
 
 
 describe("Cloud Table", function(){
-
+	
+	  
     it("should not create duplicate table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table');
         obj.save().then(function(){
-            throw("should have create the table");
+            done("should not create duplicate table");
         },function(){
             done();
         });
@@ -14920,26 +14933,41 @@ describe("Cloud Table", function(){
 
     it("should first create a table and then delete that table",function(done){
         this.timeout(20000);
-        var obj = new CB.CloudTable('Table3');
-        obj.save().then(function(){
-          CB.CloudTable.delete(obj).then(function(){
+        var tableName = util.makeString();
+        var obj = new CB.CloudTable(tableName);
+        obj.save().then(function(newTable){
+          CB.CloudTable.delete(newTable).then(function(){
               done();
           },function(){
-              throw("should have delete the table");
+              done("should have delete the table");
           });
         },function(){
-            throw("should have create the table");
+            done("should have create the table");
         });
 
     });
-
+	
+	it("should add a column to the table after save.",function(done){
+        this.timeout(20000);
+        var tableName = util.makeString();
+        var table = new CB.CloudTable(tableName);
+        table.save().then(function(table){
+            var column1 = new CB.Column('Name11', 'Text', true, false);
+            table.addColumn(column1);
+            table.save().then(function(newTable){
+              done();
+              CB.CloudTable.delete(newTable);
+            });
+        });
+    });
+    
     it("should get a table information",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Address');
         CB.CloudTable.get(obj).then(function(){
             done();
         },function(){
-            throw("should have create the table");
+            done("should fetch the table");
         });
     });
 
@@ -14948,44 +14976,178 @@ describe("Cloud Table", function(){
         CB.CloudTable.getAll().then(function(){
             done();
         },function(){
-            throw("should have create the table");
+            done("should get the all table");
         });
     });
 
     it("should update new column into the table",function(done){
         this.timeout(20000);
-
-        var obj = new CB.CloudTable('Table');
-        CB.CloudTable.get(obj, {
-          success: function(table){
-            var column1 = new CB.Column('Name4', 'Relation', true, false);
-            column1.relatedTo = 'Table2';
-            table.addColumn(column1);
-            table.save().then(function(newTable){
-              var column2 = new CB.Column('Name4');
-              newTable.deleteColumn(column2);
-              newTable.save().then(function(){
-                done();
-              },function(){
-                throw("should have create the table");
+		var tableName =  util.makeString();
+        var obj = new CB.CloudTable(tableName);
+       
+        var column1 = new CB.Column('Name11', 'Relation', true, false);
+        column1.relatedTo = 'Table2';
+        obj.addColumn(column1);
+        obj.save().then(function(newTable){
+        	var column2 = new CB.Column('Name11');
+        	newTable.deleteColumn(column2);
+            newTable.save().then(function(table){
+               done();
+               CB.CloudTable.delete(table);
+            },function(){
+                done("should save the table");
               });
             },function(){
-              throw("should have create the table");
-            });
-          },
-          error: function(err){
-              throw("should have create the table");
-          }
+              done("should save the table");
         });
+    });
+
+   /* it("should not rename a table",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.name = "NewName";
+          table.save().then(function(newTable){
+              done( "should not renamed the table");
+          }, function(){
+              done();
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should not change type of table",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.type = "NewType";
+          table.save().then(function(newTable){
+              done( "should not change the type of a table");
+          },function(){
+              done();
+          });
+      },function(){
+          done("should fetch the table");
+      });
     });
 
     it("should not rename a column",function(done){
         this.timeout(20000);
-        var obj = new CB.CloudTable('Address');
-        CB.CloudTable.get(obj).then(function(){
-            done();
+        var obj = new CB.CloudTable('Table12');
+        CB.CloudTable.get(obj).then(function(table){
+            table.columns[0].name = "abcd";
+            table.save().then(function(){
+                done("should not update the column name");
+            },function(){
+                done();
+            });
         },function(){
-            throw("should have create the table");
+            done("should fetch the table");
         });
     });
+
+    it("should not change data type of a column",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.columns[0].dataType = "abcd";
+          table.save().then(function(){
+              done("should not update the column dataType");
+          },function(){
+              done();
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should not change unique property of a default column",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.columns[0].unique = false;
+          table.save().then(function(){
+              done("should not change unique property of a default column");
+          },function(){
+              done();
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should not change required property of a default column",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.columns[0].required = false;
+          table.save().then(function(){
+              done("should not change required property of a default column");
+          },function(){
+              done();
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should change unique property of a user defined column",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          if(table.columns[5].unique)
+            table.columns[5].unique = false;
+          else
+            table.columns[5].unique = true;
+          table.save().then(function(newTable){
+              if(newTable.columns[5].unique == table.columns[5].unique)
+                done();
+              else
+                done("shouldchange unique property of a user defined column");
+          },function(){
+              done("shouldchange unique property of a user defined column");
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should change required property of a user defined column",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          if(table.columns[5].required)
+            table.columns[5].required = false;
+          else
+            table.columns[5].required = true;
+
+          table.save().then(function(newTable){
+              if(newTable.columns[5].required == table.columns[5].required)
+                done();
+              else
+                done("should change required property of a user defined column");
+          },function(){
+              done("should change required property of a user defined column");
+
+          });
+      },function(){
+          done("should fetch the table");
+      });
+    });
+
+    it("should not delete a default column of a table",function(done){
+      this.timeout(20000);
+      var obj = new CB.CloudTable('Table12');
+      CB.CloudTable.get(obj).then(function(table){
+          table.columns[2] = "";
+          table.save().then(function(newTable){
+              if(newTable.columns[2] != "createdAt")
+                done("should change required property of a user defined column");
+          },function(){
+              done();
+          });
+      });
+    });*/
+
 });
