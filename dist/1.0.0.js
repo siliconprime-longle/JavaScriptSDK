@@ -8105,6 +8105,7 @@ CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
     this.tableName = tableName;
     this.query = {};
     this.query.$include = [];
+    this.query.$includeList = [];
     this.select = {};
     this.sort = {};
     this.skip = 0;
@@ -8143,11 +8144,48 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     return this;
 };
 
-CB.CloudQuery.prototype.include = function (columnName, data) {
+CB.CloudQuery.prototype.includeList = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.query.$includeList.push(columnName);
+
+    return this;
+};
+
+
+CB.CloudQuery.prototype.include = function (columnName) {
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
+
+    return this;
+};
+
+CB.CloudQuery.prototype.all = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.query.$all = columnName;
+
+    return this;
+};
+
+CB.CloudQuery.prototype.any = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.query.$any = columnName;
+
+    return this;
+};
+
+CB.CloudQuery.prototype.first = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.query.$first = columnName;
 
     return this;
 };
@@ -8331,7 +8369,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
         this.query[columnName]["$in"] = data;
         thisObj = this;
-        if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing dublicates
+        if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing duplicates
             data.forEach(function(val) {
                 if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
                     thisObj.query[columnName]["$nin"].splice(index, 1);

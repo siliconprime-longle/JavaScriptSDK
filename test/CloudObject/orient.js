@@ -128,6 +128,26 @@ describe("Graph DB",function(done){
 
     });
 
+    it("Should delete a saved Object",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name','Vipul');
+        obj.save().then(function(res){
+            if(res){
+                res.delete().then(function(res){
+                    if(res === 'Success')
+                        done()
+                    else
+                        done("Unable to delete Object");
+                });
+            }else
+                done("Unable to Save Object");
+        }, function (err) {
+            done("Unable to Delete Object");
+        })
+    });
+
     it("Should query over relation",function(done){
 
         this.timeout(10000);
@@ -141,5 +161,7 @@ describe("Graph DB",function(done){
             throw "Unable to Save the Object";
         });
     });
+
+
 
 });
