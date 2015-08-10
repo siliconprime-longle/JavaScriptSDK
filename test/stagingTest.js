@@ -1,13 +1,13 @@
 var CB = require('../lib/cloudboost.js');
    var util = {
      makeString : function(){
-	    var text = "";
+	    var text = "x";
 	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 	    for( var i=0; i < 5; i++ )
 	        text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-	    return text;
+	    return 'x'+text;
 	},	
 
 	makeEmail : function(){
@@ -19,6 +19,7 @@ var CB = require('../lib/cloudboost.js');
    
 
 	
+
 describe("Server Check",function(){
     it("should check for localhost",function(done){
         this.timeout(100000);
@@ -1678,133 +1679,10 @@ describe("Query on Cloud Object Notifications ", function() {
                 }
         });
 
-<<<<<<< HEAD
         //attach it to the event. 
         var obj = new CB.CloudObject('Student');
         obj.set('age',9);
         obj.save();
-=======
-if (typeof(Number.prototype.toRad) === "undefined") {
-    Number.prototype.toRad = function() {
-        return this * Math.PI / 180;
-    }
-}
-
-/*
-  CloudTable
- */
-
-CB.CloudTable = function(tableName){  //new table constructor
-
-  CB._tableValidation(tableName);
-  this.name = tableName;
-  this.appId = CB.appId;
-
-  if(tableName.toLowerCase() == "user")
-    this.type = "user";
-  else if(tableName.toLowerCase() == "role")
-    this.type = "role";
-  else
-    this.type = "custom";
-
-  this.columns = CB._defaultColumns(this.type);
-}
-
-CB.CloudTable.prototype.addColumn = function(column){
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-    if(CB._columnValidation(column, this))
-      this.columns.push(column);
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this))
-          this.columns.push(column[i]);
-      }
-  }
-}
-
-CB.CloudTable.prototype.deleteColumn = function(column){
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-        if(CB._columnValidation(column, this)){
-          this.columns = this.columns.filter(function(index){return index.name != column.name });
-        }
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      //yet to test
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this)){
-          this.columns = this.columns.filter(function(index){return index.name != column[i].name });
-        }
-      }
-  }
-}
-
-//CloudTable static functions
-CB.CloudTable.getAll = function(callback){
-  if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-
-  var params=JSON.stringify({
-      key: CB.appKey
-  });
-
-  url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
-    response = JSON.parse(response);
-    var objArray = [];
-    for(var i=0; i<response.length; i++){
-      if(response[i].name){
-        var obj = new CB.CloudTable(response[i].name);
-        obj.columns = response.columns;
-        obj.id = response.id;
-        obj._id = response._id;
-        objArray.push(obj);
-      }
-    }
-    if (callback) {
-        callback.success(objArray);
-    } else {
-        def.resolve(objArray);
-    }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-  if (!callback) {
-      return def;
-  }
-}
-
-CB.CloudTable.get = function(table, callback){
-  if (Object.prototype.toString.call(table) === '[object Object]') {
-    if(table.type == "user"){
-      throw "cannot delete user table";
-    }else if(table.type == "role"){
-      throw "cannot delete role table";
-    }else{
-      if (!CB.appId) {
-          throw "CB.appId is null.";
-      }
-
-      var def;
-      if (!callback) {
-          def = new CB.Promise();
-      }
-
-      var params=JSON.stringify({
-          key: CB.appKey,
-          appId: CB.appId
-      });
->>>>>>> feature_cbtables
 
         setTimeout(function(){
             if(!isDone){
@@ -1813,35 +1691,10 @@ CB.CloudTable.get = function(table, callback){
                 };
         }, 10000);
 
-<<<<<<< HEAD
     });
-=======
-    }
-  } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot fetch array of tables";
-  }
-}
-
-CB.CloudTable.delete = function(table, callback){
-  if (Object.prototype.toString.call(table) === '[object Object]') {
-      if (!CB.appId) {
-          throw "CB.appId is null.";
-      }
-
-      var def;
-      if (!callback) {
-          def = new CB.Promise();
-      }
-
-      var params=JSON.stringify({
-          key: CB.appKey,
-          name: table.name
-      });
->>>>>>> feature_cbtables
 
     it("doesNotExist : 1",function(done){
 
-<<<<<<< HEAD
         var isDone = false;
 
         this.timeout(30000);
@@ -1861,118 +1714,6 @@ CB.CloudTable.delete = function(table, callback){
         obj.set('age',11);
         obj.save();
     });
-=======
-        if (callback) {
-            callback.success(response);
-        } else {
-            def.resolve(response);
-        }
-      },function(err){
-          if(callback){
-              callback.error(err);
-          }else {
-              def.reject(err);
-          }
-      });
-      if (!callback) {
-          return def;
-      }
-  } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot delete array of tables";
-  }
-}
-
-//CloudTable save function
-CB.CloudTable.prototype.save = function(callback){
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-  CB._validate();
-  var thisObj = this;
-  var params=JSON.stringify({
-      columns:thisObj.columns,
-      name: thisObj.name,
-      type: thisObj.type,
-      id: thisObj.id,
-      key:CB.appKey,
-      _id:thisObj._id
-  });
-
-  url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
-      response = JSON.parse(response);
-      var obj = new CB.CloudTable(response.name);
-      obj.columns = response.columns;
-      obj.id = response.id;
-      obj._id = response._id;
-      if (callback) {
-          callback.success(obj);
-      } else {
-          def.resolve(obj);
-      }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-
-  if (!callback) {
-      return def;
-  }
-}
-
-
-
-
-/*
- Column.js
- */
-
- CB.Column = function(columnName, dataType, required, unique){
-   if(columnName){
-     CB._columnNameValidation(columnName);
-     this.name = columnName;
-   }
-
-   if(dataType){
-     CB._columnDataTypeValidation(dataType);
-     this.dataType = dataType;
-   }else{
-     this.dataType = "Text";
-   }
-
-   if(typeof(required) === 'boolean')
-     this.required = required;
-   else
-     this.required = false;
-
-   if(typeof(unique) === 'boolean')
-     this.unique = unique;
-   else
-     this.unique = false;
-   this.relatedTo = null;
-   this.relationType = null;
-   this.isDeletable = true;
-   this.isEditable = true;
-   this.isRenamable = true;
-}
-
-/* PRIVATE METHODS */
-CB.toJSON = function(thisObj) {
-
-    var url=null;
-    if(thisObj instanceof  CB.CloudFile)
-        url=thisObj.document.url;
-
-    var obj= CB._clone(thisObj,url);
-
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
-        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
-    }
->>>>>>> feature_cbtables
 
 
     it("doesNotExist : 2",function(done){
@@ -2088,7 +1829,6 @@ CB.toJSON = function(thisObj) {
 
         var isDone = false; 
 
-<<<<<<< HEAD
         this.timeout(30000);
         //create the query. 
         var query = new CB.CloudQuery('Student');
@@ -2101,432 +1841,6 @@ CB.toJSON = function(thisObj) {
                     done("Fired a wrong event");
                 }
         });
-=======
-    if(!CB.appKey){
-        throw "AppKey is null. Please use CB.CLoudApp.init to initialize your app.";
-    }
-};
-
-
-//to check if its running under node, If yes - then export CB.
-(function () {
-    // Establish the root object, `window` in the browser, or `global` on the server.
-    var root = this;
-    // Create a reference to this
-    var _ = new Object();
-})();
-
-function _all(arrayOfPromises) {
-    //this is simplilar to Q.all for jQuery promises.
-    return jQuery.when.apply(jQuery, arrayOfPromises).then(function() {
-        return Array.prototype.slice.call(arguments, 0);
-    });
-};
-
-if(CB._isNode){
-    module.exports = {};
-    module.exports = CB;
-}
-
-
-CB._clone=function(obj,url){
-    var n_obj = null;
-    if(obj.document._type && obj.document._type != 'point') {
-        n_obj = CB._getObjectByType(obj.document._type,url);
-        var doc=obj.document;
-        var doc2={};
-        for (var key in doc) {
-            if(doc[key] instanceof CB.CloudObject)
-                doc2[key]=CB._clone(doc[key],null);
-            else if(doc[key] instanceof CB.CloudFile){
-                doc2[key]=CB._clone(doc[key],doc[key].document.url);
-            }else if(doc[key] instanceof CB.CloudGeoPoint){
-                doc2[key]=CB._clone(doc[key], null);
-            }
-            else
-                doc2[key]=doc[key];
-        }
-    }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
-        return n_obj;
-    }
-    n_obj.document=doc2;
-    return n_obj;
-};
-
-CB._request=function(method,url,params)
-{
-    var def = new CB.Promise();
-    var xmlhttp= CB._loadXml();
-    if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
-        localStorage = new LocalStorage('./scratch');
-    }
-    xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = localStorage.getItem('sessionID');
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
-    if(CB._isNode)
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/" + CB.version +
-            " (NodeJS " + process.versions.node + ")");
-    xmlhttp.send(params);
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
-                def.resolve(xmlhttp.responseText);
-            } else {
-                console.log(xmlhttp.status);
-                def.reject(xmlhttp.responseText);
-            }
-        }
-    }
-    return def;
-};
-
-CB._columnValidation = function(column, cloudtable){
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
-  if(cloudtable.type == 'user'){
-    defaultColumn.concat(['username', 'email', 'password', 'roles']);
-  }else if(cloudtable.type == 'role'){
-    defaultColumn.push('name');
-  }
-
-  var index = defaultColumn.indexOf(column.name.toLowerCase());
-  if(index < 0)
-    return true;
-  else
-    return false;
-};
-
-CB._tableValidation = function(tableName){
-
-  if(!tableName) //if table name is empty
-    throw "table name cannot be empty";
-
-  if(!isNaN(tableName[0]))
-    throw "table name should not start with a number";
-
-  if(!tableName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(tableName))
-    throw "table not shoul not contain special characters";
-};
-
-CB._modified = function(thisObj,columnName){
-    thisObj.document._isModified = true;
-    if(thisObj.document._modifiedColumns) {
-        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
-            thisObj.document._modifiedColumns.push(columnName);
-        }
-    }else{
-        thisObj.document._modifiedColumns = [];
-        thisObj.document._modifiedColumns.push(columnName);
-    }
-};
-
-CB._columnNameValidation = function(columnName){
-
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
-
-  if(!columnName) //if table name is empty
-    throw "table name cannot be empty";
-
-  var index = defaultColumn.indexOf(columnName.toLowerCase());
-  if(index >= 0)
-    throw "this columnname is already in use";
-
-  if(!isNaN(columnName[0]))
-    throw "table name should not start with a number";
-
-  if(!columnName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(columnName))
-    throw "table not should not contain special characters";
-};
-
-CB._columnDataTypeValidation = function(dataType){
-
-  if(!dataType)
-    throw "data type cannot be empty";
-
-  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
-  var index = dataTypeList.indexOf(dataType);
-  if(index < 0)
-    throw "invalid data type";
-
-};
-
-CB._defaultColumns = function(type){
-  if(type == "custom")
-     return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "user")
-      return  [{
-                  name: 'id',
-                  dataType: 'Id',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'username',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'email',
-                  dataType: 'Email',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'password',
-                  dataType: 'Password',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'roles',
-                  dataType: 'List',
-                  relatedTo:null,
-                  relatedToType :'role',
-                  relationType: 'table',
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "role")
-      return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'name',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  relatedToType :null,
-                 
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                 
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-};
->>>>>>> feature_cbtables
 
         //attach it to the event. 
         var obj = new CB.CloudObject('Student');
@@ -2540,12 +1854,7 @@ CB._defaultColumns = function(type){
                 };
         }, 10000);
 
-<<<<<<< HEAD
     });
-=======
-	    return 'x'+text;
-	},	
->>>>>>> feature_cbtables
 
     it("containedIn : 1",function(done){
 
@@ -2556,7 +1865,6 @@ CB._defaultColumns = function(type){
         var query = new CB.CloudQuery('Student');
         query.containedIn('age',[11]);
 
-<<<<<<< HEAD
         CB.CloudObject.on('Student', 'created', query, function(){
            if(!isDone){
                     isDone=true;
@@ -2568,28 +1876,6 @@ CB._defaultColumns = function(type){
         var obj = new CB.CloudObject('Student');
         obj.set('age',11);
         obj.save();
-=======
-	
-
-describe("Server Check",function(){
-    it("should check for localhost",function(done){
-        this.timeout(100000);
-        var xmlhttp;
-        var req = typeof(require) === 'function' ? require : null;
-        // Load references to other dependencies
-        if (typeof(XMLHttpRequest) !== 'undefined') {
-            xmlhttp = XMLHttpRequest;
-        } else if (typeof(require) === 'function' &&
-            typeof(require.ensure) === 'undefined') {
-            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
-        }
-        CB.appId = 'travis123';
-        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-        CB.socketIoUrl = CB.serverUrl;
-        CB.apiUrl = CB.serverUrl + '/api';
-        done();
->>>>>>> feature_cbtables
     });
 
     it("containedIn : 2",function(done){
@@ -3163,6 +2449,173 @@ describe("Server Check",function(){
             }
         });
     });                              
+});
+describe("Graph DB",function(done){
+
+    it("Should Create node",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Company');
+        obj.set('Name','Progress');
+        obj.save().then(function(nobj){
+            if(nobj)
+                done();
+            else
+                throw "unable to save";
+        },function(err){
+            console.log(err);
+            throw "unable to save the object";
+        });
+    });
+    it("should save a relation",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name','Anurag');
+        var obj1 = new CB.CloudObject('Company');
+        obj1.set('Name','CloudBoost');
+        obj.set('Company',obj1);
+        obj.save().then(function(nobj){
+            if(nobj.get('Company').get('Name') === 'CloudBoost')
+                done();
+            else
+                throw "Unable to save relation";
+        },function(err){
+            console.log(err);
+            throw "Unable to save data";
+        })
+    });
+
+    it("should save list of data",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Company');
+        obj.set('Name',"CloudBoost");
+        var obj1 = new CB.CloudObject('Employee');
+        obj1.set('Name','Ravi');
+        var obj2 = new CB.CloudObject('Employee');
+        obj2.set('Name','Ranjeet');
+        obj.set('Employee',[obj1,obj2]);
+        obj.save().then(function(nobj){
+            if(obj.get('Employee').length === 2)
+                done();
+            else
+                throw "Unable to Save Object";
+        },function(err){
+            console.log(err);
+            throw "Unable to save data";
+        });
+
+    });
+
+    it("Should update a saved Record",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name','Save');
+        obj.save().then(function(nobj){
+            nobj.set('Name','Update');
+            nobj.save().then(function(nnobj){
+                if(nnobj.get('Name') === 'Update')
+                    done();
+                else
+                    throw "Object saved but not updated";
+            },function(){
+               throw "unable to update the document";
+            });
+        },function(){
+            throw "Unable to save the record";
+        })
+
+    });
+
+    it("should update a relation",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name','Anurag');
+        var obj1 = new CB.CloudObject('Company');
+        obj1.set('Name','CloudBoost');
+        obj.set('Company',obj1);
+        obj.save().then(function(nobj){
+            if(nobj.get('Company').get('Name') === 'CloudBoost') {
+                nobj.set('Company',null);
+                nobj.save().then(function(fobj){
+                    if(fobj.get('Company') === null)
+                        done();
+                },function(){
+                    throw "Unable to save object";
+                });
+            }else
+                throw "Unable to save relation";
+        },function(err){
+            console.log(err);
+            throw "Unable to save data";
+        })
+    });
+
+    it("should update the list of relation",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Company');
+        var obj1 = new CB.CloudObject('Employee');
+        obj1.set('Name','abcd');
+        var obj2 = new CB.CloudObject('Employee');
+        obj2.set('Name','Vipul');
+        obj.set('Employee',[obj1,obj2]);
+        var emp = [];
+        emp.push(obj.get('Employee')[0]);
+        obj.set('Employee',emp);
+        obj.save().then(function(nobj){
+            if(nobj.get('Employee').length === 1 && nobj.get('Employee')[0].get('Name') === 'abcd')
+                done();
+            else
+                throw "Unable to Save Object";
+        },function(err){
+            console.log(err);
+            throw "Unable to save data";
+        });
+
+    });
+
+    it("Should delete a saved Object",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name','Vipul');
+        obj.save().then(function(res){
+            if(res){
+                res.delete().then(function(res){
+                    if(res === 'Success')
+                        done()
+                    else
+                        done("Unable to delete Object");
+                });
+            }else
+                done("Unable to Save Object");
+        }, function (err) {
+            done("Unable to Delete Object");
+        })
+    });
+
+    it("Should query over relation",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.equalTo('Company.Name','Progress');
+        query.find().then(function(list){
+            console.log(list);
+            done();
+        },function(err){
+            console.log(err);
+            throw "Unable to Save the Object";
+        });
+    });
+
+
+
 });
 describe("Cloud Object", function() {
 
@@ -4779,7 +4232,656 @@ describe("CloudQuery Include", function (done) {
     });
 
 });
-describe("CloudQuery", function () {
+describe("Query over Orient",function(done){
+
+   it("Should Query over related Document",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name',util.makeString());
+        obj.set('Age',20);
+        var obj1 = new CB.CloudObject('Company');
+        var company = util.makeString();
+        obj1.set('Name',company);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            if(res){
+                var query = new CB.CloudQuery('Employee');
+                query.equalTo('Company.Name',company);
+                query.find().then(function(result){
+                    console.log(result);
+                    if(result.length === 1)
+                        done();
+                    else
+                        throw "Unable to query over relation";
+                },function(err){
+                    throw "Unable to do Find";
+                });
+            }
+        },function(err){
+            throw "Unable to save Data";
+        });
+    });
+    // Wait for OrientDB to launch it
+    it("Should Query over related Document with not equal to Set",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name',util.makeString());
+        obj.set('Age',25);
+        var obj1 = new CB.CloudObject('Company');
+        var company = util.makeString();
+        obj1.set('Name',company);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            if(res){
+                var query = new CB.CloudQuery('Employee');
+                query.notEqualTo('Company.Name',company);
+                query.notEqualTo('Name','Anurag');
+                query.find().then(function(result){
+                    console.log(result);
+                    if(result.length > 0)
+                        done();
+                    else
+                        done("Returned Wrong records");
+                },function(err){
+                    done("Unable to do Find");
+                });
+            }
+        },function(err){
+            done("Unable to save Data");
+        });
+    });
+
+    it("Should Return limited number of records",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.setLimit(5);
+        query.selectColumn(['Name','Company.Name']);
+        query.find().then(function(obj){
+            if(obj.length === 5)
+                done();
+            else
+                throw "Unable to Set Limit";
+        },function(){
+            throw "Unable to do query";
+        });
+    });
+
+    it("should sort the results in ascending order",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.orderByAsc('createdAt');
+        query.equalTo('Company.Name','CloudBoost');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+           throw "Unable to execute find query";
+        });
+    });
+
+    it("should sort the results in descending order",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.orderByDesc('createdAt');
+        query.equalTo('Company.Name','CloudBoost');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+            throw "Unable to execute find query";
+        });
+    });
+
+    it("should select specific columns from document",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.selectColumn(['Name','Company.Name']);
+        query.find().then(function(obj){
+            console.log(obj);
+            done();
+        },function(){
+           throw "Unable to do query";
+        });
+    });
+
+    it("Should include columns over relation",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.setLimit(100);
+        query.include('Company');
+        query.exists('Company');
+        query.find().then(function(res){
+            console.log(res);
+            for(var i=0;i<res.length;i++){
+                if(res[i].get('Company').get('Name')) {
+                    done();
+                    return ;
+                }
+            }
+            done("did not get the linked records");
+        },function(){
+            throw "Unable to find";
+        });
+    });
+
+    it("Should skip records",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.setLimit(100);
+        query.setSkip(100);
+        query.include('Company');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        },function(){
+            throw "Unable to find";
+        });
+    });
+
+    it("Should return 10 records the default limit",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.include('Company');
+        query.find().then(function(res){
+            if(res.length === 10) {
+                console.log(res);
+                done();
+            }else
+                done("Unable to Set Default limit to 10");
+        },function(){
+            throw "Unable to find";
+        });
+    });
+
+    it("Should give objects with a value less than something",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        var obj1 = new CB.CloudObject('Company');
+        obj1.set('Name',util.makeString());
+        obj.set('Name',util.makeString());
+        obj1.set('Revenue',10000);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('Employee');
+            query.lessThan('Company.Revenue',1000000);
+            query.find().then(function(res){
+                if(res.length > 0)
+                    done();
+                else
+                    done("Less than didn't work");
+            },function(err){
+                done("Unable to find");
+            });
+        },function(err){
+            done("Unable to save Data");
+        });
+    });
+
+    it("Should give objects with a greater than something",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        var obj1 = new CB.CloudObject('Company');
+        obj1.set('Name',util.makeString());
+        obj.set('Name',util.makeString());
+        obj1.set('Revenue',10000);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('Employee');
+            query.greaterThan('Company.Revenue',1000000);
+            query.find().then(function(res){
+                if(res.length === 0)
+                    done();
+                else
+                    done("Less than didn't work");
+            },function(err){
+                done("Unable to find");
+            });
+        },function(err){
+            done("Unable to save Data");
+        });
+    });
+
+
+    it("Should give objects with a value less than equal to something",function(done){
+
+            this.timeout(10000);
+            var obj = new CB.CloudObject('Employee');
+            var obj1 = new CB.CloudObject('Company');
+            obj1.set('Name',util.makeString());
+            obj.set('Name',util.makeString());
+            obj1.set('Revenue',10000);
+            obj.set('Company',obj1);
+            obj.save().then(function(res){
+                var query = new CB.CloudQuery('Employee');
+                query.lessThanEqualTo('Company.Revenue',1000000);
+                query.find().then(function(res){
+                    if(res.length > 0)
+                        done();
+                    else
+                        done("Less than equal to didn't work");
+                },function(err){
+                    done("Unable to find");
+                });
+            },function(err){
+                done("Unable to save Data");
+            });
+    });
+
+    it("Should give objects with a value greater than equal to something",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        var obj1 = new CB.CloudObject('Company');
+        obj1.set('Name',util.makeString());
+        obj.set('Name',util.makeString());
+        obj1.set('Revenue',10000);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('Employee');
+            query.greaterThanEqualTo('Company.Revenue',1000000);
+            query.find().then(function(res){
+                if(res.length === 0)
+                    done();
+                else
+                    done("Greater than didn't work");
+            },function(err){
+                done("Unable to find");
+            });
+        },function(err){
+            done("Unable to save Data");
+        });
+    });
+
+    it("should give only those columns which satisfy exist",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.selectColumn(['Age','Name','Company.Name']);
+        query.exists('Age');
+        query.find().then(function(res){
+            for(var i=0;i<res.length;i++){
+                if(!res[i].get('Age'))
+                    done('Unable to get objects with column exists check');
+            }
+            done();
+        },function(){
+            done("Unable to find");
+        });
+    });
+
+    it("should give only those columns which satisfy does not exist",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.selectColumn(['Name','Company.Name']);
+        query.setLimit(100);
+        query.doesNotExists('Age');
+        query.find().then(function(res){
+            for(var i=0;i<res.length;i++){
+                if(res[i].get('Age'))
+                    done('Unable to get objects with column exists check');
+            }
+            done();
+        },function(){
+            done("Unable to find");
+        });
+    });
+
+    it("should Give the number documents",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name',util.makeString());
+        obj.set('Age',20);
+        var obj1 = new CB.CloudObject('Company');
+        var company = util.makeString();
+        obj1.set('Name',company);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            if(res){
+                var query = new CB.CloudQuery('Employee');
+                query.equalTo('Company.Name',company);
+                query.count().then(function(result){
+                    console.log(result);
+                    if(result === 1)
+                        done();
+                    else
+                        done("Unable to Run Count Query");
+                },function(err){
+                    done("Unable to find");
+                });
+            }
+        },function(err){
+            done("Unable to Save Data");
+        });
+    });
+
+    it("should find the element by ID",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('Employee');
+        obj.set('Name',util.makeString());
+        obj.set('Age',20);
+        var obj1 = new CB.CloudObject('Company');
+        var company = util.makeString();
+        obj1.set('Name',company);
+        obj.set('Company',obj1);
+        obj.save().then(function(res){
+            if(res){
+                var query = new CB.CloudQuery('Employee');
+                query.equalTo('Company.Name',company);
+                query.findById(res.get('id')).then(function(result){
+                    console.log(result);
+                    if(result.get('id') === res.get('id'))
+                        done();
+                    else
+                        done("Unable to Find By Id");
+                },function(err){
+                    done("Unable to find");
+                });
+            }
+        },function(err){
+            done("Unable to Save Data");
+        });
+    });
+
+    it("should query when distinct is set",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.orderByDesc('createdAt');
+        query.selectColumn(['Name','Company.Name']);
+        query.distinct('Name').then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+            throw "Unable to execute find query";
+        });
+    });
+
+    it("should query by using find One",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.orderByDesc('createdAt');
+        query.selectColumn(['Name','Company.Name']);
+        query.findOne().then(function(res){
+            console.log(res);
+            if(res.length === 1)
+                done();
+            else
+                done("Find One returned more than one record");
+        },function(err){
+            throw "Unable to execute find query";
+        });
+    });
+
+    it("Should query over starts with on a column",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Employee');
+        query.equalTo('Company.Name','CloudBoost');
+        query.startsWith('Name','A');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        },function(){
+            done("unable to find");
+        })
+    });
+
+    it("Should do an OR query over relation",function(done){
+
+        this.timeout(10000);
+        var query1 = new CB.CloudQuery('Employee');
+        query1.equalTo('Company.Name','CloudBoost');
+        var query2 = new CB.CloudQuery('Employee');
+        query2.equalTo('Company.Name','CloudBoost');
+        var query = CB.CloudQuery.or(query1,query2);
+        query.find().then(function(res){
+            if(res.length>0){
+                done();
+            }else{
+                done("Did not Get Records Back");
+            }
+        },function(){
+            done('Unable to Find');
+        });
+    });
+
+    it("should query over list of relation with all set",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.all('Employee');
+        query.equalTo('Employee.Name','Ravi');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        }, function () {
+            done("Unable to query over list of relation");
+        })
+    });
+
+    it("should query over list of relation with any set",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.any('Employee');
+        query.equalTo('Employee.Name','Ravi');
+        query.find().then(function(res){
+            console.log(res);
+            done();
+        }, function () {
+            done("Unable to query over list of relation");
+        });
+    });
+
+    it("should query with contained in set",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.include('Company');
+        query.containedIn('Age',[20]);
+        query.exists('Age');
+        query.find().then(function(res){
+            for(var i=0;i<res.length;i++) {
+                console.log(res);
+                if (res[i].get('Age') != 20) {
+                    done('Contained IN not working properly');
+                }
+            }
+            done();
+        }, function () {
+            done("Unable to Run Find Query with contained in set");
+        })
+    });
+
+    it("should query with not contained in set",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.include('Company');
+        query.notContainedIn('Age',[20]);
+        query.exists('Age');
+        query.find().then(function(res){
+            for(var i=0;i<res.length;i++) {
+                console.log(res);
+                if (res[i].get('Age') === 20) {
+                    done('Not Contained IN not working properly');
+                }
+            }
+            done();
+        }, function () {
+            done("Unable to Run Find Query with contained in set");
+        });
+    });
+
+    it("Should check for exists over link list",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.all('Employee');
+        query.exists('Employee.Name');
+        query.find().then(function(res){
+        if(res.length > 0)
+                done();
+            else
+                done("Query over Link List didn't work");
+        },function(err){
+            done("Unable to find");
+        });
+    });
+
+    it("Should check for does not exists over link list",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.all('Employee');
+        query.doesNotExists('Employee.Name');
+        query.find().then(function(res){
+            if(res.length === 0)
+                done();
+            else
+                done("query over link list didn't work");
+        },function(err){
+            done("Unable to find");
+        });
+    });
+
+    it("Should Query over related Document",function(done){
+
+        this.timeout(10000);
+        var obj1 = new CB.CloudObject('Employee');
+        obj1.set('Name',util.makeString());
+        obj1.set('Age',20);
+        var obj = new CB.CloudObject('Company');
+        var company = util.makeString();
+        obj.set('Name',company);
+        var obj2 = new CB.CloudObject('Address');
+        var city = util.makeString();
+        obj2.set('City',city);
+        obj1.set('Address',obj2);
+        obj.set('Employee',[obj1,obj1]);
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('Company');
+            query.all('Employee');
+            query.equalTo('Employee.Address.City',city);
+            query.find().then(function(res){
+                console.log(res);
+                done();
+            },function(err){
+                done("Unable to do query");
+            })
+        },function(err){
+            done("Unable to save Data");
+        });
+    });
+
+    it("should query over list of relation",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Employee');
+        query.all('Employee');
+        query.lessThan('Employee.Age',20);
+        query.find().then(function(res){
+            if(res.length ===0)
+                done();
+            else
+                done("Less than didn't work");
+        },function(err){
+            done("Unable to find");
+        });
+    });
+
+    it("Should Query over the First Element of the List",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.first('Employee');
+        query.exists('Employee.Name');
+        query.find().then(function(res){
+            if(res.length>0)
+                done();
+            else
+                done("didn't receive response in exists over first element of list");
+        },function(err){
+           done("Unable to Find");
+        });
+    });
+
+
+    it("Should have Multiple Queries in all",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.any('Employee');
+        query.exists('Employee.Name');
+        query.doesNotExists('Employee.Age');
+        query.setLimit(1000);
+        query.find().then(function(res){
+            if(res)
+                done();
+        },function(err){
+            console.log(err)
+            done(err);
+        });
+    });
+
+    it("Should Query over the First Element of the List",function(done){
+
+        this.timeout(10000);
+        var query = new CB.CloudQuery('Company');
+        query.first('Employee');
+        query.exists('Employee.Name');
+        query.doesNotExists('Employee.Age');
+        query.find().then(function(res){
+            if(res.length>0)
+                done();
+            else
+                done("didn't receive response in exists over first element of list");
+        },function(err){
+            done("Unable to Find");
+        });
+    });
+
+
+    it("Should Include list",function(done){
+
+        this.timeout(10000);
+
+        var query = new CB.CloudQuery('Company');
+        query.includeList('Employee');
+        query.exists('Employee');
+        query.find().then(function(res){
+            console.log(res);
+            for(var i=0;i<res.length;i++){
+                if(!res[i].get('Employee')[0].get('Name'))
+                    done("Unable to include list of relation");
+            }
+            done();
+        },function(err){
+           done("Unable to find over include List");
+        });
+    });
+});
+describe("CloudQuery", function (done) {
 
     var obj = new CB.CloudObject('student1');
 
@@ -6543,22 +6645,87 @@ describe("CloudApp Socket Test", function () {
 
 });
 describe("Cloud Table", function(){
-<<<<<<< HEAD
 
-    // it("should not create duplicate table",function(done){
-    //     this.timeout(20000);
-    //     var obj = new CB.CloudTable('Table');
-    //     obj.save().then(function(){
-    //         throw("should not create duplicate table");
-    //     },function(){
-    //         done();
-    //     });
-    // });
-=======
+    before(function(){
+        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+      });
+
+    it("should not create duplicate table",function(done){
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Table');
+        obj.save().then(function(){
+            throw("should not create duplicate table");
+        },function(){
+            done();
+        });
+    });
+
+    it("should first create a table and then delete that table",function(done){
+        this.timeout(20000);
+        var tableName = util.makeString();
+        var obj = new CB.CloudTable(tableName);
+        obj.save().then(function(){
+          CB.CloudTable.delete(obj).then(function(){
+              done();
+          },function(){
+              throw("should have delete the table");
+          });
+        },function(){
+            throw("should have create the table");
+        });
+
+    });
+
+    it("should get a table information",function(done){
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Address');
+        CB.CloudTable.get(obj).then(function(){
+            done();
+        },function(){
+            throw("should fetch the table");
+        });
+    });
+
+    it("should get all tables from an app",function(done){
+        this.timeout(20000);
+        CB.CloudTable.getAll().then(function(){
+            done();
+        },function(){
+            throw("should get the all table");
+        });
+    });
+
+    it("should update new column into the table",function(done){
+        this.timeout(20000);
+
+        var obj = new CB.CloudTable('Table12');
+        CB.CloudTable.get(obj, {
+          success: function(table){
+            var column1 = new CB.Column('Name11', 'Relation', true, false);
+            column1.relatedTo = 'Table2';
+            table.addColumn(column1);
+            table.save().then(function(newTable){
+              var column2 = new CB.Column('Name11');
+              newTable.deleteColumn(column2);
+              newTable.save().then(function(){
+                done();
+              },function(){
+                throw("should save the table");
+              });
+            },function(){
+              throw("should save the table");
+            });
+          },
+          error: function(err){
+              throw("should fetch the table");
+          }
+        });
+    });
+
+
 	
-	before(function(){
-    	CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
-  	});
+  	
+  	
     it("should not create duplicate table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table');
@@ -6568,7 +6735,6 @@ describe("Cloud Table", function(){
             done();
         });
     });
->>>>>>> feature_cbtables
 
     it("should first create a table and then delete that table",function(done){
         this.timeout(20000);
@@ -6585,205 +6751,8 @@ describe("Cloud Table", function(){
         });
 
     });
-<<<<<<< HEAD
-
-    // it("should get a table information",function(done){
-    //     this.timeout(20000);
-    //     var obj = new CB.CloudTable('Address');
-    //     CB.CloudTable.get(obj).then(function(){
-    //         done();
-    //     },function(){
-    //         throw("should fetch the table");
-    //     });
-    // });
-
-    // it("should get all tables from an app",function(done){
-    //     this.timeout(20000);
-    //     CB.CloudTable.getAll().then(function(){
-    //         done();
-    //     },function(){
-    //         throw("should get the all table");
-    //     });
-    // });
-
-    // it("should update new column into the table",function(done){
-    //     this.timeout(20000);
-
-    //     var obj = new CB.CloudTable('Table12');
-    //     CB.CloudTable.get(obj, {
-    //       success: function(table){
-    //         var column1 = new CB.Column('Name11', 'Relation', true, false);
-    //         column1.relatedTo = 'Table2';
-    //         table.addColumn(column1);
-    //         table.save().then(function(newTable){
-    //           var column2 = new CB.Column('Name11');
-    //           newTable.deleteColumn(column2);
-    //           newTable.save().then(function(){
-    //             done();
-    //           },function(){
-    //             throw("should save the table");
-    //           });
-    //         },function(){
-    //           throw("should save the table");
-    //         });
-    //       },
-    //       error: function(err){
-    //           throw("should fetch the table");
-    //       }
-    //     });
-    // });
-
-    // it("should not rename a table",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.name = "NewName";
-    //       table.save().then(function(newTable){
-    //           throw "should not renamed the table";
-    //       }, function(){
-    //           done();
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should not change type of table",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.type = "NewType";
-    //       table.save().then(function(newTable){
-    //           throw "should not change the type of a table";
-    //       },function(){
-    //           done();
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should not rename a column",function(done){
-    //     this.timeout(20000);
-    //     var obj = new CB.CloudTable('Table12');
-    //     CB.CloudTable.get(obj).then(function(table){
-    //         table.columns[0].name = "abcd";
-    //         table.save().then(function(){
-    //             throw("should not update the column name");
-    //         },function(){
-    //             done();
-    //         });
-    //     },function(){
-    //         throw("should fetch the table");
-    //     });
-    // });
-
-    // it("should not change data type of a column",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.columns[0].dataType = "abcd";
-    //       table.save().then(function(){
-    //           throw("should not update the column dataType");
-    //       },function(){
-    //           done();
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should not change unique property of a default column",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.columns[0].unique = false;
-    //       table.save().then(function(){
-    //           throw("should not change unique property of a default column");
-    //       },function(){
-    //           done();
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should not change required property of a default column",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.columns[0].required = false;
-    //       table.save().then(function(){
-    //           throw("should not change required property of a default column");
-    //       },function(){
-    //           done();
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should change unique property of a user defined column",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       if(table.columns[5].unique)
-    //         table.columns[5].unique = false;
-    //       else
-    //         table.columns[5].unique = true;
-    //       table.save().then(function(newTable){
-    //           if(newTable.columns[5].unique == table.columns[5].unique)
-    //             done();
-    //           else
-    //             throw("shouldchange unique property of a user defined column");
-    //       },function(){
-    //           throw("shouldchange unique property of a user defined column");
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should change required property of a user defined column",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       if(table.columns[5].required)
-    //         table.columns[5].required = false;
-    //       else
-    //         table.columns[5].required = true;
-
-    //       table.save().then(function(newTable){
-    //           if(newTable.columns[5].required == table.columns[5].required)
-    //             done();
-    //           else
-    //             throw("should change required property of a user defined column");
-    //       },function(){
-    //           throw("should change required property of a user defined column");
-
-    //       });
-    //   },function(){
-    //       throw("should fetch the table");
-    //   });
-    // });
-
-    // it("should not delete a default column of a table",function(done){
-    //   this.timeout(20000);
-    //   var obj = new CB.CloudTable('Table12');
-    //   CB.CloudTable.get(obj).then(function(table){
-    //       table.columns[2] = "";
-    //       table.save().then(function(newTable){
-    //           if(newTable.columns[2] != "createdAt")
-    //             throw("should change required property of a user defined column");
-    //       },function(){
-    //           done();
-    //       });
-    //   });
-    // });
-
-=======
 	
-	/*it("should add a column to an existing table",function(done){
+	it("should add a column to an existing table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table2');
         CB.CloudTable.get(obj).then(function(table){
@@ -6796,7 +6765,7 @@ describe("Cloud Table", function(){
             done("should fetch the table");
         });
         
-    });*/
+    });
     
 	it("should add a column to the table after save.",function(done){
         this.timeout(20000);
@@ -7005,5 +6974,5 @@ describe("Cloud Table", function(){
     	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
   	});
 
->>>>>>> feature_cbtables
+
 });

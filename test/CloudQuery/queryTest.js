@@ -1,4 +1,4 @@
-describe("CloudQuery", function () {
+describe("CloudQuery", function (done) {
 
     var obj = new CB.CloudObject('student1');
 

@@ -7569,6 +7569,7 @@ if(!CB._isNode) {
  CloudApp
  */
 CB.CloudApp = CB.CloudApp || {};
+CB.CloudApp._isConnected = false;
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
@@ -7589,9 +7590,55 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
+
     CB.Socket = CB.io(CB.socketIoUrl);
+    CB.CloudApp._isConnected = true;
 };
 
+CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('connect', functionToFire);
+    
+
+};
+
+CB.CloudApp.onDisconnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('disconnect', functionToFire);
+
+};
+
+CB.CloudApp.connect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.connect();
+    CB.CloudApp._isConnected = true;
+};
+
+CB.CloudApp.disconnect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.emit('socket-disconnect',CB.appId);
+    CB.CloudApp._isConnected = false;
+};
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
     this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
@@ -8338,6 +8385,7 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
     return this;
 };
+
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
@@ -8348,6 +8396,7 @@ CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     if (columnName === 'id' || columnName === 'expires')
@@ -8357,6 +8406,7 @@ CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
     return this;
 };
+
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
 
@@ -8394,6 +8444,7 @@ CB.CloudQuery.prototype.selectColumn = function(columnNames) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
@@ -9206,12 +9257,17 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
    return true;
 };
 
+
+
+
+
 CB.SearchFilter = function(){
 
     this.bool = {};
     this.bool.must = []; //and
     this.bool.should = []; //or
     this.bool.must_not = []; //not
+    this.$include = []; //include
 };
 
 
@@ -9339,32 +9395,65 @@ CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
 //And logical function. 
 CB.SearchFilter.prototype.and = function(searchFilter) {
 
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over AND. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
     if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.must.push(searchFilter);
+
+    return this;
 };
 
 //OR Logical function
 CB.SearchFilter.prototype.or = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over OR. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+    if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.should.push(searchFilter);
+
+    return this;
 };
 
 
 //NOT logical function
 CB.SearchFilter.prototype.not = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
-        throw "data should be of type CB.SearchFilter";
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over NOT. Have an CloudSearch Include over parent SearchFilter instead.";
     }
 
-    this.bool.must_not.push(searchFilter);
+    delete searchFilter.$include;
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+   }
+
+   this.bool.must_not.push(searchFilter);
+
+   return this;
+};
+
+CB.SearchFilter.prototype.include = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.$include.push(columnName);
+
+    return this;
 };
 
 
@@ -9759,7 +9848,9 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._isModified = true;
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
 };
+
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
     get: function() {
         return this.document.username;
@@ -9787,8 +9878,15 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
         CB._modified(this,'email');
     }
 });
+
 CB.CloudUser.current = new CB.CloudUser();
+
 CB.CloudUser.prototype.signUp = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot signup the user on the server. Use CloudUser.save() instead.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -9832,6 +9930,11 @@ CB.CloudUser.prototype.signUp = function(callback) {
     }
 };
 CB.CloudUser.prototype.logIn = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot login the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -9871,6 +9974,11 @@ CB.CloudUser.prototype.logIn = function(callback) {
     }
 };
 CB.CloudUser.prototype.logOut = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot logOut the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -10418,7 +10526,7 @@ CB.CloudTable.getAll = function(callback){
   });
 
   url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
     response = JSON.parse(response);
     var objArray = [];
     for(var i=0; i<response.length; i++){
@@ -10469,7 +10577,7 @@ CB.CloudTable.get = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/"+table.name;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
           response = JSON.parse(response);
           var obj = new CB.CloudTable(response.name);
           obj.columns = response.columns;
@@ -10514,7 +10622,7 @@ CB.CloudTable.delete = function(table, callback){
       });
 
       url = CB.serviceUrl + "/table/delete/" + CB.appId;
-      CB._request('PUT',url,params).then(function(response){
+      CB._request('PUT',url,params,true).then(function(response){
         response = JSON.parse(response);
 
         if (callback) {
@@ -10555,7 +10663,7 @@ CB.CloudTable.prototype.save = function(callback){
   });
 
   url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
       var obj = new CB.CloudTable(response.name);
       obj.columns = response.columns;
@@ -10668,7 +10776,6 @@ CB.fromJSON = function(data, thisObj) {
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
-
     if (!data)
         return null;
 
@@ -10826,8 +10933,14 @@ CB._clone=function(obj,url){
     return n_obj;
 };
 
-CB._request=function(method,url,params)
+CB._request=function(method,url,params,isServiceUrl)
 {
+
+    CB._validate();
+
+    if(!CB.CloudApp._isConnected)
+        throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
     if (CB._isNode) {
@@ -10836,9 +10949,12 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = CB._getSessionId();
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
+
+    if(!isServiceUrl){
+        var ssid = CB._getSessionId();
+        if(ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+    }
     if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
@@ -10847,11 +10963,13 @@ CB._request=function(method,url,params)
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
+                if(!isServiceUrl){
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if(sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                }
                 def.resolve(xmlhttp.responseText);
             } else {
                 console.log(xmlhttp.status);
@@ -10862,10 +10980,10 @@ CB._request=function(method,url,params)
     return def;
 };
 
-<<<<<<< HEAD
-CB._getSessionId = function(){
+CB._getSessionId = function() {
     return localStorage.getItem('sessionID');
-=======
+}
+
 CB._columnValidation = function(column, cloudtable){
   var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
   if(cloudtable.type == 'user'){
@@ -10895,7 +11013,7 @@ CB._tableValidation = function(tableName){
   var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
   if(pattern.test(tableName))
     throw "table not shoul not contain special characters";
->>>>>>> feature_cbtables
+
 };
 
 CB._modified = function(thisObj,columnName){
@@ -10909,8 +11027,6 @@ CB._modified = function(thisObj,columnName){
         thisObj.document._modifiedColumns.push(columnName);
     }
 };
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 
 function trimStart(character, string) {
@@ -10922,9 +11038,6 @@ function trimStart(character, string) {
 
     return string.substr(startIndex);
 }
-=======
->>>>>>> feature_cbtables
-=======
 
 CB._columnNameValidation = function(columnName){
 
@@ -10960,263 +11073,254 @@ CB._columnDataTypeValidation = function(dataType){
 
 };
 
-CB._defaultColumns = function(type){
-  if(type == "custom")
-     return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
+CB._defaultColumns = function(type) {
+    if (type === "custom") {
+        return [{
+            name: 'id',
+            dataType: 'Id',
+            relatedTo: null,
+            relatedToType: null,
+            relationType: null,
+            required: true,
+            unique: true,
+            isRenamable: false,
+            isEditable: false,
+            isDeletable: false
+        },
+            {
+                name: 'isSearchable',
+                dataType: 'Boolean',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: false,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'createdAt',
+                dataType: 'DateTime',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'updatedAt',
+                dataType: 'DateTime',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'ACL',
+                dataType: 'ACL',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            }];
+    }
 
-   if(type == "user")
-      return  [{
-                  name: 'id',
-                  dataType: 'Id',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'username',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'email',
-                  dataType: 'Email',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'password',
-                  dataType: 'Password',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'roles',
-                  dataType: 'List',
-                  relatedTo:null,
-                  relatedToType :'role',
-                  relationType: 'table',
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
+    if (type === "user"){
+        return [{
+            name: 'id',
+            dataType: 'Id',
+            relatedTo: null,
+            relatedToType: null,
+            relationType: null,
+            required: true,
+            unique: true,
+            isRenamable: false,
+            isEditable: false,
+            isDeletable: false
+        },
+            {
+                name: 'username',
+                dataType: 'Text',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: true,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'email',
+                dataType: 'Email',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: true,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'password',
+                dataType: 'Password',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'roles',
+                dataType: 'List',
+                relatedTo: null,
+                relatedToType: 'role',
+                relationType: 'table',
+                required: false,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'isSearchable',
+                dataType: 'Boolean',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: false,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'createdAt',
+                dataType: 'DateTime',
+                relatedTo: null,
 
-   if(type == "role")
-      return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'name',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  relatedToType :null,
-                 
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                 
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'updatedAt',
+                dataType: 'DateTime',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            },
+            {
+                name: 'ACL',
+                dataType: 'ACL',
+                relatedTo: null,
+                relatedToType: null,
+                relationType: null,
+                required: true,
+                unique: false,
+                isRenamable: false,
+                isEditable: false,
+                isDeletable: false
+            }];
+    }
+
+   if(type === "role") {
+       return [{
+           name: 'id',
+           dataType: 'Id',
+           relatedTo: null,
+           relatedToType: null,
+           relationType: null,
+           required: true,
+           unique: true,
+           isRenamable: false,
+           isEditable: false,
+           isDeletable: false
+       },
+           {
+               name: 'name',
+               dataType: 'Text',
+               relatedTo: null,
+               relatedToType: null,
+               relationType: null,
+               required: true,
+               unique: true,
+               isRenamable: false,
+               isEditable: false,
+               isDeletable: false
+           },
+           {
+               name: 'isSearchable',
+               dataType: 'Boolean',
+               relatedTo: null,
+               relatedToType: null,
+               relationType: null,
+               required: false,
+               unique: false,
+               isRenamable: false,
+               isEditable: false,
+               isDeletable: false
+           },
+           {
+               name: 'createdAt',
+               dataType: 'DateTime',
+               relatedTo: null,
+               relatedToType: null,
+               relationType: null,
+               required: true,
+               unique: false,
+               isRenamable: false,
+               isEditable: false,
+               isDeletable: false
+           },
+           {
+               name: 'updatedAt',
+               dataType: 'DateTime',
+               relatedTo: null,
+               relatedToType: null,
+               relationType: null,
+               required: true,
+               unique: false,
+               isRenamable: false,
+               isEditable: false,
+               isDeletable: false
+           },
+           {
+               name: 'ACL',
+               dataType: 'ACL',
+               relatedTo: null,
+               relatedToType: null,
+               relationType: null,
+               required: true,
+               unique: false,
+               isRenamable: false,
+               isEditable: false,
+               isDeletable: false
+           }];
+   }
 };
->>>>>>> feature_cbtables
