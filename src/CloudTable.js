@@ -69,9 +69,15 @@ CB.CloudTable.getAll = function(callback){
     for(var i=0; i<response.length; i++){
       if(response[i].name){
         var obj = new CB.CloudTable(response[i].name);
-        obj.columns = response.columns;
-        obj.id = response.id;
-        obj._id = response._id;
+        if(response[i].columns){
+        	obj.columns = response[i].columns;
+        }
+        if(response[i].id){
+        	obj.id = response[i].id;
+        }
+        if(response[i]._id){
+        	obj._id = response[i]._id;
+        }
         objArray.push(obj);
       }
     }

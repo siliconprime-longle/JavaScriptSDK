@@ -71,7 +71,7 @@ describe("Cloud Table", function(){
 
     it("should get all tables from an app",function(done){
         this.timeout(20000);
-        CB.CloudTable.getAll().then(function(){
+        CB.CloudTable.getAll().then(function(table){
             done();
         },function(){
             done("should get the all table");

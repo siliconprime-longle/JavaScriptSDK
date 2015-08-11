@@ -10108,9 +10108,15 @@ CB.CloudTable.getAll = function(callback){
     for(var i=0; i<response.length; i++){
       if(response[i].name){
         var obj = new CB.CloudTable(response[i].name);
-        obj.columns = response.columns;
-        obj.id = response.id;
-        obj._id = response._id;
+        if(response[i].columns){
+        	obj.columns = response[i].columns;
+        }
+        if(response[i].id){
+        	obj.id = response[i].id;
+        }
+        if(response[i]._id){
+        	obj._id = response[i]._id;
+        }
         objArray.push(obj);
       }
     }
@@ -14906,6 +14912,7 @@ describe("Cloud Table", function(){
 	before(function(){
     	CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
   	});
+  	
     it("should not create duplicate table",function(done){
         this.timeout(20000);
         var obj = new CB.CloudTable('Table');
@@ -14973,7 +14980,7 @@ describe("Cloud Table", function(){
 
     it("should get all tables from an app",function(done){
         this.timeout(20000);
-        CB.CloudTable.getAll().then(function(){
+        CB.CloudTable.getAll().then(function(table){
             done();
         },function(){
             done("should get the all table");
