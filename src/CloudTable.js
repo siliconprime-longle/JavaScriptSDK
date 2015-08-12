@@ -115,11 +115,15 @@ CB.CloudTable.get = function(table, callback){
 
       url = CB.serviceUrl + "/table/"+table.name;
       CB._request('PUT',url,params,true).then(function(response){
-          response = JSON.parse(response);
-          var obj = new CB.CloudTable(response.name);
-          obj.columns = response.columns;
-          obj.id = response.id;
-          obj._id = response._id;
+          if(response === "null"){
+            obj = null;
+        }else{
+            response = JSON.parse(response);
+            var obj = new CB.CloudTable(response.name);
+            obj.columns = response.columns;
+            obj.id = response.id;
+            obj._id = response._id;
+        }
           if (callback) {
               callback.success(obj);
           } else {
@@ -160,8 +164,6 @@ CB.CloudTable.delete = function(table, callback){
 
       url = CB.serviceUrl + "/table/delete/" + CB.appId;
       CB._request('PUT',url,params,true).then(function(response){
-        response = JSON.parse(response);
-
         if (callback) {
             callback.success(response);
         } else {

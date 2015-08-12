@@ -2474,7 +2474,44 @@ describe("Query on Cloud Object Notifications ", function() {
 });
 describe("Graph DB",function(done){
 
-    it("Should Create node",function(done){
+    before(function(){
+        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+      });
+
+
+    it("should give a asked table",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudTable('Employee');
+        CB.CloudTable.get(obj).then(function(res){
+            if(res !== null){
+                CB.CloudTable.delete(res).then(function(){
+                    done();    
+                },function(){
+                    throw "Unable to Delete Table";
+                });
+            }else{
+                var Age = new CB.Column('Age');
+                Age.dataType = 'Number';
+                var Name = new CB.Column('Name');
+                Name.dataType = 'Text';
+                obj = new CB.CloudTable('Employee');
+                obj.addColumn(Age);
+                obj.addColumn(Name);
+                obj.save().then(function(res){
+                    console.log(res);
+                   done();
+                },function(){
+                   throw "Unable to Create Table"; 
+                });
+            }             
+        },function(err){
+              throw "Unable to get table";  
+        });
+    });
+
+    /*it("Should Create node",function(done){
 
         this.timeout(10000);
 
@@ -2490,6 +2527,7 @@ describe("Graph DB",function(done){
             throw "unable to save the object";
         });
     });
+
     it("should save a relation",function(done){
 
         this.timeout(10000);
@@ -2513,6 +2551,7 @@ describe("Graph DB",function(done){
     it("should save list of data",function(done){
 
         this.timeout(10000);
+
         var obj = new CB.CloudObject('Company');
         obj.set('Name',"CloudBoost");
         var obj1 = new CB.CloudObject('Employee');
@@ -2534,7 +2573,8 @@ describe("Graph DB",function(done){
 
     it("Should update a saved Record",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
+
         var obj = new CB.CloudObject('Employee');
         obj.set('Name','Save');
         obj.save().then(function(nobj){
@@ -2634,7 +2674,7 @@ describe("Graph DB",function(done){
             console.log(err);
             throw "Unable to Save the Object";
         });
-    });
+    });*/
 
 
 
