@@ -16,6 +16,9 @@ var CB = require('../lib/cloudboost.js');
 
    };
 
+   
+
+	
 describe("Server Check",function(){
     it("should check for localhost",function(done){
         this.timeout(100000);
@@ -5484,9 +5487,14 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.searchFilter.include('newColumn7');
                 cs.searchFilter.equalTo('id',obj.id);
                 cs.search().then(function(list){
+
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
+                            console.log('LIST');
+                            console.log(list[0]);
                             var student_obj=list[i].get('newColumn7');
+                            console.log('Student');
+                            console.log(student_obj);
                             if(!student_obj.get('name'))
                                 throw "Unsuccessful Join";
                             else
@@ -5816,4 +5824,6 @@ describe("CloudApp Socket Test", function () {
        CB.CloudApp.connect();
 
     });
+
+
 });

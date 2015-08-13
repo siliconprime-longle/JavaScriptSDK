@@ -10,7 +10,7 @@ module.exports = function(grunt) {
                     ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/PrivateMethods.js'],
 
                     // the location of the resulting JS file
-                    dest: 'dist/build.js'
+                    dest: 'dist/cloudboost.js'
                 },
 
             test:{
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
 
             sdkRelease: {
                 // the files to concatenate
-                    src: ['dist/build.js'],
+                    src: ['dist/cloudboost.js'],
 
                     // the location of the resulting JS file
                     dest: 'dist/'+pjson.version+'.js'
@@ -68,7 +68,7 @@ module.exports = function(grunt) {
             uglify:{
                 uglifyDev: {
                     files: {
-                        'dist/build.min.js': ['dist/build.js']
+                        'dist/cloudboost.min.js': ['dist/cloudboost.js']
                     }
                 },
                 uglifyRelease: {
