@@ -2813,7 +2813,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should not save a string into date column",function(done){
+   /* it("should not save a string into date column",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
@@ -3069,7 +3069,7 @@ describe("Cloud Object", function() {
      		}
      	});
     });
-
+*/
     it("should save an array with JSON objects. ", function(done) {
 
     	this.timeout(20000);
@@ -3088,7 +3088,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should save a CloudObject as a relation. ", function(done) {
+  /*  it("should save a CloudObject as a relation. ", function(done) {
        	this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
@@ -3562,7 +3562,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });
+    });*/
 });
 describe("Version Test",function(done){
 
@@ -7175,7 +7175,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 
-   /*it("should delete tables",function(done){
+   it("should delete tables",function(done){
 
         this.timeout(20000);
         var promises = [];
@@ -7360,7 +7360,28 @@ describe("Should Create All Test Tables",function(done){
         };
         var obj = new CB.CloudTable('student4');
         CB.CloudTable.delete(obj,callback);
-    });*/
+    });
+
+
+    it("should create table Role",function(done){
+
+        this.timeout(30000);
+
+        var callback = {};
+        callback.success = function(res){
+            var user = new CB.CloudTable('Role');
+            user.save().then(function(res){
+                done();
+            },function(){
+                throw "Unable to create Role";
+            });
+        };
+        callback.error = function(){
+            throw "Unable to Delete";
+        };
+        var obj = new CB.CloudTable('Role');
+        CB.CloudTable.delete(obj,callback);
+    });
 
     it("should create table user",function(done){
 
@@ -7382,7 +7403,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
     });
 
-/*    it("should create table Custom",function(done){
+    it("should create table Custom",function(done){
 
         this.timeout(30000);
 
@@ -7397,7 +7418,7 @@ describe("Should Create All Test Tables",function(done){
             newColumn1.dataType = 'Text';
             custom.addColumn(newColumn1);
             var newColumn2 = new CB.Column('newColumn2');
-            newColumn2.dataType = 'Url';
+            newColumn2.dataType = 'URL';
             custom.addColumn(newColumn2);
             var newColumn3 = new CB.Column('newColumn3');
             newColumn3.dataType = 'Number';
@@ -7432,6 +7453,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.get(custom).then(function(custom){
             var newColumn7 = new CB.Column('newColumn7');
             newColumn7.dataType = 'List';
+            newColumn7.relatedTo = 'Custom';
             custom.addColumn(newColumn7);
             custom.save().then(function(res){
                 done();
@@ -7491,21 +7513,13 @@ describe("Should Create All Test Tables",function(done){
             newColumn3.dataType = 'List';
             newColumn3.relatedTo = 'Object';
             custom.addColumn(newColumn3);
-            var newColumn4 = new CB.Column('sameRelation');
-            newColumn4.dataType = 'Relation';
-            newColumn4.relatedTo = 'Sample';
-            custom.addColumn(newColumn4);
-            var newColumn5 = new CB.Column('relationArray');
-            newColumn5.dataType = 'List';
-            newColumn5.relatedTo = 'Sample';
-            custom.addColumn(newColumn5);
             var newColumn6 = new CB.Column('file');
             newColumn6.dataType = 'File';
             custom.addColumn(newColumn6);
             var newColumn7 = new CB.Column('fileList');
             newColumn7.dataType = 'List';
             newColumn7.relatedTo = 'File';
-            custom.addColumn(newColumn6);
+            custom.addColumn(newColumn7);
             custom.save().then(function(res){
                 done();
             },function(){
@@ -7520,6 +7534,36 @@ describe("Should Create All Test Tables",function(done){
 
 
     });
+
+
+    it("should update Sample table ",function(done){
+
+        this.timeout(30000);
+
+        var custom = new CB.CloudTable('Sample');
+        CB.CloudTable.get(custom).then(function(custom){
+            var newColumn4 = new CB.Column('uniqueRelation');
+            newColumn4.dataType = 'Relation';
+            newColumn4.relatedTo = 'Sample';
+            newColumn4.unique = true;
+            var newColumn4 = new CB.Column('sameRelation');
+            newColumn4.dataType = 'Relation';
+            newColumn4.relatedTo = 'Sample';
+            custom.addColumn(newColumn4);
+            var newColumn5 = new CB.Column('relationArray');
+            newColumn5.dataType = 'List';
+            newColumn5.relatedTo = 'Sample';
+            custom.addColumn(newColumn5);
+            custom.save().then(function(res){
+                done();
+            },function(){
+                throw "Unable to Update Sample";
+            });
+        },function(){
+            throw "Unable to get Table";
+        });
+    });
+
 
     it("should create table hostel",function(done){
 
@@ -7720,7 +7764,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
     });
 
-    it("should create table Custom2",function(done){
+    it("should create table Custom4",function(done){
 
         this.timeout(30000);
 
@@ -7748,7 +7792,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
 
 
-    });*/
+    });
 
 });
 describe("Table Tests", function (done) {
@@ -7773,11 +7817,9 @@ describe("Table Tests", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudTable('Sample2');
+        var obj = new CB.CloudTable('user');
         CB.CloudTable.get(obj).then(function(res){
-            for(var i=0;i<res.columns.length;i++){
-                console.log(res.columns[i].name +' '+ res.columns[i].dataType +' '+ res.columns[i].relatedTo + ' unique: '+res.columns[i].unique + ' required: '+res.columns[i].required);
-            }
+            console.log(res);
             done();
         },function(){
             throw "Unable to get tables";

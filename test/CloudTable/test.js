@@ -20,11 +20,9 @@ describe("Table Tests", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudTable('Sample2');
+        var obj = new CB.CloudTable('Role');
         CB.CloudTable.get(obj).then(function(res){
-            for(var i=0;i<res.columns.length;i++){
-                console.log(res.columns[i].name +' '+ res.columns[i].dataType +' '+ res.columns[i].relatedTo + ' unique: '+res.columns[i].unique + ' required: '+res.columns[i].required);
-            }
+            console.log(res);
             done();
         },function(){
             throw "Unable to get tables";
