@@ -344,9 +344,9 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
     CB._request('POST',url,params).then(function(response){
         if (callback) {
-            callback.success(thisObj);
+            callback.success(response);
         } else {
-            def.resolve(thisObj);
+            def.resolve(response);
         }
     },function(err){
         if(callback){

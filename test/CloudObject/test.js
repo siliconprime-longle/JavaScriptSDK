@@ -4,7 +4,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should not save a string into date column",function(done){
+   /* it("should not save a string into date column",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
@@ -260,7 +260,7 @@ describe("Cloud Object", function() {
      		}
      	});
     });
-
+*/
     it("should save an array with JSON objects. ", function(done) {
 
     	this.timeout(20000);
@@ -279,7 +279,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should save a CloudObject as a relation. ", function(done) {
+  /*  it("should save a CloudObject as a relation. ", function(done) {
        	this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
@@ -753,5 +753,5 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });
+    });*/
 });

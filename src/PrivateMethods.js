@@ -464,7 +464,7 @@ CB._defaultColumns = function(type) {
             {
                 name: 'roles',
                 dataType: 'List',
-                relatedTo: null,
+                relatedTo: 'Role',
                 relatedToType: 'role',
                 relationType: 'table',
                 required: false,

@@ -8,15 +8,20 @@ CB.CloudTable = function(tableName){  //new table constructor
   this.name = tableName;
   this.appId = CB.appId;
 
-  if(tableName.toLowerCase() == "user")
-    this.type = "user";
-  else if(tableName.toLowerCase() == "role")
-    this.type = "role";
-  else
-    this.type = "custom";
-
+  if(tableName.toLowerCase() == "user") {
+      this.type = "user";
+      this.maxCount = 1;
+  }
+  else if(tableName.toLowerCase() == "role") {
+      this.type = "role";
+      this.maxCount = 1;
+  }
+  else {
+      this.type = "custom";
+      this.maxCount = 9999;
+  }
   this.columns = CB._defaultColumns(this.type);
-}
+};
 
 CB.CloudTable.prototype.addColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
@@ -199,6 +204,7 @@ CB.CloudTable.prototype.save = function(callback){
   CB._validate();
   var thisObj = this;
   var params=JSON.stringify({
+      maxCount:thisObj.maxCount,
       columns:thisObj.columns,
       name: thisObj.name,
       type: thisObj.type,

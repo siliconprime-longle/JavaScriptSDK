@@ -4,30 +4,59 @@ describe("Graph DB",function(done){
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
       });
 
-   /* it("should delete tables",function(done){
+    it("should delete tables",function(done){
 
         this.timeout(20000);
-
+        var promises = [];
         var obj = new CB.CloudTable('Address');
-        CB.CloudTable.delete(obj).then(function(res){
-            obj = new CB.CloudTable('Company');
-            CB.CloudTable.delete(obj).then(function(res){
-                obj = new CB.CloudTable('Employee');
-                CB.CloudTable.delete(obj).then(function(res){
-                    console.log(res);
-                    done();
-                },function(){
-                    throw "Unable to Delete Table";
-                });
-            },function(){
-                throw "Unable to Delete Table";
-            });
+        CB.CloudTable.delete(obj).then(function(){
+            done();
         },function(){
-            throw "Unable to Delete Table";
+            throw "Unable to delete";
         });
+
     });
 
-   it("should give a asked table",function(done){
+
+    it("should delete tables",function(done){
+
+        this.timeout(20000);
+        var promises = [];
+        var obj = new CB.CloudTable('Address');
+        CB.CloudTable.delete(obj).then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    });
+
+    it("should delete tables",function(done){
+
+        this.timeout(20000);
+        var promises = [];
+        var obj = new CB.CloudTable('Company');
+        CB.CloudTable.delete(obj).then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    });
+    it("should delete tables",function(done){
+
+        this.timeout(20000);
+        var promises = [];
+        var obj = new CB.CloudTable('Employee');
+        CB.CloudTable.delete(obj).then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    });
+
+   it("should create a table",function(done){
 
         this.timeout(20000);
 
@@ -46,7 +75,7 @@ describe("Graph DB",function(done){
         });
     });
 
-    it("should give a asked table",function(done){
+    it("should create a table",function(done){
 
         this.timeout(20000);
 
@@ -65,7 +94,7 @@ describe("Graph DB",function(done){
         });
     });
 
-    it("should give a asked table",function(done){
+    it("should create a table",function(done){
 
         this.timeout(20000);
 
@@ -83,8 +112,8 @@ describe("Graph DB",function(done){
             throw "Unable to Create Table";
         });
     });
-*/
-    it("Should update the table schema",function(){
+
+    it("Should update the table schema",function(done){
 
         this.timeout(10000);
 
@@ -94,6 +123,10 @@ describe("Graph DB",function(done){
             Company.dataType = 'Relation';
             Company.relatedTo = 'Company';
             res.addColumn(Company);
+            var Address = new CB.Column('Address');
+            Address.dataType = 'Relation';
+            Address.relatedTo = 'Address';
+            res.addColumn(Address);
             res.save().then(function(res){
                 console.log(res);
                 done();
@@ -101,34 +134,38 @@ describe("Graph DB",function(done){
                 throw "Unable to Update schema of the table";
             })
         },function(){
-
+            throw "Unable to get table";
         });
     });
-    /*it("should delete tables",function(done){
+
+    it("Should update the table schema",function(done){
 
         this.timeout(10000);
 
-        var obj = new CB.CloudTable('Address');
-        CB.CloudTable.delete(obj).then(function(res){
-            obj = new CB.CloudTable('Company');
-            CB.CloudTable.delete(obj).then(function(res){
-                obj = new CB.CloudTable('Employee');
-                CB.CloudTable.delete(obj).then(function(res){
-                    console.log(res);
-                    done();
-                },function(){
-                    throw "Unable to Delete Table";
-                });
-            },function(){
-                throw "Unable to Delete Table";
-            });
+        var obj = new CB.CloudTable('Company');
+        CB.CloudTable.get(obj).then(function(res){
+            var Employee = new CB.Column('Employee');
+            Employee.dataType = 'List';
+            Employee.relatedTo = 'Employee';
+            res.addColumn(Employee);
+            var Address = new CB.Column('Address');
+            Address.dataType = 'Relation';
+            Address.relatedTo = 'Address';
+            res.addColumn(Address);
+            res.save().then(function(res){
+                console.log(res);
+                done();
+            },function(err){
+                throw "Unable to Update schema of the table";
+            })
         },function(){
-            throw "Unable to Delete Table";
+            throw "Unable to get table";
         });
-    });*/
+    });
 
 
-    /* it("Should Create node",function(done){
+
+     it("Should Create node",function(done){
 
          this.timeout(10000);
 
@@ -267,8 +304,8 @@ describe("Graph DB",function(done){
          obj.save().then(function(res){
              if(res){
                  res.delete().then(function(res){
-                     if(res === 'Success')
-                         done()
+                     if(res)
+                         done();
                      else
                          done("Unable to delete Object");
                  });
@@ -291,7 +328,7 @@ describe("Graph DB",function(done){
              console.log(err);
              throw "Unable to Save the Object";
          });
-     });*/
+     });
 
 
 
