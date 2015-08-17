@@ -4,26 +4,11 @@ describe("Should Create All Test Tables",function(done){
         this.timeout(10000);
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
     });
+   
 
-
-   it("should delete tables",function(done){
-
-        this.timeout(20000);
-        var promises = [];
-        var obj = new CB.CloudTable('Address');
-        CB.CloudTable.delete(obj).then(function(){
-            done();
-        },function(){
-            throw "Unable to delete";
-        });
-
-    });
-
-
-    it("should delete tables",function(done){
+  it("should delete tables",function(done){
 
         this.timeout(20000);
-        var promises = [];
         var obj = new CB.CloudTable('Address');
         CB.CloudTable.delete(obj).then(function(){
             done();
@@ -36,7 +21,6 @@ describe("Should Create All Test Tables",function(done){
     it("should delete tables",function(done){
 
         this.timeout(20000);
-        var promises = [];
         var obj = new CB.CloudTable('Company');
         CB.CloudTable.delete(obj).then(function(){
             done();
@@ -48,7 +32,7 @@ describe("Should Create All Test Tables",function(done){
     it("should delete tables",function(done){
 
         this.timeout(20000);
-        var promises = [];
+     
         var obj = new CB.CloudTable('Employee');
         CB.CloudTable.delete(obj).then(function(){
             done();
@@ -60,7 +44,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
@@ -79,7 +63,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         var obj = new CB.CloudTable('Company');
         var Revenue = new CB.Column('Revenue');
@@ -98,7 +82,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         var obj = new CB.CloudTable('Address');
         var City = new CB.Column('City');
@@ -142,7 +126,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("Should update the table schema",function(done){
 
-        this.timeout(10000);
+        this.timeout(40000);
 
         var obj = new CB.CloudTable('Company');
         CB.CloudTable.get(obj).then(function(res){
@@ -169,11 +153,11 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table student4",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
         var callback = {};
         callback.success = function(res){
             var student = new CB.CloudTable('student4');
-            var subject = new CB.Column('subject4');
+            var subject = new CB.Column('subject');
             subject.dataType = 'List';
             subject.relatedTo = 'Text';
             var age = new CB.Column('age');
@@ -196,7 +180,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Role",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -216,7 +200,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table user",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -236,7 +220,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
 
         var callback = {};
@@ -278,7 +262,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should update custom table ",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var custom = new CB.CloudTable('Custom');
         CB.CloudTable.get(custom).then(function(custom){
@@ -298,7 +282,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom5",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -322,7 +306,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Sample",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
 
         var callback = {};
@@ -369,14 +353,15 @@ describe("Should Create All Test Tables",function(done){
 
     it("should update Sample table ",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var custom = new CB.CloudTable('Sample');
         CB.CloudTable.get(custom).then(function(custom){
-            var newColumn4 = new CB.Column('uniqueRelation');
-            newColumn4.dataType = 'Relation';
-            newColumn4.relatedTo = 'Sample';
-            newColumn4.unique = true;
+            var newColumn = new CB.Column('uniqueRelation');
+            newColumn.dataType = 'Relation';
+            newColumn.relatedTo = 'Sample';
+            newColumn.unique = true;
+            custom.addColumn(newColumn);
             var newColumn4 = new CB.Column('sameRelation');
             newColumn4.dataType = 'Relation';
             newColumn4.relatedTo = 'Sample';
@@ -398,7 +383,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table hostel",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -427,7 +412,7 @@ describe("Should Create All Test Tables",function(done){
     //create Hostel
     it("should create table student1",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -460,7 +445,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Student",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
 
         var callback = {};
@@ -494,7 +479,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom18",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -518,7 +503,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom3",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -543,7 +528,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom7",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -566,7 +551,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom2",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var callback = {};
         callback.success = function(res){
@@ -597,7 +582,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom4",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
 
         var callback = {};
@@ -623,6 +608,75 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
 
 
+    });
+
+
+    it("should create table Custom14",function(done){
+
+        this.timeout(40000);
+
+
+        var callback = {};
+        callback.success = function(res){
+            var custom = new CB.CloudTable('Custom14');
+            var newColumn = new CB.Column('List_Number');
+            newColumn.dataType = 'List';
+            newColumn.relatedTo = 'Number';
+            custom.addColumn(newColumn);
+            var newColumn1 = new CB.Column('List_GeoPoint');
+            newColumn1.dataType = 'List';
+            newColumn1.relatedTo = 'GeoPoint';
+            custom.addColumn(newColumn1);
+            custom.save().then(function(res){
+                done();
+            },function(){
+                throw "Unable to create Custom14";
+            });
+        };
+        callback.error = function(){
+            throw "Unable to Delete";
+        };
+        var obj = new CB.CloudTable('Custom14');
+        CB.CloudTable.delete(obj,callback);
+
+
+    });
+
+   it("should create table Custom1",function(done){
+
+        this.timeout(40000);
+
+
+        var callback = {};
+        callback.success = function(res){
+            var custom = new CB.CloudTable('Custom1');
+            var newColumn = new CB.Column('description');
+            newColumn.dataType = 'Text';
+            custom.addColumn(newColumn);
+            var newColumn1 = new CB.Column('newColumn');
+            newColumn1.dataType = 'Text';
+            custom.addColumn(newColumn1);
+            var newColumn2 = new CB.Column('newColumn1');
+            newColumn2.dataType = 'Boolean';
+            custom.addColumn(newColumn2);
+            
+            custom.save().then(function(res){
+                done();
+            },function(){
+                throw "Unable to create Custom1";
+            });
+        };
+        callback.error = function(){
+            throw "Unable to Delete";
+        };
+        var obj = new CB.CloudTable('Custom1');
+        CB.CloudTable.delete(obj,callback);
+
+
+    });
+
+    after(function() {
+        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
     });
 
 });

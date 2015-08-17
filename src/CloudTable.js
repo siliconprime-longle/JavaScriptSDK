@@ -155,11 +155,7 @@ CB.CloudTable.get = function(table, callback){
 
 CB.CloudTable.delete = function(table, callback){
   if (Object.prototype.toString.call(table) === '[object Object]') {
-      if(table.type == "user"){
-          throw "cannot delete user table";
-      }else if(table.type == "role"){
-          throw "cannot delete role table";
-      }else if (!CB.appId) {
+      if (!CB.appId) {
           throw "CB.appId is null.";
       }
 

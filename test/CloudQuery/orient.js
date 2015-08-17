@@ -160,7 +160,7 @@ describe("Query over Orient",function(done){
         var query = new CB.CloudQuery('Employee');
         query.include('Company');
         query.find().then(function(res){
-            if(res.length === 10) {
+            if(res.length > 0 && res.length <= 10) {
                 console.log(res);
                 done();
             }else

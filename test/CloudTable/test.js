@@ -4,7 +4,7 @@ describe("Table Tests", function (done) {
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
     });
 
-    /*it("Should Give all the tables", function (done) {
+    it("Should Give all the tables", function (done) {
 
         this.timeout(10000);
 
@@ -14,7 +14,7 @@ describe("Table Tests", function (done) {
         },function(){
             throw "Unable to get tables";
         });
-    });*/
+    });
 
     it("Should Give all the tables", function (done) {
 
@@ -27,5 +27,9 @@ describe("Table Tests", function (done) {
         },function(){
             throw "Unable to get tables";
         });
+    });
+
+    after(function() {
+        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
     });
 });

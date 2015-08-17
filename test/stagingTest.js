@@ -7795,7 +7795,7 @@ describe("Table Tests", function (done) {
 
         this.timeout(10000);
 
-        var obj = new CB.CloudTable('user');
+        var obj = new CB.CloudTable('Role');
         CB.CloudTable.get(obj).then(function(res){
             console.log(res);
             done();

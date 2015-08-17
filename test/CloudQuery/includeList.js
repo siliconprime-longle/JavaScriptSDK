@@ -2,7 +2,7 @@
     
    
     
-    it("save a relation.", function (done) {
+   it("save a relation.", function (done) {
         
         this.timeout(30000);
 
@@ -62,10 +62,9 @@
         obj2.set('room',509);
         obj1.set('name', 'Vipul');
         obj1.set('expires',null);
-        obj.set('newColumn7', obj1);
         obj1.set('newColumn',obj2);
+        obj.set('newColumn7', obj1);
         obj.save().then(function(obj) {
-
             var query = new CB.CloudQuery('Custom2');
             query.include('newColumn7');
             query.include('newColumn7.newColumn');
@@ -91,11 +90,6 @@
         }, function () { 
             throw "Relation Save error";
         });
-
-
-
-       
-
     });
 
 
@@ -115,14 +109,18 @@
                 var query = new CB.CloudQuery('Custom2');
                 query.include('newColumn7');
                 query.distinct('newColumn1').then(function(list){
+                    var status = false;
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             var student_obj=list[i].get('newColumn7');
-                            if(!student_obj.get('name'))
-                                throw "Unsuccessful Join";
-                            else
-                                done();
-                        }    
+                            if(student_obj.get('name'))
+                                status = true;
+                        }
+                        if(status === true){
+                            done();
+                        }else{
+                            throw "Cannot retrieve a saved relation.";
+                        }
                     }else{
                         throw "Cannot retrieve a saved relation.";
                     }
@@ -131,13 +129,8 @@
                 });
             }, error : function(error){
                 throw "Cannot save a CloudObject";
-
             }
-
         })
-
-       
-
     });
 
     it("should query over a linked column if a object is passed in equalTo",function(done){
@@ -225,21 +218,17 @@
             
     });
 
-    it("should inclue with findById",function(done){
+    it("should include with findById",function(done){
 
             this.timeout(300000);
-
             var obj = new CB.CloudObject('Custom');
             var obj1 = new CB.CloudObject('Custom');
-
-
             var obj2 = new CB.CloudObject('Custom');
             obj2.set('newColumn1','sample');
             obj.set('newColumn7', [obj2,obj1]);
-
             obj.save().then(function(obj){
                 var query = new CB.CloudQuery('Custom');
-                query.include('newColumn7');
+                query.includeList('newColumn7');
                 query.findById(obj.id).then(function(obj){
                    if(obj.get('newColumn7').length>0){
                      if(obj.get('newColumn7')[0].get('newColumn1') === 'sample'){
