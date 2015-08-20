@@ -18,7 +18,7 @@ CB.serviceUrl = 'https://service.cloudboost.io';
 CB.io = null; //socket.io library is saved here.
 
 
-CB.apiUrl = CB.serverUrl+'/api';
+CB.apiUrl = CB.serverUrl;
 
 CB.appId = CB.appId || null;
 CB.appKey = CB.appKey || null;

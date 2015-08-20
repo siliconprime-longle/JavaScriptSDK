@@ -6,6 +6,7 @@
    if(columnName){
      CB._columnNameValidation(columnName);
      this.name = columnName;
+     this._type = 'column';
    }
 
    if(dataType){

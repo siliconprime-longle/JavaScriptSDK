@@ -4,6 +4,19 @@ describe("Table Tests", function (done) {
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
     });
 
+   it("should create a table with serialize", function (done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('ughtil');
+        obj.save().then(function(res){
+            console.log(res);
+            done();
+        },function(){
+           throw "Unable to create table";
+        });
+    });
+
     it("Should Give all the tables", function (done) {
 
         this.timeout(10000);

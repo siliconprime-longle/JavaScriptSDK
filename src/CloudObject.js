@@ -8,6 +8,7 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document.expires = null;
 
     if(!id){
         this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
@@ -124,7 +125,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
             var payload = {
                 room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
-                sessionId : CB._getSessionId(),
+                sessionId : CB._getSessionId()
             };
 
             CB.Socket.emit('join-object-channel',payload);
@@ -243,6 +244,12 @@ CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of t
     CB._modified(this,columnName);
 };
 
+/**
+ * Saved CloudObject in Database.
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
     var def;
     if (!callback) {
@@ -257,9 +264,8 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/save";
-    //console.log(params);
-    CB._request('POST',url,params).then(function(response){
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+    CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -296,7 +302,6 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!callback) {
         def = new CB.Promise();
     }
-    // var xmlhttp=CB._loadXml();
     var params=JSON.stringify({
         key: CB.appKey
     });
@@ -340,9 +345,9 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         key: CB.appKey,
         document: CB.toJSON(thisObj)
     });
-    url = CB.apiUrl + "/" + CB.appId +"/delete/";
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName +'/'+ thisObj.get('id');
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('DELETE',url,params).then(function(response){
         if (callback) {
             callback.success(response);
         } else {

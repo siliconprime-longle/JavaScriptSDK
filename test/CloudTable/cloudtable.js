@@ -105,7 +105,9 @@ describe("Cloud Table", function(){
     });
 
     it("should first create a table and then delete that table",function(done){
-        this.timeout(20000);
+
+        this.timeout(40000);
+
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(newTable){
@@ -121,7 +123,7 @@ describe("Cloud Table", function(){
     });
 	
 	it("should add a column to an existing table",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
         	var column1 = new CB.Column('city', 'Text', true, false);

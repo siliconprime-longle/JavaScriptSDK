@@ -44,7 +44,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
@@ -63,7 +63,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var obj = new CB.CloudTable('Company');
         var Revenue = new CB.Column('Revenue');
@@ -82,7 +82,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var obj = new CB.CloudTable('Address');
         var City = new CB.Column('City');
@@ -101,7 +101,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("Should update the table schema",function(done){
 
-        this.timeout(10000);
+        this.timeout(50000);
 
         var obj = new CB.CloudTable('Employee');
         CB.CloudTable.get(obj).then(function(res){
@@ -153,7 +153,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table student4",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
         var callback = {};
         callback.success = function(res){
             var student = new CB.CloudTable('student4');
@@ -180,7 +180,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Role",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -200,7 +200,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table user",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -220,7 +220,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};
@@ -262,7 +262,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should update custom table ",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var custom = new CB.CloudTable('Custom');
         CB.CloudTable.get(custom).then(function(custom){
@@ -282,7 +282,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom5",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -306,7 +306,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Sample",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};
@@ -353,7 +353,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should update Sample table ",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var custom = new CB.CloudTable('Sample');
         CB.CloudTable.get(custom).then(function(custom){
@@ -383,7 +383,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table hostel",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -412,7 +412,7 @@ describe("Should Create All Test Tables",function(done){
     //create Hostel
     it("should create table student1",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -445,7 +445,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Student",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};
@@ -479,7 +479,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom18",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -503,7 +503,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom3",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -528,7 +528,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom7",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -551,7 +551,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom2",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var callback = {};
         callback.success = function(res){
@@ -582,7 +582,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom4",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};
@@ -613,7 +613,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom14",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};
@@ -644,7 +644,7 @@ describe("Should Create All Test Tables",function(done){
 
    it("should create table Custom1",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
 
         var callback = {};

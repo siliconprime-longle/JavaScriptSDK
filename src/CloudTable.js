@@ -5,33 +5,35 @@
 CB.CloudTable = function(tableName){  //new table constructor
 
   CB._tableValidation(tableName);
-  this.name = tableName;
-  this.appId = CB.appId;
+  this.document = {};
+  this.document.name = tableName;
+  this.document.appId = CB.appId;
+  this.document._type = 'table';
 
-  if(tableName.toLowerCase() == "user") {
-      this.type = "user";
-      this.maxCount = 1;
+  if(tableName.toLowerCase() === "user") {
+      this.document.type = "user";
+      this.document.maxCount = 1;
   }
-  else if(tableName.toLowerCase() == "role") {
-      this.type = "role";
-      this.maxCount = 1;
+  else if(tableName.toLowerCase() === "role") {
+      this.document.type = "role";
+      this.document.maxCount = 1;
   }
   else {
-      this.type = "custom";
-      this.maxCount = 9999;
+      this.document.type = "custom";
+      this.document.maxCount = 9999;
   }
-  this.columns = CB._defaultColumns(this.type);
+  this.document.columns = CB._defaultColumns(this.document.type);
 };
 
 CB.CloudTable.prototype.addColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
     if(CB._columnValidation(column, this))
-      this.columns.push(column);
+      this.document.columns.push(column);
 
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       for(var i=0; i<column.length; i++){
         if(CB._columnValidation(column[i], this))
-          this.columns.push(column[i]);
+          this.document.columns.push(column[i]);
       }
   }
 }
@@ -39,20 +41,26 @@ CB.CloudTable.prototype.addColumn = function(column){
 CB.CloudTable.prototype.deleteColumn = function(column){
   if (Object.prototype.toString.call(column) === '[object Object]') {
         if(CB._columnValidation(column, this)){
-          this.columns = this.columns.filter(function(index){return index.name != column.name });
+          this.document.columns = this.document.columns.filter(function(index){return index.name != column.name });
         }
 
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
       //yet to test
       for(var i=0; i<column.length; i++){
         if(CB._columnValidation(column[i], this)){
-          this.columns = this.columns.filter(function(index){return index.name != column[i].name });
+          this.document.columns = this.document.columns.filter(function(index){return index.name != column[i].name });
         }
       }
   }
 }
 
-//CloudTable static functions
+/**
+ * Gets All the Tables from an App
+ *
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudTable.getAll = function(callback){
   if (!CB.appId) {
       throw "CB.appId is null.";
@@ -67,29 +75,14 @@ CB.CloudTable.getAll = function(callback){
       key: CB.appKey
   });
 
-  url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params,true).then(function(response){
+  var url = CB.serviceUrl+'/'+CB.appId +"/table";
+  CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
-    var objArray = [];
-    for(var i=0; i<response.length; i++){
-      if(response[i].name){
-        var obj = new CB.CloudTable(response[i].name);
-        if(response[i].columns){
-        	obj.columns = response[i].columns;
-        }
-        if(response[i].id){
-        	obj.id = response[i].id;
-        }
-        if(response[i]._id){
-        	obj._id = response[i]._id;
-        }
-        objArray.push(obj);
-      }
-    }
+    var obj = CB.fromJSON(response);
     if (callback) {
-        callback.success(objArray);
+        callback.success(obj);
     } else {
-        def.resolve(objArray);
+        def.resolve(obj);
     }
   },function(err){
       if(callback){
@@ -102,6 +95,16 @@ CB.CloudTable.getAll = function(callback){
       return def;
   }
 }
+
+/**
+ * Gets a table
+ *
+ * @param table
+ *  It is the CloudTable object
+ * @param callback
+ * @returns {*}
+ */
+
 
 CB.CloudTable.get = function(table, callback){
   if (Object.prototype.toString.call(table) === '[object Object]') {
@@ -120,16 +123,13 @@ CB.CloudTable.get = function(table, callback){
           appId: CB.appId
       });
 
-      url = CB.serviceUrl + "/table/"+table.name;
-      CB._request('PUT',url,params,true).then(function(response){
+      var url = CB.serviceUrl + '/' + CB.appId + "/table/" + table.name;
+      CB._request('POST',url,params,true).then(function(response){
           if(response === "null"){
             obj = null;
         }else{
             response = JSON.parse(response);
-            var obj = new CB.CloudTable(response.name);
-            obj.columns = response.columns;
-            obj.id = response.id;
-            obj._id = response._id;
+            var obj = CB.fromJSON(response);
         }
           if (callback) {
               callback.success(obj);
@@ -153,6 +153,15 @@ CB.CloudTable.get = function(table, callback){
   }
 }
 
+
+/**
+ * Deletes a table from database.
+ *
+ * @param table
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudTable.delete = function(table, callback){
   if (Object.prototype.toString.call(table) === '[object Object]') {
       if (!CB.appId) {
@@ -169,8 +178,9 @@ CB.CloudTable.delete = function(table, callback){
           name: table.name
       });
 
-      url = CB.serviceUrl + "/table/delete/" + CB.appId;
-      CB._request('PUT',url,params,true).then(function(response){
+      var url = CB.serviceUrl + '/' + CB.appId + "/table/" +table.name;
+
+      CB._request('DELETE',url,params,true).then(function(response){
         if (callback) {
             callback.success(response);
         } else {
@@ -191,7 +201,13 @@ CB.CloudTable.delete = function(table, callback){
   }
 }
 
-//CloudTable save function
+/**
+ * Saves a table
+ *
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudTable.prototype.save = function(callback){
   var def;
   if (!callback) {
@@ -200,22 +216,15 @@ CB.CloudTable.prototype.save = function(callback){
   CB._validate();
   var thisObj = this;
   var params=JSON.stringify({
-      maxCount:thisObj.maxCount,
-      columns:thisObj.columns,
-      name: thisObj.name,
-      type: thisObj.type,
-      id: thisObj.id,
       key:CB.appKey,
-      _id:thisObj._id
+      data:CB.toJSON(thisObj)
   });
 
-  url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params,true).then(function(response){
+  var url = CB.serviceUrl +'/' + CB.appId + "/table/" + thisObj.document.name;
+
+    CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
-      var obj = new CB.CloudTable(response.name);
-      obj.columns = response.columns;
-      obj.id = response.id;
-      obj._id = response._id;
+      var obj = CB.fromJSON(response);
       if (callback) {
           callback.success(obj);
       } else {
@@ -232,7 +241,7 @@ CB.CloudTable.prototype.save = function(callback){
   if (!callback) {
       return def;
   }
-}
+};
 
 
 

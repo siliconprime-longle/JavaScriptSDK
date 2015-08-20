@@ -25,7 +25,7 @@ CB.CloudQuery.or = function(obj1, obj2) {
 
 CB.CloudQuery.prototype.equalTo = function(columnName, data) {
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if(data !== null){
@@ -55,7 +55,7 @@ CB.CloudQuery.prototype.includeList = function (columnName) {
 
 
 CB.CloudQuery.prototype.include = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
@@ -64,7 +64,7 @@ CB.CloudQuery.prototype.include = function (columnName) {
 };
 
 CB.CloudQuery.prototype.all = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.query.$all = columnName;
@@ -73,7 +73,7 @@ CB.CloudQuery.prototype.all = function (columnName) {
 };
 
 CB.CloudQuery.prototype.any = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.query.$any = columnName;
@@ -82,7 +82,7 @@ CB.CloudQuery.prototype.any = function (columnName) {
 };
 
 CB.CloudQuery.prototype.first = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.query.$first = columnName;
@@ -91,7 +91,7 @@ CB.CloudQuery.prototype.first = function (columnName) {
 };
 
 CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if(data !== null){
@@ -113,7 +113,7 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
 };
 CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -125,7 +125,7 @@ CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -137,7 +137,7 @@ CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
 
@@ -150,7 +150,7 @@ CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
 
@@ -165,7 +165,7 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.sort[columnName] = 1;
@@ -175,7 +175,7 @@ CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.sort[columnName] = -1;
@@ -561,7 +561,7 @@ CB.CloudQuery.prototype.count = function(callback) {
         skip: thisObj.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/count';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/count';
 
     CB._request('POST',url,params).then(function(response){
         response = parseInt(response);
@@ -617,7 +617,7 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
         skip: thisObj.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/distinct';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -663,7 +663,7 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -729,7 +729,7 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
         sort : {}
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         response = JSON.parse(response);
@@ -771,7 +771,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
         skip: this.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));

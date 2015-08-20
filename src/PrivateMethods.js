@@ -5,6 +5,9 @@ CB.toJSON = function(thisObj) {
     if(thisObj instanceof  CB.CloudFile)
         url=thisObj.document.url;
 
+    if(thisObj instanceof CB.CloudTable)
+        return thisObj.document;
+
     var obj= CB._clone(thisObj,url);
 
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
@@ -50,9 +53,12 @@ CB.fromJSON = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
-    //if data is a list it will return a list of CloudObjects.
+    //if data is a list it will return a list of Cl oudObjects.
     if (!data)
         return null;
+
+    if(data instanceof Object && data._type === 'column')
+        return data;
 
     if (data instanceof Array) {
 
@@ -104,14 +110,22 @@ CB.fromJSON = function(data, thisObj) {
             var url=null;
             var latitude = null;
             var longitude = null;
+            var tableName = null;
             if(document._type === "file")
                 url=document.url;
             if(document._type === "point"){
                 latitude = document.longitude;
                 longitude = document.latitude;
             }
-            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
-            obj.document = document;
+            if(document._type === "table"){
+                tableName = document.name;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude,tableName);
+            if(document._type === 'table') {
+                obj.document = document;
+            }else{
+                obj.columns = document.columns;
+            }
             return obj;
         }else{
             thisObj.document = document;
@@ -124,7 +138,7 @@ CB.fromJSON = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url,latitude,longitude){
+CB._getObjectByType = function(type,url,latitude,longitude,tableName){
 
     var obj = null;
 
@@ -146,6 +160,10 @@ CB._getObjectByType = function(type,url,latitude,longitude){
 
     if(type === 'point'){
         obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
+
+    if(type === 'table'){
+        obj = new CB.CloudTable(tableName);
     }
     return obj;
 };
@@ -234,7 +252,10 @@ CB._request=function(method,url,params,isServiceUrl)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
-    xmlhttp.send(params);
+    if(params)
+        xmlhttp.send(params);
+    else
+        xmlhttp.send();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
@@ -260,7 +281,7 @@ CB._getSessionId = function() {
 }
 
 CB._columnValidation = function(column, cloudtable){
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+  var defaultColumn = ['id', 'createdAt', 'updatedAt', 'ACL'];
   if(cloudtable.type == 'user'){
     defaultColumn.concat(['username', 'email', 'password', 'roles']);
   }else if(cloudtable.type == 'role'){
@@ -316,24 +337,24 @@ function trimStart(character, string) {
 
 CB._columnNameValidation = function(columnName){
 
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
+  var defaultColumn = ['id','createdAt', 'updatedAt', 'ACL'];
 
   if(!columnName) //if table name is empty
     throw "table name cannot be empty";
 
   var index = defaultColumn.indexOf(columnName.toLowerCase());
   if(index >= 0)
-    throw "this columnname is already in use";
+    throw "this column name is already in use";
 
   if(!isNaN(columnName[0]))
-    throw "table name should not start with a number";
+    throw "column name should not start with a number";
 
   if(!columnName.match(/^\S+$/))
-    throw "table name should not contain spaces";
+    throw "column name should not contain spaces";
 
   var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
   if(pattern.test(columnName))
-    throw "table not should not contain special characters";
+    throw "column name not should not contain special characters";
 };
 
 CB._columnDataTypeValidation = function(dataType){
@@ -363,12 +384,12 @@ CB._defaultColumns = function(type) {
             isDeletable: false
         },
             {
-                name: 'isSearchable',
-                dataType: 'Boolean',
+                name: 'expires',
+                dataType: 'Number',
                 relatedTo: null,
                 relatedToType: null,
                 relationType: null,
-                required: false,
+                required: true,
                 unique: false,
                 isRenamable: false,
                 isEditable: false,
@@ -474,12 +495,12 @@ CB._defaultColumns = function(type) {
                 isDeletable: false
             },
             {
-                name: 'isSearchable',
-                dataType: 'Boolean',
+                name: 'expires',
+                dataType: 'Number',
                 relatedTo: null,
                 relatedToType: null,
                 relationType: null,
-                required: false,
+                required: true,
                 unique: false,
                 isRenamable: false,
                 isEditable: false,
@@ -489,7 +510,6 @@ CB._defaultColumns = function(type) {
                 name: 'createdAt',
                 dataType: 'DateTime',
                 relatedTo: null,
-
                 relatedToType: null,
                 relationType: null,
                 required: true,
@@ -550,12 +570,12 @@ CB._defaultColumns = function(type) {
                isDeletable: false
            },
            {
-               name: 'isSearchable',
-               dataType: 'Boolean',
+               name: 'expires',
+               dataType: 'Number',
                relatedTo: null,
                relatedToType: null,
                relationType: null,
-               required: false,
+               required: true,
                unique: false,
                isRenamable: false,
                isEditable: false,

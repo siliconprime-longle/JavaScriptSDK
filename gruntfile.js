@@ -20,6 +20,7 @@ module.exports = function(grunt) {
                         'test/util/util.js',
                         'test/serverTest.js',
                         'test/init/init.js',
+                        'test/CloudTable/*.js',
                         'test/ACL/*.js',
                         'test/CloudFile/*.js',
                         'test/CloudObject/*.js',
@@ -30,8 +31,7 @@ module.exports = function(grunt) {
                         'test/CloudSearch/*.js',
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
-                        'test/CloudApp/*.js',
-                        'test/CloudTable/*.js'
+                        'test/CloudApp/*.js'
                     ],
 
                     dest: 'test/test.js'
@@ -39,10 +39,12 @@ module.exports = function(grunt) {
 
             stagingTest:{
                     src: [
+                        'test/CloudTable/*.js',
                         'test/requireCloudBoost.js',
                         'test/util/util.js',
                         'test/stageTest.js',
                         'test/init/init.js',
+                        'test/CloudTable/*.js',
                         'test/ACL/*.js',
                         'test/CloudFile/*.js',
                         'test/CloudObject/*.js',
@@ -53,8 +55,7 @@ module.exports = function(grunt) {
                         'test/CloudSearch/*.js',
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
-                        'test/CloudApp/*.js',
-                        'test/CloudTable/*.js'
+                        'test/CloudApp/*.js'
                     ],
 
                     dest: 'test/stagingTest.js'
@@ -66,7 +67,7 @@ module.exports = function(grunt) {
 
                     // the location of the resulting JS file
                     dest: 'dist/'+pjson.version+'.js'
-                },
+                }
             },
 
             uglify:{
