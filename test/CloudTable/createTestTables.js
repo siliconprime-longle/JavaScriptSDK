@@ -420,9 +420,6 @@ describe("Should Create All Test Tables",function(done){
             var newColumn = new CB.Column('age');
             newColumn.dataType = 'Number';
             custom.addColumn(newColumn);
-            var newColumn1 = new CB.Column('expires');
-            newColumn1.dataType = 'Number';
-            custom.addColumn(newColumn1);
             var newColumn2 = new CB.Column('newColumn');
             newColumn2.dataType = 'Relation';
             newColumn2.relatedTo = 'hostel';

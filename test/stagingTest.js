@@ -750,9 +750,6 @@ describe("Should Create All Test Tables",function(done){
             var newColumn = new CB.Column('age');
             newColumn.dataType = 'Number';
             custom.addColumn(newColumn);
-            var newColumn1 = new CB.Column('expires');
-            newColumn1.dataType = 'Number';
-            custom.addColumn(newColumn1);
             var newColumn2 = new CB.Column('newColumn');
             newColumn2.dataType = 'Relation';
             newColumn2.relatedTo = 'hostel';
@@ -1016,18 +1013,18 @@ describe("Table Tests", function (done) {
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
     });
 
-   /* it("should create a table with serialize", function (done) {
+   it("should create a table with serialize", function (done) {
 
         this.timeout(50000);
 
-        var obj = new CB.CloudTable('util');
+        var obj = new CB.CloudTable('ughtil');
         obj.save().then(function(res){
             console.log(res);
             done();
         },function(){
            throw "Unable to create table";
         });
-    });*/
+    });
 
     it("Should Give all the tables", function (done) {
 
@@ -1051,6 +1048,20 @@ describe("Table Tests", function (done) {
             done();
         },function(){
             throw "Unable to get tables";
+        });
+    });
+
+    it("Should give all table with tableName",function(done){
+
+        this.timeout(10000);
+
+        CB.CloudTable.get('Employee').then(function(done) {
+            if(res){
+                done();
+            }else
+                throw "Unable to Get table by name";
+        },function(){
+           throw "unable to get table by name";
         });
     });
 
@@ -1893,6 +1904,28 @@ describe("Cloud Files", function(done) {
         });
     });
 
+
+    it("Should Save a file and give the url",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
+                done();
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
     it("Should delete a file with file data and name",function(done){
 
         this.timeout(10000);
@@ -2070,7 +2103,7 @@ describe("CloudObjectExpires", function () {
         query.find().then(function(list){
             if(list.length>0){
                 for(var i=0;i<list.length;i++){
-                    if(list[i]._expires > curr || !list[i]._expires){
+                    if(list[i].expires > curr || !list[i].expires){
                             break;
                         }
                     else{
@@ -2111,7 +2144,7 @@ describe("CloudObjectExpires", function () {
             success:function(list){
             if(list.length>0) {
                 for (var i = 0; i < list.length; i++) {
-                    if (list[i]._expires > curr || !list[i]._expires) {
+                    if (list[i].expires > curr || !list[i].expires) {
                         break;
                     }
                     else {

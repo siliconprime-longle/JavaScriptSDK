@@ -4,19 +4,6 @@ describe("Table Tests", function (done) {
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
     });
 
-   it("should create a table with serialize", function (done) {
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('ughtil');
-        obj.save().then(function(res){
-            console.log(res);
-            done();
-        },function(){
-           throw "Unable to create table";
-        });
-    });
-
     it("Should Give all the tables", function (done) {
 
         this.timeout(10000);
@@ -39,6 +26,20 @@ describe("Table Tests", function (done) {
             done();
         },function(){
             throw "Unable to get tables";
+        });
+    });
+
+    it("Should give table with tableName",function(done){
+
+        this.timeout(10000);
+
+        CB.CloudTable.get('Employee').then(function(done) {
+            if(res){
+                done();
+            }else
+                throw "Unable to Get table by name";
+        },function(){
+           throw "unable to get table by name";
         });
     });
 

@@ -30,7 +30,7 @@ describe("CloudObjectExpires", function () {
         query.find().then(function(list){
             if(list.length>0){
                 for(var i=0;i<list.length;i++){
-                    if(list[i]._expires > curr || !list[i]._expires){
+                    if(list[i].expires > curr || !list[i].expires){
                             break;
                         }
                     else{
@@ -71,7 +71,7 @@ describe("CloudObjectExpires", function () {
             success:function(list){
             if(list.length>0) {
                 for (var i = 0; i < list.length; i++) {
-                    if (list[i]._expires > curr || !list[i]._expires) {
+                    if (list[i].expires > curr || !list[i].expires) {
                         break;
                     }
                     else {

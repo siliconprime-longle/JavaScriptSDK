@@ -10,7 +10,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
-
         this.document = {
             _type: 'file',
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
@@ -207,7 +206,7 @@ CB.CloudFile.prototype.delete = function(callback) {
         url: thisObj.url,
         key: CB.appKey
     });
-    var url = CB.serverUrl+'/file/' + CB.appId + 'fileId' ;
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
 
     CB._request('DELETE',url,params).then(function(response){
         thisObj.url = null;

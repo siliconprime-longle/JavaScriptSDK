@@ -1,11 +1,11 @@
 describe("Atomicity Tests",function(done){
 
-    it("Should Attach the Database",function(done){
+    /*it("Should Attach the Database",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/orientReconnect';
-        CB._request('GET',url).then(function() {
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
             done();
         },function(){
             throw "Unable to connect back Mongo";
@@ -20,8 +20,8 @@ describe("Atomicity Tests",function(done){
         obj.set('name','let');
         obj.save().then(function(res){
            var id = res.get('id');
-            var url = CB.serverUrl + '/orientDisconnect';
-            CB._request('GET',url).then(function(){
+            var url = CB.serverUrl + '/db/orient/Disconnect';
+            CB._request('POST',url).then(function(){
                 res.set('name','what');
                 res.save().then(function(){
                    done("DB disconnected should not save");
@@ -49,8 +49,8 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/orientReconnect';
-        CB._request('GET',url).then(function() {
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
             done();
         },function(){
             throw "Unable to connect back Mongo";
@@ -64,8 +64,8 @@ describe("Atomicity Tests",function(done){
         var obj = new CB.CloudObject('student1');
         obj.set('name','abcdef');
         obj.save().then(function(res){
-            var url = CB.serverUrl + '/orientDisconnect';
-            CB._request('GET',url).then(function(){
+            var url = CB.serverUrl + '/db/orient/Disconnect';
+            CB._request('POST',url).then(function(){
                 var id = res.get('id');
                 res.delete().then(function(){
                     throw "Should Not delete with db disconnected";
@@ -95,13 +95,13 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/orientReconnect';
-        CB._request('GET',url).then(function() {
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
             done();
         },function(){
             throw "Unable to connect back Mongo";
         });
-    });
+    });*/
 
     before(function(){
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
@@ -112,8 +112,8 @@ describe("Atomicity Tests",function(done){
         this.timeout(50000);
 
         var tableName = util.makeString();
-        var url = CB.serverUrl + '/orientDisconnect';
-        CB._request('GET',url).then(function(){
+        var url = CB.serverUrl + '/db/orient/Disconnect';
+        CB._request('POST',url).then(function(){
             var table = new CB.CloudTable(tableName);
             table.save().then(function(){
                 throw "should not create the table when DB is disconnected";
@@ -133,20 +133,36 @@ describe("Atomicity Tests",function(done){
 
     });
 
+
+    it("Should delete a table",function(){
+
+        this.timeout(10000);
+
+        var table = new CB.CloudTable('Address');
+        CB.CloudTable.delete(table).then(function(){
+            throw "Should not delete the table if db is down";
+        },function(){
+            done();
+        })
+    });
+
     after(function() {
         CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
     });
+
 
     it("Should Attach the Database",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/orientReconnect';
-        CB._request('GET',url).then(function() {
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
             done();
         },function(){
             throw "Unable to connect back Mongo";
         });
     });
+
+
 
 });

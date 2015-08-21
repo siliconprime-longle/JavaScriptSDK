@@ -7888,11 +7888,11 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 /* For Expire of objects */
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
-        return this.document._expires;
+        return this.document.expires;
     },
     set: function(expires) {
-        this.document._expires = expires;
-        CB._modified(this,'_expires');
+        this.document.expires = expires;
+        CB._modified(this,'expires');
     }
 });
 
@@ -10140,7 +10140,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
-
         this.document = {
             _type: 'file',
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
@@ -10337,7 +10336,7 @@ CB.CloudFile.prototype.delete = function(callback) {
         url: thisObj.url,
         key: CB.appKey
     });
-    var url = CB.serverUrl+'/file/' + CB.appId + 'fileId' ;
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this._id ;
 
     CB._request('DELETE',url,params).then(function(response){
         thisObj.url = null;
@@ -10590,6 +10589,10 @@ CB.CloudTable.getAll = function(callback){
 
 
 CB.CloudTable.get = function(table, callback){
+  if(Object.prototype.toString.call(table) === '[object String]') {
+      var obj = new CB.CloudTable(table);
+      table = obj;
+  }
   if (Object.prototype.toString.call(table) === '[object Object]') {
     {
       if (!CB.appId) {
@@ -10606,7 +10609,7 @@ CB.CloudTable.get = function(table, callback){
           appId: CB.appId
       });
 
-      var url = CB.serviceUrl + '/' + CB.appId + "/table/" + table.name;
+      var url = CB.serviceUrl + '/' + CB.appId + "/table/" + table.document.name;
       CB._request('POST',url,params,true).then(function(response){
           if(response === "null"){
             obj = null;
@@ -10658,10 +10661,10 @@ CB.CloudTable.delete = function(table, callback){
 
       var params=JSON.stringify({
           key: CB.appKey,
-          name: table.name
+          name: table.document.name
       });
 
-      var url = CB.serviceUrl + '/' + CB.appId + "/table/" +table.name;
+      var url = CB.serviceUrl + '/' + CB.appId + "/table/" +table.document.name;
 
       CB._request('DELETE',url,params,true).then(function(response){
         if (callback) {
@@ -11154,7 +11157,7 @@ CB._defaultColumns = function(type) {
                 relatedTo: null,
                 relatedToType: null,
                 relationType: null,
-                required: true,
+                required: false,
                 unique: false,
                 isRenamable: false,
                 isEditable: false,
@@ -11229,7 +11232,7 @@ CB._defaultColumns = function(type) {
                 relatedTo: null,
                 relatedToType: null,
                 relationType: null,
-                required: true,
+                required: false,
                 unique: true,
                 isRenamable: false,
                 isEditable: false,
@@ -11265,7 +11268,7 @@ CB._defaultColumns = function(type) {
                 relatedTo: null,
                 relatedToType: null,
                 relationType: null,
-                required: true,
+                required: false,
                 unique: false,
                 isRenamable: false,
                 isEditable: false,
@@ -11340,7 +11343,7 @@ CB._defaultColumns = function(type) {
                relatedTo: null,
                relatedToType: null,
                relationType: null,
-               required: true,
+               required: false,
                unique: false,
                isRenamable: false,
                isEditable: false,

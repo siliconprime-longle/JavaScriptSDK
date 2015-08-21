@@ -61,11 +61,11 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 /* For Expire of objects */
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
-        return this.document._expires;
+        return this.document.expires;
     },
     set: function(expires) {
-        this.document._expires = expires;
-        CB._modified(this,'_expires');
+        this.document.expires = expires;
+        CB._modified(this,'expires');
     }
 });
 
@@ -200,7 +200,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
     if(columnName=== 'id' || columnName === '_id')
         throw "You cannot set the id of a CloudObject";
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
@@ -232,7 +232,7 @@ CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     return this.document[columnName];
