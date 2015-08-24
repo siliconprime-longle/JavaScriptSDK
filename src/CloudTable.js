@@ -25,7 +25,27 @@ CB.CloudTable = function(tableName){  //new table constructor
   this.document.columns = CB._defaultColumns(this.document.type);
 };
 
+Object.defineProperty(CB.CloudTable.prototype,'columns',{
+    get: function(){
+        return this.document.columns;
+    }
+});
+
+Object.defineProperty(CB.CloudTable.prototype,'name',{
+    get: function(){
+        return this.document.name;
+    },
+    set: function(){
+        throw "You can not rename a table";
+    }
+});
+
+
 CB.CloudTable.prototype.addColumn = function(column){
+    if(Object.prototype.toString.call(column) === '[object String]') {
+        var obj = new CB.Column(column);
+        column = obj;
+    }
   if (Object.prototype.toString.call(column) === '[object Object]') {
     if(CB._columnValidation(column, this))
       this.document.columns.push(column);
@@ -36,23 +56,36 @@ CB.CloudTable.prototype.addColumn = function(column){
           this.document.columns.push(column[i]);
       }
   }
-}
+};
 
 CB.CloudTable.prototype.deleteColumn = function(column){
+    if(Object.prototype.toString.call(column) === '[object String]') {
+        var obj = new CB.Column(column);
+        column = obj;
+    }
   if (Object.prototype.toString.call(column) === '[object Object]') {
         if(CB._columnValidation(column, this)){
-          this.document.columns = this.document.columns.filter(function(index){return index.name != column.name });
+            var arr = [];
+            for(var i=0;i<this.columns.length;i++){
+                if(this.columns[i].name !== column.name)
+                    arr.push(this.columns[i]);
+            }
+          this.document.columns = arr;
         }
 
   } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      //yet to test
+      var arr = [];
       for(var i=0; i<column.length; i++){
         if(CB._columnValidation(column[i], this)){
-          this.document.columns = this.document.columns.filter(function(index){return index.name != column[i].name });
+            for(var i=0;i<this.columns.length;i++){
+                if(this.columns[i].name !== column[i].name)
+                    arr.push(this.columns[i]);
+            }
+            this.document.columns = arr;
         }
       }
   }
-}
+};
 
 /**
  * Gets All the Tables from an App

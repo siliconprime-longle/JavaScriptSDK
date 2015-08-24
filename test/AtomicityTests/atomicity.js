@@ -1,6 +1,6 @@
 describe("Atomicity Tests",function(done){
 
-    /*it("Should Attach the Database",function(done){
+    it("Should Attach the Database",function(done){
 
         this.timeout(10000);
 
@@ -101,7 +101,7 @@ describe("Atomicity Tests",function(done){
         },function(){
             throw "Unable to connect back Mongo";
         });
-    });*/
+    });
 
     before(function(){
         CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';

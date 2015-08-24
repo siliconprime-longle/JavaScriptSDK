@@ -5,8 +5,10 @@ describe("Cloud Table", function(){
       });
 
     var tableName = util.makeString();
+
     it("should not create duplicate table",function(done){
-        this.timeout(40000);
+
+        this.timeout(60000);
 
 
         var obj = new CB.CloudTable(tableName);
@@ -24,7 +26,7 @@ describe("Cloud Table", function(){
     });
 
     it("should first create a table and then delete that table",function(done){
-        this.timeout(40000);
+        this.timeout(60000);
 
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
@@ -44,10 +46,7 @@ describe("Cloud Table", function(){
         this.timeout(40000);
         var obj = new CB.CloudTable('Address');
         CB.CloudTable.get(obj).then(function(res){
-            if(res)
-                done();
-            else
-                throw "Unable to Get Table Data";
+            done();
         },function(){
             throw("should fetch the table");
         });
@@ -67,7 +66,7 @@ describe("Cloud Table", function(){
 
     it("should update new column into the table",function(done){
 
-        this.timeout(50000);
+        this.timeout(80000);
 
         var tableName1 = util.makeString();
         var tableName2 = util.makeString();
@@ -140,11 +139,12 @@ describe("Cloud Table", function(){
     });
     
 	it("should add a column to the table after save.",function(done){
-        this.timeout(20000);
+        this.timeout(40000);
+
         var tableName = util.makeString();
         var table = new CB.CloudTable(tableName);
         table.save().then(function(table){
-            var column1 = new CB.Column('Name11', 'Text', true, false);
+            var column1 = new CB.Column('Name1', 'Text', true, false);
             table.addColumn(column1);
             table.save().then(function(newTable){
               done();
@@ -173,26 +173,52 @@ describe("Cloud Table", function(){
     });
 
 
+    tableName = util.makeString();
+
     it("should not rename a table",function(done){
-      this.timeout(20000);
+
+        this.timeout(40000);
+
+
       var obj = new CB.CloudTable(tableName);
-      CB.CloudTable.get(obj).then(function(table){
-          table.name = "NewName";
-          table.save().then(function(newTable){
-              done( "should not renamed the table");
-          }, function(){
+      obj.save().then(function(table){
+          try{
+              table.name = "NewName";
+              done("Error");
+          }catch(err){
               done();
-          });
+              return;
+          }
       },function(){
           done("should fetch the table");
       });
     });
 
+    it("should not rename a table",function(done){
+
+        this.timeout(40000);
+
+        var obj = new CB.CloudTable(tableName);
+        CB.CloudTable.get(obj).then(function(table){
+            table.document.name = "sadjhkasj";
+            table.save().then(function(){
+                done("Should not rename the tableName");
+            },function(){
+               done();
+            });
+        },function(){
+            done("should fetch the table");
+        });
+    });
+
+
     it("should not change type of table",function(done){
-      this.timeout(20000);
+
+        this.timeout(20000);
+
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
-          table.type = "NewType";
+          table.document.type = "NewType";
           table.save().then(function(newTable){
               done( "should not change the type of a table");
           },function(){
@@ -207,7 +233,7 @@ describe("Cloud Table", function(){
         this.timeout(20000);
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
-            table.columns[0].name = "abcd";
+            table.document.columns[0].name = "abcd";
             table.save().then(function(){
                 done("should not update the column name");
             },function(){
@@ -222,7 +248,7 @@ describe("Cloud Table", function(){
       this.timeout(20000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
-          table.columns[0].dataType = "abcd";
+          table.document.columns[0].dataType = "abcd";
           table.save().then(function(){
               done("should not update the column dataType");
           },function(){
@@ -237,7 +263,7 @@ describe("Cloud Table", function(){
       this.timeout(20000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
-          table.columns[0].unique = false;
+          table.document.columns[0].unique = false;
           table.save().then(function(){
               done("should not change unique property of a default column");
           },function(){
@@ -252,7 +278,7 @@ describe("Cloud Table", function(){
       this.timeout(20000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
-          table.columns[0].required = false;
+          table.document.columns[0].required = false;
           table.save().then(function(){
               done("should not change required property of a default column");
           },function(){
@@ -263,21 +289,21 @@ describe("Cloud Table", function(){
       });
     });
 
-    it("should change unique property of a user defined column",function(done){
+    it("should not change unique property of a pre defined column",function(done){
       this.timeout(20000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
-          if(table.columns[5].unique)
-            table.columns[5].unique = false;
+          if(table.document.columns[0].unique)
+            table.document.columns[0].unique = false;
           else
-            table.columns[5].unique = true;
+            table.document.columns[0].unique = true;
           table.save().then(function(newTable){
-              if(newTable.columns[5].unique == table.columns[5].unique)
+              if(newTable.document.columns[0].unique !== table.columns[0].unique)
                 done();
               else
                 done("shouldChange unique property of a user defined column");
           },function(){
-              done("shouldChange unique property of a user defined column");
+              done();
           });
       },function(){
           done("should fetch the table");
@@ -285,16 +311,21 @@ describe("Cloud Table", function(){
     });
 
     it("should change required property of a user defined column",function(done){
-      this.timeout(20000);
-      var obj = new CB.CloudTable(tableName);
-      CB.CloudTable.get(obj).then(function(table){
+
+      this.timeout(50000);
+
+
+      var obj = new CB.CloudTable(util.makeString());
+      var name = new CB.Column("abc");
+        name.required = true;
+        obj.addColumn(name);
+        obj.save().then(function(table){
           if(table.columns[5].required)
             table.columns[5].required = false;
           else
             table.columns[5].required = true;
-
           table.save().then(function(newTable){
-              if(newTable.columns[5].required == table.columns[5].required)
+              if(newTable.columns[5].required === table.columns[5].required)
                 done();
               else
                 done("should change required property of a user defined column");
@@ -308,19 +339,25 @@ describe("Cloud Table", function(){
     });
 
     it("should not delete a default column of a table",function(done){
-      this.timeout(20000);
+
+        this.timeout(50000);
       var obj = new CB.CloudTable(tableName);
-      CB.CloudTable.get(obj).then(function(table){
-          table.columns[2] = "";
+      obj.save().then(function(table){
+          table.deleteColumn('id');
           table.save().then(function(newTable){
-              if(newTable.columns[2] != "createdAt")
-                done("should change required property of a user defined column");
+              if(newTable.columns) {
+                  if (newTable.columns[0].name === "id")
+                      done();
+                  else
+                      done("Should not change the behaviour of predefined columns");
+              }else
+                done();
           },function(){
               done();
           });
       });
     });
-    
+
     after(function() {
     	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
   	});

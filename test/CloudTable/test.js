@@ -16,7 +16,7 @@ describe("Table Tests", function (done) {
         });
     });
 
-    it("Should Give all the tables", function (done) {
+    it("Should Give specific tables", function (done) {
 
         this.timeout(10000);
 
@@ -33,7 +33,7 @@ describe("Table Tests", function (done) {
 
         this.timeout(10000);
 
-        CB.CloudTable.get('Employee').then(function(done) {
+        CB.CloudTable.get('Employee').then(function(res) {
             if(res){
                 done();
             }else
@@ -46,4 +46,5 @@ describe("Table Tests", function (done) {
     after(function() {
         CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
     });
+
 });

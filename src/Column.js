@@ -3,31 +3,81 @@
  */
 
  CB.Column = function(columnName, dataType, required, unique){
+   this.document = {};
    if(columnName){
      CB._columnNameValidation(columnName);
-     this.name = columnName;
-     this._type = 'column';
+     this.document.name = columnName;
+     this.document._type = 'column';
    }
 
    if(dataType){
      CB._columnDataTypeValidation(dataType);
-     this.dataType = dataType;
+     this.document.dataType = dataType;
    }else{
-     this.dataType = "Text";
+     this.document.dataType = "Text";
    }
 
    if(typeof(required) === 'boolean')
-     this.required = required;
+     this.document.required = required;
    else
-     this.required = false;
+     this.document.required = false;
 
    if(typeof(unique) === 'boolean')
-     this.unique = unique;
+     this.document.unique = unique;
    else
-     this.unique = false;
-   this.relatedTo = null;
-   this.relationType = null;
-   this.isDeletable = true;
-   this.isEditable = true;
-   this.isRenamable = true;
-}
+     this.document.unique = false;
+   this.document.relatedTo = null;
+   this.document.relationType = null;
+
+   this.document.isDeletable = true;
+   this.document.isEditable = true;
+   this.document.isRenamable = false;
+
+};
+
+Object.defineProperty(CB.Column.prototype,'name',{
+    get: function() {
+        return this.document.name;
+    },
+    set: function(name) {
+        this.document.name = name;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'dataType',{
+    get: function() {
+        return this.document.dataType;
+    },
+    set: function(dataType) {
+        this.document.dataType = dataType;
+    }
+});
+
+
+Object.defineProperty(CB.Column.prototype,'unique',{
+    get: function() {
+        return this.document.unique;
+    },
+    set: function(unique) {
+        this.document.unique = unique;
+    }
+});
+
+
+Object.defineProperty(CB.Column.prototype,'relatedTo',{
+    get: function() {
+        return this.document.relatedTo;
+    },
+    set: function(relatedTo) {
+        this.document.relatedTo = relatedTo;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'required',{
+    get: function() {
+        return this.document.required;
+    },
+    set: function(required) {
+        this.document.required = required;
+    }
+});

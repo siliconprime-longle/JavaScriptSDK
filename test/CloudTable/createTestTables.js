@@ -198,6 +198,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
     });
 
+
     it("should create table user",function(done){
 
         this.timeout(50000);
@@ -218,7 +219,7 @@ describe("Should Create All Test Tables",function(done){
         CB.CloudTable.delete(obj,callback);
     });
 
-    it("should create table Custom",function(done){
+  it("should create table Custom",function(done){
 
         this.timeout(50000);
 
