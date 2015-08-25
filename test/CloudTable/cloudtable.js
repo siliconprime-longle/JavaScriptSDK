@@ -172,28 +172,6 @@ describe("Cloud Table", function(){
         });
     });
 
-
-    tableName = util.makeString();
-
-    it("should not rename a table",function(done){
-
-        this.timeout(40000);
-
-
-      var obj = new CB.CloudTable(tableName);
-      obj.save().then(function(table){
-          try{
-              table.name = "NewName";
-              done("Error");
-          }catch(err){
-              done();
-              return;
-          }
-      },function(){
-          done("should fetch the table");
-      });
-    });
-
     it("should not rename a table",function(done){
 
         this.timeout(40000);
