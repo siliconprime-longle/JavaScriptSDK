@@ -1,3 +1,440 @@
+/*
+
+ This is the version 1.0.0 of the CloudBoost JS/Node SDK
+ This SDK is dependent on jQuery.
+
+ */
+
+var CB = CB || {}; //namespace.
+
+CB.version = "1.0.0";
+CB._isNode = false;
+CB.Socket = null;
+
+CB.serverUrl = 'https://api.cloudboost.io'; // server url.
+CB.socketIoUrl = 'http://realtime.cloudboost.io';
+
+CB.io = null; //socket.io library is saved here.
+
+
+CB.apiUrl = CB.serverUrl+'/api';
+
+CB.appId = CB.appId || null;
+CB.appKey = CB.appKey || null;
+
+if (typeof(process) !== "undefined" &&
+    process.versions &&
+    process.versions.node) {
+    CB._isNode = true;
+}
+else
+{
+    CB._isNode = false;
+}
+
+/*
+ Parse codes:
+ */
+CB._ajaxIE8 = function(method, url, data) {
+    var promise = new CB.Promise();
+    var xdr = new XDomainRequest();
+    xdr.onload = function() {
+        var response;
+        try {
+            response = JSON.parse(xdr.responseText);
+        } catch (e) {
+            promise.reject(e);
+        }
+        if (response) {
+            promise.resolve(response);
+        }
+    };
+    xdr.onerror = xdr.ontimeout = function() {
+        // Let's fake a real error message.
+        var fakeResponse = {
+            responseText: JSON.stringify({
+                code: 500,
+                error: "IE's XDomainRequest does not supply error info."
+            })
+        };
+        promise.reject(fakeResponse);
+    };
+    xdr.onprogress = function() {};
+    xdr.open(method, url);
+    xdr.send(data);
+    return promise;
+};
+CB._loadXml = function()
+{
+    var xmlhttp;
+    var req = typeof(require) === 'function' ? require : null;
+    // Load references to other dependencies
+    if (typeof(XMLHttpRequest) !== 'undefined') {
+        xmlhttp = XMLHttpRequest;
+    } else if (typeof(require) === 'function' &&
+        typeof(require.ensure) === 'undefined') {
+        xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+    }
+    xmlhttp = new xmlhttp();
+    return xmlhttp;
+};
+CB.Promise = function() {
+    this._resolved = false;
+    this._rejected = false;
+    this._resolvedCallbacks = [];
+    this._rejectedCallbacks = [];
+
+    this._isPromisesAPlusCompliant = false;
+    this.is = function(promise) {
+        return promise && promise.then && Object.prototype.toString.call(promise.then) === "[object Function]";
+    };
+    this.as = function() {
+        var promise = new CB.Promise();
+        promise.resolve.apply(promise, arguments);
+        return promise;
+    };
+    this.error = function() {
+        var promise = new CB.Promise();
+        promise.reject.apply(promise, arguments);
+        return promise;
+    };
+    this.when = function(promises) {
+        // Allow passing in Promises as separate arguments instead of an Array.
+        var objects;
+        if (promises && (typeof promises.length === "undefined" || promises.length === null)) {
+            objects = arguments;
+        } else {
+            objects = promises;
+        }
+
+        var total = objects.length;
+        var hadError = false;
+        var results = [];
+        var errors = [];
+        results.length = objects.length;
+        errors.length = objects.length;
+
+        if (total === 0) {
+            return CB.Promise.as.apply(this, results);
+        }
+
+        var promise = new CB.Promise();
+
+        var resolveOne = function() {
+            total = total - 1;
+            if (total === 0) {
+                if (hadError) {
+                    promise.reject(errors);
+                } else {
+                    promise.resolve.apply(promise, results);
+                }
+            }
+        };
+
+        objects.forEach(function(object, i) {
+            if (CB.Promise.is(object)) {
+                object.then(function(result) {
+                    results[i] = result;
+                    resolveOne();
+                }, function(error) {
+                    errors[i] = error;
+                    hadError = true;
+                    resolveOne();
+                });
+            } else {
+                results[i] = object;
+                resolveOne();
+            }
+        });
+
+        return promise;
+    };
+    this._continueWhile = function(predicate, asyncFunction) {
+        if (predicate()) {
+            return asyncFunction().then(function() {
+                return CB.Promise._continueWhile(predicate, asyncFunction);
+            });
+        }
+        return CB.Promise.as();
+    }
+};
+
+CB.Promise.is = function(promise) {
+    return promise && promise.then && Object.prototype.toString.call(promise.then) === "[object Function]";
+};
+/**
+ * Marks this promise as fulfilled, firing any callbacks waiting on it.
+ * @param {Object} result the result to pass to the callbacks.
+ */
+CB.Promise.prototype["resolve"] = function(result) {
+    if (this._resolved || this._rejected) {
+        throw "A promise was resolved even though it had already been " +
+        (this._resolved ? "resolved" : "rejected") + ".";
+    }
+    this._resolved = true;
+    this._result = arguments;
+    var results = arguments;
+    this._resolvedCallbacks.forEach(function(resolvedCallback) {
+        resolvedCallback.apply(this, results);
+    });
+    this._resolvedCallbacks = [];
+    this._rejectedCallbacks = [];
+};
+
+/**
+ * Marks this promise as fulfilled, firing any callbacks waiting on it.
+ * @param {Object} error the error to pass to the callbacks.
+ */
+CB.Promise.prototype["reject"] = function(error) {
+    if (this._resolved || this._rejected) {
+        throw "A promise was rejected even though it had already been " +
+        (this._resolved ? "resolved" : "rejected") + ".";
+    }
+    this._rejected = true;
+    this._error = error;
+    this._rejectedCallbacks.forEach(function(rejectedCallback) {
+        rejectedCallback(error);
+    });
+    this._resolvedCallbacks = [];
+    this._rejectedCallbacks = [];
+};
+
+/**
+ * Adds callbacks to be called when this promise is fulfilled. Returns a new
+ * Promise that will be fulfilled when the callback is complete. It allows
+ * chaining. If the callback itself returns a Promise, then the one returned
+ * by "then" will not be fulfilled until that one returned by the callback
+ * is fulfilled.
+ * @param {Function} resolvedCallback Function that is called when this
+ * Promise is resolved. Once the callback is complete, then the Promise
+ * returned by "then" will also be fulfilled.
+ * @param {Function} rejectedCallback Function that is called when this
+ * Promise is rejected with an error. Once the callback is complete, then
+ * the promise returned by "then" with be resolved successfully. If
+ * rejectedCallback is null, or it returns a rejected Promise, then the
+ * Promise returned by "then" will be rejected with that error.
+ * @return {CB.Promise} A new Promise that will be fulfilled after this
+ * Promise is fulfilled and either callback has completed. If the callback
+ * returned a Promise, then this Promise will not be fulfilled until that
+ * one is.
+ */
+CB.Promise.prototype["then"] = function(resolvedCallback, rejectedCallback) {
+    var promise = new CB.Promise();
+
+    var wrappedResolvedCallback = function() {
+        var result = arguments;
+        if (resolvedCallback) {
+            if (CB.Promise._isPromisesAPlusCompliant) {
+                try {
+                    result = [resolvedCallback.apply(this, result)];
+                } catch (e) {
+                    result = [CB.Promise.error(e)];
+                }
+            } else {
+                result = [resolvedCallback.apply(this, result)];
+            }
+        }
+        if (result.length === 1 && CB.Promise.is(result[0])) {
+            result[0].then(function() {
+                promise.resolve.apply(promise, arguments);
+            }, function(error) {
+                promise.reject(error);
+            });
+        } else {
+            promise.resolve.apply(promise, result);
+        }
+    };
+
+    var wrappedRejectedCallback = function(error) {
+        var result = [];
+        if (rejectedCallback) {
+            if (CB.Promise._isPromisesAPlusCompliant) {
+                try {
+                    result = [rejectedCallback(error)];
+                } catch (e) {
+                    result = [CB.Promise.error(e)];
+                }
+            } else {
+                result = [rejectedCallback(error)];
+            }
+            if (result.length === 1 && CB.Promise.is(result[0])) {
+                result[0].then(function() {
+                    promise.resolve.apply(promise, arguments);
+                }, function(error) {
+                    promise.reject(error);
+                });
+            } else {
+                if (CB.Promise._isPromisesAPlusCompliant) {
+                    promise.resolve.apply(promise, result);
+                } else {
+                    promise.reject(result[0]);
+                }
+            }
+        } else {
+            promise.reject(error);
+        }
+    };
+
+    var runLater = function(func) {
+        func.call();
+    };
+    if (CB.Promise._isPromisesAPlusCompliant) {
+        if (typeof(window) !== 'undefined' && window.setTimeout) {
+            runLater = function(func) {
+                window.setTimeout(func, 0);
+            };
+        } else if (typeof(process) !== 'undefined' && process.nextTick) {
+            runLater = function(func) {
+                process.nextTick(func);
+            };
+        }
+    }
+
+    var self = this;
+    if (this._resolved) {
+        runLater(function() {
+            wrappedResolvedCallback.apply(self, self._result);
+        });
+    } else if (this._rejected) {
+        runLater(function() {
+            wrappedRejectedCallback(self._error);
+        });
+    } else {
+        this._resolvedCallbacks.push(wrappedResolvedCallback);
+        this._rejectedCallbacks.push(wrappedRejectedCallback);
+    }
+
+    return promise;
+};
+
+/**
+ * Add handlers to be called when the promise
+ * is either resolved or rejected
+ */
+CB.Promise.prototype["always"] = function(callback) {
+    return this.then(callback, callback);
+};
+
+/**
+ * Add handlers to be called when the Promise object is resolved
+ */
+CB.Promise.prototype["done"] = function(callback) {
+    return this.then(callback);
+};
+
+/**
+ * Add handlers to be called when the Promise object is rejected
+ */
+CB.Promise.prototype["fail"] = function(callback) {
+    return this.then(null, callback);
+};
+
+/**
+ * Run the given callbacks after this promise is fulfilled.
+ * @param optionsOrCallback {} A Backbone-style options callback, or a
+ * callback function. If this is an options object and contains a "model"
+ * attributes, that will be passed to error callbacks as the first argument.
+ * @param model {} If truthy, this will be passed as the first result of
+ * error callbacks. This is for Backbone-compatability.
+ * @return {CB.Promise} A promise that will be resolved after the
+ * callbacks are run, with the same result as this.
+ */
+CB.clone = function(obj) {
+    if (! Object.prototype.toString.call(obj) === "[object Object]") return obj;
+    return (Object.prototype.toString.call(obj) === "[object Array]") ? obj.slice() : new Object(obj);
+};
+
+CB.Promise.prototype["_thenRunCallbacks"] = function(optionsOrCallback, model) {
+    var options;
+    if (Object.prototype.toString.call(optionsOrCallback) === "[object Function]") {
+        var callback = optionsOrCallback;
+        options = {
+            success: function(result) {
+                callback(result, null);
+            },
+            error: function(error) {
+                callback(null, error);
+            }
+        };
+    } else {
+        options = CB.clone(optionsOrCallback);
+    }
+    options = options || {};
+
+    return this.then(function(result) {
+        if (options.success) {
+            options.success.apply(this, arguments);
+        } else if (model) {
+            // When there's no callback, a sync event should be triggered.
+            model.trigger('sync', model, result, options);
+        }
+        return CB.Promise.as.apply(CB.Promise, arguments);
+    }, function(error) {
+        if (options.error) {
+            if (! typeof model === "undefined") {
+                options.error(model, error);
+            } else {
+                options.error(error);
+            }
+        } else if (model) {
+            // When there's no error callback, an error event should be triggered.
+            model.trigger('error', model, error, options);
+        }
+        // By explicitly returning a rejected Promise, this will work with
+        // either jQuery or Promises/A semantics.
+        return CB.Promise.error(error);
+    });
+}
+CB.Events = {
+    trigger: function(events) {
+        var event, node, calls, tail, args, all, rest;
+        if (!(calls = this._callbacks)) {
+            return this;
+        }
+        all = calls.all;
+        events = events.split(eventSplitter);
+        rest = slice.call(arguments, 1);
+
+        // For each event, walk through the linked list of callbacks twice,
+        // first to trigger the event, then to trigger any `"all"` callbacks.
+        event = events.shift();
+        while (event) {
+            node = calls[event];
+            if (node) {
+                tail = node.tail;
+                while ((node = node.next) !== tail) {
+                    node.callback.apply(node.context || this, rest);
+                }
+            }
+            node = all;
+            if (node) {
+                tail = node.tail;
+                args = [event].concat(rest);
+                while ((node = node.next) !== tail) {
+                    node.callback.apply(node.context || this, args);
+                }
+            }
+            event = events.shift();
+        }
+
+        return this;
+    }
+}
+/**
+ * Adds a callback function that should be called regardless of whether
+ * this promise failed or succeeded. The callback will be given either the
+ * array of results for its first argument, or the error as its second,
+ * depending on whether this Promise was rejected or resolved. Returns a
+ * new Promise, like "then" would.
+ * @param {Function} continuation the callback.
+ */
+CB.Promise.prototype["_continueWith"] = function(continuation) {
+    return this.then(function() {
+        return continuation(arguments, null);
+    }, function(error) {
+        return continuation(null, error);
+    });
+};
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -7200,3 +7637,3046 @@ CB.CloudApp.disconnect = function() { //static function for initialisation of th
     CB.Socket.emit('socket-disconnect',CB.appId);
     CB.CloudApp._isConnected = false;
 };
+CB.ACL = function() { //constructor for ACL class
+    this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
+    this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
+};
+CB.ACL.prototype.setPublicWriteAccess = function(value) { //for setting the public write access
+    if (value) { //If asked to allow public write access
+        this['write']['allow']['user'] = ['all'];
+    } else {
+        var index = this['write']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['write']['allow']['user'].splice(index, 1); //remove the "all" value from the "write" array of "this" object
+        }
+    }
+};
+CB.ACL.prototype.setPublicReadAccess = function(value) { //for setting the public read access
+
+    if (value) { //If asked to allow public read access
+        this['read']['allow']['user'] = ['all'];
+    } else {
+        var index = this['read']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['read']['allow']['user'].splice(index, 1); //remove the "all" value from the "read" array of "this" object
+        }
+    }
+};
+CB.ACL.prototype.setUserWriteAccess = function(userId, value) { //for setting the user write access
+
+    if (value) { //If asked to allow user write access
+        //remove public write access.
+        var index = this['write']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['write']['allow']['user'].splice(index, 1);
+        }
+        if (this['write']['allow']['user'].indexOf(userId) === -1) {
+            this['write']['allow']['user'].push(userId);
+        }
+    } else {
+        var index = this['write']['allow']['user'].indexOf(userId);
+        if (index > -1) {
+            this['write']['allow']['user'].splice(index, 1); //remove the "userId" value from the "write" array of "this" object
+        }
+        this['write']['deny']['user'].push(userId);
+    }
+};
+CB.ACL.prototype.setUserReadAccess = function(userId, value) { //for setting the user read access
+
+    if (value) { //If asked to allow user read access
+        //remove public write access.
+        var index = this['read']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['read']['allow']['user'].splice(index, 1);
+        }
+        if (this['read']['allow']['user'].indexOf(userId) === -1) {
+            this['read']['allow']['user'].push(userId);
+        }
+    } else {
+        var index = this['read']['allow']['user'].indexOf(userId);
+        if (index > -1) {
+            this['read']['allow']['user'].splice(index, 1); //remove the "userId" value from the "read" array of "this" object
+        }
+        this['read']['deny']['user'].push(userId);
+    }
+};
+CB.ACL.prototype.setRoleWriteAccess = function(roleId, value) {
+
+    if (value) {
+        //remove public write access.
+        var index = this['write']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['write']['allow']['user'].splice(index, 1);
+        }
+        if (this['write']['allow']['role'].indexOf(roleId) === -1) {
+            this['write']['allow']['role'].push(roleId);
+        }
+    } else {
+        var index = this['write']['allow']['role'].indexOf(roleId);
+        if (index > -1) {
+            this['write']['allow']['role'].splice(index, 1);
+        }
+        var index = this['write']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['write']['allow']['user'].splice(index, 1);
+        }
+
+        this['write']['deny']['role'].push(roleId);
+    }
+};
+CB.ACL.prototype.setRoleReadAccess = function(roleId, value) {
+
+    if (value) {
+        //remove public write access.
+        var index = this['read']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['read']['allow']['user'].splice(index, 1);
+        }
+        if (this['read']['allow']['role'].indexOf(roleId) === -1) {
+            this['read']['allow']['role'].push(roleId);
+        }
+    } else {
+        var index = this['read']['allow']['role'].indexOf(roleId);
+        if (index > -1) {
+            this['read']['allow']['role'].splice(index, 1);
+        }
+        var index = this['read']['allow']['user'].indexOf('all');
+        if (index > -1) {
+            this['read']['allow']['user'].splice(index, 1);
+        }
+        this['read']['deny']['role'].push(roleId);
+    }
+};
+
+/* CloudNotificiation */
+
+CB.CloudNotification = CB.CloudNotification || {};
+
+CB.CloudNotification.on = function(channelName, callback, done) {
+
+    CB._validate();
+
+    var def;
+
+    if (!done) {
+        def = new CB.Promise();
+    }
+
+    CB.Socket.emit('join-custom-channel',CB.appId+channelName);
+    CB.Socket.on(CB.appId+channelName, function(data){ //listen to events in custom channel.
+        callback(data);
+    });
+
+    if(done && done.success)
+        done.success();
+    else
+        def.resolve();
+
+    if (!done) {
+        return def;
+    }
+
+};
+
+CB.CloudNotification.off = function(channelName, done) {
+
+    CB._validate();
+
+    var def;
+
+    if (!done) {
+        def = new CB.Promise();
+    }
+
+    CB.Socket.emit('leave-custom-channel',CB.appId+channelName);
+    CB.Socket.removeAllListeners(CB.appId+channelName);
+    if(done && done.success)
+        done.success();
+    else
+        def.resolve();
+
+    if (!done) {
+        return def;
+    }
+
+};
+
+CB.CloudNotification.publish = function(channelName, data, done) {
+
+    CB._validate();
+
+    var def;
+
+    if (!done) {
+        def = new CB.Promise();
+    }
+
+    CB.Socket.emit('publish-custom-channel',{channel:CB.appId+channelName,data : data});
+    if(done && done.success)
+        done.success();
+    else
+        def.resolve();
+
+    if (!done) {
+        return def;
+    }
+
+};
+
+/*
+ CloudObject
+ */
+
+CB.CloudObject = function(tableName, id) { //object for documents
+    
+    this.document = {};
+    this.document._tableName = tableName; //the document object
+    this.document.ACL = new CB.ACL(); //ACL(s) of the document
+    this.document._type = 'custom';
+
+    if(!id){
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._isModified = true;
+    }
+    else{
+        this.document._modifiedColumns = [];
+        this.document._isModified = false;
+        this.document._id = id;
+    }
+};
+
+Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
+    get: function() {
+        return this.document.ACL;
+    },
+    set: function(ACL) {
+        this.document.ACL = ACL;
+        CB._modified(this,'ACL');
+    }
+});
+
+Object.defineProperty(CB.CloudObject.prototype, 'id', {
+    get: function() {
+        return this.document._id;
+    }
+});
+
+Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
+    get: function() {
+        return this.document.createdAt;
+    },
+    set: function(createdAt) {
+        this.document.createdAt = createdAt;
+        CB._modified(this,'createdAt');
+    }
+});
+
+Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
+    get: function() {
+        return this.document.updatedAt;
+    },
+    set: function(updatedAt) {
+        this.document.updatedAt = updatedAt;
+        CB._modified(this,'updatedAt');
+    }
+});
+
+
+/* For Expire of objects */
+Object.defineProperty(CB.CloudObject.prototype, 'expires', {
+    get: function() {
+        return this.document._expires;
+    },
+    set: function(expires) {
+        this.document._expires = expires;
+        CB._modified(this,'_expires');
+    }
+});
+
+/* This is Real time implementation of CloudObjects */
+CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
+
+    var def;
+    
+    //shift variables. 
+    if(cloudQuery && !(cloudQuery instanceof CB.CloudQuery)){
+        //this is a function. 
+        if(callback !== null && typeof callback === 'object'){
+            //callback is actually done. 
+            done = callback;
+            callback = null;
+        }
+        callback = cloudQuery;
+        cloudQuery = null;
+    }
+
+    if (!done) {
+        def = new CB.Promise();
+    }
+
+    //validate query. 
+    if(cloudQuery && cloudQuery instanceof CB.CloudQuery){
+
+        if(cloudQuery.tableName!== tableName){
+            throw "CloudQuery TableName and CloudNotification TableName should be same.";
+        }
+
+        if(cloudQuery.query){
+            if(cloudQuery.query.$include.length>0){
+                throw "Include with CloudNotificaitons is not supported right now.";
+            }
+        }
+
+        if(Object.keys(cloudQuery.select).length > 0){
+            throw "You cannot pass the query with select in CloudNotifications.";
+        }
+    }
+
+    tableName = tableName.toLowerCase();
+
+    if (eventType instanceof Array) {
+        //if event type is an array.
+        for(var i=0;i<eventType.length;i++){
+            CB.CloudObject.on(tableName, eventType[i], cloudQuery, callback);
+            if(done && done.success)
+                done.success();
+            else
+                def.resolve();
+        }
+    } else {
+        eventType = eventType.toLowerCase();
+        if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
+
+            var payload = {
+                room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
+                sessionId : CB._getSessionId(),
+            };
+
+            CB.Socket.emit('join-object-channel',payload);
+            CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
+                data = CB.fromJSON(data);
+                if(cloudQuery && cloudQuery instanceof CB.CloudQuery && CB.CloudObject._validateNotificationQuery(data, cloudQuery))
+                    callback(data);
+                else if(!cloudQuery)
+                    callback(data);
+            });
+
+            if(done && done.success)
+                done.success();
+            else
+                def.resolve();
+        }else{
+            throw 'created, updated, deleted are supported notification types.';
+        }
+    }
+
+    if (!done) {
+        return def;
+    }
+};
+
+CB.CloudObject.off = function(tableName, eventType, done) {
+
+    var def;
+
+    if (!done) {
+        def = new CB.Promise();
+    }
+
+    tableName = tableName.toLowerCase();
+
+    if (eventType instanceof Array) {
+        //if event type is an array.
+        for(var i=0;i<eventType.length;i++){
+            CB.CloudObject.off(tableName, eventType[i]);
+            if(done && done.success)
+                done.success();
+            else
+                def.resolve();
+        }
+    } else {
+
+        eventType = eventType.toLowerCase();
+
+        if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
+            CB.Socket.emit('leave-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
+            CB.Socket.removeAllListeners((CB.appId+'table'+tableName+eventType).toLowerCase());
+            if(done && done.success)
+                done.success();
+            else
+                def.resolve();
+        }else{
+            throw 'created, updated, deleted are supported notification types.';
+        }
+    }
+
+    if (!done) {
+        return def;
+    }
+};
+
+/* RealTime implementation ends here.  */
+
+CB.CloudObject.prototype.set = function(columnName, data) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+    this.document[columnName] = data;
+    CB._modified(this,columnName);
+};
+
+
+CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+    var keywords = ['_tableName', '_type', 'operator'];
+
+    if(columnName=== 'id' || columnName === '_id')
+        throw "You cannot set the id of a CloudObject";
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        throw "You cannot link an object to this column";
+
+    if (keywords.indexOf(columnName) > -1) {
+        throw columnName + " is a keyword. Please choose a different column name.";
+    }
+
+    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+    CB._modified(this,columnName);
+};
+
+
+CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        columnName = '_' + columnName;
+
+    return this.document[columnName];
+
+};
+
+CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
+    this.document[columnName] = null;
+    CB._modified(this,columnName);
+};
+
+CB.CloudObject.prototype.save = function(callback) { //save the document to the db
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    CB._validate();
+
+    var thisObj = this;
+    var xmlhttp = CB._loadXml();
+    var params=JSON.stringify({
+        document: CB.toJSON(thisObj),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/save";
+    //console.log(params);
+    CB._request('POST',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from the db
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (this.id) {
+        this.document['_id'] = this.id;
+    } else {
+        throw "Can't fetch an object which is not saved."
+    }
+    if (this.ACL) {
+        this.document['ACL'] = this.ACL;
+    }
+    thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    // var xmlhttp=CB._loadXml();
+    var params=JSON.stringify({
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
+
+    CB._request('POST',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
+};
+
+CB.CloudObject.prototype.delete = function(callback) { //delete an object matching the objectId
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.document._id) {
+        throw "You cannot delete an object which is not saved."
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var params=JSON.stringify({
+        key: CB.appKey,
+        document: CB.toJSON(thisObj)
+    });
+    url = CB.apiUrl + "/" + CB.appId +"/delete/";
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+/* Private Methods */
+CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
+   
+   if(!cloudQuery)
+        throw "CloudQuery is null";
+
+    if(!cloudQuery.query)
+        throw "There is no query in CloudQuery";
+   
+   //validate query. 
+   var query = cloudQuery.query;
+
+   if(cloudQuery.limit===0)
+        return false;
+    
+   if(cloudQuery.skip>0){
+        --cloudQuery.skip;
+        return false;
+    }
+
+
+   //delete include
+   delete query.$include;
+
+   if(CB.CloudQuery._validateQuery(cloudObject, query)){
+        //redice limit of CloudQuery.
+       --cloudQuery.limit;
+       return true;
+   }else{
+    return false;
+   }
+};
+
+
+/*
+ CloudQuery
+ */
+CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
+    this.tableName = tableName;
+    this.query = {};
+    this.query.$include = [];
+    this.select = {};
+    this.sort = {};
+    this.skip = 0;
+    this.limit = 10; //default limit is 10
+};
+
+// Logical operations
+CB.CloudQuery.or = function(obj1, obj2) {
+    if (!obj1.tableName === obj2.tableName) {
+        throw "Table names are not same";
+    }
+    var obj = new CB.CloudQuery(obj1.tableName);
+    obj.query["$or"] = [obj1.query, obj2.query];
+    return obj;
+}
+
+
+CB.CloudQuery.prototype.equalTo = function(columnName, data) {
+
+    if (columnName === 'id' ||  columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if(data !== null){
+        if( data.constructor === CB.CloudObject){
+            columnName = columnName+'._id';
+            data = data.get('id');
+        }
+
+        this.query[columnName] = data;
+    }else{
+
+        //This is for people who code : obj.equalTo('column', null);
+        this.doesNotExists(columnName);
+    }
+
+    return this;
+};
+
+CB.CloudQuery.prototype.include = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.query.$include.push(columnName);
+
+    return this;
+};
+
+CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if(data !== null){
+
+        if(data.constructor === CB.CloudObject){
+            columnName = columnName+'._id';
+            data = data.get('id');
+        }
+
+        this.query[columnName] = {
+            $ne: data
+        };
+    }else{
+        //This is for people who code : obj.notEqualTo('column', null);
+        this.exists(columnName); 
+    }
+
+    return this;
+};
+CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$gt"] = data;
+
+    return this;
+};
+CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$gte"] = data;
+
+    return this;
+};
+CB.CloudQuery.prototype.lessThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$lt"] = data;
+
+    return this;
+};
+CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$lte"] = data;
+
+    return this;
+};
+
+//Sorting
+CB.CloudQuery.prototype.orderByAsc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.sort[columnName] = 1;
+
+    return this;
+};
+
+CB.CloudQuery.prototype.orderByDesc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.sort[columnName] = -1;
+
+    return this;
+};
+
+//Limit and skip
+CB.CloudQuery.prototype.setLimit = function(data) {
+
+    this.limit = data;
+    return this;
+};
+CB.CloudQuery.prototype.setSkip = function(data) {
+    this.skip = data;
+    return this;
+};
+
+//select/deselect columns to show
+CB.CloudQuery.prototype.selectColumn = function(columnNames) {
+
+    if(Object.keys(this.select).length === 0){
+        this.select = {
+            _id : 1,
+            createdAt : 1,
+            updatedAt : 1,
+            ACL : 1,
+            _type : 1,
+            _tableName : 1
+        }
+    }
+
+    if (Object.prototype.toString.call(columnNames) === '[object Object]') {
+        this.select = columnNames;
+    } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
+        for (var i = 0; i < columnNames.length; i++) {
+            this.select[columnNames[i]] = 1;
+        }
+    } else {
+        this.select[columnNames] = 1;
+    }
+
+    return this;
+};
+
+CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
+    if (Object.prototype.toString.call(columnNames) === '[object Object]') {
+        this.select = columnNames;
+    } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
+        for (var i = 0; i < columnNames.length; i++) {
+            this.select[columnNames[i]] = 0;
+        }
+    } else {
+        this.select[columnNames] = 0;
+    }
+
+    return this;
+};
+
+CB.CloudQuery.prototype.containedIn = function(columnName, data) {
+
+    var isCloudObject = false;
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
+        throw 'Array / value / CloudObject expected as an argument';
+    }
+
+    
+    if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+                isCloudObject = true;
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+                }
+
+                data[i] = data[i].id;
+            }
+        }
+
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
+        
+
+        if (!this.query[columnName]) {
+                    this.query[columnName] = {};
+        }
+
+        this.query[columnName]["$in"] = data;
+        thisObj = this;
+        if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing dublicates
+            data.forEach(function(val) {
+                if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
+                    thisObj.query[columnName]["$nin"].splice(index, 1);
+                }
+            });
+        }
+    } else { //if the argument is a string then push if it is not present already
+
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+            }
+
+            columnName = columnName+'._id';
+            data = data.id;
+        }
+
+        if (!this.query[columnName]) {
+                this.query[columnName] = {};
+        }
+
+
+        if (!this.query[columnName]["$in"]) {
+            this.query[columnName]["$in"] = [];
+        }
+        if (this.query[columnName]["$in"].indexOf(data) === -1) {
+            this.query[columnName]["$in"].push(data);
+        }
+        if (typeof this.query[columnName]["$nin"] !== 'undefined') {
+            if ((index = this.query[columnName]["$nin"].indexOf(data)) >= 0) {
+                this.query[columnName]["$nin"].splice(index, 1);
+            }
+        }
+    }
+    
+
+    return this;
+}
+
+CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
+
+    var isCloudObject = false;
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
+        throw 'Array or string expected as an argument';
+    }
+
+    if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+                isCloudObject = true;
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
+                }
+
+                data[i] = data[i].id;           
+            }
+        }
+
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
+           
+
+         if (!this.query[columnName]) {
+            this.query[columnName] = {};
+         }
+
+        this.query[columnName]["$nin"] = data;
+        if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing dublicates
+            thisObj = this;
+            data.forEach(function(val) {
+                if ((index = thisObj.query[columnName]["$in"].indexOf(val)) >= 0) {
+                    thisObj.query[columnName]["$in"].splice(index, 1);
+                }
+            });
+        }
+    } else { //if the argument is a string then push if it is not present already
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
+            }
+
+            columnName = columnName+'._id';
+            data = data.id;
+        }
+
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
+        }
+
+
+        if (!this.query[columnName]["$nin"]) {
+            this.query[columnName]["$nin"] = [];
+        }
+        if (this.query[columnName]["$nin"].indexOf(data) === -1) {
+            this.query[columnName]["$nin"].push(data);
+        }
+        if (typeof this.query[columnName]["$in"] !== 'undefined') {
+            if ((index = this.query[columnName]["$in"].indexOf(data)) >= 0) {
+                this.query[columnName]["$in"].splice(index, 1);
+            }
+        }
+    }
+
+    return this;
+}
+
+CB.CloudQuery.prototype.exists = function(columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$exists"] = true;
+
+    return this;
+}
+
+CB.CloudQuery.prototype.doesNotExists = function(columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    }
+    this.query[columnName]["$exists"] = false;
+
+    return this;
+}
+
+CB.CloudQuery.prototype.containsAll = function(columnName, data) {
+
+    var isCloudObject = false;
+
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
+        throw 'Array or string expected as an argument';
+    }
+
+    if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
+
+
+
+        for(var i=0; i<data.length; i++){
+             if(data[i] instanceof CB.CloudObject){
+                
+                isCloudObject = true;
+
+                if(!data[i].id){
+                    throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+                }
+
+                data[i] = data[i].id;           
+            }
+        }
+
+        if(isCloudObject){
+            columnName = columnName+'._id';
+        }
+
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
+         }
+
+        this.query[columnName]["$all"] = data;
+        
+    } else { //if the argument is a string then push if it is not present already
+
+        if(data instanceof CB.CloudObject){
+
+            if(!data.id){
+                throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+            }
+
+            columnName = columnName+'._id';
+            data = data.id;
+        }
+
+        if (!this.query[columnName]) {
+            this.query[columnName] = {};
+        }
+
+
+        if (!this.query[columnName]["$all"]) {
+            this.query[columnName]["$all"] = [];
+        }
+        if (this.query[columnName]["$all"].indexOf(data) === -1) {
+            this.query[columnName]["$all"].push(data);
+        }
+        
+    }
+
+    return this;
+}
+
+CB.CloudQuery.prototype.startsWith = function(columnName, value) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    var regex = '^' + value;
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    } 
+
+    this.query[columnName]["$regex"] = regex;
+    this.query[columnName]["$options"] = 'im';
+    
+    return this;
+}
+
+//GeoPoint near query
+CB.CloudQuery.prototype.near = function(columnName, geoPoint, maxDistance, minDistance){
+    if(!this.query[columnName]){
+        this.query[columnName] = {};
+        this.query[columnName]['$near'] = {
+            '$geometry': { coordinates: geoPoint['document'].coordinates, type:'Point'},
+            '$maxDistance': maxDistance,
+            '$minDistance': minDistance
+        };
+    }
+};
+
+//GeoPoint geoWithin query
+CB.CloudQuery.prototype.geoWithin = function(columnName, geoPoint, radius){
+
+    if(!radius){
+        var coordinates = [];
+        //extracting coordinates from each CloudGeoPoint Object
+        if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
+            for(i=0; i < geoPoint.length; i++){
+                if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
+                    coordinates[i] = geoPoint[i]['document']['coordinates'];
+                }
+            }
+        }else{
+            throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+        }
+        //2dSphere needs first and last coordinates to be same for polygon type
+        //eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one
+        coordinates[coordinates.length] = coordinates[0];
+        var type = 'Polygon';
+        if(!this.query[columnName]){
+            this.query[columnName] = {};
+            this.query[columnName]['$geoWithin'] = {};
+            this.query[columnName]['$geoWithin']['$geometry'] = {
+                'type': type,
+                'coordinates': [ coordinates ]
+            };
+        }
+    }else{
+        if(!this.query[columnName]){
+            this.query[columnName] = {};
+            this.query[columnName]['$geoWithin'] = {
+                '$centerSphere': [ geoPoint['document']['coordinates'], radius/3963.2 ]
+            };
+        }
+    }
+};
+
+CB.CloudQuery.prototype.count = function(callback) {
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+    var params=JSON.stringify({
+        query: thisObj.query,
+        limit: thisObj.limit,
+        skip: thisObj.skip,
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/count';
+
+    CB._request('POST',url,params).then(function(response){
+        response = parseInt(response);
+        if (callback) {
+            callback.success(response);
+        } else {
+            def.resolve(response);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
+
+};
+
+CB.CloudQuery.prototype.distinct = function(keys, callback) {
+
+
+    if(keys === 'id'){
+        keys = '_id';
+    }
+
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    if (Object.prototype.toString.call(keys) !== '[object Array]' && keys.length <= 0) {
+        throw "keys should be array";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var thisObj = this;
+    
+    var params=JSON.stringify({
+        onKey: keys,
+        query: thisObj.query,
+        select: thisObj.select,
+        sort: thisObj.sort,
+        limit: thisObj.limit,
+        skip: thisObj.skip,
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
+
+    CB._request('POST',url,params).then(function(response){
+        var object = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(object);
+        } else {
+            def.resolve(object);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+CB.CloudQuery.prototype.find = function(callback) { //find the document(s) matching the given query
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var thisObj = this;
+
+    var xmlhttp=CB._loadXml();
+    var params=JSON.stringify({
+        query: thisObj.query,
+        select: thisObj.select,
+        sort: thisObj.sort,
+        limit: thisObj.limit,
+        skip: thisObj.skip,
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+
+    CB._request('POST',url,params).then(function(response){
+        var object = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(object);
+        } else {
+            def.resolve(object);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+};
+
+CB.CloudQuery.prototype.get = function(objectId,callback){
+    var query = new CB.CloudQuery(this.tableName);
+    return query.findById(objectId,callback);
+};
+
+CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
+    
+    var thisObj = this;
+
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    if(thisObj.skip && !thisObj.skip !== 0){
+        throw "You cannot use skip and find object by Id in the same query";
+    }
+
+    if(thisObj.limit && thisObj.limit === 0){
+        throw "You cannot use limit and find object by Id in the same query";
+    }
+
+    if(thisObj.sort && Object.getOwnPropertyNames(thisObj.sort).length > 0){
+        throw "You cannot use sort and find object by Id in the same query";
+    }
+
+    thisObj.equalTo('id',objectId);
+
+    var params=JSON.stringify({
+        query: thisObj.query,
+        select: thisObj.select,
+        key: CB.appKey,
+        limit : 1,
+        skip : 0,
+        sort : {}
+    });
+
+    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+
+    CB._request('POST',url,params).then(function(response){
+        response = JSON.parse(response);
+        if (Object.prototype.toString.call(response) === '[object Array]') {
+            response = response[0];
+        }
+        if (callback) {
+            callback.success(CB.fromJSON(response));
+        } else {
+            def.resolve(CB.fromJSON(response));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+CB.CloudQuery.prototype.findOne = function(callback) { //find a single document matching the given query
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var params=JSON.stringify({
+        query: this.query,
+        select: this.select,
+        sort: this.sort,
+        skip: this.skip,
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
+
+    CB._request('POST',url,params).then(function(response){
+        var object = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(object);
+        } else {
+            def.resolve(object);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+
+CB.CloudQuery._validateQuery = function(cloudObject, query){
+    //validate query. 
+   for(var key in query){
+        
+        if(query[key]){
+            var value = query[key];
+            if(typeof value === 'object'){
+
+                if(key === '$or'){
+                    if(query[key].length>0){
+                        var isTrue = false;
+                        for(var i=0;i<query[key].length;i++){
+                            if(CB.CloudQuery._validateQuery(cloudObject,query[key][i])){
+                                isTrue = true;
+                                break;
+                            }
+                        }
+
+                        if(!isTrue){
+                            return false;
+                        }
+                    }
+                }else{
+
+                        for(var objectKeys in value){
+                             //not equalTo query
+                            if(objectKeys === '$ne'){
+                                if(cloudObject.get(key) === query[key]['$ne']){
+                                    return false;
+                                }
+                            }
+
+                            //greater than
+                            if(objectKeys === '$gt'){
+                                if(cloudObject.get(key) <= query[key]['$gt']){
+                                    return false;
+                                }
+                            }
+
+                            //less than
+                            if(objectKeys === '$lt'){
+                                if(cloudObject.get(key) >= query[key]['$lt']){
+                                    return false;
+                                }
+                            }
+
+                            //greater than and equalTo. 
+                            if(objectKeys === '$gte'){
+                                if(cloudObject.get(key) < query[key]['$gte']){
+                                    return false;
+                                }
+                            }
+
+
+                            //less than and equalTo. 
+                            if(objectKeys === '$lte'){
+                                if(cloudObject.get(key) > query[key]['$lte']){
+                                    return false;
+                                }
+                            }
+
+                            //exists 
+                            if(objectKeys === '$exists'){
+                                if(query[key][objectKeys] && cloudObject.get(key)){
+                                    //do nothing.
+                                }else if(query[key][objectKeys]!==false){
+                                    return false;
+                                }
+                            }
+
+                            //doesNot exists. 
+                            if(objectKeys === '$exists'){
+                                if(!query[key][objectKeys] && cloudObject.get(key)){
+                                    return false;
+                                }
+                            }
+
+                            //startsWith. 
+                            if(objectKeys === '$regex'){
+
+                                var reg = new RegExp(query[key][objectKeys]);
+
+                                if(!query[key]['$options'] ){
+                                    if(!reg.test(cloudObject.get(key))) //test actial regex. 
+                                        return false;
+                                }else{
+                                    if(query[key]['$options']==='im'){ //test starts with.
+                                         //starts with.
+                                        var value = trimStart('^', query[key][objectKeys]);
+                                        if(cloudObject.get(key).indexOf(value)!==0)
+                                            return false;
+                                        }
+                                }
+
+                            }
+
+
+                            //containedIn. 
+                            if(objectKeys === '$in'){
+
+                                if(query[key][objectKeys]){
+                                    var arr =  query[key][objectKeys];
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        var exists = false;
+                                        for(var i=0;i<value.length;i++){
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)>-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])>-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }
+                                           
+                                        }
+
+                                        if(!exists){
+                                            return false;
+                                        }
+
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)===-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+
+                            //doesNot containedIn. 
+                            if(objectKeys === '$nin'){
+                                if(query[key][objectKeys]){
+                                    var arr =  query[key][objectKeys];
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        var exists = false;
+                                        for(var i=0;i<value.length;i++){
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)!==-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])!==-1){
+                                                    exists = true;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                        }
+                                        
+                                        if(exists){
+                                            return false;
+                                        }
+
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)!==-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+
+                            //containsAll. 
+                             if(objectKeys === '$all'){
+                                if(query[key][objectKeys]){
+                                    var arr =  query[key][objectKeys];
+                                    var value = null;
+                                    if(key.indexOf('.')>-1){ //for CloudObjects
+                                        value = cloudObject.get(key.substr(0,key.indexOf('.')));
+                                    }else{
+                                        value = cloudObject.get(key);
+                                    }
+
+                                    if( Object.prototype.toString.call( value ) === '[object Array]' ) {
+                                        for(var i=0;i<value.length;i++){
+                                            if(value[i] instanceof CB.CloudObject){
+                                                if(arr.indexOf(value[i].id)===-1){
+                                                    return false;
+                                                }
+                                            }else{
+                                                if(arr.indexOf(value[i])===-1){
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }else{
+                                        //if the element is not in the array then return false;
+                                        if(arr.indexOf(value)===-1)
+                                            return false;
+                                    }
+
+                                }
+                            }
+                        }
+                    
+                }
+            }else{
+                //it might be a plain equalTo query. 
+                if(key.indexOf('.')!==-1){ // for keys with "key._id" - This is for CloudObjects.
+                    var temp = key.substring(0, key.indexOf('.'));
+                    if(!cloudObject.get(temp)){
+                        return false;
+                    }
+
+                    if(cloudObject.get(temp).id !== query[key]){
+                        return false;
+                    }
+                }else{
+                    if(cloudObject.get(key) !== query[key]){
+                        return false;
+                    }
+                }
+                
+            }
+        }
+        
+   }
+
+   return true;
+};
+
+
+
+
+
+CB.SearchFilter = function(){
+
+    this.bool = {};
+    this.bool.must = []; //and
+    this.bool.should = []; //or
+    this.bool.must_not = []; //not
+    this.$include = []; //include
+};
+
+
+CB.SearchFilter.prototype.notEqualTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    //data can bean array too!
+    var term = {};
+    if (data instanceof Array) {
+        term.terms = {};
+        term.terms[columnName] = data;
+    } else {
+        term.term = {};
+        term.term[columnName] = data;
+    }
+
+    this.bool.must_not.push(term);
+
+    return this;
+
+};
+
+CB.SearchFilter.prototype.equalTo = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var term = {};
+    if (data instanceof Array) {
+        term.terms = {};
+        term.terms[columnName] = data;
+    } else {
+        term.term = {};
+        term.term[columnName] = data;
+    }
+
+    this.bool.must.push(term);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.exists = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.exists = {};
+    obj.exists.field = columnName;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.doesNotExist = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.missing = {};
+    obj.missing.field = columnName;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.greaterThanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['gte'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.greaterThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['gt'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.lessThan = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lt'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+    var obj = {};
+    obj.range = {};
+    obj.range[columnName] = {};
+    obj.range[columnName]['lte'] = data;
+
+    this.bool.must.push(obj);
+
+    return this;
+};
+
+
+//And logical function. 
+CB.SearchFilter.prototype.and = function(searchFilter) {
+
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over AND. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+    if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+    }
+
+    this.bool.must.push(searchFilter);
+
+    return this;
+};
+
+//OR Logical function
+CB.SearchFilter.prototype.or = function(searchFilter) {
+
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over OR. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+    if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+    }
+
+    this.bool.should.push(searchFilter);
+
+    return this;
+};
+
+
+//NOT logical function
+CB.SearchFilter.prototype.not = function(searchFilter) {
+
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over NOT. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+   }
+
+   this.bool.must_not.push(searchFilter);
+
+   return this;
+};
+
+CB.SearchFilter.prototype.include = function (columnName) {
+    if (columnName === 'id' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    this.$include.push(columnName);
+
+    return this;
+};
+
+
+/* This is Search Query*/
+
+CB.SearchQuery = function(){
+    this.bool = {};
+    this.bool.must = []; //and
+    this.bool.should = []; //or
+    this.bool.must_not = []; //not
+};
+
+CB.SearchQuery.prototype._buildSearchPhrase = function(columns, query, slop, boost) {
+
+    var obj = this._buildSearchOn(columns, query, null, null,null,boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'phrase';
+        if(slop){
+            obj.multi_match.slop = slop;
+        }
+     } else {
+        obj.match[columns].type = 'phrase';
+        if(slop){
+            obj.match[columns].slop = slop;
+        }
+     }
+
+     return obj;
+
+}
+
+
+CB.SearchQuery.prototype._buildBestColumns = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'best_fields';
+     } else {
+        obj.match[columns].type = 'best_fields';
+     }
+
+     return obj;
+};
+
+CB.SearchQuery.prototype._buildMostColumns = function(columns, query, fuzziness,  operator, match_percent, boost) {
+
+    var obj = this._buildSearchOn(columns, query, fuzziness, operator, match_percent, boost);
+
+     if (columns instanceof Array) {
+        obj.multi_match.type = 'most_fields';
+     } else {
+        obj.match[columns].type = 'most_fields';
+     }
+
+     return obj;
+};
+
+CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, operator, match_percent, boost) {
+
+    var obj = {};
+
+        if (columns instanceof Array) {
+            //if columns is an array.
+            obj.multi_match = {};
+            obj.multi_match.query = query;
+            obj.multi_match.fields = columns;
+            
+            if (operator) {
+                obj.multi_match.operator = operator;
+            } 
+
+            if(match_percent){
+                obj.multi_match.minimum_should_match = match_percent;
+            }
+            
+            if(boost){
+                obj.multi_match.boost = boost;
+            }
+
+            if(fuzziness){
+                obj.multi_match.fuzziness = fuzziness;
+            }
+
+        } else {
+
+            obj.match = {};
+            obj.match[columns] = {};
+            obj.match[columns].query = query;
+            
+            if (operator) {
+                obj.match[columns].operator = operator;
+            }
+
+            if(match_percent){
+                obj.match[columns].minimum_should_match = match_percent;
+            }
+
+            if(boost){
+                obj.match[columns].boost = boost;
+            }
+
+            if(fuzziness){
+                obj.match[columns].fuzziness = fuzziness;
+            }
+        }
+
+        return obj;
+
+}
+
+CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, all_words, match_percent, priority) {
+
+    //this is actually 'operator'
+    if(all_words){
+        all_words='and';
+    }
+        
+    var obj = this._buildSearchOn(columns,query, fuzziness,all_words,match_percent,priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+    
+};
+
+CB.SearchQuery.prototype.phrase = function(columns, query,fuzziness, priority) {
+
+        
+    var obj = this._buildSearchPhrase(columns, query,fuzziness, priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
+
+    if(!columns instanceof Array || columns.length<2)
+           throw "There should be more than one columns in-order to use this function";
+
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildBestColumns(columns, query, fuzziness, all_words, match_percent, priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, all_words, match_percent, priority) {
+
+    if(!columns instanceof Array || columns.length<2)
+           throw "There should be more than one columns in-order to use this function";
+
+    if(all_words){
+        all_words='and';
+    }
+
+    var obj = this._buildMostColumns(columns, query, fuzziness, all_words, match_percent, priority);
+    //save in query 'and' clause.
+    this.bool.should.push(obj); 
+
+    return this;
+};
+
+CB.SearchQuery.prototype.startsWith = function(column, value, priority) {
+
+    var obj = {};
+    obj.prefix = {};
+    obj.prefix[column] = {};
+    obj.prefix[column].value = value;
+    
+    if(priority){
+        obj.prefix[column].boost = priority;
+    }
+
+    this.bool.must.push(obj);
+};
+
+CB.SearchQuery.prototype.wildcard = function(column, value, priority) {
+
+    var obj = {};
+    obj.wildcard = {};
+    obj.wildcard[column] = {};
+    obj.wildcard[column].value = value;
+    
+    if(priority){
+        obj.wildcard[column].boost = priority;
+    }
+
+    this.bool.should.push(obj);
+};
+
+
+
+CB.SearchQuery.prototype.regexp = function(column, value, priority) {
+
+    var obj = {};
+    obj.regexp = {};
+    obj.regexp[column] = {};
+    obj.regexp[column].value = value;
+    
+    if(priority){
+        obj.regexp[column].boost = priority;
+    }
+
+    this.bool.must.push(obj);
+};
+
+//And logical function. 
+CB.SearchQuery.prototype.and = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.must.push(searchQuery);
+};
+
+//OR Logical function
+CB.SearchQuery.prototype.or = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.should.push(searchQuery);
+};
+
+
+//NOT logical function
+CB.SearchQuery.prototype.not = function(searchQuery) {
+
+    if(!searchQuery instanceof CB.SearchQuery){
+        throw "data should be of type CB.SearchQuery";
+    }
+
+    this.bool.must_not.push(searchQuery);
+};
+
+
+/* This is CloudSearch Function, 
+
+Params : 
+CollectionNames : string or string[] of collection names. (Required)
+SearchQuery : CB.SearchQuery Object (optional)
+SearchFilter : CB.SearchFilter Object (optional)
+*/
+
+CB.CloudSearch = function(collectionNames, searchQuery, searchFilter) {
+
+    this.collectionNames = collectionNames;
+    //make a filterd query in elastic search.
+
+    this.query = {};
+    this.query.filtered = {};
+    
+    
+    if(searchQuery){
+        this.query.filtered.query = searchQuery;
+    }else{
+        this.query.filtered.query = {};
+    }
+
+    if(searchFilter){
+        this.query.filtered.filter = searchFilter;
+    }else{
+        this.query.filtered.filter = {};
+    }
+
+    this.from = 0; //this is skip in usual terms.
+    this.size = 10; //this is take in usual terms.
+    this.sort = [];
+};
+
+Object.defineProperty(CB.CloudSearch.prototype, 'searchFilter', {
+    get: function() {
+        return this.query.filtered.filter;
+    },
+    set: function(searchFilter) {
+        this.query.filtered.filter = searchFilter;
+    }
+});
+
+
+Object.defineProperty(CB.CloudSearch.prototype, 'searchQuery', {
+    get: function() {
+        return this.query.filtered.query;
+    },
+    set: function(searchQuery) {
+        this.query.filtered.query = searchQuery;
+    }
+});
+
+CB.CloudSearch.prototype.setSkip = function(data) {
+    this.from = data;
+    return this;
+};
+
+CB.CloudSearch.prototype.setLimit = function(data) {
+    this.size = data;
+    return this;
+};
+
+CB.CloudSearch.prototype.orderByAsc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    var obj = {};
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'asc';
+    this.sort.push(obj);
+
+    return this;
+};
+
+CB.CloudSearch.prototype.orderByDesc = function(columnName) {
+
+    if (columnName === 'id' || columnName === 'isSearchable' || columnName === 'expires')
+        columnName = '_' + columnName;
+
+    var obj = {};
+    obj[columnName] = {};
+    obj[columnName]['order'] = 'desc';
+    this.sort.push(obj);
+
+    return this;
+};
+
+
+CB.CloudSearch.prototype.search = function(callback) {
+
+    CB._validate();
+
+    var collectionName = null;
+
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    if (this.collectionNames instanceof Array) {
+        collectionName = this.collectionNames.join(',');
+    } else {
+        collectionName = this.collectionNames;
+    }
+
+
+    var params=JSON.stringify({
+        collectionName: collectionName,
+        query: this.query,
+        sort: this.sort,
+        limit: this.size,
+        skip: this.from,
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/" + CB.appId + "/search" ;
+
+    CB._request('POST',url,params).then(function(response){
+        var object = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(object);
+        } else {
+            def.resolve(object);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if(!callback) {
+        return def;
+    }
+};
+
+/*
+ CloudUser
+ */
+CB.CloudUser = CB.CloudUser || function() {
+    if (!this.document) this.document = {};
+    this.document._tableName = 'User';
+    this.document._type = 'user';
+    this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+};
+CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
+Object.defineProperty(CB.CloudUser.prototype, 'username', {
+    get: function() {
+        return this.document.username;
+    },
+    set: function(username) {
+        this.document.username = username;
+        CB._modified(this,'username');
+    }
+});
+Object.defineProperty(CB.CloudUser.prototype, 'password', {
+    get: function() {
+        return this.document.password;
+    },
+    set: function(password) {
+        this.document.password = password;
+        CB._modified(this,'password');
+    }
+});
+Object.defineProperty(CB.CloudUser.prototype, 'email', {
+    get: function() {
+        return this.document.email;
+    },
+    set: function(email) {
+        this.document.email = email;
+        CB._modified(this,'email');
+    }
+});
+CB.CloudUser.current = new CB.CloudUser();
+CB.CloudUser.prototype.signUp = function(callback) {
+    if (!this.document.username) {
+        throw "Username is not set.";
+    }
+    if (!this.document.password) {
+        throw "Password is not set.";
+    }
+    if (!this.document.email) {
+        throw "Email is not set.";
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //now call the signup API.
+    var params=JSON.stringify({
+        document: CB.toJSON(thisObj),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
+
+    CB._request('POST',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        CB.CloudUser.current = thisObj;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+};
+CB.CloudUser.prototype.logIn = function(callback) {
+    if (!this.document.username) {
+        throw "Username is not set.";
+    }
+    if (!this.document.password) {
+        throw "Password is not set.";
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //now call the signup API.
+    var params=JSON.stringify({
+        document: CB.toJSON(thisObj),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
+
+    CB._request('POST',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        CB.CloudUser.current = thisObj;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+CB.CloudUser.prototype.logOut = function(callback) {
+    if (!this.document.username) {
+        throw "Username is not set.";
+    }
+    if (!this.document.password) {
+        throw "Password is not set.";
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //now call the logout API.
+    var params=JSON.stringify({
+        document: CB.toJSON(thisObj),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
+
+    CB._request('POST',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        CB.CloudUser.current = null;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+};
+CB.CloudUser.prototype.addToRole = function(role, callback) {
+    if (!role) {
+        throw "Role is null";
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //Call the addToRole API
+    var params=JSON.stringify({
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
+
+    CB._request('PUT',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+CB.CloudUser.prototype.isInRole = function(role) {
+    if (!role) {
+        throw "role is null";
+    }
+    return (this.get('roles').indexOf(role.document._id) >= 0);
+};
+CB.CloudUser.prototype.removeFromRole = function(role, callback) {
+    if (!role) {
+        throw "Role is null";
+    }
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //now call the removeFromRole API.
+    var params=JSON.stringify({
+        user: CB.toJSON(thisObj),
+        role: CB.toJSON(role),
+        key: CB.appKey
+    });
+    url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
+
+    CB._request('PUT',url,params).then(function(response){
+        CB.fromJSON(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+/*
+ CloudRole
+ */
+CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
+    if (!this.document) this.document = {};
+    this.document._tableName = 'Role';
+    this.document._type = 'role';
+    this.document.name = roleName;
+    this.document.ACL = new CB.ACL();
+    this.document._isModified = true;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name'];
+};
+
+CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
+
+Object.defineProperty(CB.CloudRole.prototype, 'name', {
+    get: function() {
+        return this.document.name;
+    },
+    set: function(name) {
+        this.document.name = name;
+        CB._modified(this,name);
+    }
+});
+
+/*
+ CloudFiles
+ */
+
+CB.CloudFile = CB.CloudFile || function(file,data,type) {
+
+    if(!file)
+        throw "File is null.";
+
+    if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
+
+        this.fileObj = file;
+
+        this.document = {
+            _type: 'file',
+            name: (file && file.name && file.name !== "") ? file.name : 'unknown',
+            size: file.size,
+            url: '',
+            contentType : (typeof file.type !== "undefined" && file.type !== "") ? file.type : 'unknown'
+        };
+
+    } else if(typeof file === "string") {
+
+        var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
+        if (regexp.test(file)) {
+            this.document = {
+                _type: 'file',
+                name: '',
+                size: '',
+                url: file,
+                contentType : ''
+            };
+        } else{
+            if(data){
+                this.data = data;
+                if(!type){
+                    type = file.split('.')[file.split('.').length-1];
+                }
+                this.document = {
+                    _type: 'file',
+                    name: file,
+                    size: '',
+                    url: '',
+                    contentType : type
+                };
+            }else{
+                throw "Invalid File. It should be of type file or blob";
+            }
+        }
+    }
+    else{
+        throw "Invalid File. It should be of type file or blob";
+    }
+};
+
+Object.defineProperty(CB.CloudFile.prototype, 'type', {
+    get: function() {
+        return this.document.contentType;
+    },
+    set: function(type) {
+        this.document.contentType = type;
+    }
+});
+
+Object.defineProperty(CB.CloudFile.prototype, 'url', {
+    get: function() {
+        return this.document.url;
+    },
+    set: function(url) {
+        this.document.url = url;
+    }
+});
+
+Object.defineProperty(CB.CloudFile.prototype, 'size', {
+    get: function() {
+        return this.document.size;
+    },
+    set: function(size) {
+        this.document.size = size;
+    }
+});
+
+Object.defineProperty(CB.CloudFile.prototype, 'name', {
+    get: function() {
+        return this.document.name;
+    },
+    set: function(name) {
+        this.document.name = name;
+    }
+});
+
+CB.CloudFile.prototype.save = function(callback) {
+
+    var def;
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+
+    var thisObj = this;
+
+
+    if(!this.fileObj && !this.data)
+        throw "You cannot save a file which is null";
+
+    if(!this.data) {
+        var formdata = new FormData();
+        formdata.append("fileToUpload", this.fileObj);
+        formdata.append("key", CB.appKey);
+
+        var xmlhttp = CB._loadXml();
+        var params = formdata;
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        xmlhttp.open('POST', url, true);
+        if (CB._isNode) {
+            var LocalStorage = require('node-localstorage').LocalStorage;
+            localStorage = new LocalStorage('./scratch');
+            xmlhttp.setRequestHeader("User-Agent",
+                "CB/" + CB.version +
+                " (NodeJS " + process.versions.node + ")");
+        }
+        var ssid = localStorage.getItem('sessionID');
+        if (ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+        xmlhttp.send(params);
+
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == xmlhttp.DONE) {
+                if (xmlhttp.status == 200) {
+                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if (sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                    if (callback) {
+                        callback.success(thisObj);
+                    } else {
+                        def.resolve(thisObj);
+                    }
+                } else {
+                    if (callback) {
+                        callback.error(xmlhttp.responseText);
+                    } else {
+                        def.reject(xmlhttp.responseText);
+                    }
+                }
+            }
+        }
+    }else{
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            data: this.data,
+            key: CB.appKey
+        });
+        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        //console.log(params);
+        CB._request('POST',url,params).then(function(response){
+            thisObj.url = JSON.parse(response)._url;
+            delete thisObj.data;
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+    }
+
+
+    if (!callback) {
+        return def;
+    }
+}
+
+CB.CloudFile.prototype.delete = function(callback) {
+    var def;
+
+    if(!this.url) {
+        throw "You cannot delete a file which does not have an URL";
+    }
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+
+    var params=JSON.stringify({
+        url: thisObj.url,
+        key: CB.appKey
+    });
+    url = CB.serverUrl+'/file/' + CB.appId + '/delete' ;
+
+    CB._request('POST',url,params).then(function(response){
+        thisObj.url = null;
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+}
+/*
+ *CloudGeoPoint
+ */
+
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+    if(!latitude || !longitude)
+        throw "Latitude or Longitude is empty.";
+
+    if(isNaN(latitude))
+        throw "Latitude "+ latitude +" is not a number type.";
+
+    if(isNaN(longitude))
+        throw "Longitude "+ longitude+" is not a number type.";
+
+    this.document = {};
+    this.document._type = "point";
+    this.document._isModified = true;
+    //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
+    if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180)) {
+        this.document.coordinates = [Number(longitude), Number(latitude)];
+        this.document.latitude = Number(longitude);
+        this.document.longitude = Number(latitude);
+    }
+    else
+        throw "latitude and longitudes are not in range";
+};
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
+    get: function() {
+        return this.document.coordinates[1];
+    },
+    set: function(latitude) {
+        if(Number(latitude)>= -90 && Number(latitude)<=90) {
+            this.document.longitude = Number(latitude);
+            this.document.coordinates[1] = Number(latitude);
+            this.document._isModified = true;
+        }
+        else
+            throw "Latitude is not in Range";
+    }
+});
+
+Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
+    get: function() {
+        return this.document.coordinates[0];
+    },
+    set: function(longitude) {
+        if(Number(longitude)>= -180 && Number(longitude)<=180) {
+            this.document.latitude = Number(longitude);
+            this.document.coordinates[0] = Number(longitude);
+            this.document._isModified = true;
+        }
+        else
+            throw "Longitude is not in Range";
+    }
+});
+
+CB.CloudGeoPoint.prototype.get = function(name) { //for getting data of a particular column
+
+    if(name === 'latitude')
+        return this.document.longitude;
+    else
+        return this.document.latitude;
+
+};
+
+CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a particular column
+
+    if(name === 'latitude') {
+        if(Number(value)>= -90 && Number(value)<=90) {
+            this.document.longitude = Number(value);
+            this.document.coordinates[1] = Number(value);
+            this.document._isModified = true;
+        }
+        else
+            throw "Latitude is not in Range";
+    }
+    else {
+        if(Number(value)>= -180 && Number(value)<=180) {
+            this.document.latitude = Number(value);
+            this.document.coordinates[0] = Number(value);
+            this.document._isModified = true;
+        }
+        else
+            throw "Latitude is not in Range";
+    }
+};
+CB.CloudGeoPoint.prototype.distanceInKMs = function(point) {
+
+    var earthRedius = 6371; //in Kilometer
+    return earthRedius * greatCircleFormula(this, point);
+};
+
+CB.CloudGeoPoint.prototype.distanceInMiles = function(point){
+
+    var earthRedius = 3959 // in Miles
+    return earthRedius * greatCircleFormula(this, point);
+
+};
+
+CB.CloudGeoPoint.prototype.distanceInRadians = function(point){
+
+    return greatCircleFormula(this, point);
+};
+
+function greatCircleFormula(thisObj, point){
+
+    var dLat =(thisObj.document.coordinates[1] - point.document.coordinates[1]).toRad();
+    var dLon = (thisObj.document.coordinates[0] - point.document.coordinates[0]).toRad();
+    var lat1 = (point.document.coordinates[1]).toRad();
+    var lat2 = (thisObj.document.coordinates[1]).toRad();
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return c;
+}
+
+if (typeof(Number.prototype.toRad) === "undefined") {
+    Number.prototype.toRad = function() {
+        return this * Math.PI / 180;
+    }
+}
+
+/* PRIVATE METHODS */
+CB.toJSON = function(thisObj) {
+
+    var url=null;
+    if(thisObj instanceof  CB.CloudFile)
+        url=thisObj.document.url;
+
+    var obj= CB._clone(thisObj,url);
+
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
+    }
+
+    if(obj instanceof CB.CloudFile)
+        return obj.document;
+
+    if(obj instanceof CB.CloudGeoPoint)
+        return obj.document;
+
+    var doc = obj.document;
+
+    for (var key in doc) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
+            //if something is a relation.
+            doc[key] = CB.toJSON(doc[key]); //serialize this object.
+        } else if (key === 'ACL') {
+            //if this is an ACL, then. Convert this from CB.ACL object to JSON - to strip all the ACL Methods.
+            var acl = {
+                write: doc[key].write,
+                read: doc[key].read
+            };
+            doc[key] = acl;
+        } else if (doc[key] instanceof Array) {
+            //if this is an array.
+            //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
+                var arr = [];
+                for (var i = 0; i < doc[key].length; i++) {
+                    arr.push(CB.toJSON(doc[key][i]));
+                }
+                doc[key] = arr;
+            }
+        }
+    }
+
+    return doc;
+};
+
+CB.fromJSON = function(data, thisObj) {
+
+    //prevObj : is a copy of object before update.
+    //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
+    //if data is a list it will return a list of CloudObjects.
+    if (!data)
+        return null;
+
+    if (data instanceof Array) {
+
+        if (data[0] && data[0] instanceof Object) {
+
+            var arr = [];
+
+            for (var i = 0; i < data.length; i++) {
+                obj = CB.fromJSON(data[i]);
+                arr.push(obj);
+            }
+
+            return arr;
+
+        } else {
+            //this is just a normal array, not an array of CloudObjects.
+            return data;
+        }
+    } else if (data instanceof Object && data._type) {
+
+        //if this is a CloudObject.
+        var document = {};
+        //different types of classes.
+
+        for (var key in data) {
+            if(data[key] instanceof Array) {
+                document[key]=CB.fromJSON(data[key]);
+            }else if (data[key] instanceof Object) {
+                if (key === 'ACL') {
+                    //this is an ACL.
+                    document[key] = new CB.ACL();
+                    document[key].write = data[key].write;
+                    document[key].read = data[key].read;
+
+                } else if(data[key]._type) {
+                    if(thisObj)
+                        document[key] = CB.fromJSON(data[key], thisObj.get(key));
+                    else
+                        document[key] = CB.fromJSON(data[key]);
+                }else{
+                    document[key] = data[key];
+                }
+            }else {
+                document[key] = data[key];
+            }
+        }
+
+        if(!thisObj){
+            var url=null;
+            var latitude = null;
+            var longitude = null;
+            if(document._type === "file")
+                url=document.url;
+            if(document._type === "point"){
+                latitude = document.longitude;
+                longitude = document.latitude;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
+            obj.document = document;
+            return obj;
+        }else{
+            thisObj.document = document;
+            return thisObj;
+        }
+
+    }else {
+        //if this is plain json.
+        return data;
+    }
+};
+
+CB._getObjectByType = function(type,url,latitude,longitude){
+
+    var obj = null;
+
+    if (type === 'custom') {
+        obj = new CB.CloudObject();
+    }
+
+    if (type === 'role') {
+        obj = new CB.CloudRole();
+    }
+
+    if (type === 'user') {
+        obj = new CB.CloudUser();
+    }
+
+    if (type === 'file') {
+        obj = new CB.CloudFile(url);
+    }
+
+    if(type === 'point'){
+        obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
+    return obj;
+};
+
+
+CB._validate = function() {
+    if (!CB.appId) {
+        throw "AppID is null. Please use CB.CLoudApp.init to initialize your app.";
+    }
+
+    if(!CB.appKey){
+        throw "AppKey is null. Please use CB.CLoudApp.init to initialize your app.";
+    }
+};
+
+
+//to check if its running under node, If yes - then export CB.
+(function () {
+    // Establish the root object, `window` in the browser, or `global` on the server.
+    var root = this;
+    // Create a reference to this
+    var _ = new Object();
+})();
+
+function _all(arrayOfPromises) {
+    //this is simplilar to Q.all for jQuery promises.
+    return jQuery.when.apply(jQuery, arrayOfPromises).then(function() {
+        return Array.prototype.slice.call(arguments, 0);
+    });
+};
+
+if(CB._isNode){
+    module.exports = {};
+    module.exports = CB;
+}
+
+
+CB._clone=function(obj,url){
+    var n_obj = null;
+    if(obj.document._type && obj.document._type != 'point') {
+        n_obj = CB._getObjectByType(obj.document._type,url);
+        var doc=obj.document;
+        var doc2={};
+        for (var key in doc) {
+            if(doc[key] instanceof CB.CloudObject)
+                doc2[key]=CB._clone(doc[key],null);
+            else if(doc[key] instanceof CB.CloudFile){
+                doc2[key]=CB._clone(doc[key],doc[key].document.url);
+            }else if(doc[key] instanceof CB.CloudGeoPoint){
+                doc2[key]=CB._clone(doc[key], null);
+            }
+            else
+                doc2[key]=doc[key];
+        }
+    }else if(obj instanceof CB.CloudGeoPoint){
+        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        return n_obj;
+    }
+    n_obj.document=doc2;
+    return n_obj;
+};
+
+CB._request=function(method,url,params)
+{
+
+    CB._validate();
+
+    if(!CB.CloudApp._isConnected)
+        throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
+    var def = new CB.Promise();
+    var xmlhttp= CB._loadXml();
+    if (CB._isNode) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    }
+    xmlhttp.open(method,url,true);
+    xmlhttp.setRequestHeader('Content-Type','text/plain');
+    var ssid = CB._getSessionId();
+    if(ssid != null)
+        xmlhttp.setRequestHeader('sessionID', ssid);
+    if(CB._isNode)
+        xmlhttp.setRequestHeader("User-Agent",
+            "CB/" + CB.version +
+            " (NodeJS " + process.versions.node + ")");
+    xmlhttp.send(params);
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == xmlhttp.DONE) {
+            if (xmlhttp.status == 200) {
+                var sessionID = xmlhttp.getResponseHeader('sessionID');
+                if(sessionID)
+                    localStorage.setItem('sessionID', sessionID);
+                else
+                    localStorage.removeItem('sessionID');
+                def.resolve(xmlhttp.responseText);
+            } else {
+                console.log(xmlhttp.status);
+                def.reject(xmlhttp.responseText);
+            }
+        }
+    }
+    return def;
+};
+
+CB._getSessionId = function(){
+    return localStorage.getItem('sessionID');
+};
+
+CB._modified = function(thisObj,columnName){
+    thisObj.document._isModified = true;
+    if(thisObj.document._modifiedColumns) {
+        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
+            thisObj.document._modifiedColumns.push(columnName);
+        }
+    }else{
+        thisObj.document._modifiedColumns = [];
+        thisObj.document._modifiedColumns.push(columnName);
+    }
+};
+
+
+function trimStart(character, string) {
+    var startIndex = 0;
+
+    while (string[startIndex] === character) {
+        startIndex++;
+    }
+
+    return string.substr(startIndex);
+}

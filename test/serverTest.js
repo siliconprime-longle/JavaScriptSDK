@@ -25,6 +25,12 @@ describe("Server Check",function(){
                     done();
                 }
                 else {
+                    if(window.mochaPhantomJS){
+                         console.log('RUNNING IN PHANTOM JS'); 
+                         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+                         CB.socketIoUrl = CB.serverUrl;
+                         CB.apiUrl = CB.serverUrl + '/api';
+                    }
                     CB.appId = 'travis123';
                     CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
                     done();

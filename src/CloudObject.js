@@ -69,12 +69,42 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 });
 
 /* This is Real time implementation of CloudObjects */
-CB.CloudObject.on = function(tableName, eventType, callback, done) {
+CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
     var def;
+    
+    //shift variables. 
+    if(cloudQuery && !(cloudQuery instanceof CB.CloudQuery)){
+        //this is a function. 
+        if(callback !== null && typeof callback === 'object'){
+            //callback is actually done. 
+            done = callback;
+            callback = null;
+        }
+        callback = cloudQuery;
+        cloudQuery = null;
+    }
 
     if (!done) {
         def = new CB.Promise();
+    }
+
+    //validate query. 
+    if(cloudQuery && cloudQuery instanceof CB.CloudQuery){
+
+        if(cloudQuery.tableName!== tableName){
+            throw "CloudQuery TableName and CloudNotification TableName should be same.";
+        }
+
+        if(cloudQuery.query){
+            if(cloudQuery.query.$include.length>0){
+                throw "Include with CloudNotificaitons is not supported right now.";
+            }
+        }
+
+        if(Object.keys(cloudQuery.select).length > 0){
+            throw "You cannot pass the query with select in CloudNotifications.";
+        }
     }
 
     tableName = tableName.toLowerCase();
@@ -82,7 +112,7 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
     if (eventType instanceof Array) {
         //if event type is an array.
         for(var i=0;i<eventType.length;i++){
-            CB.CloudObject.on(tableName, eventType[i], callback);
+            CB.CloudObject.on(tableName, eventType[i], cloudQuery, callback);
             if(done && done.success)
                 done.success();
             else
@@ -91,9 +121,19 @@ CB.CloudObject.on = function(tableName, eventType, callback, done) {
     } else {
         eventType = eventType.toLowerCase();
         if(eventType==='created' || eventType === 'updated' || eventType === 'deleted'){
-            CB.Socket.emit('join-object-channel',(CB.appId+'table'+tableName+eventType).toLowerCase());
+
+            var payload = {
+                room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
+                sessionId : CB._getSessionId(),
+            };
+
+            CB.Socket.emit('join-object-channel',payload);
             CB.Socket.on((CB.appId+'table'+tableName+eventType).toLowerCase(), function(data){ //listen to events in custom channel.
-                callback(CB.fromJSON(data));
+                data = CB.fromJSON(data);
+                if(cloudQuery && cloudQuery instanceof CB.CloudQuery && CB.CloudObject._validateNotificationQuery(data, cloudQuery))
+                    callback(data);
+                else if(!cloudQuery)
+                    callback(data);
             });
 
             if(done && done.success)
@@ -320,3 +360,37 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         return def;
     }
 };
+
+/* Private Methods */
+CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
+   
+   if(!cloudQuery)
+        throw "CloudQuery is null";
+
+    if(!cloudQuery.query)
+        throw "There is no query in CloudQuery";
+   
+   //validate query. 
+   var query = cloudQuery.query;
+
+   if(cloudQuery.limit===0)
+        return false;
+    
+   if(cloudQuery.skip>0){
+        --cloudQuery.skip;
+        return false;
+    }
+
+
+   //delete include
+   delete query.$include;
+
+   if(CB.CloudQuery._validateQuery(cloudObject, query)){
+        //redice limit of CloudQuery.
+       --cloudQuery.limit;
+       return true;
+   }else{
+    return false;
+   }
+};
+

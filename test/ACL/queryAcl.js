@@ -9,6 +9,12 @@ describe("Query_ACL", function () {
     var user = new CB.CloudUser();
     it("Should create new user", function (done) {
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
         this.timeout(20000);
         user.set('username', username);
         user.set('password',passwd);
@@ -25,6 +31,13 @@ describe("Query_ACL", function () {
     });
 
     it("Should set the public read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
 
         this.timeout(20000);
 
@@ -58,6 +71,12 @@ describe("Query_ACL", function () {
     obj1.isSearchable = true;
     obj1.set('age',60);
     it("Should search object with user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
 
         this.timeout(20000);
         obj1.ACL = new CB.ACL();

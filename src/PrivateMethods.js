@@ -51,7 +51,6 @@ CB.fromJSON = function(data, thisObj) {
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
-
     if (!data)
         return null;
 
@@ -211,6 +210,12 @@ CB._clone=function(obj,url){
 
 CB._request=function(method,url,params)
 {
+
+    CB._validate();
+
+    if(!CB.CloudApp._isConnected)
+        throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
     if (CB._isNode) {
@@ -219,7 +224,7 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = localStorage.getItem('sessionID');
+    var ssid = CB._getSessionId();
     if(ssid != null)
         xmlhttp.setRequestHeader('sessionID', ssid);
     if(CB._isNode)
@@ -244,6 +249,11 @@ CB._request=function(method,url,params)
     }
     return def;
 };
+
+CB._getSessionId = function(){
+    return localStorage.getItem('sessionID');
+};
+
 CB._modified = function(thisObj,columnName){
     thisObj.document._isModified = true;
     if(thisObj.document._modifiedColumns) {
@@ -255,3 +265,14 @@ CB._modified = function(thisObj,columnName){
         thisObj.document._modifiedColumns.push(columnName);
     }
 };
+
+
+function trimStart(character, string) {
+    var startIndex = 0;
+
+    while (string[startIndex] === character) {
+        startIndex++;
+    }
+
+    return string.substr(startIndex);
+}
