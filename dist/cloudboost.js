@@ -7949,7 +7949,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
             var payload = {
                 room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
-                sessionId : CB._getSessionId(),
+                sessionId : CB._getSessionId()
             };
 
             CB.Socket.emit('join-object-channel',payload);
@@ -8423,6 +8423,7 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
     var isCloudObject = false;
 
+    var CbData = [];
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8430,33 +8431,32 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
         throw 'Array / value / CloudObject expected as an argument';
     }
 
-    
+
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
+            if(data[i] instanceof CB.CloudObject){
                 isCloudObject = true;
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
-
-                data[i] = data[i].id;
+                CbData.push(data[i].id);
             }
         }
 
         if(isCloudObject){
             columnName = columnName+'._id';
         }
-        
+
 
         if (!this.query[columnName]) {
-                    this.query[columnName] = {};
+            this.query[columnName] = {};
         }
 
-        this.query[columnName]["$in"] = data;
+        this.query[columnName]["$in"] = CbData;
         thisObj = this;
         if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing dublicates
-            data.forEach(function(val) {
+            CbData.forEach(function(val) {
                 if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
                     thisObj.query[columnName]["$nin"].splice(index, 1);
                 }
@@ -8472,27 +8472,28 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
-                this.query[columnName] = {};
+            this.query[columnName] = {};
         }
 
 
         if (!this.query[columnName]["$in"]) {
             this.query[columnName]["$in"] = [];
         }
-        if (this.query[columnName]["$in"].indexOf(data) === -1) {
-            this.query[columnName]["$in"].push(data);
+        if (this.query[columnName]["$in"].indexOf(CbData) === -1) {
+            this.query[columnName]["$in"].push(CbData);
         }
         if (typeof this.query[columnName]["$nin"] !== 'undefined') {
-            if ((index = this.query[columnName]["$nin"].indexOf(data)) >= 0) {
+            if ((index = this.query[columnName]["$nin"].indexOf(CbData)) >= 0) {
                 this.query[columnName]["$nin"].splice(index, 1);
             }
         }
     }
-    
+
 
     return this;
 }
@@ -8501,6 +8502,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 
     var isCloudObject = false;
 
+    var CbData = [];
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8511,29 +8513,29 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
+            if(data[i] instanceof CB.CloudObject){
                 isCloudObject = true;
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
                 }
 
-                data[i] = data[i].id;           
+                CbData.push(data[i].id);
             }
         }
 
         if(isCloudObject){
             columnName = columnName+'._id';
         }
-           
 
-         if (!this.query[columnName]) {
+
+        if (!this.query[columnName]) {
             this.query[columnName] = {};
-         }
+        }
 
-        this.query[columnName]["$nin"] = data;
-        if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing dublicates
+        this.query[columnName]["$nin"] = CbData;
+        if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing duplicates
             thisObj = this;
-            data.forEach(function(val) {
+            CbData.forEach(function(val) {
                 if ((index = thisObj.query[columnName]["$in"].indexOf(val)) >= 0) {
                     thisObj.query[columnName]["$in"].splice(index, 1);
                 }
@@ -8548,8 +8550,9 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
@@ -8559,11 +8562,11 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
         if (!this.query[columnName]["$nin"]) {
             this.query[columnName]["$nin"] = [];
         }
-        if (this.query[columnName]["$nin"].indexOf(data) === -1) {
-            this.query[columnName]["$nin"].push(data);
+        if (this.query[columnName]["$nin"].indexOf(CbData) === -1) {
+            this.query[columnName]["$nin"].push(CbData);
         }
         if (typeof this.query[columnName]["$in"] !== 'undefined') {
-            if ((index = this.query[columnName]["$in"].indexOf(data)) >= 0) {
+            if ((index = this.query[columnName]["$in"].indexOf(CbData)) >= 0) {
                 this.query[columnName]["$in"].splice(index, 1);
             }
         }
@@ -8600,6 +8603,8 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
     var isCloudObject = false;
 
+    var CbData = [];
+
     if (columnName === 'id' || columnName === 'expires')
         columnName = '_' + columnName;
 
@@ -8612,15 +8617,15 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
-                
+            if(data[i] instanceof CB.CloudObject){
+
                 isCloudObject = true;
 
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
                 }
 
-                data[i] = data[i].id;           
+                CbData.push(data[i].id);
             }
         }
 
@@ -8630,10 +8635,10 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
-         }
+        }
 
-        this.query[columnName]["$all"] = data;
-        
+        this.query[columnName]["$all"] = CbData;
+
     } else { //if the argument is a string then push if it is not present already
 
         if(data instanceof CB.CloudObject){
@@ -8643,8 +8648,9 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
@@ -8654,14 +8660,15 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
         if (!this.query[columnName]["$all"]) {
             this.query[columnName]["$all"] = [];
         }
-        if (this.query[columnName]["$all"].indexOf(data) === -1) {
-            this.query[columnName]["$all"].push(data);
+        if (this.query[columnName]["$all"].indexOf(CbData) === -1) {
+            this.query[columnName]["$all"].push(CbData);
         }
-        
+
     }
 
     return this;
 }
+
 
 CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     if (columnName === 'id' || columnName === 'expires')
