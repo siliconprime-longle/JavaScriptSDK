@@ -90,4 +90,30 @@ describe("CloudQuery - Encryption", function () {
 
     });
 
+    it("should not encrypt already encrypted passwords", function (done) {
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('User');
+        obj.set('username',util.makeEmail());
+        obj.set('password','password');
+        obj.set('email',util.makeEmail());
+        obj.save().then(function(obj){
+            var query = new CB.CloudQuery('User');
+            query.findById(obj.get('id')).then(function(obj1){
+                obj1.save().then(function(obj2){
+                    if(obj2.get('password') === obj2.get('password'))
+                        done();
+                },function(){
+                    throw "Encrypted the password field again";
+                });
+            }, function (err) {
+                throw "unable to find object by id";
+            });
+        }, function(){
+            throw "Cannot save a CloudObject";
+        });
+
+    });
+
 });

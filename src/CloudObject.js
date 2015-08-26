@@ -124,7 +124,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
             var payload = {
                 room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
-                sessionId : CB._getSessionId(),
+                sessionId : CB._getSessionId()
             };
 
             CB.Socket.emit('join-object-channel',payload);

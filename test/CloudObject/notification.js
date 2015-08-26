@@ -2,14 +2,16 @@ describe("Cloud Objects Notification", function() {
   
 	var obj = new CB.CloudObject('Student');
     var obj1 = new CB.CloudObject('student4');
-  it("should alert when the object is created.", function(done) {
+
+    it("should alert when the object is created.", function(done) {
 
       this.timeout(20000);
 
       CB.CloudObject.on('Student', 'created', function(data){
        if(data.get('name') === 'sample') {
+           console.log(data);
            done();
-           CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
+           //CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
        }
        else
         throw "Wrong data received.";
@@ -25,7 +27,16 @@ describe("Cloud Objects Notification", function() {
       });
     });
 
-   it("should throw an error when wrong event type is entered. ", function(done) {
+    it("should save",function(done){
+        this.timeout(10000);
+
+       var obj = new CB.CloudObject('Student');
+        obj.set('name','sample');
+        obj.save();
+        done();
+    });
+
+   /*it("should throw an error when wrong event type is entered. ", function(done) {
 
        this.timeout(20000);
      	try{
@@ -174,6 +185,6 @@ describe("Cloud Objects Notification", function() {
       	}
 
       }, 5000);
-    });
+    });*/
 
 });
