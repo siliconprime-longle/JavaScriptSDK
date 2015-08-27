@@ -1,3 +1,5 @@
+[![Build Status](http://cbjenkins.cloudapp.net:8080/job/DataServicesPushProduction/14/badge/icon)](http://cbjenkins.cloudapp.net:8080/job/DataServicesPushProduction/14/)
+
 # CloudBoost.io : Hybrid No-Sql Database as a Service
 
 
