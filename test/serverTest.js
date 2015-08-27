@@ -22,6 +22,7 @@ describe("Server Check",function(){
                     CB.serverUrl = 'http://localhost:4730';
                     CB.socketIoUrl = CB.serverUrl;
                     CB.apiUrl = CB.serverUrl + '/api';
+                    
                     done();
 
                 }
