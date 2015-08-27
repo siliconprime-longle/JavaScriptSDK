@@ -19,7 +19,7 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.searchFilter.include('newColumn7');
                 cs.searchFilter.equalTo('id',obj.id);
                 cs.search().then(function(list){
-
+                    console.log(list);
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             console.log('LIST');
