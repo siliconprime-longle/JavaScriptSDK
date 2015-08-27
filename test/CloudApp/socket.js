@@ -15,7 +15,6 @@ describe("CloudApp Socket Test", function () {
 
        this.timeout(30000);
 
-       CB.CloudApp.disconnect();
 
        CB.CloudApp.onConnect(function(){
         done();
