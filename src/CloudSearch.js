@@ -186,7 +186,7 @@ CB.SearchFilter.prototype.not = function(searchFilter) {
 };
 
 CB.SearchFilter.prototype.include = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.$include.push(columnName);

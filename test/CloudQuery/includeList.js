@@ -37,7 +37,6 @@
         obj.set('newColumn2',obj3);
         obj2.set('room',509);
         obj1.set('name', 'Vipul');
-        obj1.set('expires',null);
         obj.set('newColumn7', obj1);
         obj1.set('newColumn',obj2);
         obj.save().then(function() {
@@ -61,7 +60,6 @@
         obj.set('newColumn2',obj3);
         obj2.set('room',509);
         obj1.set('name', 'Vipul');
-        obj1.set('expires',null);
         obj.set('newColumn7', obj1);
         obj1.set('newColumn',obj2);
         obj.save().then(function(obj) {

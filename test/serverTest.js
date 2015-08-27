@@ -23,6 +23,7 @@ describe("Server Check",function(){
                     CB.socketIoUrl = CB.serverUrl;
                     CB.apiUrl = CB.serverUrl + '/api';
                     done();
+
                 }
                 else {
                     if(window.mochaPhantomJS){

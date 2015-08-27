@@ -959,7 +959,6 @@ describe("CloudObjectExpires", function () {
         var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.set('age', 10);
-        obj.expires=new Date().getTime();
         obj.isSearchable=true;
         obj.save().then(function(obj1) {
             if(obj1.get('expires'))
@@ -4022,7 +4021,6 @@ describe("CloudQuery Include", function (done) {
         obj.set('newColumn2',obj3);
         obj2.set('room',509);
         obj1.set('name', 'Vipul');
-        obj1.set('expires',null);
         obj.set('newColumn7', obj1);
         obj1.set('newColumn',obj2);
         obj.save().then(function() {
@@ -4046,7 +4044,6 @@ describe("CloudQuery Include", function (done) {
         obj.set('newColumn2',obj3);
         obj2.set('room',509);
         obj1.set('name', 'Vipul');
-        obj1.set('expires',null);
         obj.set('newColumn7', obj1);
         obj1.set('newColumn',obj2);
         obj.save().then(function(obj) {

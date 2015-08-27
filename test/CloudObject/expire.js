@@ -6,8 +6,6 @@ describe("CloudObjectExpires", function () {
         var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.set('age', 10);
-        obj.expires=new Date().getTime();
-        obj.isSearchable=true;
         obj.save().then(function(obj1) {
             if(obj1.get('expires'))
                 done();
