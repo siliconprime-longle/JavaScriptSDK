@@ -1,5 +1,6 @@
 [![Build Status](http://cbjenkins.cloudapp.net:8080/job/DataServicesPushProduction/badge/icon)](http://cbjenkins.cloudapp.net:8080/job/DataServicesPushProduction/)
 
+
 ## NPM Installation
 ```
 npm install cloudboost
