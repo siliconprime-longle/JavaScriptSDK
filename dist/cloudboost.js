@@ -7833,9 +7833,10 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document.expires = null;
 
     if(!id){
-        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
         this.document._isModified = true;
     }
     else{
@@ -9821,9 +9822,10 @@ CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
     this.document._type = 'user';
+    this.document.expires = null;
     this.document.ACL = new CB.ACL();
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
 
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
@@ -10082,8 +10084,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
     this.document.ACL = new CB.ACL();
+    this.document.expires = null;
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name','expires'];
 };
 
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
@@ -10686,7 +10689,7 @@ CB._request=function(method,url,params)
                 def.reject(xmlhttp.responseText);
             }
         }
-    }
+    };
     return def;
 };
 

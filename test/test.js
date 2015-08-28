@@ -43,7 +43,8 @@ describe("Server Check",function(){
                     CB.serverUrl = 'http://localhost:4730';
                     CB.socketIoUrl = CB.serverUrl;
                     CB.apiUrl = CB.serverUrl + '/api';
-                    
+                    CB.appId = 'travis123';
+                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
                     done();
 
                 }
@@ -985,9 +986,12 @@ describe("CloudObject - Encryption", function () {
         obj.save().then(function(obj){
             var query = new CB.CloudQuery('User');
             query.findById(obj.get('id')).then(function(obj1){
+                obj1.set('updatedAt',new Date());
                 obj1.save().then(function(obj2){
-                    if(obj2.get('password') === obj2.get('password'))
+                    if(obj1.get('password') === obj2.get('password'))
                         done();
+                    else
+                        throw "password encrypted twice";
                 },function(){
                     throw "Encrypted the password field again";
                 });
@@ -5890,7 +5894,6 @@ describe("CloudApp Socket Test", function () {
 
        this.timeout(30000);
 
-       CB.CloudApp.disconnect();
 
        CB.CloudApp.onConnect(function(){
         done();

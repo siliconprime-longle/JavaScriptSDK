@@ -246,7 +246,7 @@ CB._request=function(method,url,params)
                 def.reject(xmlhttp.responseText);
             }
         }
-    }
+    };
     return def;
 };
 

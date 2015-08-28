@@ -8,9 +8,10 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document.expires = null;
 
     if(!id){
-        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
         this.document._isModified = true;
     }
     else{

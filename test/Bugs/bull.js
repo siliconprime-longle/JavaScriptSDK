@@ -1,25 +1,34 @@
 describe("Search Bugs",function(done){
 
-	it("search for objects",function(){
+	it("should save",function(done){
 
-		this.timeout(10000);
+        this.timeout(10000);
 
-		var obj = new CB.CloudObject('Student');
-		obj.set('name','bull');
-		obj.save().then(function(){
-			var search = new CB.CloudSearch('Student');
-			//search.SearchFilter = new CB.SearchFilter();
-			search.SearchQuery = new CB.SearchQuery();
-			
-			search.search().then(function(res){
-				console.log(res);
-				done();
-			},function(){
-				throw "Unable to DO Search";
-			});				
-		},function(){
-			throw "Unable to save Object";
-		});
+        var obj = new CB.CloudObject('cron');
+        obj.set('name','test');
+        obj.save().then(function(res){
+            if(res.expires === null)
+                done();
+            else
+                throw "Unable to save expire as null";
+        },function(){
+            throw "Unable to save";
+        });
+    });
 
-	})
+    it("should save",function(done){
+
+        this.timeout(10000);
+        var obj = new CB.CloudObject('cron');
+        obj.set('name','test');
+        obj.set('expires',new Date().getTime());
+        obj.save().then(function(res){
+            if(res.expires )
+                done();
+            else
+                throw "Unable to save expire as null";
+        },function(){
+            throw "Unable to save";
+        });
+    });
 })

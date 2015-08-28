@@ -5,9 +5,10 @@ CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
     this.document._type = 'user';
+    this.document.expires = null;
     this.document.ACL = new CB.ACL();
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
 
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);

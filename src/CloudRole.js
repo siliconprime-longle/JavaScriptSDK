@@ -7,8 +7,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
     this.document.ACL = new CB.ACL();
+    this.document.expires = null;
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name','expires'];
 };
 
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
