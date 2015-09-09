@@ -2,7 +2,7 @@ describe("Should Create All Test Tables",function(done){
 
     before(function(){
         this.timeout(10000);
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
     });
    
 
@@ -675,7 +675,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
     after(function() {
-        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+        CB.appKey = CB.jsKey;
     });
 
 });

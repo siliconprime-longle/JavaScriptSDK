@@ -107,7 +107,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(50000);
 
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
 
 
         var tableName = util.makeString();
@@ -134,7 +134,7 @@ describe("Atomicity Tests",function(done){
 
     it("",function(done) {
         this.timeout(10000);
-        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+        CB.appKey = CB.jsKey;
         var url = CB.serverUrl + '/db/orient/connect';
         CB._request('POST',url).then(function() {
             done();

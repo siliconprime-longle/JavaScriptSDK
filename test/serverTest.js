@@ -19,6 +19,8 @@ describe("Server Check",function(){
                 if (xmlhttp.status == 200) {
                     CB.appId = "sample123";
                     CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+                    CB.masterKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+                    CB.jsKey = CB.appKey;
                     CB.serverUrl = 'http://localhost:4730';
                     CB.serviceUrl = 'http://localhost:3000';
                     CB.socketIoUrl = CB.serverUrl;
@@ -30,11 +32,14 @@ describe("Server Check",function(){
                     if(window.mochaPhantomJS){
                          console.log('RUNNING IN PHANTOM JS'); 
                          CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+                         CB.serviceUrl = 'http://localhost:3000';
                          CB.socketIoUrl = CB.serverUrl;
                          CB.apiUrl = CB.serverUrl;
                     }
                     CB.appId = 'travis123';
                     CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+                    CB.jsKey = CB.appKey;
+                    CB.masterKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM="
                     done();
                 }
             }

@@ -12,6 +12,8 @@ describe("Server Check",function(){
         }
         CB.appId = 'travis123';
         CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+        CB.jsKey = CB.appKey;
+        CB.masterKey = 'vfmMIbP4KaqxihajNqLNFGuub8CIOLREP1oH0QC0qy4=';
         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
         CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;

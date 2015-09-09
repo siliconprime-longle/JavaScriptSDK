@@ -34,7 +34,10 @@ describe("Server Check",function(){
         }
         CB.appId = 'travis123';
         CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+        CB.jsKey = CB.appKey;
+        CB.masterKey = 'vfmMIbP4KaqxihajNqLNFGuub8CIOLREP1oH0QC0qy4=';
         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+        CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;
         CB.apiUrl = CB.serverUrl;
         done();
@@ -54,7 +57,7 @@ describe("Cloud App", function() {
 describe("Cloud Table", function(){
 
     before(function(){
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
       });
 
     var tableName = util.makeString();
@@ -390,7 +393,7 @@ describe("Cloud Table", function(){
     });
 
     after(function() {
-    	CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+    	CB.appKey = CB.jsKey;
   	});
 
 
@@ -400,7 +403,7 @@ describe("Should Create All Test Tables",function(done){
 
     before(function(){
         this.timeout(10000);
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
     });
    
 
@@ -1073,14 +1076,14 @@ describe("Should Create All Test Tables",function(done){
     });
 
     after(function() {
-        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+        CB.appKey = CB.jsKey;
     });
 
 });
 describe("Table Tests", function (done) {
 
     before(function(){
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
     });
 
     it("Should Give all the tables", function (done) {
@@ -1123,7 +1126,7 @@ describe("Table Tests", function (done) {
     });
 
     after(function() {
-        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+        CB.appKey = CB.jsKey;
     });
 
 });

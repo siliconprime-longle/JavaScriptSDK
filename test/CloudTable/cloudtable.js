@@ -1,7 +1,7 @@
 describe("Cloud Table", function(){
 
     before(function(){
-        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+        CB.appKey = CB.masterKey;
       });
 
     var tableName = util.makeString();
@@ -337,7 +337,7 @@ describe("Cloud Table", function(){
     });
 
     after(function() {
-    	CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+    	CB.appKey = CB.jsKey;
   	});
 
 
