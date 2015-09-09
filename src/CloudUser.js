@@ -4,6 +4,7 @@
 CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
+    this.document.expires = null;
     this.document._type = 'user';
     this.document.expires = null;
     this.document.ACL = new CB.ACL();
@@ -68,7 +69,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/signup" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -113,7 +114,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/login" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -157,7 +158,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/logout" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -195,7 +196,7 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/addToRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -237,7 +238,7 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/removeFromRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);

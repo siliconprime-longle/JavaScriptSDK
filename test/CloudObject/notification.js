@@ -5,7 +5,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should alert when the object is created.", function(done) {
 
-      this.timeout(20000);
+      this.timeout(40000);
 
       CB.CloudObject.on('Student', 'created', function(data){
        if(data.get('name') === 'sample') {
@@ -46,7 +46,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should alert when the object is updated.", function(done) {
 
-      this.timeout(20000);
+      this.timeout(40000);
       CB.CloudObject.on('student4', 'updated', function(data){
         done();
           CB.CloudObject.off('student4','updated',{success:function(){},error:function(){}});

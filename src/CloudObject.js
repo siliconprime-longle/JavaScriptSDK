@@ -232,7 +232,7 @@ CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     return this.document[columnName];
@@ -243,6 +243,12 @@ CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of t
     this.document[columnName] = null;
     CB._modified(this,columnName);
 };
+
+/**
+ * Saved CloudObject in Database.
+ * @param callback
+ * @returns {*}
+ */
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
     var def;
@@ -258,9 +264,8 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/save";
-    //console.log(params);
-    CB._request('POST',url,params).then(function(response){
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+    CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -297,7 +302,6 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!callback) {
         def = new CB.Promise();
     }
-    // var xmlhttp=CB._loadXml();
     var params=JSON.stringify({
         key: CB.appKey
     });
@@ -341,13 +345,13 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         key: CB.appKey,
         document: CB.toJSON(thisObj)
     });
-    url = CB.apiUrl + "/" + CB.appId +"/delete/";
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName +'/'+ thisObj.get('id');
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('DELETE',url,params).then(function(response){
         if (callback) {
-            callback.success(thisObj);
+            callback.success(response);
         } else {
-            def.resolve(thisObj);
+            def.resolve(response);
         }
     },function(err){
         if(callback){

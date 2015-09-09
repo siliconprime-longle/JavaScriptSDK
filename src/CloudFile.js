@@ -10,7 +10,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
-
         this.document = {
             _type: 'file',
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
@@ -89,6 +88,13 @@ Object.defineProperty(CB.CloudFile.prototype, 'name', {
     }
 });
 
+/**
+ * Uploads File
+ *
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudFile.prototype.save = function(callback) {
 
     var def;
@@ -97,9 +103,7 @@ CB.CloudFile.prototype.save = function(callback) {
         def = new CB.Promise();
     }
 
-
     var thisObj = this;
-
 
     if(!this.fileObj && !this.data)
         throw "You cannot save a file which is null";
@@ -111,7 +115,7 @@ CB.CloudFile.prototype.save = function(callback) {
 
         var xmlhttp = CB._loadXml();
         var params = formdata;
-        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        var url = CB.serverUrl + '/file/' + CB.appId;
         xmlhttp.open('POST', url, true);
         if (CB._isNode) {
             var LocalStorage = require('node-localstorage').LocalStorage;
@@ -154,7 +158,7 @@ CB.CloudFile.prototype.save = function(callback) {
             data: this.data,
             key: CB.appKey
         });
-        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        url = CB.serverUrl + '/file/' + CB.appId ;
         //console.log(params);
         CB._request('POST',url,params).then(function(response){
             thisObj.url = JSON.parse(response)._url;
@@ -179,6 +183,14 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 }
 
+/**
+ * Removes a file from Database.
+ *
+ * @param callback
+ * @returns {*}
+ */
+
+
 CB.CloudFile.prototype.delete = function(callback) {
     var def;
 
@@ -194,9 +206,9 @@ CB.CloudFile.prototype.delete = function(callback) {
         url: thisObj.url,
         key: CB.appKey
     });
-    url = CB.serverUrl+'/file/' + CB.appId + '/delete' ;
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('DELETE',url,params).then(function(response){
         thisObj.url = null;
         if (callback) {
             callback.success(thisObj);

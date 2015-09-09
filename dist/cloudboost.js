@@ -12,12 +12,13 @@ CB._isNode = false;
 CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
-CB.socketIoUrl = 'http://realtime.cloudboost.io';
+CB.socketIoUrl = 'https://realtime.cloudboost.io';
+CB.serviceUrl = 'https://service.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
 
-CB.apiUrl = CB.serverUrl+'/api';
+CB.apiUrl = CB.serverUrl;
 
 CB.appId = CB.appId || null;
 CB.appKey = CB.appKey || null;
@@ -435,6 +436,7 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
         return continuation(null, error);
     });
 };
+
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -8057,7 +8059,7 @@ CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId
 
 CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     return this.document[columnName];
@@ -8068,6 +8070,12 @@ CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of t
     this.document[columnName] = null;
     CB._modified(this,columnName);
 };
+
+/**
+ * Saved CloudObject in Database.
+ * @param callback
+ * @returns {*}
+ */
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
     var def;
@@ -8083,9 +8091,8 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/save";
-    //console.log(params);
-    CB._request('POST',url,params).then(function(response){
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+    CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -8122,7 +8129,6 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!callback) {
         def = new CB.Promise();
     }
-    // var xmlhttp=CB._loadXml();
     var params=JSON.stringify({
         key: CB.appKey
     });
@@ -8166,13 +8172,13 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         key: CB.appKey,
         document: CB.toJSON(thisObj)
     });
-    url = CB.apiUrl + "/" + CB.appId +"/delete/";
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName +'/'+ thisObj.get('id');
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('DELETE',url,params).then(function(response){
         if (callback) {
-            callback.success(thisObj);
+            callback.success(response);
         } else {
-            def.resolve(thisObj);
+            def.resolve(response);
         }
     },function(err){
         if(callback){
@@ -8228,6 +8234,7 @@ CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
     this.tableName = tableName;
     this.query = {};
     this.query.$include = [];
+    this.query.$includeList = [];
     this.select = {};
     this.sort = {};
     this.skip = 0;
@@ -8270,7 +8277,44 @@ CB.CloudQuery.prototype.include = function (columnName) {
     if (columnName === 'id')
         columnName = '_' + columnName;
 
+    this.query.$includeList.push(columnName);
+
+    return this;
+};
+
+
+CB.CloudQuery.prototype.include = function (columnName) {
+    if (columnName === 'id')
+        columnName = '_' + columnName;
+
     this.query.$include.push(columnName);
+
+    return this;
+};
+
+CB.CloudQuery.prototype.all = function (columnName) {
+    if (columnName === 'id')
+        columnName = '_' + columnName;
+
+    this.query.$all = columnName;
+
+    return this;
+};
+
+CB.CloudQuery.prototype.any = function (columnName) {
+    if (columnName === 'id')
+        columnName = '_' + columnName;
+
+    this.query.$any = columnName;
+
+    return this;
+};
+
+CB.CloudQuery.prototype.first = function (columnName) {
+    if (columnName === 'id')
+        columnName = '_' + columnName;
+
+    this.query.$first = columnName;
 
     return this;
 };
@@ -8763,7 +8807,7 @@ CB.CloudQuery.prototype.count = function(callback) {
         skip: thisObj.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/count';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/count';
 
     CB._request('POST',url,params).then(function(response){
         response = parseInt(response);
@@ -8819,7 +8863,7 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
         skip: thisObj.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/distinct';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/distinct';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -8865,7 +8909,7 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -8931,7 +8975,7 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
         sort : {}
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.tableName + '/find';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         response = JSON.parse(response);
@@ -8973,7 +9017,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
         skip: this.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/" + this.tableName + '/findOne';
+    url = CB.apiUrl + "/data/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -9794,7 +9838,7 @@ CB.CloudSearch.prototype.search = function(callback) {
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/search" ;
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+ collectionName + "/search" ;
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -9821,6 +9865,7 @@ CB.CloudSearch.prototype.search = function(callback) {
 CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
+    this.document.expires = null;
     this.document._type = 'user';
     this.document.expires = null;
     this.document.ACL = new CB.ACL();
@@ -9885,7 +9930,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/signup" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/signup" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -9930,7 +9975,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/login" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/login" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -9974,7 +10019,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/logout" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/logout" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -10012,7 +10057,7 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/addToRole" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/addToRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -10054,7 +10099,7 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/" + CB.appId + "/user/removeFromRole" ;
+    url = CB.apiUrl + "/user/" + CB.appId + "/removeFromRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -10083,6 +10128,7 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._tableName = 'Role';
     this.document._type = 'role';
     this.document.name = roleName;
+    this.document.expires = null;
     this.document.ACL = new CB.ACL();
     this.document.expires = null;
     this.document._isModified = true;
@@ -10113,7 +10159,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
-
         this.document = {
             _type: 'file',
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
@@ -10192,6 +10237,13 @@ Object.defineProperty(CB.CloudFile.prototype, 'name', {
     }
 });
 
+/**
+ * Uploads File
+ *
+ * @param callback
+ * @returns {*}
+ */
+
 CB.CloudFile.prototype.save = function(callback) {
 
     var def;
@@ -10200,9 +10252,7 @@ CB.CloudFile.prototype.save = function(callback) {
         def = new CB.Promise();
     }
 
-
     var thisObj = this;
-
 
     if(!this.fileObj && !this.data)
         throw "You cannot save a file which is null";
@@ -10214,7 +10264,7 @@ CB.CloudFile.prototype.save = function(callback) {
 
         var xmlhttp = CB._loadXml();
         var params = formdata;
-        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        var url = CB.serverUrl + '/file/' + CB.appId;
         xmlhttp.open('POST', url, true);
         if (CB._isNode) {
             var LocalStorage = require('node-localstorage').LocalStorage;
@@ -10257,7 +10307,7 @@ CB.CloudFile.prototype.save = function(callback) {
             data: this.data,
             key: CB.appKey
         });
-        url = CB.serverUrl + '/file/' + CB.appId + '/upload';
+        url = CB.serverUrl + '/file/' + CB.appId ;
         //console.log(params);
         CB._request('POST',url,params).then(function(response){
             thisObj.url = JSON.parse(response)._url;
@@ -10282,6 +10332,14 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 }
 
+/**
+ * Removes a file from Database.
+ *
+ * @param callback
+ * @returns {*}
+ */
+
+
 CB.CloudFile.prototype.delete = function(callback) {
     var def;
 
@@ -10297,9 +10355,9 @@ CB.CloudFile.prototype.delete = function(callback) {
         url: thisObj.url,
         key: CB.appKey
     });
-    url = CB.serverUrl+'/file/' + CB.appId + '/delete' ;
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('DELETE',url,params).then(function(response){
         thisObj.url = null;
         if (callback) {
             callback.success(thisObj);
@@ -10441,18 +10499,403 @@ if (typeof(Number.prototype.toRad) === "undefined") {
     }
 }
 
+/*
+  CloudTable
+ */
+
+CB.CloudTable = function(tableName){  //new table constructor
+
+  CB._tableValidation(tableName);
+  this.document = {};
+  this.document.name = tableName;
+  this.document.appId = CB.appId;
+  this.document._type = 'table';
+
+  if(tableName.toLowerCase() === "user") {
+      this.document.type = "user";
+      this.document.maxCount = 1;
+  }
+  else if(tableName.toLowerCase() === "role") {
+      this.document.type = "role";
+      this.document.maxCount = 1;
+  }
+  else {
+      this.document.type = "custom";
+      this.document.maxCount = 9999;
+  }
+  this.document.columns = CB._defaultColumns(this.document.type);
+};
+
+Object.defineProperty(CB.CloudTable.prototype,'columns',{
+    get: function(){
+        return this.document.columns;
+    }
+});
+
+Object.defineProperty(CB.CloudTable.prototype,'name',{
+    get: function(){
+        return this.document.name;
+    },
+    set: function(){
+        throw "You can not rename a table";
+    }
+});
+
+
+CB.CloudTable.prototype.addColumn = function(column){
+    if(Object.prototype.toString.call(column) === '[object String]') {
+        var obj = new CB.Column(column);
+        column = obj;
+    }
+  if (Object.prototype.toString.call(column) === '[object Object]') {
+    if(CB._columnValidation(column, this))
+      this.document.columns.push(column);
+
+  } else if (Object.prototype.toString.call(column) === '[object Array]') {
+      for(var i=0; i<column.length; i++){
+        if(CB._columnValidation(column[i], this))
+          this.document.columns.push(column[i]);
+      }
+  }
+};
+
+CB.CloudTable.prototype.deleteColumn = function(column){
+    if(Object.prototype.toString.call(column) === '[object String]') {
+        var obj = new CB.Column(column);
+        column = obj;
+    }
+  if (Object.prototype.toString.call(column) === '[object Object]') {
+        if(CB._columnValidation(column, this)){
+            var arr = [];
+            for(var i=0;i<this.columns.length;i++){
+                if(this.columns[i].name !== column.name)
+                    arr.push(this.columns[i]);
+            }
+          this.document.columns = arr;
+        }
+
+  } else if (Object.prototype.toString.call(column) === '[object Array]') {
+      var arr = [];
+      for(var i=0; i<column.length; i++){
+        if(CB._columnValidation(column[i], this)){
+            for(var i=0;i<this.columns.length;i++){
+                if(this.columns[i].name !== column[i].name)
+                    arr.push(this.columns[i]);
+            }
+            this.document.columns = arr;
+        }
+      }
+  }
+};
+
+/**
+ * Gets All the Tables from an App
+ *
+ * @param callback
+ * @returns {*}
+ */
+
+CB.CloudTable.getAll = function(callback){
+  if (!CB.appId) {
+      throw "CB.appId is null.";
+  }
+
+  var def;
+  if (!callback) {
+      def = new CB.Promise();
+  }
+
+  var params=JSON.stringify({
+      key: CB.appKey
+  });
+
+  var url = CB.serviceUrl+'/'+CB.appId +"/table";
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+}
+
+/**
+ * Gets a table
+ *
+ * @param table
+ *  It is the CloudTable object
+ * @param callback
+ * @returns {*}
+ */
+
+
+CB.CloudTable.get = function(table, callback){
+  if(Object.prototype.toString.call(table) === '[object String]') {
+      var obj = new CB.CloudTable(table);
+      table = obj;
+  }
+  if (Object.prototype.toString.call(table) === '[object Object]') {
+    {
+      if (!CB.appId) {
+          throw "CB.appId is null.";
+      }
+
+      var def;
+      if (!callback) {
+          def = new CB.Promise();
+      }
+
+      var params=JSON.stringify({
+          key: CB.appKey,
+          appId: CB.appId
+      });
+
+      var url = CB.serviceUrl + '/' + CB.appId + "/table/" + table.document.name;
+      CB._request('POST',url,params,true).then(function(response){
+          if(response === "null"){
+            obj = null;
+        }else{
+            response = JSON.parse(response);
+            var obj = CB.fromJSON(response);
+        }
+          if (callback) {
+              callback.success(obj);
+          } else {
+              def.resolve(obj);
+          }
+      },function(err){
+          if(callback){
+              callback.error(err);
+          }else {
+              def.reject(err);
+          }
+      });
+      if (!callback) {
+          return def;
+      }
+
+    }
+  } else if (Object.prototype.toString.call(table) === '[object Array]') {
+    throw "cannot fetch array of tables";
+  }
+}
+
+
+/**
+ * Deletes a table from database.
+ *
+ * @param table
+ * @param callback
+ * @returns {*}
+ */
+
+CB.CloudTable.prototype.delete = function(callback){
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var params=JSON.stringify({
+        key: CB.appKey,
+        name: this.name
+    });
+
+    var url = CB.serviceUrl + '/' + CB.appId + "/table/" +this.name;
+
+    CB._request('DELETE',url,params,true).then(function(response){
+        if (callback) {
+            callback.success(response);
+        } else {
+            def.resolve(response);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
+}
+
+/**
+ * Saves a table
+ *
+ * @param callback
+ * @returns {*}
+ */
+
+CB.CloudTable.prototype.save = function(callback){
+  var def;
+  if (!callback) {
+      def = new CB.Promise();
+  }
+  CB._validate();
+  var thisObj = this;
+  var params=JSON.stringify({
+      key:CB.appKey,
+      data:CB.toJSON(thisObj)
+  });
+
+  var url = CB.serviceUrl +'/' + CB.appId + "/table/" + thisObj.document.name;
+
+    CB._request('PUT',url,params,true).then(function(response){
+      response = JSON.parse(response);
+      var obj = CB.fromJSON(response);
+      if (callback) {
+          callback.success(obj);
+      } else {
+          def.resolve(obj);
+      }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+
+  if (!callback) {
+      return def;
+  }
+};
+
+
+
+
+/*
+ Column.js
+ */
+
+ CB.Column = function(columnName, dataType, required, unique){
+   this.document = {};
+   if(columnName){
+     CB._columnNameValidation(columnName);
+     this.document.name = columnName;
+     this.document._type = 'column';
+   }
+
+   if(dataType){
+     CB._columnDataTypeValidation(dataType);
+     this.document.dataType = dataType;
+   }else{
+     this.document.dataType = "Text";
+   }
+
+   if(typeof(required) === 'boolean')
+     this.document.required = required;
+   else
+     this.document.required = false;
+
+   if(typeof(unique) === 'boolean')
+     this.document.unique = unique;
+   else
+     this.document.unique = false;
+   this.document.relatedTo = null;
+   this.document.relationType = null;
+
+   this.document.isDeletable = true;
+   this.document.isEditable = true;
+   this.document.isRenamable = false;
+
+};
+
+Object.defineProperty(CB.Column.prototype,'name',{
+    get: function() {
+        return this.document.name;
+    },
+    set: function(name) {
+        this.document.name = name;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'dataType',{
+    get: function() {
+        return this.document.dataType;
+    },
+    set: function(dataType) {
+        this.document.dataType = dataType;
+    }
+});
+
+
+Object.defineProperty(CB.Column.prototype,'unique',{
+    get: function() {
+        return this.document.unique;
+    },
+    set: function(unique) {
+        this.document.unique = unique;
+    }
+});
+
+
+Object.defineProperty(CB.Column.prototype,'relatedTo',{
+    get: function() {
+        return this.document.relatedTo;
+    },
+    set: function(relatedTo) {
+        this.document.relatedTo = relatedTo;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'required',{
+    get: function() {
+        return this.document.required;
+    },
+    set: function(required) {
+        this.document.required = required;
+    }
+});
+
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
-    var url=null;
-    if(thisObj instanceof  CB.CloudFile)
+    var url = null;
+    var columnName = null;
+    var tableName = null;
+    var latitude = null;
+    var longitude = null;
+
+    if(thisObj instanceof CB.CloudGeoPoint){
+        latitude = thisObj.document.longitude;
+        longitude = document.latitude;
+    }
+
+    if(thisObj instanceof CB.CloudFile)
         url=thisObj.document.url;
 
-    var obj= CB._clone(thisObj,url);
+    if(thisObj instanceof CB.Column)
+        columnName=thisObj.document.name;
 
-    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint) {
+    if(thisObj instanceof CB.CloudTable)
+        tableName=thisObj.document.name;
+
+    var obj= CB._clone(thisObj,url,latitude,longitude,tableName,columnName);
+
+    if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint
+        || !obj instanceof CB.CloudTable || !obj instanceof CB.Column) {
         throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
+
+    if(obj instanceof CB.Column)
+        return obj.document;
 
     if(obj instanceof CB.CloudFile)
         return obj.document;
@@ -10463,7 +10906,8 @@ CB.toJSON = function(thisObj) {
     var doc = obj.document;
 
     for (var key in doc) {
-        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile || doc[key] instanceof CB.CloudGeoPoint) {
+        if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile
+            || doc[key] instanceof CB.CloudGeoPoint  || doc[key] instanceof CB.Column) {
             //if something is a relation.
             doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -10476,7 +10920,8 @@ CB.toJSON = function(thisObj) {
         } else if (doc[key] instanceof Array) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
-            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile || doc[key][0] instanceof CB.CloudGeoPoint )) {
+            if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile
+                || doc[key][0] instanceof CB.CloudGeoPoint || doc[key][0] instanceof CB.Column )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB.toJSON(doc[key][i]));
@@ -10493,7 +10938,7 @@ CB.fromJSON = function(data, thisObj) {
 
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
-    //if data is a list it will return a list of CloudObjects.
+    //if data is a list it will return a list of Cl oudObjects.
     if (!data)
         return null;
 
@@ -10547,13 +10992,21 @@ CB.fromJSON = function(data, thisObj) {
             var url=null;
             var latitude = null;
             var longitude = null;
+            var tableName = null;
+            var columnName = null;
             if(document._type === "file")
                 url=document.url;
             if(document._type === "point"){
                 latitude = document.longitude;
                 longitude = document.latitude;
             }
-            var obj = CB._getObjectByType(document._type,url,latitude,longitude);
+            if(document._type === "table"){
+                tableName = document.name;
+            }
+            if(document._type === "column"){
+                columnName = document.name;
+            }
+            var obj = CB._getObjectByType(document._type,url,latitude,longitude,tableName,columnName);
             obj.document = document;
             return obj;
         }else{
@@ -10567,7 +11020,7 @@ CB.fromJSON = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url,latitude,longitude){
+CB._getObjectByType = function(type,url,latitude,longitude,tableName,columnName){
 
     var obj = null;
 
@@ -10589,6 +11042,14 @@ CB._getObjectByType = function(type,url,latitude,longitude){
 
     if(type === 'point'){
         obj = new CB.CloudGeoPoint(latitude,longitude);
+    }
+
+    if(type === 'table'){
+        obj = new CB.CloudTable(tableName);
+    }
+
+    if(type === 'column'){
+        obj = new CB.Column(columnName);
     }
     return obj;
 };
@@ -10626,10 +11087,10 @@ if(CB._isNode){
 }
 
 
-CB._clone=function(obj,url){
+CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
     var n_obj = null;
     if(obj.document._type && obj.document._type != 'point') {
-        n_obj = CB._getObjectByType(obj.document._type,url);
+        n_obj = CB._getObjectByType(obj.document._type,url,latitude,longitude,tableName,columnName);
         var doc=obj.document;
         var doc2={};
         for (var key in doc) {
@@ -10651,7 +11112,7 @@ CB._clone=function(obj,url){
     return n_obj;
 };
 
-CB._request=function(method,url,params)
+CB._request=function(method,url,params,isServiceUrl)
 {
 
     CB._validate();
@@ -10667,22 +11128,30 @@ CB._request=function(method,url,params)
     }
     xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader('Content-Type','text/plain');
-    var ssid = CB._getSessionId();
-    if(ssid != null)
-        xmlhttp.setRequestHeader('sessionID', ssid);
+
+    if(!isServiceUrl){
+        var ssid = CB._getSessionId();
+        if(ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+    }
     if(CB._isNode)
         xmlhttp.setRequestHeader("User-Agent",
             "CB/" + CB.version +
             " (NodeJS " + process.versions.node + ")");
-    xmlhttp.send(params);
+    if(params)
+        xmlhttp.send(params);
+    else
+        xmlhttp.send();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             if (xmlhttp.status == 200) {
-                var sessionID = xmlhttp.getResponseHeader('sessionID');
-                if(sessionID)
-                    localStorage.setItem('sessionID', sessionID);
-                else
-                    localStorage.removeItem('sessionID');
+                if(!isServiceUrl){
+                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+                    if(sessionID)
+                        localStorage.setItem('sessionID', sessionID);
+                    else
+                        localStorage.removeItem('sessionID');
+                }
                 def.resolve(xmlhttp.responseText);
             } else {
                 console.log(xmlhttp.status);
@@ -10693,8 +11162,40 @@ CB._request=function(method,url,params)
     return def;
 };
 
-CB._getSessionId = function(){
+CB._getSessionId = function() {
     return localStorage.getItem('sessionID');
+}
+
+CB._columnValidation = function(column, cloudtable){
+  var defaultColumn = ['id', 'createdAt', 'updatedAt', 'ACL'];
+  if(cloudtable.document.type == 'user'){
+    defaultColumn.concat(['username', 'email', 'password', 'roles']);
+  }else if(cloudtable.document.type == 'role'){
+    defaultColumn.push('name');
+  }
+
+  var index = defaultColumn.indexOf(column.name.toLowerCase());
+  if(index === -1)
+    return true;
+  else
+    return false;
+};
+
+CB._tableValidation = function(tableName){
+
+  if(!tableName) //if table name is empty
+    throw "table name cannot be empty";
+
+  if(!isNaN(tableName[0]))
+    throw "table name should not start with a number";
+
+  if(!tableName.match(/^\S+$/))
+    throw "table name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(tableName))
+    throw "table not shoul not contain special characters";
+
 };
 
 CB._modified = function(thisObj,columnName){
@@ -10719,3 +11220,107 @@ function trimStart(character, string) {
 
     return string.substr(startIndex);
 }
+
+CB._columnNameValidation = function(columnName){
+
+///  var defaultColumn = ['id','createdAt', 'updatedAt', 'ACL'];
+
+  if(!columnName) //if table name is empty
+    throw "table name cannot be empty";
+
+  /*var index = defaultColumn.indexOf(columnName.toLowerCase());
+  if(index >= 0)
+    throw "this column name is already in use";
+*/
+  if(!isNaN(columnName[0]))
+    throw "column name should not start with a number";
+
+  if(!columnName.match(/^\S+$/))
+    throw "column name should not contain spaces";
+
+  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+  if(pattern.test(columnName))
+    throw "column name not should not contain special characters";
+};
+
+CB._columnDataTypeValidation = function(dataType){
+
+  if(!dataType)
+    throw "data type cannot be empty";
+
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
+  var index = dataTypeList.indexOf(dataType);
+  if(index < 0)
+    throw "invalid data type";
+
+};
+
+CB._defaultColumns = function(type) {
+    var id = new CB.Column('id');
+    id.dataType = 'Id';
+    id.required = true;
+    id.unique = true;
+    id.document.isDeletable = false;
+    id.document.isEditable = false;
+    var expires = new CB.Column('expires');
+    expires.dataType = 'Number';
+    expires.document.isDeletable = false;
+    expires.document.isEditable = false;
+    var createdAt = new CB.Column('createdAt');
+    createdAt.dataType = 'DateTime';
+    createdAt.required = true;
+    createdAt.document.isDeletable = false;
+    createdAt.document.isEditable = false;
+    var updatedAt = new CB.Column('updatedAt');
+    updatedAt.dataType = 'DateTime';
+    updatedAt.required = true;
+    updatedAt.document.isDeletable = false;
+    updatedAt.document.isEditable = false;
+    var ACL = new CB.Column('ACL');
+    ACL.dataType = 'ACL';
+    ACL.required = true;
+    ACL.document.isDeletable = false;
+    ACL.document.isEditable = false;
+    var col = [id,expires,updatedAt,createdAt,ACL];
+    if (type === "custom") {
+        return col;
+    }else if (type === "user"){
+        var username = new CB.Column('username');
+        username.dataType = 'Text';
+        username.required = true;
+        username.unique = true;
+        username.document.isDeletable = false;
+        username.document.isEditable = false;
+        var email = new CB.Column('email');
+        email.dataType = 'Email';
+        email.unique = true;
+        email.document.isDeletable = false;
+        email.document.isEditable = false;
+        var password = new CB.Column('password');
+        password.dataType = 'Password';
+        password.required = true;
+        password.document.isDeletable = false;
+        password.document.isEditable = false;
+        var roles = new CB.Column('roles');
+        roles.dataType = 'List';
+        roles.relatedTo = 'Role';
+        roles.relatedToType = 'role';
+        roles.document.relationType = 'table';
+        roles.document.isDeletable = false;
+        roles.document.isEditable = false;
+        col.push(username);
+        col.push(roles);
+        col.push(password);
+        col.push(email);
+        return col;
+    }else if(type === "role") {
+        var name = new CB.Column('name');
+        name.dataType = 'Text';
+        name.unique = true;
+        name.required = true;
+        name.document.isDeletable = false;
+        name.document.isEditable = false;
+        col.push(name);
+        return col;
+   }
+};

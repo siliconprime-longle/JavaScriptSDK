@@ -13,7 +13,6 @@ CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
 CB.socketIoUrl = 'http://realtime.cloudboost.io';
-CB.serviceUrl = 'https://service.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
 
@@ -436,7 +435,6 @@ CB.Promise.prototype["_continueWith"] = function(continuation) {
         return continuation(null, error);
     });
 };
-
 if(!CB._isNode) {
 // Socket.io.js
     !function (e) {
@@ -7569,6 +7567,7 @@ if(!CB._isNode) {
  CloudApp
  */
 CB.CloudApp = CB.CloudApp || {};
+CB.CloudApp._isConnected = false;
 
 CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
@@ -7589,9 +7588,55 @@ CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static 
     else {
         CB.io = io;
     }
+
     CB.Socket = CB.io(CB.socketIoUrl);
+    CB.CloudApp._isConnected = true;
 };
 
+CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('connect', functionToFire);
+    
+
+};
+
+CB.CloudApp.onDisconnect = function(functionToFire) { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.on('disconnect', functionToFire);
+
+};
+
+CB.CloudApp.connect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.connect();
+    CB.CloudApp._isConnected = true;
+};
+
+CB.CloudApp.disconnect = function() { //static function for initialisation of the app
+    CB._validate();
+
+    if(!CB.Socket){
+        throw "Socket couldn't be found. Init app first.";
+    }
+
+    CB.Socket.emit('socket-disconnect',CB.appId);
+    CB.CloudApp._isConnected = false;
+};
 CB.ACL = function() { //constructor for ACL class
     this['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
     this['write'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow write access to "all"
@@ -7788,9 +7833,10 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
+    this.document.expires = null;
 
     if(!id){
-        this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
         this.document._isModified = true;
     }
     else{
@@ -7840,11 +7886,11 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 /* For Expire of objects */
 Object.defineProperty(CB.CloudObject.prototype, 'expires', {
     get: function() {
-        return this.document._expires;
+        return this.document.expires;
     },
     set: function(expires) {
-        this.document._expires = expires;
-        CB._modified(this,'_expires');
+        this.document.expires = expires;
+        CB._modified(this,'expires');
     }
 });
 
@@ -7904,7 +7950,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
             var payload = {
                 room :(CB.appId+'table'+tableName+eventType).toLowerCase(),
-                sessionId : CB._getSessionId(),
+                sessionId : CB._getSessionId()
             };
 
             CB.Socket.emit('join-object-channel',payload);
@@ -7979,7 +8025,7 @@ CB.CloudObject.prototype.set = function(columnName, data) { //for setting data f
     if(columnName=== 'id' || columnName === '_id')
         throw "You cannot set the id of a CloudObject";
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (keywords.indexOf(columnName) > -1) {
@@ -7997,7 +8043,7 @@ CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId
     if(columnName=== 'id' || columnName === '_id')
         throw "You cannot set the id of a CloudObject";
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         throw "You cannot link an object to this column";
 
     if (keywords.indexOf(columnName) > -1) {
@@ -8182,7 +8228,6 @@ CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
     this.tableName = tableName;
     this.query = {};
     this.query.$include = [];
-    this.query.$includeList = [];
     this.select = {};
     this.sort = {};
     this.skip = 0;
@@ -8202,7 +8247,7 @@ CB.CloudQuery.or = function(obj1, obj2) {
 
 CB.CloudQuery.prototype.equalTo = function(columnName, data) {
 
-    if (columnName === 'id' ||  columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if(data !== null){
@@ -8221,18 +8266,8 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     return this;
 };
 
-CB.CloudQuery.prototype.includeList = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
-        columnName = '_' + columnName;
-
-    this.query.$includeList.push(columnName);
-
-    return this;
-};
-
-
 CB.CloudQuery.prototype.include = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.query.$include.push(columnName);
@@ -8240,35 +8275,8 @@ CB.CloudQuery.prototype.include = function (columnName) {
     return this;
 };
 
-CB.CloudQuery.prototype.all = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
-        columnName = '_' + columnName;
-
-    this.query.$all = columnName;
-
-    return this;
-};
-
-CB.CloudQuery.prototype.any = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
-        columnName = '_' + columnName;
-
-    this.query.$any = columnName;
-
-    return this;
-};
-
-CB.CloudQuery.prototype.first = function (columnName) {
-    if (columnName === 'id' || columnName === 'expires')
-        columnName = '_' + columnName;
-
-    this.query.$first = columnName;
-
-    return this;
-};
-
 CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if(data !== null){
@@ -8290,7 +8298,7 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
 };
 CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -8302,7 +8310,7 @@ CB.CloudQuery.prototype.greaterThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -8314,7 +8322,7 @@ CB.CloudQuery.prototype.greaterThanEqualTo = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
 
@@ -8327,7 +8335,7 @@ CB.CloudQuery.prototype.lessThan = function(columnName, data) {
 };
 CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
 
@@ -8338,25 +8346,28 @@ CB.CloudQuery.prototype.lessThanEqualTo = function(columnName, data) {
 
     return this;
 };
+
 //Sorting
 CB.CloudQuery.prototype.orderByAsc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.sort[columnName] = 1;
 
     return this;
 };
+
 CB.CloudQuery.prototype.orderByDesc = function(columnName) {
 
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     this.sort[columnName] = -1;
 
     return this;
 };
+
 //Limit and skip
 CB.CloudQuery.prototype.setLimit = function(data) {
 
@@ -8394,6 +8405,7 @@ CB.CloudQuery.prototype.selectColumn = function(columnNames) {
 
     return this;
 };
+
 CB.CloudQuery.prototype.doNotSelectColumn = function(columnNames) {
     if (Object.prototype.toString.call(columnNames) === '[object Object]') {
         this.select = columnNames;
@@ -8412,40 +8424,43 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
 
     var isCloudObject = false;
 
-    if (columnName === 'id' || columnName === 'expires')
+    var CbData = [];
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
         throw 'Array / value / CloudObject expected as an argument';
     }
 
-    
+
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
+            if(data[i] instanceof CB.CloudObject){
                 isCloudObject = true;
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
                 }
-
-                data[i] = data[i].id;
+                CbData.push(data[i].id);
             }
+        }
+        if(CbData.length === 0){
+            CbData = data;
         }
 
         if(isCloudObject){
             columnName = columnName+'._id';
         }
-        
+
 
         if (!this.query[columnName]) {
-                    this.query[columnName] = {};
+            this.query[columnName] = {};
         }
 
-        this.query[columnName]["$in"] = data;
+        this.query[columnName]["$in"] = CbData;
         thisObj = this;
-        if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing duplicates
-            data.forEach(function(val) {
+        if (typeof this.query[columnName]["$nin"] !== 'undefined') { //for removing dublicates
+            CbData.forEach(function(val) {
                 if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
                     thisObj.query[columnName]["$nin"].splice(index, 1);
                 }
@@ -8461,27 +8476,28 @@ CB.CloudQuery.prototype.containedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
-                this.query[columnName] = {};
+            this.query[columnName] = {};
         }
 
 
         if (!this.query[columnName]["$in"]) {
             this.query[columnName]["$in"] = [];
         }
-        if (this.query[columnName]["$in"].indexOf(data) === -1) {
-            this.query[columnName]["$in"].push(data);
+        if (this.query[columnName]["$in"].indexOf(CbData) === -1) {
+            this.query[columnName]["$in"].push(CbData);
         }
         if (typeof this.query[columnName]["$nin"] !== 'undefined') {
-            if ((index = this.query[columnName]["$nin"].indexOf(data)) >= 0) {
+            if ((index = this.query[columnName]["$nin"].indexOf(CbData)) >= 0) {
                 this.query[columnName]["$nin"].splice(index, 1);
             }
         }
     }
-    
+
 
     return this;
 }
@@ -8490,7 +8506,8 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 
     var isCloudObject = false;
 
-    if (columnName === 'id' || columnName === 'expires')
+    var CbData = [];
+    if (columnName === 'id' )
         columnName = '_' + columnName;
 
     if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
@@ -8500,29 +8517,32 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
     if (Object.prototype.toString.call(data) === '[object Array]') { //if array is passed, then replace the whole
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
+            if(data[i] instanceof CB.CloudObject){
                 isCloudObject = true;
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
                 }
 
-                data[i] = data[i].id;           
+                CbData.push(data[i].id);
             }
+        }
+        if(CbData.length === 0){
+            CbData = data;
         }
 
         if(isCloudObject){
             columnName = columnName+'._id';
         }
-           
 
-         if (!this.query[columnName]) {
+
+        if (!this.query[columnName]) {
             this.query[columnName] = {};
-         }
+        }
 
-        this.query[columnName]["$nin"] = data;
-        if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing dublicates
+        this.query[columnName]["$nin"] = CbData;
+        if (typeof this.query[columnName]["$in"] !== 'undefined') { //for removing duplicates
             thisObj = this;
-            data.forEach(function(val) {
+            CbData.forEach(function(val) {
                 if ((index = thisObj.query[columnName]["$in"].indexOf(val)) >= 0) {
                     thisObj.query[columnName]["$in"].splice(index, 1);
                 }
@@ -8537,8 +8557,9 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
@@ -8548,11 +8569,11 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
         if (!this.query[columnName]["$nin"]) {
             this.query[columnName]["$nin"] = [];
         }
-        if (this.query[columnName]["$nin"].indexOf(data) === -1) {
-            this.query[columnName]["$nin"].push(data);
+        if (this.query[columnName]["$nin"].indexOf(CbData) === -1) {
+            this.query[columnName]["$nin"].push(CbData);
         }
         if (typeof this.query[columnName]["$in"] !== 'undefined') {
-            if ((index = this.query[columnName]["$in"].indexOf(data)) >= 0) {
+            if ((index = this.query[columnName]["$in"].indexOf(CbData)) >= 0) {
                 this.query[columnName]["$in"].splice(index, 1);
             }
         }
@@ -8562,7 +8583,7 @@ CB.CloudQuery.prototype.notContainedIn = function(columnName, data) {
 }
 
 CB.CloudQuery.prototype.exists = function(columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -8574,7 +8595,7 @@ CB.CloudQuery.prototype.exists = function(columnName) {
 }
 
 CB.CloudQuery.prototype.doesNotExists = function(columnName) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (!this.query[columnName]) {
@@ -8589,7 +8610,9 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
     var isCloudObject = false;
 
-    if (columnName === 'id' || columnName === 'expires')
+    var CbData = [];
+
+    if (columnName === 'id')
         columnName = '_' + columnName;
 
     if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof CB.CloudObject) { //if object is passed as an argument
@@ -8601,16 +8624,20 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
 
         for(var i=0; i<data.length; i++){
-             if(data[i] instanceof CB.CloudObject){
-                
+            if(data[i] instanceof CB.CloudObject){
+
                 isCloudObject = true;
 
                 if(!data[i].id){
                     throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
                 }
 
-                data[i] = data[i].id;           
+                CbData.push(data[i].id);
             }
+        }
+
+        if(CbData.length === 0){
+            CbData = data;
         }
 
         if(isCloudObject){
@@ -8619,10 +8646,10 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
-         }
+        }
 
-        this.query[columnName]["$all"] = data;
-        
+        this.query[columnName]["$all"] = CbData;
+
     } else { //if the argument is a string then push if it is not present already
 
         if(data instanceof CB.CloudObject){
@@ -8632,8 +8659,9 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
             }
 
             columnName = columnName+'._id';
-            data = data.id;
-        }
+            CbData = data.id;
+        }else
+            CbData = data;
 
         if (!this.query[columnName]) {
             this.query[columnName] = {};
@@ -8643,17 +8671,18 @@ CB.CloudQuery.prototype.containsAll = function(columnName, data) {
         if (!this.query[columnName]["$all"]) {
             this.query[columnName]["$all"] = [];
         }
-        if (this.query[columnName]["$all"].indexOf(data) === -1) {
-            this.query[columnName]["$all"].push(data);
+        if (this.query[columnName]["$all"].indexOf(CbData) === -1) {
+            this.query[columnName]["$all"].push(CbData);
         }
-        
+
     }
 
     return this;
 }
 
+
 CB.CloudQuery.prototype.startsWith = function(columnName, value) {
-    if (columnName === 'id' || columnName === 'expires')
+    if (columnName === 'id' )
         columnName = '_' + columnName;
 
     var regex = '^' + value;
@@ -9206,12 +9235,17 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
    return true;
 };
 
+
+
+
+
 CB.SearchFilter = function(){
 
     this.bool = {};
     this.bool.must = []; //and
     this.bool.should = []; //or
     this.bool.must_not = []; //not
+    this.$include = []; //include
 };
 
 
@@ -9339,32 +9373,65 @@ CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
 //And logical function. 
 CB.SearchFilter.prototype.and = function(searchFilter) {
 
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over AND. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
     if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.must.push(searchFilter);
+
+    return this;
 };
 
 //OR Logical function
 CB.SearchFilter.prototype.or = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over OR. Have an CloudSearch Include over parent SearchFilter instead.";
+    }
+
+    delete searchFilter.$include;
+
+    if(!searchFilter instanceof CB.SearchFilter){
         throw "data should be of type CB.SearchFilter";
     }
 
     this.bool.should.push(searchFilter);
+
+    return this;
 };
 
 
 //NOT logical function
 CB.SearchFilter.prototype.not = function(searchFilter) {
 
-   if(!searchFilter instanceof CB.SearchFilter){
-        throw "data should be of type CB.SearchFilter";
+    if(searchFilter.$include.length>0){
+        throw "You cannot have an include over NOT. Have an CloudSearch Include over parent SearchFilter instead.";
     }
 
-    this.bool.must_not.push(searchFilter);
+    delete searchFilter.$include;
+
+   if(!searchFilter instanceof CB.SearchFilter){
+        throw "data should be of type CB.SearchFilter";
+   }
+
+   this.bool.must_not.push(searchFilter);
+
+   return this;
+};
+
+CB.SearchFilter.prototype.include = function (columnName) {
+    if (columnName === 'id')
+        columnName = '_' + columnName;
+
+    this.$include.push(columnName);
+
+    return this;
 };
 
 
@@ -9755,11 +9822,14 @@ CB.CloudUser = CB.CloudUser || function() {
     if (!this.document) this.document = {};
     this.document._tableName = 'User';
     this.document._type = 'user';
+    this.document.expires = null;
     this.document.ACL = new CB.ACL();
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
+
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
+
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
     get: function() {
         return this.document.username;
@@ -9787,8 +9857,15 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
         CB._modified(this,'email');
     }
 });
+
 CB.CloudUser.current = new CB.CloudUser();
+
 CB.CloudUser.prototype.signUp = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot signup the user on the server. Use CloudUser.save() instead.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -9832,6 +9909,11 @@ CB.CloudUser.prototype.signUp = function(callback) {
     }
 };
 CB.CloudUser.prototype.logIn = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot login the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -9871,6 +9953,11 @@ CB.CloudUser.prototype.logIn = function(callback) {
     }
 };
 CB.CloudUser.prototype.logOut = function(callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot logOut the user on the server.";
+    }
+
     if (!this.document.username) {
         throw "Username is not set.";
     }
@@ -9997,8 +10084,9 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._type = 'role';
     this.document.name = roleName;
     this.document.ACL = new CB.ACL();
+    this.document.expires = null;
     this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name'];
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','name','expires'];
 };
 
 CB.CloudRole.prototype = Object.create(CB.CloudObject.prototype);
@@ -10353,274 +10441,6 @@ if (typeof(Number.prototype.toRad) === "undefined") {
     }
 }
 
-/*
-  CloudTable
- */
-
-CB.CloudTable = function(tableName){  //new table constructor
-
-  CB._tableValidation(tableName);
-  this.name = tableName;
-  this.appId = CB.appId;
-
-  if(tableName.toLowerCase() == "user")
-    this.type = "user";
-  else if(tableName.toLowerCase() == "role")
-    this.type = "role";
-  else
-    this.type = "custom";
-
-  this.columns = CB._defaultColumns(this.type);
-}
-
-CB.CloudTable.prototype.addColumn = function(column){
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-    if(CB._columnValidation(column, this))
-      this.columns.push(column);
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this))
-          this.columns.push(column[i]);
-      }
-  }
-}
-
-CB.CloudTable.prototype.deleteColumn = function(column){
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-        if(CB._columnValidation(column, this)){
-          this.columns = this.columns.filter(function(index){return index.name != column.name });
-        }
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      //yet to test
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this)){
-          this.columns = this.columns.filter(function(index){return index.name != column[i].name });
-        }
-      }
-  }
-}
-
-//CloudTable static functions
-CB.CloudTable.getAll = function(callback){
-  if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-
-  var params=JSON.stringify({
-      key: CB.appKey
-  });
-
-  url = CB.serviceUrl + "/table/get/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
-    response = JSON.parse(response);
-    var objArray = [];
-    for(var i=0; i<response.length; i++){
-      if(response[i].name){
-        var obj = new CB.CloudTable(response[i].name);
-        if(response[i].columns){
-        	obj.columns = response[i].columns;
-        }
-        if(response[i].id){
-        	obj.id = response[i].id;
-        }
-        if(response[i]._id){
-        	obj._id = response[i]._id;
-        }
-        objArray.push(obj);
-      }
-    }
-    if (callback) {
-        callback.success(objArray);
-    } else {
-        def.resolve(objArray);
-    }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-  if (!callback) {
-      return def;
-  }
-}
-
-CB.CloudTable.get = function(table, callback){
-  if (Object.prototype.toString.call(table) === '[object Object]') {
-    if(table.type == "user"){
-      throw "cannot delete user table";
-    }else if(table.type == "role"){
-      throw "cannot delete role table";
-    }else{
-      if (!CB.appId) {
-          throw "CB.appId is null.";
-      }
-
-      var def;
-      if (!callback) {
-          def = new CB.Promise();
-      }
-
-      var params=JSON.stringify({
-          key: CB.appKey,
-          appId: CB.appId
-      });
-
-      url = CB.serviceUrl + "/table/"+table.name;
-      CB._request('PUT',url,params).then(function(response){
-          response = JSON.parse(response);
-          var obj = new CB.CloudTable(response.name);
-          obj.columns = response.columns;
-          obj.id = response.id;
-          obj._id = response._id;
-          if (callback) {
-              callback.success(obj);
-          } else {
-              def.resolve(obj);
-          }
-      },function(err){
-          if(callback){
-              callback.error(err);
-          }else {
-              def.reject(err);
-          }
-      });
-      if (!callback) {
-          return def;
-      }
-
-    }
-  } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot fetch array of tables";
-  }
-}
-
-CB.CloudTable.delete = function(table, callback){
-  if (Object.prototype.toString.call(table) === '[object Object]') {
-      if (!CB.appId) {
-          throw "CB.appId is null.";
-      }
-
-      var def;
-      if (!callback) {
-          def = new CB.Promise();
-      }
-
-      var params=JSON.stringify({
-          key: CB.appKey,
-          name: table.name
-      });
-
-      url = CB.serviceUrl + "/table/delete/" + CB.appId;
-      CB._request('PUT',url,params).then(function(response){
-        response = JSON.parse(response);
-
-        if (callback) {
-            callback.success(response);
-        } else {
-            def.resolve(response);
-        }
-      },function(err){
-          if(callback){
-              callback.error(err);
-          }else {
-              def.reject(err);
-          }
-      });
-      if (!callback) {
-          return def;
-      }
-  } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot delete array of tables";
-  }
-}
-
-//CloudTable save function
-CB.CloudTable.prototype.save = function(callback){
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-  CB._validate();
-  var thisObj = this;
-  var params=JSON.stringify({
-      columns:thisObj.columns,
-      name: thisObj.name,
-      type: thisObj.type,
-      id: thisObj.id,
-      key:CB.appKey,
-      _id:thisObj._id
-  });
-
-  url = CB.serviceUrl + "/table/create/" + CB.appId;
-  CB._request('PUT',url,params).then(function(response){
-      response = JSON.parse(response);
-      var obj = new CB.CloudTable(response.name);
-      obj.columns = response.columns;
-      obj.id = response.id;
-      obj._id = response._id;
-      if (callback) {
-          callback.success(obj);
-      } else {
-          def.resolve(obj);
-      }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-
-  if (!callback) {
-      return def;
-  }
-}
-
-
-
-
-/*
- Column.js
- */
-
- CB.Column = function(columnName, dataType, required, unique){
-   if(columnName){
-     CB._columnNameValidation(columnName);
-     this.name = columnName;
-   }
-
-   if(dataType){
-     CB._columnDataTypeValidation(dataType);
-     this.dataType = dataType;
-   }else{
-     this.dataType = "Text";
-   }
-
-   if(typeof(required) === 'boolean')
-     this.required = required;
-   else
-     this.required = false;
-
-   if(typeof(unique) === 'boolean')
-     this.unique = unique;
-   else
-     this.unique = false;
-   this.relatedTo = null;
-   this.relationType = null;
-   this.isDeletable = true;
-   this.isEditable = true;
-   this.isRenamable = true;
-}
-
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
@@ -10674,7 +10494,6 @@ CB.fromJSON = function(data, thisObj) {
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of CloudObjects.
-
     if (!data)
         return null;
 
@@ -10834,6 +10653,12 @@ CB._clone=function(obj,url){
 
 CB._request=function(method,url,params)
 {
+
+    CB._validate();
+
+    if(!CB.CloudApp._isConnected)
+        throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
     if (CB._isNode) {
@@ -10864,44 +10689,12 @@ CB._request=function(method,url,params)
                 def.reject(xmlhttp.responseText);
             }
         }
-    }
+    };
     return def;
 };
 
-<<<<<<< HEAD
 CB._getSessionId = function(){
     return localStorage.getItem('sessionID');
-=======
-CB._columnValidation = function(column, cloudtable){
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
-  if(cloudtable.type == 'user'){
-    defaultColumn.concat(['username', 'email', 'password', 'roles']);
-  }else if(cloudtable.type == 'role'){
-    defaultColumn.push('name');
-  }
-
-  var index = defaultColumn.indexOf(column.name.toLowerCase());
-  if(index < 0)
-    return true;
-  else
-    return false;
-};
-
-CB._tableValidation = function(tableName){
-
-  if(!tableName) //if table name is empty
-    throw "table name cannot be empty";
-
-  if(!isNaN(tableName[0]))
-    throw "table name should not start with a number";
-
-  if(!tableName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(tableName))
-    throw "table not shoul not contain special characters";
->>>>>>> feature_cbtables
 };
 
 CB._modified = function(thisObj,columnName){
@@ -10915,8 +10708,6 @@ CB._modified = function(thisObj,columnName){
         thisObj.document._modifiedColumns.push(columnName);
     }
 };
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 
 function trimStart(character, string) {
@@ -10928,301 +10719,3 @@ function trimStart(character, string) {
 
     return string.substr(startIndex);
 }
-=======
->>>>>>> feature_cbtables
-=======
-
-CB._columnNameValidation = function(columnName){
-
-  var defaultColumn = ['id', 'issearchable', 'createdat', 'updatedat', 'acl'];
-
-  if(!columnName) //if table name is empty
-    throw "table name cannot be empty";
-
-  var index = defaultColumn.indexOf(columnName.toLowerCase());
-  if(index >= 0)
-    throw "this columnname is already in use";
-
-  if(!isNaN(columnName[0]))
-    throw "table name should not start with a number";
-
-  if(!columnName.match(/^\S+$/))
-    throw "table name should not contain spaces";
-
-  var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-  if(pattern.test(columnName))
-    throw "table not should not contain special characters";
-};
-
-CB._columnDataTypeValidation = function(dataType){
-
-  if(!dataType)
-    throw "data type cannot be empty";
-
-  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
-  var index = dataTypeList.indexOf(dataType);
-  if(index < 0)
-    throw "invalid data type";
-
-};
-
-CB._defaultColumns = function(type){
-  if(type == "custom")
-     return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "user")
-      return  [{
-                  name: 'id',
-                  dataType: 'Id',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'username',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'email',
-                  dataType: 'Email',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'password',
-                  dataType: 'Password',
-                  
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'roles',
-                  dataType: 'List',
-                  relatedTo:null,
-                  relatedToType :'role',
-                  relationType: 'table',
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                 
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-
-   if(type == "role")
-      return [{
-                  name: 'id',
-                  dataType: 'Id',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'name',
-                  dataType: 'Text',
-                  relatedTo: null,
-                  relatedToType :null,
-                 
-                  relationType: null,
-                  required: true,
-                  unique: true,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'isSearchable',
-                  dataType: 'Boolean',
-                  relatedTo: null,
-                  relatedToType :null,
-                  
-                  relationType: null,
-                  required: false,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'createdAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                 
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'updatedAt',
-                  dataType: 'DateTime',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              },
-              {
-                  name: 'ACL',
-                  dataType: 'ACL',
-                  relatedTo: null,
-                  relatedToType :null,
-                  relationType: null,
-                  required: true,
-                  unique: false,
-                  isRenamable: false,
-                  isEditable: false,
-                  isDeletable: false,
-              }];
-};
->>>>>>> feature_cbtables

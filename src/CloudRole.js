@@ -6,6 +6,7 @@ CB.CloudRole = CB.CloudRole || function(roleName) { //calling the constructor.
     this.document._tableName = 'Role';
     this.document._type = 'role';
     this.document.name = roleName;
+    this.document.expires = null;
     this.document.ACL = new CB.ACL();
     this.document.expires = null;
     this.document._isModified = true;

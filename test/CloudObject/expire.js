@@ -24,13 +24,10 @@ describe("CloudObjectExpires", function () {
         var query2 = new CB.CloudQuery('student1');
         query2.lessThan('age',12);
         var query =  CB.CloudQuery.or(query1,query2);
-        delete query.query.$include;
-        delete query.query.$or[0].$include;
-        delete query.query.$or[1].$include;
         query.find().then(function(list){
             if(list.length>0){
                 for(var i=0;i<list.length;i++){
-                    if(list[i]._expires>curr || !list[i]._expires){
+                    if(list[i].expires > curr || !list[i].expires){
                             break;
                         }
                     else{
@@ -71,7 +68,7 @@ describe("CloudObjectExpires", function () {
             success:function(list){
             if(list.length>0) {
                 for (var i = 0; i < list.length; i++) {
-                    if (list[i]._expires > curr || !list[i]._expires) {
+                    if (list[i].expires > curr || !list[i].expires) {
                         break;
                     }
                     else {

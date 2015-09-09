@@ -1,0 +1,147 @@
+describe("Atomicity Tests",function(done){
+
+    it("Should Attach the Database",function(done){
+
+        this.timeout(10000);
+
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
+            done();
+        },function(){
+            throw "Unable to connect back Mongo";
+        });
+    });
+
+    it("Should Delete CloudObjects from other databases if not saved in one",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudObject('student1');
+        obj.set('name','let');
+        obj.save().then(function(res){
+           var id = res.get('id');
+            var url = CB.serverUrl + '/db/orient/Disconnect';
+            CB._request('POST',url).then(function(){
+                res.set('name','what');
+                res.save().then(function(){
+                   done("DB disconnected should not save");
+                },function(){
+                    var query = new CB.CloudQuery('student1');
+                    query.findById(id).then(function(res){
+                        if(res.get('name') === 'let')
+                            done();
+                        else
+                            throw "Save is Not Atomic";
+                    },function(){
+                        throw "Unable to run find Query";
+                    })
+                });
+            },function(err){
+                throw "Unable to disconnect Mongo";
+            });
+        },function(){
+            throw "Unable to Save Object";
+        });
+
+    });
+
+    it("Should Attach the Database",function(done){
+
+        this.timeout(10000);
+
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
+            done();
+        },function(){
+            throw "Unable to connect back Mongo";
+        });
+    });
+
+    it("should delete a saved record",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudObject('student1');
+        obj.set('name','abcdef');
+        obj.save().then(function(res){
+            var url = CB.serverUrl + '/db/orient/Disconnect';
+            CB._request('POST',url).then(function(){
+                var id = res.get('id');
+                res.delete().then(function(){
+                    throw "Should Not delete with db disconnected";
+                },function(){
+                    var query = new CB.CloudQuery('student1');
+                    query.findById(id).then(function(res) {
+                        if(res) {
+                            console.log("Deleted Res")
+                            console.log(res);
+                            done();
+                        }else{
+                            throw "should get the record back";
+                        }
+                    },function(){
+                        throw "unable to do find by id"
+                    });
+                });
+            },function(){
+                throw "Unable to delete"
+            });
+        }, function (err) {
+            throw "Unable to find document by Id";
+        })
+    });
+
+    it("Should Attach the Database",function(done){
+
+        this.timeout(10000);
+
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
+            done();
+        },function(){
+            throw "Unable to connect back Mongo";
+        });
+    });
+
+    it("should create a table",function(done){
+
+        this.timeout(50000);
+
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+
+
+        var tableName = util.makeString();
+        var url = CB.serverUrl + '/db/orient/Disconnect';
+        CB._request('POST',url).then(function(){
+            var table = new CB.CloudTable(tableName);
+            table.save().then(function(){
+                throw "should not create the table when DB is disconnected";
+            },function(){
+                CB.CloudTable.get(table).then(function(res){
+                    if(!res)
+                        done();
+                    else
+                        throw "Unable to have atomicity in create table";
+                },function(){
+                    throw "Unable to run get query";
+                });
+            });
+        },function(err){
+            throw "Unable to disconnect Mongo";
+        });
+
+    });
+
+    it("",function(done) {
+        this.timeout(10000);
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
+        var url = CB.serverUrl + '/db/orient/connect';
+        CB._request('POST',url).then(function() {
+            done();
+        },function(){
+            throw "Unable to connect back Mongo";
+        });
+    });
+
+
+});

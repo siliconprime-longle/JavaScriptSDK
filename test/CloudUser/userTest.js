@@ -244,7 +244,5 @@ describe("CloudUser", function () {
     });
 
 
-  
-
 
 });

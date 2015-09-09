@@ -14,7 +14,7 @@ describe("Server Check",function(){
         CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;
-        CB.apiUrl = CB.serverUrl + '/api';
+        CB.apiUrl = CB.serverUrl;
         done();
     });
 });

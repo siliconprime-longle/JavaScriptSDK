@@ -7,7 +7,7 @@ module.exports = function(grunt) {
             sdk: {
                 // the files to concatenate
                     src: ['src/Promises.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
-                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/PrivateMethods.js'],
+                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/PrivateMethods.js'],
 
                     // the location of the resulting JS file
                     dest: 'dist/cloudboost.js'
@@ -20,6 +20,7 @@ module.exports = function(grunt) {
                         'test/util/util.js',
                         'test/serverTest.js',
                         'test/init/init.js',
+                        'test/CloudTable/*.js',
                         'test/ACL/*.js',
                         'test/CloudFile/*.js',
                         'test/CloudObject/*.js',
@@ -30,17 +31,21 @@ module.exports = function(grunt) {
                         'test/CloudSearch/*.js',
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
-                        'test/CloudApp/*.js'
+                        'test/CloudApp/*.js',
+                        'test/AppTests/*.js'
                     ],
+
                     dest: 'test/test.js'
                 },
 
             stagingTest:{
                     src: [
+                        'test/CloudTable/*.js',
                         'test/requireCloudBoost.js',
                         'test/util/util.js',
                         'test/stageTest.js',
                         'test/init/init.js',
+                        'test/CloudTable/*.js',
                         'test/ACL/*.js',
                         'test/CloudFile/*.js',
                         'test/CloudObject/*.js',
@@ -51,8 +56,10 @@ module.exports = function(grunt) {
                         'test/CloudSearch/*.js',
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
-                        'test/CloudApp/*.js'
+                        'test/CloudApp/*.js',
+                        'test/AppTests/*.js'
                     ],
+
                     dest: 'test/stagingTest.js'
                 },
 
@@ -62,7 +69,7 @@ module.exports = function(grunt) {
 
                     // the location of the resulting JS file
                     dest: 'dist/'+pjson.version+'.js'
-                },
+                }
             },
 
             uglify:{

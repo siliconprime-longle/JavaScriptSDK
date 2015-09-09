@@ -4,7 +4,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-    it("should not save a string into date column",function(done){
+ it("should not save a string into date column",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
@@ -129,7 +129,7 @@ describe("Cloud Object", function() {
         });
     });
 
-    it("should delete an object after save.", function(done) {
+   it("should delete an object after save.", function(done) {
 
     	this.timeout('20000');
         
@@ -279,7 +279,7 @@ describe("Cloud Object", function() {
      	});
     });
 
-    it("should save a CloudObject as a relation. ", function(done) {
+   it("should save a CloudObject as a relation. ", function(done) {
        	this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
@@ -544,7 +544,7 @@ describe("Cloud Object", function() {
     });
 
     it("should not save an array of different CloudObjects.", function(done) {
-        this.timeout(20000);
+        this.timeout(30000);
 
        var obj = new CB.CloudObject('Student');
        obj.set('name','sample');
@@ -694,7 +694,7 @@ describe("Cloud Object", function() {
         obj1.set('room',123);
         obj1.save().then(function(obj){
             
-            if(obj.get('room')===123){
+            if(obj.get('room') === 123){
                 obj.unset('room');
                 obj1.save().then(function(obj){
                     if(!obj.get('room')){
@@ -716,7 +716,7 @@ describe("Cloud Object", function() {
 
      it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
         
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',123);
@@ -728,13 +728,13 @@ describe("Cloud Object", function() {
                     if(!obj.get('room')){
                         done();
                     }else
-                        throw "Didnot unset the data from an object";
+                        throw "DidNot unset the data from an object";
 
                 },function(){
                     throw "should save the object";
                 });
             }else
-                throw "Didnot set the data to an object";
+                throw "DidNot set the data to an object";
 
         },function(){
             throw "should save the object";
@@ -744,7 +744,7 @@ describe("Cloud Object", function() {
 
      it("should save a required number with 0.", function(done) {
         
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudObject('Custom18');
         obj1.set('number',0);

@@ -554,7 +554,7 @@ CB.CloudSearch.prototype.search = function(callback) {
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/" + CB.appId + "/search" ;
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+ collectionName + "/search" ;
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));

@@ -17,11 +17,12 @@ describe("Server Check",function(){
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
-                    CB.appId = 'sample123';
-                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+                    CB.appId = "sample123";
+                    CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
                     CB.serverUrl = 'http://localhost:4730';
+                    CB.serviceUrl = 'http://localhost:3000';
                     CB.socketIoUrl = CB.serverUrl;
-                    CB.apiUrl = CB.serverUrl + '/api';
+                    CB.apiUrl = CB.serverUrl;
                     done();
 
                 }
@@ -30,12 +31,11 @@ describe("Server Check",function(){
                          console.log('RUNNING IN PHANTOM JS'); 
                          CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
                          CB.socketIoUrl = CB.serverUrl;
-                         CB.apiUrl = CB.serverUrl + '/api';
+                         CB.apiUrl = CB.serverUrl;
                     }
                     CB.appId = 'travis123';
                     CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
                     done();
-
                 }
             }
         }

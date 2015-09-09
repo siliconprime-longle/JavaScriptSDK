@@ -781,5 +781,5 @@ describe("CloudQuery", function (done) {
             });
         });
 
-    
+
 });
