@@ -129,7 +129,7 @@ describe("Cloud Object", function() {
         });
     });
 
-    it("should delete an object after save.", function(done) {
+   it("should delete an object after save.", function(done) {
 
     	this.timeout('20000');
         

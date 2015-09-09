@@ -1,7 +1,7 @@
 describe("Cloud Table", function(){
 
     before(function(){
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
       });
 
     var tableName = util.makeString();
@@ -31,7 +31,7 @@ describe("Cloud Table", function(){
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(){
-          CB.CloudTable.delete(obj).then(function(){
+          obj.delete().then(function(){
               done();
           },function(){
               throw("should have delete the table");
@@ -110,7 +110,7 @@ describe("Cloud Table", function(){
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(newTable){
-          CB.CloudTable.delete(newTable).then(function(){
+          newTable.delete().then(function(){
               done();
           },function(){
               done("should have delete the table");
@@ -148,7 +148,7 @@ describe("Cloud Table", function(){
             table.addColumn(column1);
             table.save().then(function(newTable){
               done();
-              CB.CloudTable.delete(newTable);
+              newTable.delete();
             });
         });
     });
@@ -320,7 +320,7 @@ describe("Cloud Table", function(){
 
         this.timeout(50000);
       var obj = new CB.CloudTable(tableName);
-      obj.save().then(function(table){
+      CB.CloudTable.get(obj).then(function(table){
           table.deleteColumn('id');
           table.save().then(function(newTable){
               if(newTable.columns) {
@@ -337,7 +337,7 @@ describe("Cloud Table", function(){
     });
 
     after(function() {
-    	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+    	CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
   	});
 
 

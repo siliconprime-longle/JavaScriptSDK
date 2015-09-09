@@ -12,7 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
-CB.socketIoUrl = 'http://realtime.cloudboost.io';
+CB.socketIoUrl = 'https://realtime.cloudboost.io';
 CB.serviceUrl = 'https://service.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.

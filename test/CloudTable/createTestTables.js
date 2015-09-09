@@ -2,7 +2,7 @@ describe("Should Create All Test Tables",function(done){
 
     before(function(){
         this.timeout(10000);
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
     });
    
 
@@ -10,7 +10,7 @@ describe("Should Create All Test Tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Address');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
@@ -22,19 +22,20 @@ describe("Should Create All Test Tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Company');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
         });
 
-    });
+    }); 
+
     it("should delete tables",function(done){
 
         this.timeout(20000);
      
         var obj = new CB.CloudTable('Employee');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
@@ -174,7 +175,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('student4');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -195,7 +196,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Role');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -216,7 +217,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('User');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
   it("should create table Custom",function(done){
@@ -258,7 +259,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should update custom table ",function(done){
@@ -301,7 +302,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom5');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -346,7 +347,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Sample');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -405,7 +406,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('hostel');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -438,7 +439,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('student1');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Student",function(done){
@@ -471,7 +472,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Student');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
     });
 
@@ -495,7 +496,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom18');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
     });
 
@@ -519,7 +520,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom3');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -544,7 +545,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom7');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Custom2",function(done){
@@ -575,7 +576,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom2');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Custom4",function(done){
@@ -603,7 +604,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom4');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -635,7 +636,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom14');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -668,13 +669,13 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom1');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
 
     after(function() {
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
     });
 
 });

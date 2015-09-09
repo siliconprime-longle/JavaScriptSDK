@@ -1,7 +1,7 @@
 describe("Table Tests", function (done) {
 
     before(function(){
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
     });
 
     it("Should Give all the tables", function (done) {
@@ -44,7 +44,7 @@ describe("Table Tests", function (done) {
     });
 
     after(function() {
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
     });
 
 });

@@ -103,13 +103,12 @@ describe("Atomicity Tests",function(done){
         });
     });
 
-    before(function(){
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
-    });
-
     it("should create a table",function(done){
 
         this.timeout(50000);
+
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
+
 
         var tableName = util.makeString();
         var url = CB.serverUrl + '/db/orient/Disconnect';
@@ -133,28 +132,9 @@ describe("Atomicity Tests",function(done){
 
     });
 
-
-    it("Should delete a table",function(){
-
+    it("",function(done) {
         this.timeout(10000);
-
-        var table = new CB.CloudTable('Address');
-        CB.CloudTable.delete(table).then(function(){
-            throw "Should not delete the table if db is down";
-        },function(){
-            done();
-        })
-    });
-
-    after(function() {
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
-    });
-
-
-    it("Should Attach the Database",function(done){
-
-        this.timeout(10000);
-
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
         var url = CB.serverUrl + '/db/orient/connect';
         CB._request('POST',url).then(function() {
             done();
@@ -162,7 +142,6 @@ describe("Atomicity Tests",function(done){
             throw "Unable to connect back Mongo";
         });
     });
-
 
 
 });

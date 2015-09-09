@@ -39,8 +39,8 @@ describe("Server Check",function(){
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
-                    CB.appId = 'sample123';
-                    CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+                    CB.appId = "sample123";
+                    CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
                     CB.serverUrl = 'http://localhost:4730';
                     CB.serviceUrl = 'http://localhost:3000';
                     CB.socketIoUrl = CB.serverUrl;
@@ -76,14 +76,14 @@ describe("Cloud App", function() {
 describe("Cloud Table", function(){
 
     before(function(){
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
       });
 
     var tableName = util.makeString();
 
     it("should not create duplicate table",function(done){
 
-        this.timeout(40000);
+        this.timeout(60000);
 
 
         var obj = new CB.CloudTable(tableName);
@@ -101,12 +101,12 @@ describe("Cloud Table", function(){
     });
 
     it("should first create a table and then delete that table",function(done){
-        this.timeout(40000);
+        this.timeout(60000);
 
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(){
-          CB.CloudTable.delete(obj).then(function(){
+          obj.delete().then(function(){
               done();
           },function(){
               throw("should have delete the table");
@@ -141,7 +141,7 @@ describe("Cloud Table", function(){
 
     it("should update new column into the table",function(done){
 
-        this.timeout(50000);
+        this.timeout(80000);
 
         var tableName1 = util.makeString();
         var tableName2 = util.makeString();
@@ -185,7 +185,7 @@ describe("Cloud Table", function(){
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(newTable){
-          CB.CloudTable.delete(newTable).then(function(){
+          newTable.delete().then(function(){
               done();
           },function(){
               done("should have delete the table");
@@ -214,15 +214,16 @@ describe("Cloud Table", function(){
     });
     
 	it("should add a column to the table after save.",function(done){
-        this.timeout(20000);
+        this.timeout(40000);
+
         var tableName = util.makeString();
         var table = new CB.CloudTable(tableName);
         table.save().then(function(table){
-            var column1 = new CB.Column('Name11', 'Text', true, false);
+            var column1 = new CB.Column('Name1', 'Text', true, false);
             table.addColumn(column1);
             table.save().then(function(newTable){
               done();
-              CB.CloudTable.delete(newTable);
+              newTable.delete();
             });
         });
     });
@@ -244,25 +245,6 @@ describe("Cloud Table", function(){
         },function(){
             done("should get the all table");
         });
-    });
-
-
-    tableName = util.makeString();
-
-    it("should not rename a table",function(done){
-
-        this.timeout(40000);
-
-      var obj = new CB.CloudTable(tableName);
-      obj.save().then(function(table){
-          try{
-              table.name = "NewName";
-          }catch(err){
-              done();
-          }
-      },function(){
-          done("should fetch the table");
-      });
     });
 
     it("should not rename a table",function(done){
@@ -360,7 +342,7 @@ describe("Cloud Table", function(){
       });
     });
 
-    it("should change unique property of a user defined column",function(done){
+    it("should not change unique property of a pre defined column",function(done){
       this.timeout(20000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
@@ -369,12 +351,12 @@ describe("Cloud Table", function(){
           else
             table.document.columns[0].unique = true;
           table.save().then(function(newTable){
-              if(newTable.document.columns[0].unique == table.columns[0].unique)
+              if(newTable.document.columns[0].unique !== table.columns[0].unique)
                 done();
               else
                 done("shouldChange unique property of a user defined column");
           },function(){
-              done("shouldChange unique property of a user defined column");
+              done();
           });
       },function(){
           done("should fetch the table");
@@ -382,16 +364,21 @@ describe("Cloud Table", function(){
     });
 
     it("should change required property of a user defined column",function(done){
-      this.timeout(20000);
-      var obj = new CB.CloudTable(tableName);
-      CB.CloudTable.get(obj).then(function(table){
-          if(table.document.columns[0].required)
-            table.document.columns[0].required = false;
-          else
-            table.document.columns[0].required = true;
 
+      this.timeout(50000);
+
+
+      var obj = new CB.CloudTable(util.makeString());
+      var name = new CB.Column("abc");
+        name.required = true;
+        obj.addColumn(name);
+        obj.save().then(function(table){
+          if(table.columns[5].required)
+            table.columns[5].required = false;
+          else
+            table.columns[5].required = true;
           table.save().then(function(newTable){
-              if(newTable.document.columns[0].required == table.document.columns[0].required)
+              if(newTable.columns[5].required === table.columns[5].required)
                 done();
               else
                 done("should change required property of a user defined column");
@@ -405,21 +392,27 @@ describe("Cloud Table", function(){
     });
 
     it("should not delete a default column of a table",function(done){
-      this.timeout(20000);
+
+        this.timeout(50000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           table.deleteColumn('id');
           table.save().then(function(newTable){
-              if(newTable.columns[0] != "id")
-                done("should change required property of a user defined column");
+              if(newTable.columns) {
+                  if (newTable.columns[0].name === "id")
+                      done();
+                  else
+                      done("Should not change the behaviour of predefined columns");
+              }else
+                done();
           },function(){
               done();
           });
       });
     });
-    
+
     after(function() {
-    	CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+    	CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
   	});
 
 
@@ -429,7 +422,7 @@ describe("Should Create All Test Tables",function(done){
 
     before(function(){
         this.timeout(10000);
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
     });
    
 
@@ -437,7 +430,7 @@ describe("Should Create All Test Tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Address');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
@@ -449,19 +442,20 @@ describe("Should Create All Test Tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Company');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
         });
 
-    });
+    }); 
+
     it("should delete tables",function(done){
 
         this.timeout(20000);
      
         var obj = new CB.CloudTable('Employee');
-        CB.CloudTable.delete(obj).then(function(){
+        obj.delete().then(function(){
             done();
         },function(){
             throw "Unable to delete";
@@ -526,7 +520,7 @@ describe("Should Create All Test Tables",function(done){
         });
     });
 
-   /* it("Should update the table schema",function(done){
+    it("Should update the table schema",function(done){
 
         this.timeout(50000);
 
@@ -601,7 +595,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('student4');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -622,7 +616,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Role');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -643,7 +637,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('User');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
   it("should create table Custom",function(done){
@@ -685,7 +679,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should update custom table ",function(done){
@@ -728,7 +722,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom5');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
 
@@ -773,7 +767,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Sample');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -832,7 +826,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('hostel');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -865,7 +859,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('student1');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Student",function(done){
@@ -898,7 +892,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Student');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
     });
 
@@ -922,7 +916,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom18');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
     });
 
@@ -946,7 +940,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom3');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -971,7 +965,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom7');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Custom2",function(done){
@@ -1002,7 +996,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom2');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
     });
 
     it("should create table Custom4",function(done){
@@ -1030,7 +1024,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom4');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -1062,7 +1056,7 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom14');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
     });
@@ -1095,25 +1089,25 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom1');
-        CB.CloudTable.delete(obj,callback);
+        obj.delete(callback);
 
 
-    });*/
+    });
 
     after(function() {
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
     });
 
 });
 describe("Table Tests", function (done) {
 
     before(function(){
-        CB.appKey = 'Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=';
+        CB.appKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM=";
     });
 
     it("Should Give all the tables", function (done) {
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         CB.CloudTable.getAll().then(function(res){
            console.log(res);
@@ -1151,7 +1145,7 @@ describe("Table Tests", function (done) {
     });
 
     after(function() {
-        CB.appKey = '9SPxp6D3OPWvxj0asw5ryA==';
+        CB.appKey = "9SPxp6D3OPWvxj0asw5ryA==";
     });
 
 });
@@ -3901,7 +3895,7 @@ describe("Cloud Object", function() {
         });
     });
 
-    it("should delete an object after save.", function(done) {
+   it("should delete an object after save.", function(done) {
 
     	this.timeout('20000');
         
@@ -5296,7 +5290,7 @@ describe("CloudQuery Include", function (done) {
     });
 
     it("should query over a linked column if a object is passed in equalTo",function(done){
-            this.timeout(300000);
+            this.timeout(30000);
 
             var hostel = new CB.CloudObject('hostel');
             var student = new CB.CloudObject('student1');
@@ -5311,7 +5305,7 @@ describe("CloudQuery Include", function (done) {
                     done();
                 }, function () {
                     throw "";
-                })
+                });
                 console.log(list);
             },function(){
                 throw "unable to save data";
@@ -6844,7 +6838,7 @@ describe("CloudQuery", function (done) {
             });
         });
 
-    
+
 });
 describe("CloudSearch", function (done) {
 
@@ -7820,5 +7814,162 @@ describe("CloudApp Socket Test", function () {
 
     });
 
+
+});
+describe("App Tests2",function(done){
+
+    var appId = util.makeString();
+    var name = util.makeString();
+
+    it("should create an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        var params = {};
+        params.email = 'hotcomputerworks@hot.xyz';
+        params.password = 'sample';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/create';
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('POST',url,params,true).then(function(res){
+                res = JSON.parse(res);
+                CB.appId = res.appId;
+                CB.appKey = res.keys.js;
+                CB.jsKey = res.keys.js;
+                CB.masterKey = res.keys.master;
+                console.log(res);
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
+
+    it("",function(done){
+
+        CB.CloudApp.init(CB.appId,CB.appKey);
+        CB.appKey = CB.masterKey;
+        done();
+    });
+
+    it("should create a table",function(done){
+
+        this.timeout(30000);
+
+        var table = new CB.CloudTable('Tests1');
+        table.save().then(function(){
+            done();
+        },function(){
+            throw "Unable to create Table";
+        });
+
+    });
+
+    it("",function(done){
+
+        CB.appKey = CB.jsKey;
+        done();
+    });
+
+
+    it("should save a record",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Tests1');
+        obj.save().then(function(res){
+            done();
+        },function(err){
+           throw "Unable to Save";
+        });
+    });
+});
+describe("App Tests",function(done){
+
+    var appId = util.makeString();
+    var name = util.makeString();
+
+    it("should create an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        var params = {};
+        params.email = 'hotcomputerworks@hot.xyz';
+        params.password = 'sample';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/create';
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('POST',url,params,true).then(function(res){
+                res = JSON.parse(res);
+                CB.appId = res.appId;
+                CB.appKey = res.keys.js;
+                CB.masterKey = res.keys.master;
+                CB.jsKey = res.keys.js;
+                console.log(res);
+                done();
+            },function(err){
+               throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
+
+     it("",function(done){
+
+         CB.CloudApp.init(CB.appId,CB.appKey);
+         CB.appKey = CB.masterKey;
+            done();
+     });
+
+    it("should create a table",function(done){
+
+        this.timeout(30000);
+
+        var table = new CB.CloudTable('Tests');
+        table.save().then(function(){
+            done();    
+        },function(){
+            throw "Unable to create Table";
+        });    
+
+    });
+
+    it("",function(done){
+
+        CB.appKey = CB.jsKey;
+        done();
+    });
+
+
+    it("should save a record",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Tests');
+        obj.save().then(function(res){
+            done();
+        },function(err){
+            throw "Unable to Save";
+        });
+    });
 
 });

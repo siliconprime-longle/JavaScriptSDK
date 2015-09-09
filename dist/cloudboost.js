@@ -12,7 +12,7 @@ CB._isNode = false;
 CB.Socket = null;
 
 CB.serverUrl = 'https://api.cloudboost.io'; // server url.
-CB.socketIoUrl = 'http://realtime.cloudboost.io';
+CB.socketIoUrl = 'https://realtime.cloudboost.io';
 CB.serviceUrl = 'https://service.cloudboost.io';
 
 CB.io = null; //socket.io library is saved here.
@@ -10681,43 +10681,39 @@ CB.CloudTable.get = function(table, callback){
  * @returns {*}
  */
 
-CB.CloudTable.delete = function(table, callback){
-  if (Object.prototype.toString.call(table) === '[object Object]') {
-      if (!CB.appId) {
-          throw "CB.appId is null.";
-      }
+CB.CloudTable.prototype.delete = function(callback){
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
 
-      var def;
-      if (!callback) {
-          def = new CB.Promise();
-      }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
 
-      var params=JSON.stringify({
-          key: CB.appKey,
-          name: table.document.name
-      });
+    var params=JSON.stringify({
+        key: CB.appKey,
+        name: this.name
+    });
 
-      var url = CB.serviceUrl + '/' + CB.appId + "/table/" +table.document.name;
+    var url = CB.serviceUrl + '/' + CB.appId + "/table/" +this.name;
 
-      CB._request('DELETE',url,params,true).then(function(response){
+    CB._request('DELETE',url,params,true).then(function(response){
         if (callback) {
             callback.success(response);
         } else {
             def.resolve(response);
         }
-      },function(err){
-          if(callback){
-              callback.error(err);
-          }else {
-              def.reject(err);
-          }
-      });
-      if (!callback) {
-          return def;
-      }
-  } else if (Object.prototype.toString.call(table) === '[object Array]') {
-    throw "cannot delete array of tables";
-  }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
 }
 
 /**

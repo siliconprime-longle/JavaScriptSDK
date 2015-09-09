@@ -134,7 +134,7 @@
     });
 
     it("should query over a linked column if a object is passed in equalTo",function(done){
-            this.timeout(300000);
+            this.timeout(30000);
 
             var hostel = new CB.CloudObject('hostel');
             var student = new CB.CloudObject('student1');
@@ -149,7 +149,7 @@
                     done();
                 }, function () {
                     throw "";
-                })
+                });
                 console.log(list);
             },function(){
                 throw "unable to save data";
