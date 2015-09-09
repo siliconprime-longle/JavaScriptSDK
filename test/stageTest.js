@@ -13,6 +13,7 @@ describe("Server Check",function(){
         CB.appId = 'travis123';
         CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+        CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
         CB.socketIoUrl = CB.serverUrl;
         CB.apiUrl = CB.serverUrl;
         done();
