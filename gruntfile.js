@@ -40,7 +40,6 @@ module.exports = function(grunt) {
 
             stagingTest:{
                     src: [
-                        'test/CloudTable/*.js',
                         'test/requireCloudBoost.js',
                         'test/util/util.js',
                         'test/stageTest.js',

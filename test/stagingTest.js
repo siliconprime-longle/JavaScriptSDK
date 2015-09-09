@@ -1,3 +1,56 @@
+var CB = require('../lib/cloudboost.js');
+   var util = {
+     makeString : function(){
+	    var text = "x";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	    for( var i=0; i < 5; i++ )
+	        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	    return 'x'+text;
+	},	
+
+	makeEmail : function(){
+	    return this.makeString()+'@sample.com';
+	}
+
+   };
+
+   
+
+	
+
+describe("Server Check",function(){
+    it("should check for localhost",function(done){
+        this.timeout(100000);
+        var xmlhttp;
+        var req = typeof(require) === 'function' ? require : null;
+        // Load references to other dependencies
+        if (typeof(XMLHttpRequest) !== 'undefined') {
+            xmlhttp = XMLHttpRequest;
+        } else if (typeof(require) === 'function' &&
+            typeof(require.ensure) === 'undefined') {
+            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+        }
+        CB.appId = 'travis123';
+        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+        CB.socketIoUrl = CB.serverUrl;
+        CB.apiUrl = CB.serverUrl;
+        done();
+    });
+});
+
+describe("Cloud App", function() {
+    it("should init the CloudApp and SDK.", function(done) {
+        this.timeout(500000);
+
+        CB.CloudApp.init(CB.appId, CB.appKey);
+
+        done();
+    });
+});
+
 describe("Cloud Table", function(){
 
     before(function(){
@@ -1074,59 +1127,6 @@ describe("Table Tests", function (done) {
     });
 
 });
-var CB = require('../lib/cloudboost.js');
-   var util = {
-     makeString : function(){
-	    var text = "x";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	    for( var i=0; i < 5; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	    return 'x'+text;
-	},	
-
-	makeEmail : function(){
-	    return this.makeString()+'@sample.com';
-	}
-
-   };
-
-   
-
-	
-
-describe("Server Check",function(){
-    it("should check for localhost",function(done){
-        this.timeout(100000);
-        var xmlhttp;
-        var req = typeof(require) === 'function' ? require : null;
-        // Load references to other dependencies
-        if (typeof(XMLHttpRequest) !== 'undefined') {
-            xmlhttp = XMLHttpRequest;
-        } else if (typeof(require) === 'function' &&
-            typeof(require.ensure) === 'undefined') {
-            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
-        }
-        CB.appId = 'travis123';
-        CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
-        CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-        CB.socketIoUrl = CB.serverUrl;
-        CB.apiUrl = CB.serverUrl;
-        done();
-    });
-});
-
-describe("Cloud App", function() {
-    it("should init the CloudApp and SDK.", function(done) {
-        this.timeout(500000);
-
-        CB.CloudApp.init(CB.appId, CB.appKey);
-
-        done();
-    });
-});
-
 describe("ACL", function () {
 
     it("Should set the public write access", function (done) {
