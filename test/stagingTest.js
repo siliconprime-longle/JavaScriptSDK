@@ -5418,7 +5418,7 @@ describe("CloudQuery Include", function (done) {
 });
 describe("Query over Orient",function(done){
 
-   /*it("Should Query over related Document",function(done){
+   it("Should Query over related Document",function(done){
 
         this.timeout(10000);
         var obj = new CB.CloudObject('Employee');
@@ -5893,7 +5893,7 @@ describe("Query over Orient",function(done){
         }, function () {
             done("Unable to Run Find Query with contained in set");
         })
-    });*/
+    });
 
     it("should query with not contained in set",function(done){
 
@@ -5916,7 +5916,7 @@ describe("Query over Orient",function(done){
         });
     });
 
- /*   it("Should check for exists over link list",function(done){
+   it("Should check for exists over link list",function(done){
 
         this.timeout(10000);
         var query = new CB.CloudQuery('Company');
@@ -6063,7 +6063,7 @@ describe("Query over Orient",function(done){
         },function(err){
            done("Unable to find over include List");
         });
-    });*/
+    });
 });
 describe("CloudQuery", function (done) {
 
