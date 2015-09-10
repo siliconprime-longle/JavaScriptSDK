@@ -8273,7 +8273,7 @@ CB.CloudQuery.prototype.equalTo = function(columnName, data) {
     return this;
 };
 
-CB.CloudQuery.prototype.include = function (columnName) {
+CB.CloudQuery.prototype.includeList = function (columnName) {
     if (columnName === 'id')
         columnName = '_' + columnName;
 

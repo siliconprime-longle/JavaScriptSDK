@@ -32,7 +32,7 @@ describe("Server Check",function(){
                     if(window.mochaPhantomJS){
                          console.log('RUNNING IN PHANTOM JS'); 
                          CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-                         CB.serviceUrl = 'http://localhost:3000';
+                         CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
                          CB.socketIoUrl = CB.serverUrl;
                          CB.apiUrl = CB.serverUrl;
                     }

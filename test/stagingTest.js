@@ -407,7 +407,7 @@ describe("Should Create All Test Tables",function(done){
     });
    
 
-  it("should delete tables",function(done){
+  /*it("should delete tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Address');
@@ -1008,7 +1008,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });
+    });*/
 
 
     it("should create table Custom14",function(done){
@@ -1019,11 +1019,11 @@ describe("Should Create All Test Tables",function(done){
         var callback = {};
         callback.success = function(res){
             var custom = new CB.CloudTable('Custom14');
-            var newColumn = new CB.Column('List_Number');
+            var newColumn = new CB.Column('ListNumber');
             newColumn.dataType = 'List';
             newColumn.relatedTo = 'Number';
             custom.addColumn(newColumn);
-            var newColumn1 = new CB.Column('List_GeoPoint');
+            var newColumn1 = new CB.Column('ListGeoPoint');
             newColumn1.dataType = 'List';
             newColumn1.relatedTo = 'GeoPoint';
             custom.addColumn(newColumn1);
@@ -1042,7 +1042,7 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
-   it("should create table Custom1",function(done){
+ /*  it("should create table Custom1",function(done){
 
         this.timeout(50000);
 
@@ -1074,7 +1074,7 @@ describe("Should Create All Test Tables",function(done){
 
 
     });
-
+*/
     after(function() {
         CB.appKey = CB.jsKey;
     });
@@ -3755,7 +3755,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
- it("should not save a string into date column",function(done){
+/* it("should not save a string into date column",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
@@ -4369,7 +4369,7 @@ describe("Cloud Object", function() {
         this.timeout(20000);
 
         var obj = new CB.CloudObject('Custom14');
-        obj.set('List_Number',[1,2,3]);
+        obj.set('ListNumber',[1,2,3]);
         obj.save().then(function(list){
             console.log(list);
            done();
@@ -4377,7 +4377,7 @@ describe("Cloud Object", function() {
             throw "should save the list of numbers";
         });
     });
-
+*/
     it("should save a list of GeoPoint",function(done){
 
         this.timeout(20000);
@@ -4385,7 +4385,7 @@ describe("Cloud Object", function() {
         var obj = new CB.CloudObject('Custom14');
         var GP1 = new CB.CloudGeoPoint(17,89);
         var GP2 = new CB.CloudGeoPoint(66,78);
-        obj.set('List_GeoPoint',[GP1,GP2]);
+        obj.set('ListGeoPoint',[GP1,GP2]);
         obj.save().then(function(list){
            console.log(list);
             done();
@@ -4394,7 +4394,7 @@ describe("Cloud Object", function() {
         });
     });
 
-    it("should save the relation",function(done){
+   /* it("should save the relation",function(done){
 
         this.timeout(20000);
 
@@ -4504,7 +4504,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });
+    });*/
 });
 describe("Version Test",function(done){
 
