@@ -3780,7 +3780,7 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required. 
 
-/* it("should not save a string into date column",function(done){
+ it("should not save a string into date column",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudObject('Sample');
@@ -4402,7 +4402,7 @@ describe("Cloud Object", function() {
             throw "should save the list of numbers";
         });
     });
-*/
+
     it("should save a list of GeoPoint",function(done){
 
         this.timeout(20000);
@@ -4419,7 +4419,7 @@ describe("Cloud Object", function() {
         });
     });
 
-   /* it("should save the relation",function(done){
+    it("should save the relation",function(done){
 
         this.timeout(20000);
 
@@ -4529,7 +4529,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });*/
+    });
 });
 describe("Version Test",function(done){
 
