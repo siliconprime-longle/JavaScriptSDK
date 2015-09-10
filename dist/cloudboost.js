@@ -10875,7 +10875,7 @@ CB.toJSON = function(thisObj) {
 
     if(thisObj instanceof CB.CloudGeoPoint){
         latitude = thisObj.document.longitude;
-        longitude = document.latitude;
+        longitude = thisObj.document.latitude;
     }
 
     if(thisObj instanceof CB.CloudFile)

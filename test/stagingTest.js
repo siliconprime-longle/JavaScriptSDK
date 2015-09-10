@@ -7835,8 +7835,8 @@ describe("App Tests2",function(done){
 
         var url = CB.serviceUrl+'/user/signin';
         var params = {};
-        params.email = 'hotcomputerworks@hot.xyz';
-        params.password = 'sample';
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
         params = JSON.stringify(params);
         CB._request('POST',url,params,true).then(function(res) {
             res = JSON.parse(res);
@@ -7912,9 +7912,10 @@ describe("App Tests",function(done){
         this.timeout(100000);
 
         var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
         var params = {};
-        params.email = 'hotcomputerworks@hot.xyz';
-        params.password = 'sample';
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
         params = JSON.stringify(params);
         CB._request('POST',url,params,true).then(function(res) {
             res = JSON.parse(res);
