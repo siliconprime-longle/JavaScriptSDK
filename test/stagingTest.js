@@ -407,7 +407,7 @@ describe("Should Create All Test Tables",function(done){
     });
    
 
-  /*it("should delete tables",function(done){
+  it("should delete tables",function(done){
 
         this.timeout(20000);
         var obj = new CB.CloudTable('Address');
@@ -1008,7 +1008,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });*/
+    });
 
 
     it("should create table Custom14",function(done){
@@ -1042,7 +1042,7 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
- /*  it("should create table Custom1",function(done){
+   it("should create table Custom1",function(done){
 
         this.timeout(50000);
 
@@ -1074,7 +1074,7 @@ describe("Should Create All Test Tables",function(done){
 
 
     });
-*/
+
     after(function() {
         CB.appKey = CB.jsKey;
     });
