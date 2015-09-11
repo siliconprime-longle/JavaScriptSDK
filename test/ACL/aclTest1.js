@@ -4,11 +4,18 @@ describe("ACL", function () {
 
         this.timeout(20000);
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
         obj.ACL.setPublicWriteAccess(false);
         obj.save().then(function(list) {
-            acl=list.get('ACL');
+            var acl=list.get('ACL');
             if(acl.write.deny.user.length === 0) {
                 obj.set('age',15);
                 obj.save().then(function(){
@@ -28,11 +35,18 @@ describe("ACL", function () {
 
         this.timeout(20000);
 
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
-            acl=list.get('ACL');
+            var acl=list.get('ACL');
             if(acl.read.deny.user.length === 0)
                 done();
             else

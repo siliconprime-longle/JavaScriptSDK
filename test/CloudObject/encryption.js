@@ -8,13 +8,11 @@ describe("CloudObject - Encryption", function () {
         obj.set('username',util.makeEmail());
         obj.set('password','password');
         obj.set('email',util.makeEmail());
-
         obj.save().then(function(obj){
             if(obj.get('password') !== 'password')
                 done();
             else
                 throw "Cannot encrypt";
-
         }, function(){
             throw "Cannot save a CloudObject";
         });
