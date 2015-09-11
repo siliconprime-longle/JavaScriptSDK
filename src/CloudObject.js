@@ -266,7 +266,7 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
     });
     var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
     CB._request('PUT',url,params).then(function(response){
-        CB.fromJSON(JSON.parse(response),thisObj);
+        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {
@@ -308,7 +308,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
 
     CB._request('POST',url,params).then(function(response){
-        CB.fromJSON(JSON.parse(response),thisObj);
+        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
         } else {

@@ -144,9 +144,8 @@ describe("CloudUser", function () {
     role.set('name',rolename);
     it("Should create a role ", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
-        //var role = new CB.CloudRole('admin');
         role.save().then(function(list){
                 done();
             },function(){
@@ -237,7 +236,7 @@ describe("CloudUser", function () {
                 throw "Password is not encrypted.";
             else
                done();
-        }, function () {
+        }, function (err) {
             throw "user create error";
         });
 

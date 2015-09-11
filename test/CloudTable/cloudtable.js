@@ -8,7 +8,7 @@ describe("Cloud Table", function(){
 
     it("should not create duplicate table",function(done){
 
-        this.timeout(60000);
+        this.timeout(80000);
 
 
         var obj = new CB.CloudTable(tableName);

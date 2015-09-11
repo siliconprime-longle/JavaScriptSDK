@@ -64,7 +64,7 @@ describe("Cloud Table", function(){
 
     it("should not create duplicate table",function(done){
 
-        this.timeout(60000);
+        this.timeout(80000);
 
 
         var obj = new CB.CloudTable(tableName);
@@ -7664,9 +7664,8 @@ describe("CloudUser", function () {
     role.set('name',rolename);
     it("Should create a role ", function (done) {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
-        //var role = new CB.CloudRole('admin');
         role.save().then(function(list){
                 done();
             },function(){
@@ -7757,7 +7756,7 @@ describe("CloudUser", function () {
                 throw "Password is not encrypted.";
             else
                done();
-        }, function () {
+        }, function (err) {
             throw "user create error";
         });
 
@@ -7772,19 +7771,21 @@ describe("CloudRole", function (done) {
     it("Should create a role", function (done) {
 
         this.timeout(20000);
+
         role.save().then(function(list){
             console.log(list);
             if(!list)
-                throw "Should retrieve the cloud role";
+                throw "Should create a role";
             done();
         },function(){
-            throw "Should retrieve the cloud role";
+            throw "unable to create a role.";
         });
     });
 
     it("Should Retrieve a role", function (done) {
 		
         this.timeout(20000);
+
         var query = new CB.CloudQuery('Role');
         if(!role.get('id')){
             done();
