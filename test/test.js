@@ -7808,7 +7808,7 @@ describe("CloudRole", function (done) {
     var role5 = new CB.CloudRole(roleName5);
     it("Should create a role", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         role5.save().then(function(list){
             console.log(list);
@@ -7915,7 +7915,7 @@ describe("App Tests2",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(30000);
+        this.timeout(50000);
 
         var table = new CB.CloudTable('Tests1');
         table.save().then(function(){
@@ -7935,7 +7935,7 @@ describe("App Tests2",function(done){
 
     it("should save a record",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('Tests1');
         obj.save().then(function(res){
@@ -7994,7 +7994,7 @@ describe("App Tests",function(done){
 
     it("should create a table",function(done){
 
-        this.timeout(30000);
+        this.timeout(50000);
 
         var table = new CB.CloudTable('Tests');
         table.save().then(function(){
@@ -8014,7 +8014,7 @@ describe("App Tests",function(done){
 
     it("should save a record",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var obj = new CB.CloudObject('Tests');
         obj.save().then(function(res){
