@@ -103,12 +103,12 @@ describe("Version Test",function(done){
 
     });
 
-    var roleName = util.makeString();
+    var roleName1 = util.makeString();
 
     it("Should create a role with version", function (done) {
 
         this.timeout(20000);
-        var role = new CB.CloudRole(roleName);
+        var role = new CB.CloudRole(roleName1);
         role.save().then(function (list) {
             if (!list)
                 throw "Should retrieve the cloud role";

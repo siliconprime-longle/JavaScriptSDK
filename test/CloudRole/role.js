@@ -1,11 +1,11 @@
 describe("CloudRole", function (done) {
-    var roleName = util.makeString();
-    var role = new CB.CloudRole(roleName);
+    var roleName5 = util.makeString();
+    var role5 = new CB.CloudRole(roleName5);
     it("Should create a role", function (done) {
 
         this.timeout(20000);
 
-        role.save().then(function(list){
+        role5.save().then(function(list){
             console.log(list);
             if(!list)
                 throw "Should create a role";
@@ -20,10 +20,10 @@ describe("CloudRole", function (done) {
         this.timeout(20000);
 
         var query = new CB.CloudQuery('Role');
-        if(!role.get('id')){
+        if(!role5.get('id')){
             done();
         }
-        query.equalTo('id',role.get('id'));
+        query.equalTo('id',role5.get('id'));
         query.find().then(function(list){
         	console.log(list);
         	if(!list)

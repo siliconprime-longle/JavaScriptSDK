@@ -139,14 +139,14 @@ describe("CloudUser", function () {
 
     });
 
-    var rolename = util.makeString();
-    var role = new CB.CloudRole(rolename);
-    role.set('name',rolename);
+    var roleName2 = util.makeString();
+    var role1 = new CB.CloudRole(roleName2);
+    role1.set('name',roleName2);
     it("Should create a role ", function (done) {
 
         this.timeout(20000);
 
-        role.save().then(function(list){
+        role1.save().then(function(list){
                 done();
             },function(){
                 throw "role create error";
@@ -168,7 +168,7 @@ describe("CloudUser", function () {
         obj.set('username', username);
         obj.set('password',passwd);
         obj.logIn().then(function(list) {
-            role.save().then(function(role){
+            role1.save().then(function(role){
                 list.addToRole(role).then(function(list){
                     done();
                 },function(error){
@@ -194,15 +194,15 @@ describe("CloudUser", function () {
         this.timeout(1000000);
 
         var obj = new CB.CloudUser();
-        rolename = util.makeString();
-        var role = new CB.CloudRole(rolename);
-        role.set('name',rolename);
+        var roleName3 = util.makeString();
+        var role2 = new CB.CloudRole(roleName3);
+        role2.set('name',roleName3);
         obj.set('username', username);
         obj.set('password',passwd);
         obj.logIn().then(function(list) {
-            role.save().then(function(role){
-                list.addToRole(role).then(function(list){
-                    CB.CloudUser.current.removeFromRole(role).then(function(){
+            role2.save().then(function(role2){
+                list.addToRole(role2).then(function(list){
+                    CB.CloudUser.current.removeFromRole(role2).then(function(){
                         done();
                     },function(){
                         throw "Should remove the role";
