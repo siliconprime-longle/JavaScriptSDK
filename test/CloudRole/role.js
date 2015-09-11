@@ -3,7 +3,7 @@ describe("CloudRole", function (done) {
     var role5 = new CB.CloudRole(roleName5);
     it("Should create a role", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         role5.save().then(function(list){
             console.log(list);
