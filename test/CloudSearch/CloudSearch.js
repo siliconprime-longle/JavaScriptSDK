@@ -9,7 +9,9 @@ describe("CloudSearch", function (done) {
         obj.set('description', 'wi-fi');
         obj.save({
             success : function(obj){
-                done();
+                setTimeout(function(){
+                    done();
+                },2000);
             },error : function(error){
                 throw "should index cloud object";
             }

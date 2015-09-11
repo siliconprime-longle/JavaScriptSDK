@@ -6861,7 +6861,9 @@ describe("CloudSearch", function (done) {
         obj.set('description', 'wi-fi');
         obj.save({
             success : function(obj){
-                done();
+                setTimeout(function(){
+                    done();
+                },2000);
             },error : function(error){
                 throw "should index cloud object";
             }
@@ -7770,7 +7772,6 @@ describe("CloudRole", function (done) {
     it("Should create a role", function (done) {
 
         this.timeout(20000);
-        console.log(role.ACL);
         role.save().then(function(list){
             console.log(list);
             if(!list)
@@ -7785,6 +7786,9 @@ describe("CloudRole", function (done) {
 		
         this.timeout(20000);
         var query = new CB.CloudQuery('Role');
+        if(!role.get('id')){
+            done();
+        }
         query.equalTo('id',role.get('id'));
         query.find().then(function(list){
         	console.log(list);
