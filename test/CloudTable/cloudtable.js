@@ -26,7 +26,7 @@ describe("Cloud Table", function(){
     });
 
     it("should first create a table and then delete that table",function(done){
-        this.timeout(60000);
+        this.timeout(100000);
 
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
@@ -105,7 +105,7 @@ describe("Cloud Table", function(){
 
     it("should first create a table and then delete that table",function(done){
 
-        this.timeout(40000);
+        this.timeout(80000);
 
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
@@ -122,7 +122,7 @@ describe("Cloud Table", function(){
     });
 	
 	it("should add a column to an existing table",function(done){
-        this.timeout(30000);
+        this.timeout(90000);
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
         	var column1 = new CB.Column('city', 'Text', true, false);
@@ -139,7 +139,7 @@ describe("Cloud Table", function(){
     });
     
 	it("should add a column to the table after save.",function(done){
-        this.timeout(40000);
+        this.timeout(80000);
 
         var tableName = util.makeString();
         var table = new CB.CloudTable(tableName);
