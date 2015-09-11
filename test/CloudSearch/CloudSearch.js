@@ -558,7 +558,7 @@ describe("CloudSearch", function (done) {
         });
 
 
-        it("multi table search",function(done){
+   /*     it("multi table search",function(done){
 
          this.timeout(30000);
 
@@ -614,6 +614,6 @@ describe("CloudSearch", function (done) {
          });
 
     
-    });
+    });*/
 
 });
