@@ -53,7 +53,7 @@ describe("Cloud Table", function(){
     });
 
     it("should get all tables from an app",function(done){
-        this.timeout(20000);
+        this.timeout(40000);
         CB.CloudTable.getAll().then(function(res){
             if(res)
                 done();
@@ -154,7 +154,7 @@ describe("Cloud Table", function(){
     });
     
     it("should get a table information",function(done){
-        this.timeout(20000);
+        this.timeout(40000);
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(){
             done();
@@ -164,7 +164,7 @@ describe("Cloud Table", function(){
     });
 
     it("should get all tables from an app",function(done){
-        this.timeout(20000);
+        this.timeout(40000);
         CB.CloudTable.getAll().then(function(table){
             done();
         },function(){
@@ -174,7 +174,7 @@ describe("Cloud Table", function(){
 
     it("should not rename a table",function(done){
 
-        this.timeout(40000);
+        this.timeout(80000);
 
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
@@ -192,7 +192,7 @@ describe("Cloud Table", function(){
 
     it("should not change type of table",function(done){
 
-        this.timeout(20000);
+        this.timeout(80000);
 
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
@@ -208,7 +208,7 @@ describe("Cloud Table", function(){
     });
 
     it("should not rename a column",function(done){
-        this.timeout(20000);
+        this.timeout(80000);
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
             table.document.columns[0].name = "abcd";
@@ -223,7 +223,7 @@ describe("Cloud Table", function(){
     });
 
     it("should not change data type of a column",function(done){
-      this.timeout(20000);
+      this.timeout(80000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           table.document.columns[0].dataType = "abcd";
@@ -238,7 +238,7 @@ describe("Cloud Table", function(){
     });
 
     it("should not change unique property of a default column",function(done){
-      this.timeout(20000);
+      this.timeout(80000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           table.document.columns[0].unique = false;
@@ -253,7 +253,7 @@ describe("Cloud Table", function(){
     });
 
     it("should not change required property of a default column",function(done){
-      this.timeout(20000);
+      this.timeout(80000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           table.document.columns[0].required = false;
@@ -268,7 +268,7 @@ describe("Cloud Table", function(){
     });
 
     it("should not change unique property of a pre defined column",function(done){
-      this.timeout(20000);
+      this.timeout(80000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           if(table.document.columns[0].unique)
@@ -290,7 +290,7 @@ describe("Cloud Table", function(){
 
     it("should change required property of a user defined column",function(done){
 
-      this.timeout(50000);
+      this.timeout(80000);
 
 
       var obj = new CB.CloudTable(util.makeString());
@@ -318,7 +318,7 @@ describe("Cloud Table", function(){
 
     it("should not delete a default column of a table",function(done){
 
-        this.timeout(50000);
+        this.timeout(80000);
       var obj = new CB.CloudTable(tableName);
       CB.CloudTable.get(obj).then(function(table){
           table.deleteColumn('id');

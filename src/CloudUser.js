@@ -117,7 +117,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
     url = CB.apiUrl + "/user/" + CB.appId + "/login" ;
 
     CB._request('POST',url,params).then(function(response){
-        CB.fromJSON(JSON.parse(response),thisObj);
+        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         CB.CloudUser.current = thisObj;
         if (callback) {
             callback.success(thisObj);
