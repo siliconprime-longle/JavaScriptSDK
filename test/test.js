@@ -732,7 +732,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 
-  /*  it("should create table Sample",function(done){
+    it("should create table Sample",function(done){
 
         this.timeout(50000);
 
@@ -1033,7 +1033,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });*/
+    });
 
 
     it("should create table Custom14",function(done){
@@ -1067,7 +1067,7 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
- /*  it("should create table Custom1",function(done){
+   it("should create table Custom1",function(done){
 
         this.timeout(50000);
 
@@ -1098,7 +1098,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });*/
+    });
 
     after(function() {
         CB.appKey = CB.jsKey;
@@ -2066,7 +2066,7 @@ describe("Cloud Files", function(done) {
     
 });
 
-describe("CloudObject - Encryption", function () {
+describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
 

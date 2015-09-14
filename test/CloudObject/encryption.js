@@ -1,4 +1,4 @@
-describe("CloudObject - Encryption", function () {
+describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
 
