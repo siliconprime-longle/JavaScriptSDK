@@ -142,18 +142,6 @@ describe("CloudUser", function () {
     var roleName2 = util.makeString();
     var role1 = new CB.CloudRole(roleName2);
     role1.set('name',roleName2);
-    it("Should create a role ", function (done) {
-
-        this.timeout(20000);
-
-        role1.save().then(function(list){
-                done();
-            },function(){
-                throw "role create error";
-            });
-
-    });
-
 
    it("Should assign role to user", function (done) {
 

@@ -198,18 +198,6 @@ describe("CloudUser", function () {
     var roleName2 = util.makeString();
     var role1 = new CB.CloudRole(roleName2);
     role1.set('name',roleName2);
-    it("Should create a role ", function (done) {
-
-        this.timeout(20000);
-
-        role1.save().then(function(list){
-                done();
-            },function(){
-                throw "role create error";
-            });
-
-    });
-
 
    it("Should assign role to user", function (done) {
 
@@ -4049,16 +4037,30 @@ describe("Cloud Object", function() {
 
 	//Use Sample Table. 
 	// -> Which has columns : 
-	// name : string : required. 
+	// name : string : required.
+
+
+ it("Should timeout",function(done){
+
+     this.timeout(100000);
+
+     setTimeout(function(){
+         done();
+     },10000);
+ });
 
  it("should not save a string into date column",function(done){
 
         this.timeout(20000);
+
         var obj = new CB.CloudObject('Sample');
         obj.set('createdAt','abcd');
         obj.set('name', 'sample');
-        obj.save().then(function(){
-            throw("should not have saved string in datetime field");
+        obj.save().then(function(res){
+            if(res.createdAt === 'abcd')
+                throw("should not have saved string in datetime field");
+            else
+                done();
         },function(){
             done();
         });
@@ -4068,6 +4070,7 @@ describe("Cloud Object", function() {
 
         try{
             this.timeout(20000);
+
             var obj = new CB.CloudObject('Sample');
             obj.set('id', '123');
             throw "CLoudObject can set the id";
