@@ -9,7 +9,6 @@ describe("Table Tests", function (done) {
         this.timeout(30000);
 
         CB.CloudTable.getAll().then(function(res){
-           console.log(res);
             done();
         },function(){
             throw "Unable to get tables";
@@ -22,7 +21,6 @@ describe("Table Tests", function (done) {
 
         var obj = new CB.CloudTable('Role');
         CB.CloudTable.get(obj).then(function(res){
-            console.log(res);
             done();
         },function(){
             throw "Unable to get tables";

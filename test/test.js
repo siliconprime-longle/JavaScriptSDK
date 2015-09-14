@@ -553,7 +553,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("Should update the table schema",function(done){
 
-        this.timeout(40000);
+        this.timeout(50000);
 
         var obj = new CB.CloudTable('Company');
         CB.CloudTable.get(obj).then(function(res){
@@ -648,7 +648,7 @@ describe("Should Create All Test Tables",function(done){
 
   it("should create table Custom",function(done){
 
-        this.timeout(50000);
+        this.timeout(60000);
 
 
         var callback = {};
@@ -690,7 +690,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should update custom table ",function(done){
 
-        this.timeout(50000);
+        this.timeout(60000);
 
         var custom = new CB.CloudTable('Custom');
         CB.CloudTable.get(custom).then(function(custom){
@@ -710,7 +710,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should create table Custom5",function(done){
 
-        this.timeout(50000);
+        this.timeout(60000);
 
         var callback = {};
         callback.success = function(res){
@@ -732,7 +732,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 
-    it("should create table Sample",function(done){
+  /*  it("should create table Sample",function(done){
 
         this.timeout(50000);
 
@@ -1033,7 +1033,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });
+    });*/
 
 
     it("should create table Custom14",function(done){
@@ -1067,7 +1067,7 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
-   it("should create table Custom1",function(done){
+ /*  it("should create table Custom1",function(done){
 
         this.timeout(50000);
 
@@ -1098,7 +1098,7 @@ describe("Should Create All Test Tables",function(done){
         obj.delete(callback);
 
 
-    });
+    });*/
 
     after(function() {
         CB.appKey = CB.jsKey;
@@ -1116,7 +1116,6 @@ describe("Table Tests", function (done) {
         this.timeout(30000);
 
         CB.CloudTable.getAll().then(function(res){
-           console.log(res);
             done();
         },function(){
             throw "Unable to get tables";
@@ -1129,7 +1128,6 @@ describe("Table Tests", function (done) {
 
         var obj = new CB.CloudTable('Role');
         CB.CloudTable.get(obj).then(function(res){
-            console.log(res);
             done();
         },function(){
             throw "Unable to get tables";
@@ -6245,9 +6243,6 @@ describe("CloudQuery", function (done) {
                         throw "Name does not exists";
                     }
                 }
-
-                console.log(list);
-
                 if(list.length>0)
                     done();
                 else
@@ -6854,7 +6849,6 @@ describe("CloudQuery", function (done) {
             obj = new CB.CloudObject('student1');
             obj.set('newColumn',obj1);
             obj.save().then(function(list){
-                console.log(list)
                 var query = new CB.CloudQuery('student1');
                 query.notEqualTo('newColumn',obj1);
                 query.find().then(function (list) {

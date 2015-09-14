@@ -126,9 +126,6 @@ describe("CloudQuery", function (done) {
                         throw "Name does not exists";
                     }
                 }
-
-                console.log(list);
-
                 if(list.length>0)
                     done();
                 else
@@ -735,7 +732,6 @@ describe("CloudQuery", function (done) {
             obj = new CB.CloudObject('student1');
             obj.set('newColumn',obj1);
             obj.save().then(function(list){
-                console.log(list)
                 var query = new CB.CloudQuery('student1');
                 query.notEqualTo('newColumn',obj1);
                 query.find().then(function (list) {
