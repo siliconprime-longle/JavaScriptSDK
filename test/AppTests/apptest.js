@@ -40,6 +40,8 @@ describe("App Tests",function(done){
 
      it("",function(done){
 
+         this.timeout(10000);
+
          CB.CloudApp.init(CB.appId,CB.appKey);
          CB.appKey = CB.masterKey;
             done();
@@ -59,6 +61,8 @@ describe("App Tests",function(done){
     });
 
     it("",function(done){
+
+        this.timeout(1000);
 
         CB.appKey = CB.jsKey;
         done();

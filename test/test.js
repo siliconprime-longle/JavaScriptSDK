@@ -1960,7 +1960,7 @@ describe("Cloud Files", function(done) {
     });
 
 
-   /* it("Should Save a file and give the url",function(done){
+    it("Should Save a file and give the url",function(done){
 
         this.timeout(10000);
 
@@ -2071,7 +2071,7 @@ describe("Cloud Files", function(done) {
         }
     }catch(e){
         console.log('In node');
-    }*/
+    }
     //add ACL on CloudFiles.
     
 });
@@ -3630,7 +3630,7 @@ describe("Cloud Object", function() {
 	// name : string : required.
 
 
-/* it("Should timeout",function(done){
+ it("Should timeout",function(done){
 
      this.timeout(100000);
 
@@ -3965,7 +3965,7 @@ describe("Cloud Object", function() {
 
         
     });
-*/
+
 
     it("should keep relations intact.", function(done) {
         this.timeout(20000);
@@ -3995,7 +3995,7 @@ describe("Cloud Object", function() {
 
 
 
-    /* it("should not save a a wrong relation.", function(done) {
+     it("should not save a a wrong relation.", function(done) {
        this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
@@ -4117,7 +4117,7 @@ describe("Cloud Object", function() {
        			}	
        		});
     	}});
-    });*/
+    });
 
      it("should modify the list relation of a saved CloudObject.", function(done) {
         this.timeout(30000);
@@ -4154,7 +4154,7 @@ describe("Cloud Object", function() {
         }});
      });
 
- /*   it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
+    it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
        this.timeout(20000);
 
        var obj = new CB.CloudObject('Sample');
@@ -4392,7 +4392,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });*/
+    });
 });
 describe("Version Test",function(done){
 
@@ -4618,7 +4618,7 @@ describe("CloudExpire", function () {
 });
 describe("CloudNotification", function() {
  
-    /*it("should subscribe to a channel", function(done) {
+    it("should subscribe to a channel", function(done) {
       this.timeout(20000);
         CB.CloudNotification.on('sample',
       function(data){
@@ -4631,7 +4631,7 @@ describe("CloudNotification", function() {
       		throw 'Error subscribing to a CloudNotification.';
       	}
       });
-    });*/
+    });
 
     it("should publish data to the channel.", function(done) {
 
@@ -4665,7 +4665,7 @@ describe("CloudNotification", function() {
     });
 
 
-/*    it("should stop listening to a channel", function(done) {
+    it("should stop listening to a channel", function(done) {
 
     	this.timeout(20000);
 
@@ -4706,7 +4706,7 @@ describe("CloudNotification", function() {
 	      });
 
 
-    });*/
+    });
 
 });
 describe("Cloud GeoPoint Test", function() {
@@ -7101,6 +7101,8 @@ describe("App Tests2",function(done){
 
     it("",function(done){
 
+        this.timeout(10000);
+
         CB.CloudApp.init(CB.appId,CB.appKey);
         CB.appKey = CB.masterKey;
         done();
@@ -7120,6 +7122,8 @@ describe("App Tests2",function(done){
     });
 
     it("",function(done){
+
+        this.timeout(1000);
 
         CB.appKey = CB.jsKey;
         done();
@@ -7180,6 +7184,8 @@ describe("App Tests",function(done){
 
      it("",function(done){
 
+         this.timeout(10000);
+
          CB.CloudApp.init(CB.appId,CB.appKey);
          CB.appKey = CB.masterKey;
             done();
@@ -7199,6 +7205,8 @@ describe("App Tests",function(done){
     });
 
     it("",function(done){
+
+        this.timeout(1000);
 
         CB.appKey = CB.jsKey;
         done();
