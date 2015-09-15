@@ -41,6 +41,16 @@ describe("Table Tests", function (done) {
         });
     });
 
+    it("Should wait for other tests to run",function(done){
+
+        this.timeout(100000);
+
+        setTimeout(function(){
+            done();
+        },10000);
+        
+    });
+
     after(function() {
         CB.appKey = CB.jsKey;
     });
