@@ -7811,12 +7811,12 @@ describe("CloudUser", function () {
 
 });
 describe("CloudRole", function (done) {
-    var roleName5 = util.makeString();
-    var role5 = new CB.CloudRole(roleName5);
+
     it("Should create a role", function (done) {
 
-        this.timeout(30000);
-
+        this.timeout(40000);
+        var roleName5 = util.makeString();
+        var role5 = new CB.CloudRole(roleName5);
         role5.save().then(function(list){
             console.log(list);
             if(!list)
@@ -7829,21 +7829,29 @@ describe("CloudRole", function (done) {
 
     it("Should Retrieve a role", function (done) {
 		
-        this.timeout(20000);
+        this.timeout(40000);
 
-        var query = new CB.CloudQuery('Role');
-        if(!role5.get('id')){
-            done();
-        }
-        query.equalTo('id',role5.get('id'));
-        query.find().then(function(list){
-        	console.log(list);
-        	if(!list)
-        		throw "Should retrieve the cloud role";
-            done();
+        var roleName5 = util.makeString();
+        var role5 = new CB.CloudRole(roleName5);
+        role5.save().then(function(list){
+            var query = new CB.CloudQuery('Role');
+            if(!role5.get('id')){
+                done();
+            }
+            query.equalTo('id',role5.get('id'));
+            query.find().then(function(list){
+                console.log(list);
+                if(!list)
+                    throw "Should retrieve the cloud role";
+                done();
+            },function(){
+                throw "Should retrieve the cloud role";
+            });
         },function(){
-            throw "Should retrieve the cloud role";
-        });
+            throw "unable to create a role.";
+        })
+
+
     });
 });
 
