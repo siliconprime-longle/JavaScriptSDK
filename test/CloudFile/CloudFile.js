@@ -22,7 +22,7 @@ describe("Cloud Files", function(done) {
     });
 
 
-    it("Should Save a file and give the url",function(done){
+   /* it("Should Save a file and give the url",function(done){
 
         this.timeout(10000);
 
@@ -133,7 +133,7 @@ describe("Cloud Files", function(done) {
         }
     }catch(e){
         console.log('In node');
-    }
+    }*/
     //add ACL on CloudFiles.
     
 });

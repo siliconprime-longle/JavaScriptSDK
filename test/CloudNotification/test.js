@@ -1,6 +1,6 @@
 describe("CloudNotification", function() {
  
-    it("should subscribe to a channel", function(done) {
+    /*it("should subscribe to a channel", function(done) {
       this.timeout(20000);
         CB.CloudNotification.on('sample',
       function(data){
@@ -13,7 +13,7 @@ describe("CloudNotification", function() {
       		throw 'Error subscribing to a CloudNotification.';
       	}
       });
-    });
+    });*/
 
     it("should publish data to the channel.", function(done) {
 
@@ -47,7 +47,7 @@ describe("CloudNotification", function() {
     });
 
 
-    it("should stop listening to a channel", function(done) {
+/*    it("should stop listening to a channel", function(done) {
 
     	this.timeout(20000);
 
@@ -88,6 +88,6 @@ describe("CloudNotification", function() {
 	      });
 
 
-    });
+    });*/
 
 });

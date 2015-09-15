@@ -227,7 +227,7 @@
             obj.set('newColumn7', [obj2,obj1]);
             obj.save().then(function(obj){
                 var query = new CB.CloudQuery('Custom');
-                query.includeList('newColumn7');
+                query.include('newColumn7');
                 query.findById(obj.id).then(function(obj){
                    if(obj.get('newColumn7').length>0){
                      if(obj.get('newColumn7')[0].get('newColumn1') === 'sample'){

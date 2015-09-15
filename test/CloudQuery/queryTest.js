@@ -27,7 +27,6 @@ describe("CloudQuery", function (done) {
                 var cbQuery = new CB.CloudQuery('Custom1');
                 cbQuery.equalTo('id', obj.id);
                 cbQuery.selectColumn('newColumn');
-                
                 cbQuery.find({
                   success: function(objList){
                     if(objList.length>0)

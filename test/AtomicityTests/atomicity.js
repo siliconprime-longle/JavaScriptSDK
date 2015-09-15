@@ -4,7 +4,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/orient/connect';
+        var url = CB.serverUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
@@ -20,21 +20,26 @@ describe("Atomicity Tests",function(done){
         obj.set('name','let');
         obj.save().then(function(res){
            var id = res.get('id');
-            var url = CB.serverUrl + '/db/orient/Disconnect';
+            var url = CB.serverUrl + '/db/mongo/Disconnect';
             CB._request('POST',url).then(function(){
                 res.set('name','what');
                 res.save().then(function(){
                    done("DB disconnected should not save");
                 },function(){
-                    var query = new CB.CloudQuery('student1');
-                    query.findById(id).then(function(res){
-                        if(res.get('name') === 'let')
-                            done();
-                        else
-                            throw "Save is Not Atomic";
+                    var url = CB.serverUrl + '/db/mongo/connect';
+                    CB._request('POST',url).then(function() {
+                        var query = new CB.CloudQuery('student1');
+                        query.findById(id).then(function(res){
+                            if(res.get('name') === 'let')
+                                done();
+                            else
+                                throw "Save is Not Atomic";
+                        },function(){
+                            throw "Unable to run find Query";
+                        });
                     },function(){
-                        throw "Unable to run find Query";
-                    })
+                        throw "Unable to connect back Mongo";
+                    });
                 });
             },function(err){
                 throw "Unable to disconnect Mongo";
@@ -49,7 +54,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/orient/connect';
+        var url = CB.serverUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
@@ -64,24 +69,30 @@ describe("Atomicity Tests",function(done){
         var obj = new CB.CloudObject('student1');
         obj.set('name','abcdef');
         obj.save().then(function(res){
-            var url = CB.serverUrl + '/db/orient/Disconnect';
+            var url = CB.serverUrl + '/db/mongo/Disconnect';
             CB._request('POST',url).then(function(){
                 var id = res.get('id');
                 res.delete().then(function(){
                     throw "Should Not delete with db disconnected";
                 },function(){
-                    var query = new CB.CloudQuery('student1');
-                    query.findById(id).then(function(res) {
-                        if(res) {
-                            console.log("Deleted Res")
-                            console.log(res);
-                            done();
-                        }else{
-                            throw "should get the record back";
-                        }
+                    var url = CB.serverUrl + '/db/mongo/connect';
+                    CB._request('POST',url).then(function() {
+                        var query = new CB.CloudQuery('student1');
+                        query.findById(id).then(function(res) {
+                            if(res) {
+                                console.log("Deleted Res")
+                                console.log(res);
+                                done();
+                            }else{
+                                throw "should get the record back";
+                            }
+                        },function(){
+                            throw "unable to do find by id"
+                        });
                     },function(){
-                        throw "unable to do find by id"
+                        throw "Unable to connect back Mongo";
                     });
+
                 });
             },function(){
                 throw "Unable to delete"
@@ -95,7 +106,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/orient/connect';
+        var url = CB.serverUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
@@ -111,7 +122,7 @@ describe("Atomicity Tests",function(done){
 
 
         var tableName = util.makeString();
-        var url = CB.serverUrl + '/db/orient/Disconnect';
+        var url = CB.serverUrl + '/db/mongo/Disconnect';
         CB._request('POST',url).then(function(){
             var table = new CB.CloudTable(tableName);
             table.save().then(function(){
@@ -135,7 +146,7 @@ describe("Atomicity Tests",function(done){
     it("",function(done) {
         this.timeout(10000);
         CB.appKey = CB.jsKey;
-        var url = CB.serverUrl + '/db/orient/connect';
+        var url = CB.serverUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){

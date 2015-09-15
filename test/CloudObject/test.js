@@ -5,7 +5,7 @@ describe("Cloud Object", function() {
 	// name : string : required.
 
 
- it("Should timeout",function(done){
+/* it("Should timeout",function(done){
 
      this.timeout(100000);
 
@@ -340,7 +340,7 @@ describe("Cloud Object", function() {
 
         
     });
-
+*/
 
     it("should keep relations intact.", function(done) {
         this.timeout(20000);
@@ -353,8 +353,7 @@ describe("Cloud Object", function() {
         obj.save({
             success : function(newObj){
 
-               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1')
-               {
+               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1') {
                     done();
                }
 
@@ -371,7 +370,7 @@ describe("Cloud Object", function() {
 
 
 
-     it("should not save a a wrong relation.", function(done) {
+    /* it("should not save a a wrong relation.", function(done) {
        this.timeout(20000);
 
         var obj = new CB.CloudObject('Sample');
@@ -493,7 +492,7 @@ describe("Cloud Object", function() {
        			}	
        		});
     	}});
-    });
+    });*/
 
      it("should modify the list relation of a saved CloudObject.", function(done) {
         this.timeout(30000);
@@ -530,7 +529,7 @@ describe("Cloud Object", function() {
         }});
      });
 
-    it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
+ /*   it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
        this.timeout(20000);
 
        var obj = new CB.CloudObject('Sample');
@@ -768,5 +767,5 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });
+    });*/
 });
