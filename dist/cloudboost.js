@@ -9322,8 +9322,21 @@ CB.SearchFilter.prototype.equalTo = function(columnName, data) {
         term.terms = {};
         term.terms[columnName] = data;
     } else {
-        term.term = {};
-        term.term[columnName] = data;
+        if(data !== null) {
+            if (data.constructor === CB.CloudObject) {
+                data = data.get('id');
+                term.nested = {};
+                term.nested.path = columnName;
+                term.nested.filter = {};
+                term.nested.filter.term = {};
+                term.nested.filter.term[columnName+'._id'] = data;
+            }else{
+                term.term = {};
+                term.term[columnName] = data;
+            }
+        }else{
+            term.term[columnName] = data;
+        }
     }
 
     this.bool.must.push(term);
@@ -9413,6 +9426,18 @@ CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
     return this;
 };
 
+CB.SearchFilter.prototype.near = function(columnName,geoPoint,distance){
+
+    var obj = {};
+    obj.geo_distance = {};
+
+    //distance is in meters here in accordance with what we have in Mongo
+
+    obj.geo_distance.distance = distance.toString() + ' m';
+    obj.geo_distance[columnName] = geoPoint.document.coordinates;
+
+    this.bool.must.push(obj);
+};
 
 //And logical function. 
 CB.SearchFilter.prototype.and = function(searchFilter) {
@@ -10381,7 +10406,7 @@ CB.CloudFile.prototype.delete = function(callback) {
  *CloudGeoPoint
  */
 
-CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(longitude , latitude) {
     if(!latitude || !longitude)
         throw "Latitude or Longitude is empty.";
 
@@ -10410,7 +10435,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     },
     set: function(latitude) {
         if(Number(latitude)>= -90 && Number(latitude)<=90) {
-            this.document.longitude = Number(latitude);
+            this.document.latitude = Number(latitude);
             this.document.coordinates[1] = Number(latitude);
             this.document._isModified = true;
         }
@@ -10425,7 +10450,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     },
     set: function(longitude) {
         if(Number(longitude)>= -180 && Number(longitude)<=180) {
-            this.document.latitude = Number(longitude);
+            this.document.longitude = Number(longitude);
             this.document.coordinates[0] = Number(longitude);
             this.document._isModified = true;
         }
@@ -10436,18 +10461,14 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
 
 CB.CloudGeoPoint.prototype.get = function(name) { //for getting data of a particular column
 
-    if(name === 'latitude')
-        return this.document.longitude;
-    else
-        return this.document.latitude;
-
+    return this.document[name];
 };
 
 CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a particular column
 
     if(name === 'latitude') {
         if(Number(value)>= -90 && Number(value)<=90) {
-            this.document.longitude = Number(value);
+            this.document.latitude = Number(value);
             this.document.coordinates[1] = Number(value);
             this.document._isModified = true;
         }
@@ -10456,7 +10477,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
     }
     else {
         if(Number(value)>= -180 && Number(value)<=180) {
-            this.document.latitude = Number(value);
+            this.document.longitude = Number(value);
             this.document.coordinates[0] = Number(value);
             this.document._isModified = true;
         }
@@ -10874,8 +10895,8 @@ CB.toJSON = function(thisObj) {
     var longitude = null;
 
     if(thisObj instanceof CB.CloudGeoPoint){
-        latitude = thisObj.document.longitude;
-        longitude = thisObj.document.latitude;
+        latitude = thisObj.document.latitude;
+        longitude = thisObj.document.longitude;
     }
 
     if(thisObj instanceof CB.CloudFile)
@@ -10997,8 +11018,8 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "file")
                 url=document.url;
             if(document._type === "point"){
-                latitude = document.longitude;
-                longitude = document.latitude;
+                latitude = document.latitude;
+                longitude = document.longitude;
             }
             if(document._type === "table"){
                 tableName = document.name;
@@ -11105,7 +11126,7 @@ CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        n_obj = new CB.CloudGeoPoint(obj.get('longitude'),obj.get('latitude'));
         return n_obj;
     }
     n_obj.document=doc2;

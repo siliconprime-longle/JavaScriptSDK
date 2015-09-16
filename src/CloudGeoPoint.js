@@ -2,7 +2,7 @@
  *CloudGeoPoint
  */
 
-CB.CloudGeoPoint = CB.CloudGeoPoint || function(latitude , longitude) {
+CB.CloudGeoPoint = CB.CloudGeoPoint || function(longitude , latitude) {
     if(!latitude || !longitude)
         throw "Latitude or Longitude is empty.";
 
@@ -31,7 +31,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {
     },
     set: function(latitude) {
         if(Number(latitude)>= -90 && Number(latitude)<=90) {
-            this.document.longitude = Number(latitude);
+            this.document.latitude = Number(latitude);
             this.document.coordinates[1] = Number(latitude);
             this.document._isModified = true;
         }
@@ -46,7 +46,7 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
     },
     set: function(longitude) {
         if(Number(longitude)>= -180 && Number(longitude)<=180) {
-            this.document.latitude = Number(longitude);
+            this.document.longitude = Number(longitude);
             this.document.coordinates[0] = Number(longitude);
             this.document._isModified = true;
         }
@@ -57,18 +57,14 @@ Object.defineProperty(CB.CloudGeoPoint.prototype, 'longitude', {
 
 CB.CloudGeoPoint.prototype.get = function(name) { //for getting data of a particular column
 
-    if(name === 'latitude')
-        return this.document.longitude;
-    else
-        return this.document.latitude;
-
+    return this.document[name];
 };
 
 CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a particular column
 
     if(name === 'latitude') {
         if(Number(value)>= -90 && Number(value)<=90) {
-            this.document.longitude = Number(value);
+            this.document.latitude = Number(value);
             this.document.coordinates[1] = Number(value);
             this.document._isModified = true;
         }
@@ -77,7 +73,7 @@ CB.CloudGeoPoint.prototype.set = function(name,value) { //for getting data of a 
     }
     else {
         if(Number(value)>= -180 && Number(value)<=180) {
-            this.document.latitude = Number(value);
+            this.document.longitude = Number(value);
             this.document.coordinates[0] = Number(value);
             this.document._isModified = true;
         }

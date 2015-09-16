@@ -8,8 +8,8 @@ CB.toJSON = function(thisObj) {
     var longitude = null;
 
     if(thisObj instanceof CB.CloudGeoPoint){
-        latitude = thisObj.document.longitude;
-        longitude = thisObj.document.latitude;
+        latitude = thisObj.document.latitude;
+        longitude = thisObj.document.longitude;
     }
 
     if(thisObj instanceof CB.CloudFile)
@@ -131,8 +131,8 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "file")
                 url=document.url;
             if(document._type === "point"){
-                latitude = document.longitude;
-                longitude = document.latitude;
+                latitude = document.latitude;
+                longitude = document.longitude;
             }
             if(document._type === "table"){
                 tableName = document.name;
@@ -239,7 +239,7 @@ CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
                 doc2[key]=doc[key];
         }
     }else if(obj instanceof CB.CloudGeoPoint){
-        n_obj = new CB.CloudGeoPoint(obj.get('latitude'),obj.get('longitude'));
+        n_obj = new CB.CloudGeoPoint(obj.get('longitude'),obj.get('latitude'));
         return n_obj;
     }
     n_obj.document=doc2;

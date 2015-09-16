@@ -6644,7 +6644,7 @@ describe("CloudSearch", function (done) {
         });
 
 
-   /*     it("multi table search",function(done){
+        it("multi table search",function(done){
 
          this.timeout(30000);
 
@@ -6700,7 +6700,59 @@ describe("CloudSearch", function (done) {
          });
 
     
-    });*/
+    });
+
+    it("should get data from server for near function", function(done) {
+
+        this.timeout(20000);
+
+        var loc = new CB.CloudGeoPoint("17.7","80.3");
+        var search = new CB.CloudSearch('Custom5');
+        search.searchFilter = new CB.SearchFilter();
+        search.searchFilter.near("location", loc, 100000);
+        search.search().then(function(list) {
+            if(list.length>0){
+               console.log(list);
+                done();
+            } else{
+                throw "should retrieve saved data with particular value ";
+            }
+        }, function () {
+            throw "find data error";
+        })
+    });
+
+    it("Equal to should work in CloudSearch over CloudObject",function(done){
+
+            this.timeout(30000);
+
+            var obj = new CB.CloudObject('Custom2');
+            obj.set('newColumn1', 'text');
+
+            var obj1 = new CB.CloudObject('student1');
+            obj1.set('name', 'Vipul');
+            obj.set('newColumn7', obj1);
+
+            obj.save({
+                success : function(obj){
+
+                    var cs = new CB.CloudSearch('Custom2');
+                    cs.searchFilter = new CB.SearchFilter();
+                    cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
+                    cs.search().then(function(  list){
+                        console.log(list);
+                        done();
+                    }, function(error){
+                        throw "Unsuccessful join"
+                    });
+                }, error : function(error){
+                    throw "Cannot save a CloudObject";
+
+                }
+
+            });
+
+        });
 
 });
 describe("Inlcude in CloudSearch", function (done) {
@@ -6709,7 +6761,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
         this.timeout(30000);
 
-      /*  var obj = new CB.CloudObject('Custom2');
+        var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
 
         var obj1 = new CB.CloudObject('student1');
@@ -6748,8 +6800,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
             }
 
-        });*/
-        done();
+        });
 
     });
 });

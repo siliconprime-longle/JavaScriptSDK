@@ -38,8 +38,21 @@ CB.SearchFilter.prototype.equalTo = function(columnName, data) {
         term.terms = {};
         term.terms[columnName] = data;
     } else {
-        term.term = {};
-        term.term[columnName] = data;
+        if(data !== null) {
+            if (data.constructor === CB.CloudObject) {
+                data = data.get('id');
+                term.nested = {};
+                term.nested.path = columnName;
+                term.nested.filter = {};
+                term.nested.filter.term = {};
+                term.nested.filter.term[columnName+'._id'] = data;
+            }else{
+                term.term = {};
+                term.term[columnName] = data;
+            }
+        }else{
+            term.term[columnName] = data;
+        }
     }
 
     this.bool.must.push(term);
@@ -129,6 +142,18 @@ CB.SearchFilter.prototype.lessthanOrEqual = function(columnName, data) {
     return this;
 };
 
+CB.SearchFilter.prototype.near = function(columnName,geoPoint,distance){
+
+    var obj = {};
+    obj.geo_distance = {};
+
+    //distance is in meters here in accordance with what we have in Mongo
+
+    obj.geo_distance.distance = distance.toString() + ' m';
+    obj.geo_distance[columnName] = geoPoint.document.coordinates;
+
+    this.bool.must.push(obj);
+};
 
 //And logical function. 
 CB.SearchFilter.prototype.and = function(searchFilter) {
