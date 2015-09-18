@@ -623,7 +623,7 @@ describe("CloudSearch", function (done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom5');
-        var loc = new CB.CloudGeoPoint(17.7,78.9);
+        var loc = new CB.CloudGeoPoint(17.7,80.0);
         obj.set("location", loc);
         obj.save({
             success : function(newObj){
