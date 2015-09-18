@@ -458,3 +458,41 @@ CB._defaultColumns = function(type) {
         return col;
    }
 };
+
+CB._fileCheck = function(obj){
+
+    var deferred = new CB.Promise();
+    var promises = [];
+    for(var key in obj.document){
+        if(obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile){
+            for(var i=0;i<obj.document[key].length;i++){
+                promises.push(obj.document[key][i].save());
+            }
+        }else if(obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile){
+            promises.push(obj.document[key].save());
+        }
+    }
+    if(promises.length >0) {
+        CB.Promise.all(promises).then(function () {
+            var res = arguments;
+            var j = 0;
+            for (var key in obj.document) {
+                if (obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile) {
+                    for (var i = 0; i < obj.document[key].length; i++) {
+                        obj.document[key][i] = res[j];
+                        j = j + 1;
+                    }
+                } else if (obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile) {
+                    obj.document[key] = res[j];
+                    j = j + 1;
+                }
+            }
+            deferred.resolve(obj);
+        }, function (err) {
+            deferred.reject(err);
+        });
+    }else{
+        deferred.resolve(obj);
+    }
+    return deferred;
+};

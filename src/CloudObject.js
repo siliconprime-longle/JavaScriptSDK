@@ -252,26 +252,35 @@ CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of t
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
     var def;
+    CB._validate();
+
     if (!callback) {
         def = new CB.Promise();
     }
-
-    CB._validate();
-
     var thisObj = this;
-    var xmlhttp = CB._loadXml();
-    var params=JSON.stringify({
-        document: CB.toJSON(thisObj),
-        key: CB.appKey
-    });
-    var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
-    CB._request('PUT',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
+    CB._fileCheck(this).then(function(thisObj){
+
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            document: CB.toJSON(thisObj),
+            key: CB.appKey
+        });
+        var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+        CB._request('PUT',url,params).then(function(response){
+            thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
     },function(err){
         if(callback){
             callback.error(err);
@@ -279,7 +288,6 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
             def.reject(err);
         }
     });
-
     if (!callback) {
         return def;
     }

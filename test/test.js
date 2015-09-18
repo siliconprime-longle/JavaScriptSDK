@@ -1148,6 +1148,28 @@ describe("Table Tests", function (done) {
         });
     });
 
+    it("should create a column and then delete it",function(done){
+
+        this.timeout(10000);
+
+        CB.CloudTable.get('Employee').then(function(emp){
+            var column = new CB.Column('Test2');
+            emp.addColumn(column);
+            emp.save().then(function(emp){
+                emp.deleteColumn('Test2');
+                emp.save().then(function(){
+                    done();
+                },function(){
+                   throw "Unable to drop coumn";
+                });
+            },function(){
+                throw "Unable to add Column";
+            });
+        },function(err){
+            throw "Unable to get cloudtable";
+        });
+    });
+
     it("Should wait for other tests to run",function(done){
 
         this.timeout(100000);
@@ -2068,10 +2090,41 @@ describe("Cloud Files", function(done) {
                     throw "Error uploading file";
                 });
             });
+            it("should save a new file", function (done) {
+
+                this.timeout(20000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+                var file1 = new CB.CloudFile(oMyBlob);
+
+                var obj = new CB.CloudObject('Sample');
+                obj.set('fileList', [file, file1]);
+                obj.set('name', 'abcd');
+                obj.save().then(function (file) {
+                    if (file.get('fileList')[0].url && file.get('fileList')[1].url) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
         }
     }catch(e){
         console.log('In node');
     }
+
+
+
     //add ACL on CloudFiles.
     
 });
@@ -7034,6 +7087,78 @@ describe("CloudUser", function () {
             throw "user create error";
         });
 
+    });
+
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+           throw "Unable to Create User";
+        });
+    });
+
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+            throw "Unable to Create User";
+        });
+    });
+
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+            throw "Unable to Create User";
+        });
     });
 
 

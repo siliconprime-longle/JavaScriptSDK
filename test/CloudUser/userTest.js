@@ -230,6 +230,78 @@ describe("CloudUser", function () {
 
     });
 
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+           throw "Unable to Create User";
+        });
+    });
+
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+            throw "Unable to Create User";
+        });
+    });
+
+    it("Should Create a New User",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username',util.makeString());
+        obj.set('email',util.makeEmail());
+        obj.set('password','pass');
+        obj.save().then(function(res){
+            var query = new CB.CloudQuery('User');
+            query.get(res.get('id')).then(function (res1) {
+                if(res1){
+                    done();
+                }else{
+                    throw "Unable to retrieve User";
+                }
+            }, function () {
+                throw "Unable to Get User By ID";
+            })
+        },function(err){
+            throw "Unable to Create User";
+        });
+    });
+
 
 
 });

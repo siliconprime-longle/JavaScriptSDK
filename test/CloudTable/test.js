@@ -41,6 +41,28 @@ describe("Table Tests", function (done) {
         });
     });
 
+    it("should create a column and then delete it",function(done){
+
+        this.timeout(10000);
+
+        CB.CloudTable.get('Employee').then(function(emp){
+            var column = new CB.Column('Test2');
+            emp.addColumn(column);
+            emp.save().then(function(emp){
+                emp.deleteColumn('Test2');
+                emp.save().then(function(){
+                    done();
+                },function(){
+                   throw "Unable to drop coumn";
+                });
+            },function(){
+                throw "Unable to add Column";
+            });
+        },function(err){
+            throw "Unable to get cloudtable";
+        });
+    });
+
     it("Should wait for other tests to run",function(done){
 
         this.timeout(100000);

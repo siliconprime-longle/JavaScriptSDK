@@ -386,6 +386,92 @@ CB.Promise.prototype["_thenRunCallbacks"] = function(optionsOrCallback, model) {
         return CB.Promise.error(error);
     });
 }
+
+/**
+ * Returns a new promise that is fulfilled when all of the input promises
+ * are resolved. If any promise in the list fails, then the returned promise
+ * will fail with the last error. If they all succeed, then the returned
+ * promise will succeed, with the results being the results of all the input
+ * promises. For example: <pre>
+ *   var p1 = Parse.Promise.as(1);
+ *   var p2 = Parse.Promise.as(2);
+ *   var p3 = Parse.Promise.as(3);
+ *
+ *   Parse.Promise.when(p1, p2, p3).then(function(r1, r2, r3) {
+     *     console.log(r1);  // prints 1
+     *     console.log(r2);  // prints 2
+     *     console.log(r3);  // prints 3
+     *   });</pre>
+ *
+ * The input promises can also be specified as an array: <pre>
+ *   var promises = [p1, p2, p3];
+ *   Parse.Promise.when(promises).then(function(r1, r2, r3) {
+     *     console.log(r1);  // prints 1
+     *     console.log(r2);  // prints 2
+     *     console.log(r3);  // prints 3
+     *   });
+ * </pre>
+ * @method when
+ * @param {Array} promises a list of promises to wait for.
+ * @static
+ * @return {Parse.Promise} the new promise.
+ */
+CB.Promise["all"] = function(promises) {
+        var objects;
+        if (Array.isArray(promises)) {
+            objects = promises;
+        } else {
+            objects = arguments;
+        }
+
+        var total = objects.length;
+        var hadError = false;
+        var results = [];
+        var errors = [];
+        results.length = objects.length;
+        errors.length = objects.length;
+
+        if (total === 0) {
+            return CB.Promise.as.apply(this, results);
+        }
+
+        var promise = new CB.Promise();
+
+        var resolveOne = function resolveOne() {
+            total--;
+            if (total <= 0) {
+                if (hadError) {
+                    promise.reject(errors);
+                } else {
+                    promise.resolve.apply(promise, results);
+                }
+            }
+        };
+
+        var chain = function chain(object, index) {
+            if (CB.Promise.is(object)) {
+                object.then(function (result) {
+                    results[index] = result;
+                    resolveOne();
+                }, function (error) {
+                    errors[index] = error;
+                    hadError = true;
+                    resolveOne();
+                });
+            } else {
+                results[i] = object;
+                resolveOne();
+            }
+        };
+        for (var i = 0; i < objects.length; i++) {
+            chain(objects[i], i);
+        }
+
+        return promise;
+
+};
+
+
 CB.Events = {
     trigger: function(events) {
         var event, node, calls, tail, args, all, rest;

@@ -130,10 +130,41 @@ describe("Cloud Files", function(done) {
                     throw "Error uploading file";
                 });
             });
+            it("should save a new file", function (done) {
+
+                this.timeout(20000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+                var file1 = new CB.CloudFile(oMyBlob);
+
+                var obj = new CB.CloudObject('Sample');
+                obj.set('fileList', [file, file1]);
+                obj.set('name', 'abcd');
+                obj.save().then(function (file) {
+                    if (file.get('fileList')[0].url && file.get('fileList')[1].url) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
         }
     }catch(e){
         console.log('In node');
     }
+
+
+
     //add ACL on CloudFiles.
     
 });

@@ -386,6 +386,92 @@ CB.Promise.prototype["_thenRunCallbacks"] = function(optionsOrCallback, model) {
         return CB.Promise.error(error);
     });
 }
+
+/**
+ * Returns a new promise that is fulfilled when all of the input promises
+ * are resolved. If any promise in the list fails, then the returned promise
+ * will fail with the last error. If they all succeed, then the returned
+ * promise will succeed, with the results being the results of all the input
+ * promises. For example: <pre>
+ *   var p1 = Parse.Promise.as(1);
+ *   var p2 = Parse.Promise.as(2);
+ *   var p3 = Parse.Promise.as(3);
+ *
+ *   Parse.Promise.when(p1, p2, p3).then(function(r1, r2, r3) {
+     *     console.log(r1);  // prints 1
+     *     console.log(r2);  // prints 2
+     *     console.log(r3);  // prints 3
+     *   });</pre>
+ *
+ * The input promises can also be specified as an array: <pre>
+ *   var promises = [p1, p2, p3];
+ *   Parse.Promise.when(promises).then(function(r1, r2, r3) {
+     *     console.log(r1);  // prints 1
+     *     console.log(r2);  // prints 2
+     *     console.log(r3);  // prints 3
+     *   });
+ * </pre>
+ * @method when
+ * @param {Array} promises a list of promises to wait for.
+ * @static
+ * @return {Parse.Promise} the new promise.
+ */
+CB.Promise["all"] = function(promises) {
+        var objects;
+        if (Array.isArray(promises)) {
+            objects = promises;
+        } else {
+            objects = arguments;
+        }
+
+        var total = objects.length;
+        var hadError = false;
+        var results = [];
+        var errors = [];
+        results.length = objects.length;
+        errors.length = objects.length;
+
+        if (total === 0) {
+            return CB.Promise.as.apply(this, results);
+        }
+
+        var promise = new CB.Promise();
+
+        var resolveOne = function resolveOne() {
+            total--;
+            if (total <= 0) {
+                if (hadError) {
+                    promise.reject(errors);
+                } else {
+                    promise.resolve.apply(promise, results);
+                }
+            }
+        };
+
+        var chain = function chain(object, index) {
+            if (CB.Promise.is(object)) {
+                object.then(function (result) {
+                    results[index] = result;
+                    resolveOne();
+                }, function (error) {
+                    errors[index] = error;
+                    hadError = true;
+                    resolveOne();
+                });
+            } else {
+                results[i] = object;
+                resolveOne();
+            }
+        };
+        for (var i = 0; i < objects.length; i++) {
+            chain(objects[i], i);
+        }
+
+        return promise;
+
+};
+
+
 CB.Events = {
     trigger: function(events) {
         var event, node, calls, tail, args, all, rest;
@@ -8079,26 +8165,35 @@ CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of t
 
 CB.CloudObject.prototype.save = function(callback) { //save the document to the db
     var def;
+    CB._validate();
+
     if (!callback) {
         def = new CB.Promise();
     }
-
-    CB._validate();
-
     var thisObj = this;
-    var xmlhttp = CB._loadXml();
-    var params=JSON.stringify({
-        document: CB.toJSON(thisObj),
-        key: CB.appKey
-    });
-    var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
-    CB._request('PUT',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
+    CB._fileCheck(this).then(function(thisObj){
+
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            document: CB.toJSON(thisObj),
+            key: CB.appKey
+        });
+        var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+        CB._request('PUT',url,params).then(function(response){
+            thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
     },function(err){
         if(callback){
             callback.error(err);
@@ -8106,7 +8201,6 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
             def.reject(err);
         }
     });
-
     if (!callback) {
         return def;
     }
@@ -11344,4 +11438,42 @@ CB._defaultColumns = function(type) {
         col.push(name);
         return col;
    }
+};
+
+CB._fileCheck = function(obj){
+
+    var deferred = new CB.Promise();
+    var promises = [];
+    for(var key in obj.document){
+        if(obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile){
+            for(var i=0;i<obj.document[key].length;i++){
+                promises.push(obj.document[key][i].save());
+            }
+        }else if(obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile){
+            promises.push(obj.document[key].save());
+        }
+    }
+    if(promises.length >0) {
+        CB.Promise.all(promises).then(function () {
+            var res = arguments;
+            var j = 0;
+            for (var key in obj.document) {
+                if (obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile) {
+                    for (var i = 0; i < obj.document[key].length; i++) {
+                        obj.document[key][i] = res[j];
+                        j = j + 1;
+                    }
+                } else if (obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile) {
+                    obj.document[key] = res[j];
+                    j = j + 1;
+                }
+            }
+            deferred.resolve(obj);
+        }, function (err) {
+            deferred.reject(err);
+        });
+    }else{
+        deferred.resolve(obj);
+    }
+    return deferred;
 };
