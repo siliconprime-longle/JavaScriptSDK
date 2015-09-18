@@ -55,8 +55,8 @@ module.exports = function(grunt) {
                         'test/CloudGeoPoint/*.js',
                         'test/CloudQuery/*.js',
                         'test/CloudSearch/*.js',
-                        'test/CloudApp/*.js',
-                        'test/AppTests/*.js'
+                        'test/AppTests/*.js',
+                        'test/CloudApp/*.js'
                     ],
 
                     dest: 'test/stagingTest.js'

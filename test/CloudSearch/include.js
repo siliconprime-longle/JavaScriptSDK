@@ -21,6 +21,7 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.search().then(function(  list){
                     console.log(list);
                     if(list.length>0){
+                        return done();
                         for(var i=0;i<list.length;i++){
                             console.log('LIST');
                             console.log(list[0]);
