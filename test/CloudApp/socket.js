@@ -1,6 +1,7 @@
 describe("CloudApp Socket Test", function () {
 
     it("Should fire an event when disconnect", function (done) {
+
        this.timeout(40000);
 
        CB.CloudApp.onDisconnect(function(){

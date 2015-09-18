@@ -7199,7 +7199,7 @@ describe("Inlcude in CloudSearch", function (done) {
                             var student_obj=list[i].get('newColumn7');
                             console.log('Student');
                             console.log(student_obj);
-                            if(Object.keys(student_obj).length >3) {
+                            if(Object.keys(student_obj.document).length >3) {
                                 if (!student_obj.get('name'))
                                     throw "Unsuccessful Join";
                             } else
@@ -7223,6 +7223,7 @@ describe("Inlcude in CloudSearch", function (done) {
 describe("CloudApp Socket Test", function () {
 
     it("Should fire an event when disconnect", function (done) {
+
        this.timeout(40000);
 
        CB.CloudApp.onDisconnect(function(){
