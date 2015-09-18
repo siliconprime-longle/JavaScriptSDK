@@ -27,9 +27,10 @@ describe("Inlcude in CloudSearch", function (done) {
                             var student_obj=list[i].get('newColumn7');
                             console.log('Student');
                             console.log(student_obj);
-                            if(!student_obj.get('name'))
-                                throw "Unsuccessful Join";
-                            else
+                            if(Object.keys(student_obj).length >3) {
+                                if (!student_obj.get('name'))
+                                    throw "Unsuccessful Join";
+                            } else
                                 done();
                         }    
                     }else{

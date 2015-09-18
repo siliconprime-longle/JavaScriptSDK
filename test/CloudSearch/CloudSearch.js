@@ -616,11 +616,46 @@ describe("CloudSearch", function (done) {
     
     });
 
+    it("should save a latitude and longitude when passing data are number type", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom5');
+        var loc = new CB.CloudGeoPoint(17.7,78.9);
+        obj.set("location", loc);
+        obj.save({
+            success : function(newObj){
+                done();
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    });
+
+    it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom5');
+        var loc = new CB.CloudGeoPoint("18.19","79.3");
+        loc.latitude = 78;
+        loc.longitude = 17;
+        obj.set("location", loc);
+        obj.save({
+            success : function(newObj){
+                done();
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    });
+
+
     it("should get data from server for near function", function(done) {
 
         this.timeout(20000);
 
-        var loc = new CB.CloudGeoPoint("17.7","80.3");
+        var loc = new CB.CloudGeoPoint("17.7","80.0");
         var search = new CB.CloudSearch('Custom5');
         search.searchFilter = new CB.SearchFilter();
         search.searchFilter.near("location", loc, 100000);

@@ -45,7 +45,6 @@ module.exports = function(grunt) {
                         'test/stageTest.js',
                         'test/init/init.js',
                         'test/CloudTable/*.js',
-                        'test/CloudSearch/*.js',    
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
                         'test/CloudObject/*.js',
@@ -55,6 +54,7 @@ module.exports = function(grunt) {
                         'test/CloudNotification/*.js',
                         'test/CloudGeoPoint/*.js',
                         'test/CloudQuery/*.js',
+                        'test/CloudSearch/*.js',
                         'test/CloudApp/*.js',
                         'test/AppTests/*.js'
                     ],
