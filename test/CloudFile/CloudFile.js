@@ -1,6 +1,6 @@
 describe("Cloud Files", function(done) {
 
-   /* it("Should Save a file with file data and name",function(done){
+    it("Should Save a file with file data and name",function(done){
 
         this.timeout(10000);
 
@@ -129,7 +129,7 @@ describe("Cloud Files", function(done) {
                 }, function (err) {
                     throw "Error uploading file";
                 });
-            });*/
+            });
             it("should save a new file", function (done) {
 
                 this.timeout(20000);
@@ -158,10 +158,10 @@ describe("Cloud Files", function(done) {
                 });
 
             });
-      /*  }
+        }
     }catch(e){
         console.log('In node');
-    }*/
+    }
 
 
 

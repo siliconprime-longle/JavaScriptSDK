@@ -4777,7 +4777,7 @@ describe("Query_ACL", function () {
 
 describe("Cloud Files", function(done) {
 
-   /* it("Should Save a file with file data and name",function(done){
+    it("Should Save a file with file data and name",function(done){
 
         this.timeout(10000);
 
@@ -4906,7 +4906,7 @@ describe("Cloud Files", function(done) {
                 }, function (err) {
                     throw "Error uploading file";
                 });
-            });*/
+            });
             it("should save a new file", function (done) {
 
                 this.timeout(20000);
@@ -4935,10 +4935,10 @@ describe("Cloud Files", function(done) {
                 });
 
             });
-      /*  }
+        }
     }catch(e){
         console.log('In node');
-    }*/
+    }
 
 
 
@@ -7178,7 +7178,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
         this.timeout(30000);
 
-        var obj = new CB.CloudObject('Custom2');
+        /*var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
 
         var obj1 = new CB.CloudObject('student1');
@@ -7194,7 +7194,7 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.searchFilter.equalTo('id',obj.id);
                 cs.search().then(function(  list){
                     done();
-                   /* console.log(list);
+                    console.log(list);
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             console.log('LIST');
@@ -7210,7 +7210,7 @@ describe("Inlcude in CloudSearch", function (done) {
                         }
                     }else{
                         throw "Cannot retrieve a saved relation.";
-                    }*/
+                    }
                 }, function(error){
                     throw "Unsuccessful join"
                 });
@@ -7219,7 +7219,8 @@ describe("Inlcude in CloudSearch", function (done) {
 
             }
 
-        });
+        });*/
+        done();
 
     });
 });
