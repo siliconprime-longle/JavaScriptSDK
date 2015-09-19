@@ -14,6 +14,22 @@ describe("Cloud Object", function() {
      },10000);
  });
 
+ it("Should Save data in Custom date field",function(done){
+
+     this.timeout(20000);
+
+     var obj = new CB.CloudObject('Employee');
+     obj.set('dob',new Date());
+     obj.save().then(function(res){
+            if(res)
+                done();
+            else
+                throw "Unable to Save Object";
+     },function(err){
+         throw "Unable to Save Date TIme";
+     });
+ });
+
  it("should not save a string into date column",function(done){
 
         this.timeout(20000);

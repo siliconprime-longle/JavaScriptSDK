@@ -54,6 +54,9 @@ describe("Should Create All Test Tables",function(done){
         obj = new CB.CloudTable('Employee');
         obj.addColumn(Age);
         obj.addColumn(Name);
+        var dob = new CB.Column('dob');
+        dob.dataType = 'DateTime';
+        obj.addColumn(dob);
         obj.save().then(function(res){
             console.log(res);
             done();

@@ -480,6 +480,9 @@ describe("Should Create All Test Tables",function(done){
         obj = new CB.CloudTable('Employee');
         obj.addColumn(Age);
         obj.addColumn(Name);
+        var dob = new CB.Column('dob');
+        dob.dataType = 'DateTime';
+        obj.addColumn(dob);
         obj.save().then(function(res){
             console.log(res);
             done();
@@ -3690,6 +3693,22 @@ describe("Cloud Object", function() {
      setTimeout(function(){
          done();
      },10000);
+ });
+
+ it("Should Save data in Custom date field",function(done){
+
+     this.timeout(20000);
+
+     var obj = new CB.CloudObject('Employee');
+     obj.set('dob',new Date());
+     obj.save().then(function(res){
+            if(res)
+                done();
+            else
+                throw "Unable to Save Object";
+     },function(err){
+         throw "Unable to Save Date TIme";
+     });
  });
 
  it("should not save a string into date column",function(done){
