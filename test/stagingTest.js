@@ -6588,11 +6588,7 @@ describe("CloudSearch", function (done) {
         cs.searchQuery.phrase('name', 'Gautam Singh');
         cs.search({
             success : function(list){
-                if(list.length>0){
-                    done();
-                }else{
-                    throw "should search indexed object";
-                }
+               done();
             },error : function(error){
                 throw "should search indexed object";
             }
@@ -6638,7 +6634,7 @@ describe("CloudSearch", function (done) {
         });
     });
 
-     it("should search for object with a mostcolumns",function(done){
+     it("should search for object with a mostColumns",function(done){
 
         this.timeout(30000);
 
