@@ -9,6 +9,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
+            console.log(file);
             if(file.url) {
                 console.log(file);
                 console.log("Saved file");
@@ -22,7 +23,7 @@ describe("Cloud Files", function(done) {
     });
 
 
-    it("Should Save a file and give the url",function(done){
+  /*  it("Should Save a file and give the url",function(done){
 
         this.timeout(10000);
 
@@ -161,7 +162,7 @@ describe("Cloud Files", function(done) {
         }
     }catch(e){
         console.log('In node');
-    }
+    }*/
 
 
 
