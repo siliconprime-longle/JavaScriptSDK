@@ -30,7 +30,7 @@ describe("Cloud Object", function() {
      });
  });
 
-/* it("should not save a string into date column",function(done){
+ it("should not save a string into date column",function(done){
 
         this.timeout(20000);
 
@@ -783,5 +783,5 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });*/
+    });
 });

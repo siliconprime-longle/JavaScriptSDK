@@ -101,9 +101,6 @@ describe("Cloud Objects Files", function() {
                 });
             });
 
-            it("should save an object with unsaved file.", function (done) {
-                done();
-            });
         }
     }catch(e){
         console.log("Not in Browser");
