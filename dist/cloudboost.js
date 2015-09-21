@@ -10279,7 +10279,9 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
         this.fileObj = file;
         this.document = {
+            _id: null,
             _type: 'file',
+            ACL: new CB.ACL(),
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
             size: file.size,
             url: '',
@@ -10291,7 +10293,9 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
+                _id: null,
                 _type: 'file',
+                ACL: new CB.ACL(),
                 name: '',
                 size: '',
                 url: file,
@@ -10304,7 +10308,9 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                     type = file.split('.')[file.split('.').length-1];
                 }
                 this.document = {
+                    _id: null,
                     _type: 'file',
+                    ACL: new CB.ACL(),
                     name: file,
                     size: '',
                     url: '',
@@ -10380,7 +10386,7 @@ CB.CloudFile.prototype.save = function(callback) {
         var formdata = new FormData();
         formdata.append("fileToUpload", this.fileObj);
         formdata.append("key", CB.appKey);
-
+        formdata.append("fileObj",JSON.stringify(this.document));
         var xmlhttp = CB._loadXml();
         var params = formdata;
         var url = CB.serverUrl + '/file/' + CB.appId;
@@ -10400,7 +10406,7 @@ CB.CloudFile.prototype.save = function(callback) {
         xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState == xmlhttp.DONE) {
                 if (xmlhttp.status == 200) {
-                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
+                    thisObj.document = JSON.parse(xmlhttp.responseText);
                     var sessionID = xmlhttp.getResponseHeader('sessionID');
                     if (sessionID)
                         localStorage.setItem('sessionID', sessionID);
@@ -10424,12 +10430,13 @@ CB.CloudFile.prototype.save = function(callback) {
         var xmlhttp = CB._loadXml();
         var params=JSON.stringify({
             data: this.data,
+            fileObj:this.document,
             key: CB.appKey
         });
         url = CB.serverUrl + '/file/' + CB.appId ;
         //console.log(params);
         CB._request('POST',url,params).then(function(response){
-            thisObj.url = JSON.parse(response)._url;
+            thisObj.document = JSON.parse(response);
             delete thisObj.data;
             if (callback) {
                 callback.success(thisObj);
@@ -10471,7 +10478,7 @@ CB.CloudFile.prototype.delete = function(callback) {
     var thisObj = this;
 
     var params=JSON.stringify({
-        url: thisObj.url,
+        fileObj: thisObj.document,
         key: CB.appKey
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;

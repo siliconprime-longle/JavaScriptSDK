@@ -3094,7 +3094,7 @@ describe("Cloud Object", function() {
      });
  });
 
- it("should not save a string into date column",function(done){
+/* it("should not save a string into date column",function(done){
 
         this.timeout(20000);
 
@@ -3847,7 +3847,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });
+    });*/
 });
 describe("Version Test",function(done){
 
@@ -4805,6 +4805,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
+            console.log(file);
             if(file.url) {
                 console.log(file);
                 console.log("Saved file");
