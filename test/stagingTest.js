@@ -3094,7 +3094,7 @@ describe("Cloud Object", function() {
      });
  });
 
- it("should not save a string into date column",function(done){
+it("should not save a string into date column",function(done){
 
         this.timeout(20000);
 
@@ -4805,6 +4805,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
+            console.log(file);
             if(file.url) {
                 console.log(file);
                 console.log("Saved file");
@@ -7193,7 +7194,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
         this.timeout(30000);
 
-        /*var obj = new CB.CloudObject('Custom2');
+        var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
 
         var obj1 = new CB.CloudObject('student1');
@@ -7234,8 +7235,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
             }
 
-        });*/
-        done();
+        });
 
     });
 });
