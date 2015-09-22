@@ -1756,9 +1756,6 @@ describe("Cloud Objects Files", function() {
                 });
             });
 
-            it("should save an object with unsaved file.", function (done) {
-                done();
-            });
         }
     }catch(e){
         console.log("Not in Browser");
@@ -3060,7 +3057,7 @@ describe("Query on Cloud Object Notifications ", function() {
                 done("Object cannot be saved");
             }
         });
-    });                              
+    });
 });
 describe("Cloud Object", function() {
 
@@ -3094,7 +3091,7 @@ describe("Cloud Object", function() {
      });
  });
 
-/* it("should not save a string into date column",function(done){
+ it("should not save a string into date column",function(done){
 
         this.timeout(20000);
 
@@ -3847,7 +3844,7 @@ describe("Cloud Object", function() {
         },function(){
             throw "should save the object";
         });
-    });*/
+    });
 });
 describe("Version Test",function(done){
 
@@ -4960,12 +4957,113 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
+    it("Should Save a file file data and name then fetch it",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            console.log(file);
+            if(file.url) {
+                CB.CloudFile.getFileObj(file.url).then(function(res){
+                    res.fetchFile().then(function(res){
+                        console.log(res);
+                        done();
+                    },function(){
+                        throw "Unable to Fetch File";
+                    });
+                },function(){
+                    throw "Unable to Fetch File";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
 
 
     //add ACL on CloudFiles.
     
 });
 
+describe("ACL Tests Over Files",function(done){
+
+    it("should not get file Object with not read access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            CB.CloudFile.getFileObj(res.url).then(function(res){
+                if(!res)
+                    done();
+                else
+                    throw "Unable to get ACL working";
+            },function(){
+                throw "Unable to perform query";
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+
+    it("should not get file with no read access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            res.fetchFile().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+    it("should not delete file no write access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicWriteAccess(false);
+        fileObj.save().then(function(res){
+            res.delete().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+});
 describe("CloudExpire", function () {
 
     it("Sets Expire in Cloud Object.", function (done) {

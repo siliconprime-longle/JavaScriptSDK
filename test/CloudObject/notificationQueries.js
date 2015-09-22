@@ -1110,5 +1110,5 @@ describe("Query on Cloud Object Notifications ", function() {
                 done("Object cannot be saved");
             }
         });
-    });                              
+    });
 });

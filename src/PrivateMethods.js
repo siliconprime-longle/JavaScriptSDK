@@ -246,7 +246,7 @@ CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
     return n_obj;
 };
 
-CB._request=function(method,url,params,isServiceUrl)
+CB._request=function(method,url,params,isServiceUrl,isFile)
 {
 
     CB._validate();
@@ -261,7 +261,9 @@ CB._request=function(method,url,params,isServiceUrl)
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-Type','text/plain');
+    if(!isFile) {
+        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
+    }
 
     if(!isServiceUrl){
         var ssid = CB._getSessionId();

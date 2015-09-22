@@ -164,6 +164,35 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
+    it("Should Save a file file data and name then fetch it",function(done){
+
+        this.timeout(10000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            console.log(file);
+            if(file.url) {
+                CB.CloudFile.getFileObj(file.url).then(function(res){
+                    res.fetchFile().then(function(res){
+                        console.log(res);
+                        done();
+                    },function(){
+                        throw "Unable to Fetch File";
+                    });
+                },function(){
+                    throw "Unable to Fetch File";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
 
 
     //add ACL on CloudFiles.
