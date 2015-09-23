@@ -353,7 +353,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         key: CB.appKey,
         document: CB.toJSON(thisObj)
     });
-    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName +'/'+ thisObj.get('id');
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName;
 
     CB._request('DELETE',url,params).then(function(response){
         if (callback) {
