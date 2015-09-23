@@ -558,10 +558,9 @@ describe("CloudSearch", function (done) {
 
 
             this.timeout(30000);
-            done();
 
 
-        /*    var obj = new CB.CloudObject('Student');
+            var obj = new CB.CloudObject('Student');
             obj.set('name', 'RAVI');
 
              var obj1 = new CB.CloudObject('hostel');
@@ -611,7 +610,7 @@ describe("CloudSearch", function (done) {
                 throw "Cannot save an object";
              });
 
-    */
+
     });
 
     it("should save a latitude and longitude when passing data are number type", function(done) {
