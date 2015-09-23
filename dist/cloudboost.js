@@ -8287,6 +8287,94 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
     }
 };
 
+CB.CloudObject.saveAll = function(array,callback){
+
+    if(!array && array.constructor !== Array){
+        throw "Array of CloudObjects is Null";
+    }
+
+    for(var i=0;i<array.length;i++){
+        if(!(array[i] instanceof CB.CloudObject)){
+            throw "Should Be an Array of CloudObjects";
+        }
+    }
+
+    var def;
+    if(!callback){
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+    var params=JSON.stringify({
+        document: CB.toJSON(array),
+        key: CB.appKey
+    });
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
+    CB._request('PUT',url,params).then(function(response){
+        var thisObj = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
+};
+
+CB.CloudObject.deleteAll = function(array,callback){
+
+    if(!array && array.constructor !== Array){
+        throw "Array of CloudObjects is Null";
+    }
+
+    for(var i=0;i<array.length;i++){
+        if(!(array[i] instanceof CB.CloudObject)){
+            throw "Should Be an Array of CloudObjects";
+        }
+    }
+
+    var def;
+    if(!callback){
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+    var params=JSON.stringify({
+        document: CB.toJSON(array),
+        key: CB.appKey
+    });
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
+    CB._request('DELETE',url,params).then(function(response){
+        var thisObj = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
+};
+
 /* Private Methods */
 CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
    
@@ -10981,6 +11069,13 @@ Object.defineProperty(CB.Column.prototype,'required',{
 
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
+
+    if(thisObj.constructor === Array){
+        for(var i=0;i<thisObj.length;i++){
+            thisObj[i] = CB.toJSON(thisObj[i]);
+        }
+        return thisObj;
+    }
 
     var url = null;
     var columnName = null;

@@ -1,6 +1,13 @@
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
+    if(thisObj.constructor === Array){
+        for(var i=0;i<thisObj.length;i++){
+            thisObj[i] = CB.toJSON(thisObj[i]);
+        }
+        return thisObj;
+    }
+
     var url = null;
     var columnName = null;
     var tableName = null;

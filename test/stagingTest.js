@@ -1515,6 +1515,47 @@ describe("CloudRole", function (done) {
     });
 });
 
+describe("Bulk API",function(done){
+
+    it("should save array of CloudObject using bulk Api",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+
+    it("should save  and then delete array of CloudObject using bulk Api",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            CB.CloudObject.deleteAll(res).then(function(res){
+                console.log(res);
+                done();
+            },function(err){
+                throw "Unable to Delete CloudObject";
+            });
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+});
 describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
@@ -7044,10 +7085,9 @@ describe("CloudSearch", function (done) {
 
 
             this.timeout(30000);
-            done();
 
 
-        /*    var obj = new CB.CloudObject('Student');
+            var obj = new CB.CloudObject('Student');
             obj.set('name', 'RAVI');
 
              var obj1 = new CB.CloudObject('hostel');
@@ -7097,7 +7137,7 @@ describe("CloudSearch", function (done) {
                 throw "Cannot save an object";
              });
 
-    */
+
     });
 
     it("should save a latitude and longitude when passing data are number type", function(done) {
