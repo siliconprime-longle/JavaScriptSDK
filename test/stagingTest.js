@@ -1128,7 +1128,7 @@ describe("Table Tests", function (done) {
 
     it("should create a column and then delete it",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         CB.CloudTable.get('Employee').then(function(emp){
             var column = new CB.Column('Test2');
@@ -1515,6 +1515,119 @@ describe("CloudRole", function (done) {
     });
 });
 
+describe("Bulk API",function(done){
+
+    it("should save array of CloudObject using bulk Api",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+
+    it("should save and then delete array of CloudObject using bulk Api",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            CB.CloudObject.deleteAll(res).then(function(res){
+                console.log(res);
+                done();
+            },function(err){
+                throw "Unable to Delete CloudObject";
+            });
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+
+    try {
+        if(window) {
+
+            it("Should save CloudObject Array with unsaved files", function (done) {
+
+                this.timeout(20000);
+
+                var data = 'akldaskdhklahdasldhd';
+                var name = 'abc.txt';
+                var type = 'txt';
+                var fileObj = new CB.CloudFile(name, data, type);
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name', 'vipul');
+                obj.set('file', fileObj);
+                var data = 'akldaskdhklahdasldhd';
+                var name = 'abc.txt';
+                var type = 'txt';
+                var fileObj1 = new CB.CloudFile(name, data, type);
+                var obj1 = new CB.CloudObject('Sample');
+                obj1.set('name', 'ABCD');
+                obj1.set('file', fileObj1);
+                CB.CloudObject.saveAll([obj, obj1]).then(function (res) {
+                    console.log(res);
+                    done();
+                }, function (err) {
+                    throw "Unable to Save CloudObject";
+                });
+
+            });
+        }
+    }catch(e){
+        console.log("Not in Browser");
+    }
+
+    it("Should properly save a relation in Bulk API",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'Course');
+        var obj3 = new CB.CloudObject('Custom3');
+        obj3.set('address','progress');
+        obj.set('newColumn2',obj3);
+        CB.CloudObject.saveAll([obj,obj3]).then(function(res) {
+            if(res[1].get('id') === res[0].get('newColumn2').get('id'))
+                done();
+            else
+                throw "Unable to Save Relation properly";
+        }, function () {
+            throw "Relation Save error";
+        });
+    });
+
+    it("Should properly save a relation in Bulk API",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'Course');
+        var obj3 = new CB.CloudObject('Custom3');
+        obj3.set('address','progress');
+        obj.set('newColumn2',obj3);
+        CB.CloudObject.saveAll([obj3,obj]).then(function(res) {
+            if(res[0].get('id') === res[1].get('newColumn2').get('id'))
+                done();
+            else
+                throw "Unable to Save Relation properly";
+        }, function () {
+            throw "Relation Save error";
+        });
+    });
+});
 describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
@@ -3091,7 +3204,8 @@ describe("Cloud Object", function() {
      });
  });
 
- it("should not save a string into date column",function(done){
+
+it("should not save a string into date column",function(done){
 
         this.timeout(20000);
 
@@ -4956,6 +5070,7 @@ describe("Cloud Files", function(done) {
     }catch(e){
         console.log('In node');
     }
+<<<<<<< HEAD
 
     it("Should Save a file file data and name then fetch it",function(done){
 
@@ -4985,6 +5100,8 @@ describe("Cloud Files", function(done) {
             throw "Unable to save file";
         });
     });
+=======
+>>>>>>> development
 
 
 
@@ -5665,7 +5782,7 @@ describe("CloudQuery Include", function (done) {
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             var student_obj=list[i].get('newColumn7');
-                            if(student_obj.get('name'))
+                            if(student_obj && student_obj.get('name'))
                                 status = true;
                         }
                         if(status === true){
@@ -7142,10 +7259,9 @@ describe("CloudSearch", function (done) {
 
 
             this.timeout(30000);
-            done();
 
-
-        /*    var obj = new CB.CloudObject('Student');
+            return done();
+            var obj = new CB.CloudObject('Student');
             obj.set('name', 'RAVI');
 
              var obj1 = new CB.CloudObject('hostel');
@@ -7195,7 +7311,7 @@ describe("CloudSearch", function (done) {
                 throw "Cannot save an object";
              });
 
-    */
+
     });
 
     it("should save a latitude and longitude when passing data are number type", function(done) {
@@ -7292,7 +7408,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
         this.timeout(30000);
 
-        /*var obj = new CB.CloudObject('Custom2');
+        var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
 
         var obj1 = new CB.CloudObject('student1');
@@ -7333,8 +7449,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
             }
 
-        });*/
-        done();
+        });
 
     });
 });
@@ -7417,6 +7532,35 @@ describe("App Tests2",function(done){
             done();
         },function(err){
            throw "Unable to Save";
+        });
+    });
+
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
         });
     });
 });
@@ -7503,6 +7647,34 @@ describe("App Tests",function(done){
         });
     });
 
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
 });
 describe("CloudApp Socket Test", function () {
 

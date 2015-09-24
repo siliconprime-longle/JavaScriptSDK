@@ -21,7 +21,6 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
         };
 
     } else if(typeof file === "string") {
-
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
@@ -49,26 +48,16 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                     contentType : type
                 };
             }else{
-                throw "Invalid File. It should be of type file or blob";
+                this.document._id = id;
+                this.document._type = 'file';
             }
         }
-    }
-    else{
+    } else{
         throw "Invalid File. It should be of type file or blob";
     }
 };
 
-
-Object.defineProperty(CB.CloudFile.prototype, 'ACL', {
-    get: function() {
-        return this.document.ACL;
-    },
-    set: function(ACL) {
-        this.document.ACL = ACL;
-    }
-});
-
-
+CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
 
 Object.defineProperty(CB.CloudFile.prototype, 'type', {
     get: function() {

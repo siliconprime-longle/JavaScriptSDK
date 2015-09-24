@@ -163,6 +163,7 @@ describe("Cloud Files", function(done) {
     }catch(e){
         console.log('In node');
     }
+<<<<<<< HEAD
 
     it("Should Save a file file data and name then fetch it",function(done){
 
@@ -192,6 +193,8 @@ describe("Cloud Files", function(done) {
             throw "Unable to save file";
         });
     });
+=======
+>>>>>>> development
 
 
 

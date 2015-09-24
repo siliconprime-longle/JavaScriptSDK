@@ -43,7 +43,7 @@ describe("Table Tests", function (done) {
 
     it("should create a column and then delete it",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         CB.CloudTable.get('Employee').then(function(emp){
             var column = new CB.Column('Test2');
