@@ -559,7 +559,7 @@ describe("CloudSearch", function (done) {
 
             this.timeout(30000);
 
-
+            return done();
             var obj = new CB.CloudObject('Student');
             obj.set('name', 'RAVI');
 
