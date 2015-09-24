@@ -81,4 +81,32 @@ describe("App Tests",function(done){
         });
     });
 
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
 });
