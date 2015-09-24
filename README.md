@@ -10,6 +10,8 @@ npm install cloudboost
 
 var CB = require('cloudboost');
 
+```
+
 ### Bower Installation
 ```
 bower install cloudboost
@@ -18,6 +20,7 @@ bower install cloudboost
 ``` js
 
 <script src="bower_components/cloudboost/dist/cloudboost.js"><script>
+
 
 // AppID and AppKey are your App ID and key of the application created in CloudBoost Dashboard.
 
