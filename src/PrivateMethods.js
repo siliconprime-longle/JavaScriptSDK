@@ -1,6 +1,13 @@
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
+    if(thisObj.constructor === Array){
+        for(var i=0;i<thisObj.length;i++){
+            thisObj[i] = CB.toJSON(thisObj[i]);
+        }
+        return thisObj;
+    }
+
     var url = null;
     var columnName = null;
     var tableName = null;
@@ -497,3 +504,26 @@ CB._fileCheck = function(obj){
     return deferred;
 };
 
+CB._bulkObjFileCheck = function(array){
+    var deferred = new CB.Promise();
+    var promises = [];
+    for(var i=0;i<array.length;i++){
+        promises.push(CB._fileCheck(array[i]));
+    }
+    CB.Promise.all(promises).then(function(){
+        deferred.resolve(arguments);
+    },function(err){
+        deferred.reject(err);
+    });
+    return deferred;
+};
+
+CB._generateHash = function(){
+    var hash="";
+    var possible="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(i=0;i<8;i++)
+    {
+        hash=hash+possible.charAt(Math.floor(Math.random()*possible.length));
+    }
+    return hash;
+};

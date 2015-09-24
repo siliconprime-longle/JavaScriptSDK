@@ -7922,6 +7922,7 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
     this.document.expires = null;
+    this.document._hash = CB._generateHash();
 
     if(!id){
         this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
@@ -8266,7 +8267,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
         key: CB.appKey,
         document: CB.toJSON(thisObj)
     });
-    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName +'/'+ thisObj.get('id');
+    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName;
 
     CB._request('DELETE',url,params).then(function(response){
         if (callback) {
@@ -8285,6 +8286,103 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
     if (!callback) {
         return def;
     }
+};
+
+CB.CloudObject.saveAll = function(array,callback){
+
+    if(!array || array.constructor !== Array){
+        throw "Array of CloudObjects is Null";
+    }
+
+    for(var i=0;i<array.length;i++){
+        if(!(array[i] instanceof CB.CloudObject)){
+            throw "Should Be an Array of CloudObjects";
+        }
+    }
+
+    var def;
+    if(!callback){
+        def = new CB.Promise();
+    }
+
+    CB._bulkObjFileCheck(array).then(function(){
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            document: CB.toJSON(array),
+            key: CB.appKey
+        });
+        var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
+        CB._request('PUT',url,params).then(function(response){
+            var thisObj = CB.fromJSON(JSON.parse(response));
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
+};
+
+CB.CloudObject.deleteAll = function(array,callback){
+
+    if(!array && array.constructor !== Array){
+        throw "Array of CloudObjects is Null";
+    }
+
+    for(var i=0;i<array.length;i++){
+        if(!(array[i] instanceof CB.CloudObject)){
+            throw "Should Be an Array of CloudObjects";
+        }
+    }
+
+    var def;
+    if(!callback){
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+    var params=JSON.stringify({
+        document: CB.toJSON(array),
+        key: CB.appKey
+    });
+    var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
+    CB._request('DELETE',url,params).then(function(response){
+        var thisObj = CB.fromJSON(JSON.parse(response));
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+
 };
 
 /* Private Methods */
@@ -10982,6 +11080,13 @@ Object.defineProperty(CB.Column.prototype,'required',{
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
+    if(thisObj.constructor === Array){
+        for(var i=0;i<thisObj.length;i++){
+            thisObj[i] = CB.toJSON(thisObj[i]);
+        }
+        return thisObj;
+    }
+
     var url = null;
     var columnName = null;
     var tableName = null;
@@ -11476,4 +11581,28 @@ CB._fileCheck = function(obj){
         deferred.resolve(obj);
     }
     return deferred;
+};
+
+CB._bulkObjFileCheck = function(array){
+    var deferred = new CB.Promise();
+    var promises = [];
+    for(var i=0;i<array.length;i++){
+        promises.push(CB._fileCheck(array[i]));
+    }
+    CB.Promise.all(promises).then(function(){
+        deferred.resolve(arguments);
+    },function(err){
+        deferred.reject(err);
+    });
+    return deferred;
+};
+
+CB._generateHash = function(){
+    var hash="";
+    var possible="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(i=0;i<8;i++)
+    {
+        hash=hash+possible.charAt(Math.floor(Math.random()*possible.length));
+    }
+    return hash;
 };
