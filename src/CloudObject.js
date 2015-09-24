@@ -9,6 +9,7 @@ CB.CloudObject = function(tableName, id) { //object for documents
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'custom';
     this.document.expires = null;
+    this.document._hash = CB._generateHash();
 
     if(!id){
         this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
@@ -376,7 +377,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
 CB.CloudObject.saveAll = function(array,callback){
 
-    if(!array && array.constructor !== Array){
+    if(!array || array.constructor !== Array){
         throw "Array of CloudObjects is Null";
     }
 
@@ -391,19 +392,28 @@ CB.CloudObject.saveAll = function(array,callback){
         def = new CB.Promise();
     }
 
-    var xmlhttp = CB._loadXml();
-    var params=JSON.stringify({
-        document: CB.toJSON(array),
-        key: CB.appKey
-    });
-    var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
-    CB._request('PUT',url,params).then(function(response){
-        var thisObj = CB.fromJSON(JSON.parse(response));
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
+    CB._bulkObjFileCheck(array).then(function(){
+        var xmlhttp = CB._loadXml();
+        var params=JSON.stringify({
+            document: CB.toJSON(array),
+            key: CB.appKey
+        });
+        var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
+        CB._request('PUT',url,params).then(function(response){
+            var thisObj = CB.fromJSON(JSON.parse(response));
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
     },function(err){
         if(callback){
             callback.error(err);
