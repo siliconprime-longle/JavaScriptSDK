@@ -5680,7 +5680,7 @@ describe("CloudQuery Include", function (done) {
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             var student_obj=list[i].get('newColumn7');
-                            if(student_obj.get('name'))
+                            if(student_obj && student_obj.get('name'))
                                 status = true;
                         }
                         if(status === true){
