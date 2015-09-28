@@ -16,7 +16,8 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
             ACL: new CB.ACL(),
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
             size: file.size,
-            url: '',
+            url: null,
+            expires: null,
             contentType : (typeof file.type !== "undefined" && file.type !== "") ? file.type : 'unknown'
         };
 
@@ -30,6 +31,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 name: '',
                 size: '',
                 url: file,
+                expires: null,
                 contentType : ''
             };
         } else{
@@ -44,12 +46,15 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                     ACL: new CB.ACL(),
                     name: file,
                     size: '',
-                    url: '',
+                    url: null,
+                    expires: null,
                     contentType : type
                 };
             }else{
-                this.document._id = id;
-                this.document._type = 'file';
+                this.document = {
+                    _id: file,
+                    _type: 'file'
+                }
             }
         }
     } else{

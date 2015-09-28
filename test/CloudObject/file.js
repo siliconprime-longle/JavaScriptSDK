@@ -28,7 +28,8 @@ describe("Cloud Objects Files", function() {
                         obj.set('file', file);
 
                         obj.save().then(function (newobj) {
-                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').url) {
+                            console.log(newobj);
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                 done();
                             } else {
                                 throw "object saved but didnot return file.";
