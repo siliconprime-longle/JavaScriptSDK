@@ -8211,7 +8211,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
-    if (this.document._id) {
+    if (!this.document._id) {
         throw "Can't fetch an object which is not saved."
     }
     var thisObj = this;
