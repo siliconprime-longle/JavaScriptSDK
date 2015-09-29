@@ -10,7 +10,7 @@ describe("ACL Tests Over Files",function(done){
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.ACL.setPublicReadAccess(false);
         fileObj.save().then(function(res){
-            CB.CloudFile.getFileObj(res.url).then(function(res){
+            res.fetch().then(function(res){
                 if(!res)
                     done();
                 else
@@ -35,7 +35,7 @@ describe("ACL Tests Over Files",function(done){
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.ACL.setPublicReadAccess(false);
         fileObj.save().then(function(res){
-            res.fetchFile().then(function(res){
+            res.getFileContent().then(function(res){
                 throw "Should not retrieve file";
             },function(err){
                 console.log(err);

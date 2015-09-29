@@ -298,38 +298,34 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
-    if (this.id) {
-        this.document['_id'] = this.id;
-    } else {
+    if (this.document._id) {
         throw "Can't fetch an object which is not saved."
     }
-    if (this.ACL) {
-        this.document['ACL'] = this.ACL;
-    }
-    thisObj = this;
+    var thisObj = this;
     var def;
     if (!callback) {
         def = new CB.Promise();
     }
-    var params=JSON.stringify({
-        key: CB.appKey
-    });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
-
-    CB._request('POST',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
+    var query = null;
+    if(thisObj.document._type === 'file'){
+        query = new CB.CloudQuery('cbFile');
+    }else{
+        query = new CB.CloudQuery(thisObj.document._tableName);
+    }
+    query.findById(thisObj.get('id')).then(function(res){
+        if(!callback){
+            def.resolve(res);
+        }else{
+            callback.success(res);
         }
     },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
+        if(!callback){
             def.reject(err);
+        }else{
+            callback.error(err);
         }
     });
+
 
     if (!callback) {
         return def;

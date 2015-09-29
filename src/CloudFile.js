@@ -168,7 +168,7 @@ CB.CloudFile.prototype.save = function(callback) {
     if (!callback) {
         return def;
     }
-}
+};
 
 /**
  * Removes a file from Database.
@@ -217,7 +217,7 @@ CB.CloudFile.prototype.delete = function(callback) {
 };
 
 
-CB.CloudFile.prototype.fetchFile = function(callback){
+CB.CloudFile.prototype.getFileContent = function(callback){
 
     var def;
 
@@ -252,45 +252,3 @@ CB.CloudFile.prototype.fetchFile = function(callback){
         return def;
     }
 };
-
-CB.CloudFile.getFileObj = function(url,callback){
-
-    var def;
-
-    if(!url) {
-        throw "Url is Null";
-    }
-    var file = new CB.CloudFile(url);
-    if (!callback) {
-        def = new CB.Promise();
-    }
-
-    var params=JSON.stringify({
-        url: url,
-        key: CB.appKey
-    });
-    var url = CB.serverUrl+'/file/' + CB.appId + '/get/fileObj'  ;
-
-    CB._request('POST',url,params).then(function(response){
-        if(response)
-            file.document = JSON.parse(response);
-        else
-            file = response;
-        if (callback) {
-            callback.success(file);
-        } else {
-            def.resolve(file);
-        }
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-
-
-    if (!callback) {
-        return def;
-    }
-}

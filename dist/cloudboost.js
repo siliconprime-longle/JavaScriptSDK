@@ -8211,38 +8211,34 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     if (!CB.appId) {
         throw "CB.appId is null.";
     }
-    if (this.id) {
-        this.document['_id'] = this.id;
-    } else {
+    if (this.document._id) {
         throw "Can't fetch an object which is not saved."
     }
-    if (this.ACL) {
-        this.document['ACL'] = this.ACL;
-    }
-    thisObj = this;
+    var thisObj = this;
     var def;
     if (!callback) {
         def = new CB.Promise();
     }
-    var params=JSON.stringify({
-        key: CB.appKey
-    });
-    url = CB.apiUrl + "/" + CB.appId + "/" + thisObj.document._tableName + "/get/" + thisObj.document['_id'];
-
-    CB._request('POST',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
+    var query = null;
+    if(thisObj.document._type === 'file'){
+        query = new CB.CloudQuery('cbFile');
+    }else{
+        query = new CB.CloudQuery(thisObj.document._tableName);
+    }
+    query.findById(thisObj.get('id')).then(function(res){
+        if(!callback){
+            def.resolve(res);
+        }else{
+            callback.success(res);
         }
     },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
+        if(!callback){
             def.reject(err);
+        }else{
+            callback.error(err);
         }
     });
+
 
     if (!callback) {
         return def;
@@ -9167,7 +9163,7 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
         sort : {}
     });
 
-    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         response = JSON.parse(response);
@@ -10534,7 +10530,7 @@ CB.CloudFile.prototype.save = function(callback) {
     if (!callback) {
         return def;
     }
-}
+};
 
 /**
  * Removes a file from Database.
@@ -10583,7 +10579,7 @@ CB.CloudFile.prototype.delete = function(callback) {
 };
 
 
-CB.CloudFile.prototype.fetchFile = function(callback){
+CB.CloudFile.prototype.getFileContent = function(callback){
 
     var def;
 
@@ -10619,47 +10615,6 @@ CB.CloudFile.prototype.fetchFile = function(callback){
     }
 };
 
-CB.CloudFile.getFileObj = function(url,callback){
-
-    var def;
-
-    if(!url) {
-        throw "Url is Null";
-    }
-    var file = new CB.CloudFile(url);
-    if (!callback) {
-        def = new CB.Promise();
-    }
-
-    var params=JSON.stringify({
-        url: url,
-        key: CB.appKey
-    });
-    var url = CB.serverUrl+'/file/' + CB.appId + '/get/fileObj'  ;
-
-    CB._request('POST',url,params).then(function(response){
-        if(response)
-            file.document = JSON.parse(response);
-        else
-            file = response;
-        if (callback) {
-            callback.success(file);
-        } else {
-            def.resolve(file);
-        }
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-
-
-    if (!callback) {
-        return def;
-    }
-}
 /*
  *CloudGeoPoint
  */

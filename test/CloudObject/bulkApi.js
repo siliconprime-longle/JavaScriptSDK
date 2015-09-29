@@ -44,7 +44,7 @@ describe("Bulk API",function(done){
 
             it("Should save CloudObject Array with unsaved files", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 var data = 'akldaskdhklahdasldhd';
                 var name = 'abc.txt';
@@ -61,8 +61,10 @@ describe("Bulk API",function(done){
                 obj1.set('name', 'ABCD');
                 obj1.set('file', fileObj1);
                 CB.CloudObject.saveAll([obj, obj1]).then(function (res) {
-                    console.log(res);
-                    done();
+                    if(res[0].get('file').get('id') && res[1].get('file').get('id'))
+                        done();
+                    else
+                        throw "Object saved but unable to save file";
                 }, function (err) {
                     throw "Unable to Save CloudObject";
                 });

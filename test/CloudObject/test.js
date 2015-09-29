@@ -785,4 +785,27 @@ it("should not save a string into date column",function(done){
             throw "should save the object";
         });
     });
+
+
+    it("should fetch a CloudObject", function(done) {
+
+        this.timeout(30000);
+
+        var obj1 = new CB.CloudObject('Custom18');
+        obj1.set('number',0);
+        obj1.save().then(function(obj){
+            delete obj1.document.number;
+            obj1.fetch().then(function(res){
+                if(res.get('number') === 0)
+                    done();
+                else
+                    throw "Unable to Fetch Data Using fetch function";
+            },function(err){
+                throw "Unable to fetch";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
+
 });

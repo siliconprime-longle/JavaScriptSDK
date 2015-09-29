@@ -6,7 +6,7 @@ describe("Cloud Objects Files", function() {
 
             it("should save a file inside of an object", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
@@ -48,7 +48,7 @@ describe("Cloud Objects Files", function() {
             });
 
             it("should save an array of files.", function (done) {
-                this.timeout(200000);
+                this.timeout(400000);
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {

@@ -1963,7 +1963,7 @@ describe("Query_ACL", function () {
 
 describe("Cloud Files", function(done) {
 
-   /* it("Should Save a file with file data and name",function(done){
+    it("Should Save a file with file data and name",function(done){
 
         this.timeout(10000);
 
@@ -2009,7 +2009,7 @@ describe("Cloud Files", function(done) {
 
     it("Should delete a file with file data and name",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -2112,7 +2112,7 @@ describe("Cloud Files", function(done) {
                 obj.set('fileList', [file, file1]);
                 obj.set('name', 'abcd');
                 obj.save().then(function (file) {
-                    if (file.get('fileList')[0].url && file.get('fileList')[1].url) {
+                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
                         done();
                     } else {
                         throw "Upload success. But cannot find the URL.";
@@ -2125,11 +2125,11 @@ describe("Cloud Files", function(done) {
         }
     }catch(e){
         console.log('In node');
-    }*/
+    }
 
     it("Should Save a file file data and name then fetch it",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -2138,8 +2138,8 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file){
             console.log(file);
             if(file.url) {
-                CB.CloudFile.getFileObj(file.url).then(function(res){
-                    res.fetchFile().then(function(res){
+                file.fetch().then(function(res){
+                    res.getFileContent().then(function(res){
                         console.log(res);
                         done();
                     },function(){
@@ -2157,6 +2157,61 @@ describe("Cloud Files", function(done) {
     });
 
 
+    it("Include Over File",function(done) {
+
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var id = res.get('id');
+            var query = new CB.CloudQuery('Sample');
+            query.equalTo('id',id);
+            query.include('file');
+            query.find().then(function(res){
+                console.log(res);
+                done();
+            },function(){
+                throw "Unable to Find";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
+
+    it("Should Save a file file data and name then fetch it",function(done) {
+
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var file = res.get('file');
+            file.fetch().then(function(res){
+                console.log(res);
+                if(res.get('url'))
+                    done();
+                throw "Unable to fetch the file";
+            },function(err){
+                throw "Unable to fetch file";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
 
     //add ACL on CloudFiles.
     
@@ -2174,7 +2229,7 @@ describe("ACL Tests Over Files",function(done){
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.ACL.setPublicReadAccess(false);
         fileObj.save().then(function(res){
-            CB.CloudFile.getFileObj(res.url).then(function(res){
+            res.fetch().then(function(res){
                 if(!res)
                     done();
                 else
@@ -2199,7 +2254,7 @@ describe("ACL Tests Over Files",function(done){
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.ACL.setPublicReadAccess(false);
         fileObj.save().then(function(res){
-            res.fetchFile().then(function(res){
+            res.getFileContent().then(function(res){
                 throw "Should not retrieve file";
             },function(err){
                 console.log(err);
@@ -2280,7 +2335,7 @@ describe("Bulk API",function(done){
 
             it("Should save CloudObject Array with unsaved files", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 var data = 'akldaskdhklahdasldhd';
                 var name = 'abc.txt';
@@ -2297,8 +2352,10 @@ describe("Bulk API",function(done){
                 obj1.set('name', 'ABCD');
                 obj1.set('file', fileObj1);
                 CB.CloudObject.saveAll([obj, obj1]).then(function (res) {
-                    console.log(res);
-                    done();
+                    if(res[0].get('file').get('id') && res[1].get('file').get('id'))
+                        done();
+                    else
+                        throw "Object saved but unable to save file";
                 }, function (err) {
                     throw "Unable to Save CloudObject";
                 });
@@ -2493,7 +2550,7 @@ describe("Cloud Objects Files", function() {
 
             it("should save a file inside of an object", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
@@ -2516,7 +2573,7 @@ describe("Cloud Objects Files", function() {
 
                         obj.save().then(function (newobj) {
                             console.log(newobj);
-                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file')._id) {
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                 done();
                             } else {
                                 throw "object saved but didnot return file.";
@@ -2535,7 +2592,7 @@ describe("Cloud Objects Files", function() {
             });
 
             it("should save an array of files.", function (done) {
-                this.timeout(200000);
+                this.timeout(400000);
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
@@ -4679,6 +4736,29 @@ it("should not save a string into date column",function(done){
             throw "should save the object";
         });
     });
+
+
+    it("should fetch a CloudObject", function(done) {
+
+        this.timeout(30000);
+
+        var obj1 = new CB.CloudObject('Custom18');
+        obj1.set('number',0);
+        obj1.save().then(function(obj){
+            delete obj1.document.number;
+            obj1.fetch().then(function(res){
+                if(res.get('number') === 0)
+                    done();
+                else
+                    throw "Unable to Fetch Data Using fetch function";
+            },function(err){
+                throw "Unable to fetch";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
+
 });
 describe("Version Test",function(done){
 
