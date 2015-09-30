@@ -10793,6 +10793,39 @@ CB.CloudTable.prototype.addColumn = function(column){
   }
 };
 
+CB.CloudTable.prototype.getColumn = function(columnName){
+    if(Object.prototype.toString.call(columnName) !== '[object String]') {
+        throw "Should enter a columnName";
+    }
+    var columns = this.document.columns;
+    for(var i=0;i<columns.length;i++){
+        if(columns[i].name === columnName)
+            return columns[i];
+    }
+    throw "Column Does Not Exists";
+};
+
+CB.CloudTable.prototype.updateColumn = function(column){
+    if (Object.prototype.toString.call(column) === '[object Object]') {
+        if (CB._columnValidation(column, this)){
+            var columns = this.document.columns;
+            for(var i=0;i<columns.length;i++){
+                if(columns[i].name === column.name){
+                    columns[i] = column;
+                    this.document.columns = columns;
+                    break;
+                }
+            }
+        }else{
+            throw "Invalid Column";
+        }
+    }else{
+        throw "Invalid Column";
+    }
+
+};
+
+
 CB.CloudTable.prototype.deleteColumn = function(column){
     if(Object.prototype.toString.call(column) === '[object String]') {
         var obj = new CB.Column(column);

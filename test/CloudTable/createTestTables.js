@@ -74,8 +74,11 @@ describe("Should Create All Test Tables",function(done){
         Revenue.dataType = 'Number';
         var Name = new CB.Column('Name');
         Name.dataType = 'Text';
+        var File = new CB.Column('File');
+        File.dataType = 'File';
         obj.addColumn(Revenue);
         obj.addColumn(Name);
+        obj.addColumn(File);
         obj.save().then(function(res){
             console.log(res);
             done();

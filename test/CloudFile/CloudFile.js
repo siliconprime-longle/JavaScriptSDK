@@ -64,7 +64,7 @@ describe("Cloud Files", function(done) {
                     throw "unable to delete file";
                 });
             }else{
-                throw 'ún able to get the url';
+                throw 'unable to get the url';
             }
         },function(err){
             throw "Unable to save file";
@@ -248,6 +248,40 @@ describe("Cloud Files", function(done) {
         },function(err){
             throw "unable to save object";
         });
+    });
+
+    it("should save a file and get from a relation",function(done){
+
+        this.timeout(100000);
+
+        var obj1 = new CB.CloudObject('Employee');
+        var obj2 = new CB.CloudObject('Company');
+        obj1.set('Name','abcd');
+        obj2.set('Name','pqrs');
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(res){
+            obj2.set('File',res);
+            obj1.set('Company',obj2);
+            obj1.save().then(function(res){
+                var query = new CB.CloudQuery('Employee');
+                query.include('Company.File');
+                query.equalTo('id',res.get('id'));
+                query.find().then(function(res){
+                    console.log(res);
+                    done();
+                },function(err){
+                    throw "Unable to query";
+                });
+            },function(){
+                throw "Unable to Save Cloud Object";
+            });
+        },function(err){
+           throw "Unable to Save file";
+        });
+
     });
 
     //add ACL on CloudFiles.

@@ -417,6 +417,51 @@ describe("Cloud Table", function(){
       });
     });
 
+    it("should get column from a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = obj.getColumn('ACL');
+        if(column){
+            done();
+        }else{
+            throw "Get Column is Not Working";
+        }
+    });
+
+    it("should update column in a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        var col2 = obj.getColumn('name');
+        col2.required = false;
+        obj.updateColumn(col2);
+        column = obj.getColumn('name');
+        if(column.required === false){
+            done();
+        }else{
+            throw "Unable to Update Column";
+        }
+    });
+
+    it("should not pass string in update column",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        try {
+            obj.updateColumn("abcd");
+            throw "Update Column should not take string";
+        }catch(e){
+            done();
+        }
+    });
+
     after(function() {
     	CB.appKey = CB.jsKey;
   	});
@@ -500,8 +545,11 @@ describe("Should Create All Test Tables",function(done){
         Revenue.dataType = 'Number';
         var Name = new CB.Column('Name');
         Name.dataType = 'Text';
+        var File = new CB.Column('File');
+        File.dataType = 'File';
         obj.addColumn(Revenue);
         obj.addColumn(Name);
+        obj.addColumn(File);
         obj.save().then(function(res){
             console.log(res);
             done();
@@ -2027,7 +2075,7 @@ describe("Cloud Files", function(done) {
                     throw "unable to delete file";
                 });
             }else{
-                throw 'ún able to get the url';
+                throw 'unable to get the url';
             }
         },function(err){
             throw "Unable to save file";
@@ -2211,6 +2259,40 @@ describe("Cloud Files", function(done) {
         },function(err){
             throw "unable to save object";
         });
+    });
+
+    it("should save a file and get from a relation",function(done){
+
+        this.timeout(100000);
+
+        var obj1 = new CB.CloudObject('Employee');
+        var obj2 = new CB.CloudObject('Company');
+        obj1.set('Name','abcd');
+        obj2.set('Name','pqrs');
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(res){
+            obj2.set('File',res);
+            obj1.set('Company',obj2);
+            obj1.save().then(function(res){
+                var query = new CB.CloudQuery('Employee');
+                query.include('Company.File');
+                query.equalTo('id',res.get('id'));
+                query.find().then(function(res){
+                    console.log(res);
+                    done();
+                },function(err){
+                    throw "Unable to query";
+                });
+            },function(){
+                throw "Unable to Save Cloud Object";
+            });
+        },function(err){
+           throw "Unable to Save file";
+        });
+
     });
 
     //add ACL on CloudFiles.

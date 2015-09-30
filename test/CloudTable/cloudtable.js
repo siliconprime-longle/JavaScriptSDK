@@ -336,6 +336,51 @@ describe("Cloud Table", function(){
       });
     });
 
+    it("should get column from a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = obj.getColumn('ACL');
+        if(column){
+            done();
+        }else{
+            throw "Get Column is Not Working";
+        }
+    });
+
+    it("should update column in a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        var col2 = obj.getColumn('name');
+        col2.required = false;
+        obj.updateColumn(col2);
+        column = obj.getColumn('name');
+        if(column.required === false){
+            done();
+        }else{
+            throw "Unable to Update Column";
+        }
+    });
+
+    it("should not pass string in update column",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        try {
+            obj.updateColumn("abcd");
+            throw "Update Column should not take string";
+        }catch(e){
+            done();
+        }
+    });
+
     after(function() {
     	CB.appKey = CB.jsKey;
   	});
