@@ -85,45 +85,7 @@ it("should not save a string into date column",function(done){
     });
 
 
-    it("should not update the createdAt when the object is updated.",function(done){
-
-        this.timeout('40000');
-
-        var obj = new CB.CloudObject('Sample');
-        obj.set('name', 'sample');
-        obj.save({
-            success : function(newObj){
-                var createdAt = newObj.createdAt;
-
-                setTimeout(function(){
-                   
-                    if(createdAt ==null){
-                        done("Error : Didnot save CreatedAt");
-                    }
-
-                    obj.save({
-                        success : function(newObj){
-                            if(newObj.createdAt === createdAt){
-                                done();
-                            }else{
-                                done("Throw CreatedAt updated when the object is updated.")
-                            }
-                            
-                        }, error : function(error){
-                            throw 'Error saving the object';
-                        }
-                    });
-                 },10000);
-
-                
-
-                done();
-            }, error : function(error){
-                throw 'Error saving the object';
-            }
-        });
-    
-    });
+   
 
 
    it("should update the object after save and update.", function(done) {
@@ -847,6 +809,46 @@ it("should not save a string into date column",function(done){
         },function(){
             throw "should save the object";
         });
+    });
+
+     // it("should not update the createdAt when the object is updated.",function(done){
+
+     //    this.timeout('40000');
+
+     //    var obj = new CB.CloudObject('Sample');
+     //    obj.set('name', 'sample');
+     //    obj.save({
+     //        success : function(newObj){
+     //            var createdAt = newObj.createdAt;
+
+     //            setTimeout(function(){
+                   
+     //                if(createdAt ==null){
+     //                    done("Error : Didnot save CreatedAt");
+     //                }
+
+     //                obj.save({
+     //                    success : function(newObj){
+     //                        if(newObj.createdAt === createdAt){
+     //                            done();
+     //                        }else{
+     //                            done("Throw CreatedAt updated when the object is updated.")
+     //                        }
+                            
+     //                    }, error : function(error){
+     //                        throw 'Error saving the object';
+     //                    }
+     //                });
+     //             },10000);
+
+                
+
+     //            done();
+     //        }, error : function(error){
+     //            throw 'Error saving the object';
+     //        }
+     //    });
+    
     });
 
 });
