@@ -391,7 +391,7 @@ CB._columnDataTypeValidation = function(dataType){
   if(!dataType)
     throw "data type cannot be empty";
 
-  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object','EncyptedText'];
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object','EncryptedText'];
   var index = dataTypeList.indexOf(dataType);
   if(index < 0)
     throw "invalid data type";
