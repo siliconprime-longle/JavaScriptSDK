@@ -528,13 +528,19 @@ describe("Should Create All Test Tables",function(done){
         var dob = new CB.Column('dob');
         dob.dataType = 'DateTime';
         obj.addColumn(dob);
+
+        var password = new CB.Column('password');
+        password.dataType = 'EncryptedText';
+        obj.addColumn(password);
+
         obj.save().then(function(res){
             console.log(res);
             done();
-        },function(){
+        },function(err){
             throw "Unable to Create Table";
         });
     });
+
 
     it("should create a table",function(done){
 
@@ -686,11 +692,11 @@ describe("Should Create All Test Tables",function(done){
             var user = new CB.CloudTable('User');
             user.save().then(function(res){
                 done();
-            },function(){
+            },function(error){
                 throw "Unable to create user";
             });
         };
-        callback.error = function(){
+        callback.error = function(error){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('User');
@@ -1142,9 +1148,11 @@ describe("Should Create All Test Tables",function(done){
                 throw "Unable to create Custom1";
             });
         };
+
         callback.error = function(){
             throw "Unable to Delete";
         };
+
         var obj = new CB.CloudTable('Custom1');
         obj.delete(callback);
 
@@ -4115,6 +4123,47 @@ it("should not save a string into date column",function(done){
      			throw 'Error saving the object';
      		}
      	});
+    });
+
+
+    it("should not update the createdAt when the object is updated.",function(done){
+
+        this.timeout('40000');
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+        obj.save({
+            success : function(newObj){
+                var createdAt = newObj.createdAt;
+
+                setTimeout(function(){
+                   
+                    if(createdAt ==null){
+                        done("Error : Didnot save CreatedAt");
+                    }
+
+                    obj.save({
+                        success : function(newObj){
+                            if(newObj.createdAt === createdAt){
+                                done();
+                            }else{
+                                done("Throw CreatedAt updated when the object is updated.")
+                            }
+                            
+                        }, error : function(error){
+                            throw 'Error saving the object';
+                        }
+                    });
+                 },10000);
+
+                
+
+                done();
+            }, error : function(error){
+                throw 'Error saving the object';
+            }
+        });
+    
     });
 
 

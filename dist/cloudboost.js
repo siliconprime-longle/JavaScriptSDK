@@ -11524,7 +11524,7 @@ CB._columnDataTypeValidation = function(dataType){
   if(!dataType)
     throw "data type cannot be empty";
 
-  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object','Password'];
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object','EncyptedText'];
   var index = dataTypeList.indexOf(dataType);
   if(index < 0)
     throw "invalid data type";
@@ -11573,7 +11573,7 @@ CB._defaultColumns = function(type) {
         email.document.isDeletable = false;
         email.document.isEditable = false;
         var password = new CB.Column('password');
-        password.dataType = 'Password';
+        password.dataType = 'EncryptedText';
         password.required = true;
         password.document.isDeletable = false;
         password.document.isEditable = false;

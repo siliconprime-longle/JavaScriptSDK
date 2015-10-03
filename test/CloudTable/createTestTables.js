@@ -57,10 +57,15 @@ describe("Should Create All Test Tables",function(done){
         var dob = new CB.Column('dob');
         dob.dataType = 'DateTime';
         obj.addColumn(dob);
+
+        var password = new CB.Column('password');
+        password.dataType = 'EncryptedText';
+        obj.addColumn(password);
+
         obj.save().then(function(res){
             console.log(res);
             done();
-        },function(){
+        },function(err){
             throw "Unable to Create Table";
         });
     });
@@ -216,11 +221,11 @@ describe("Should Create All Test Tables",function(done){
             var user = new CB.CloudTable('User');
             user.save().then(function(res){
                 done();
-            },function(){
+            },function(error){
                 throw "Unable to create user";
             });
         };
-        callback.error = function(){
+        callback.error = function(error){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('User');
@@ -676,7 +681,7 @@ describe("Should Create All Test Tables",function(done){
         callback.error = function(){
             throw "Unable to Delete";
         };
-        
+
         var obj = new CB.CloudTable('Custom1');
         obj.delete(callback);
 
