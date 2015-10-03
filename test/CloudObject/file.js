@@ -6,7 +6,7 @@ describe("Cloud Objects Files", function() {
 
             it("should save a file inside of an object", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
@@ -28,7 +28,8 @@ describe("Cloud Objects Files", function() {
                         obj.set('file', file);
 
                         obj.save().then(function (newobj) {
-                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').url) {
+                            console.log(newobj);
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                 done();
                             } else {
                                 throw "object saved but didnot return file.";
@@ -47,7 +48,7 @@ describe("Cloud Objects Files", function() {
             });
 
             it("should save an array of files.", function (done) {
-                this.timeout(200000);
+                this.timeout(400000);
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
@@ -101,9 +102,6 @@ describe("Cloud Objects Files", function() {
                 });
             });
 
-            it("should save an object with unsaved file.", function (done) {
-                done();
-            });
         }
     }catch(e){
         console.log("Not in Browser");

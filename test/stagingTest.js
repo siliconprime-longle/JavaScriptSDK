@@ -392,6 +392,51 @@ describe("Cloud Table", function(){
       });
     });
 
+    it("should get column from a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = obj.getColumn('ACL');
+        if(column){
+            done();
+        }else{
+            throw "Get Column is Not Working";
+        }
+    });
+
+    it("should update column in a table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        var col2 = obj.getColumn('name');
+        col2.required = false;
+        obj.updateColumn(col2);
+        column = obj.getColumn('name');
+        if(column.required === false){
+            done();
+        }else{
+            throw "Unable to Update Column";
+        }
+    });
+
+    it("should not pass string in update column",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudTable('abcd');
+        var column = new CB.Column('name');
+        column.required = true;
+        obj.addColumn(column);
+        try {
+            obj.updateColumn("abcd");
+            throw "Update Column should not take string";
+        }catch(e){
+            done();
+        }
+    });
+
     after(function() {
     	CB.appKey = CB.jsKey;
   	});
@@ -475,8 +520,11 @@ describe("Should Create All Test Tables",function(done){
         Revenue.dataType = 'Number';
         var Name = new CB.Column('Name');
         Name.dataType = 'Text';
+        var File = new CB.Column('File');
+        File.dataType = 'File';
         obj.addColumn(Revenue);
         obj.addColumn(Name);
+        obj.addColumn(File);
         obj.save().then(function(res){
             console.log(res);
             done();
@@ -1128,7 +1176,7 @@ describe("Table Tests", function (done) {
 
     it("should create a column and then delete it",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         CB.CloudTable.get('Employee').then(function(emp){
             var column = new CB.Column('Test2');
@@ -1515,6 +1563,121 @@ describe("CloudRole", function (done) {
     });
 });
 
+describe("Bulk API",function(done){
+
+    it("should save array of CloudObject using bulk Api",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            done();
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+
+    it("should save and then delete array of CloudObject using bulk Api",function(done){
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Student');
+        obj.set('name','Vipul');
+        var obj1 = new CB.CloudObject('Student');
+        obj1.set('name','ABCD');
+        var arr = [obj,obj1];
+        CB.CloudObject.saveAll(arr).then(function(res){
+            console.log(res);
+            CB.CloudObject.deleteAll(res).then(function(res){
+                console.log(res);
+                done();
+            },function(err){
+                throw "Unable to Delete CloudObject";
+            });
+        },function(err){
+            throw "Unable to Save CloudObject";
+        });
+    });
+
+    try {
+        if(window) {
+
+            it("Should save CloudObject Array with unsaved files", function (done) {
+
+                this.timeout(40000);
+
+                var data = 'akldaskdhklahdasldhd';
+                var name = 'abc.txt';
+                var type = 'txt';
+                var fileObj = new CB.CloudFile(name, data, type);
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name', 'vipul');
+                obj.set('file', fileObj);
+                var data = 'akldaskdhklahdasldhd';
+                var name = 'abc.txt';
+                var type = 'txt';
+                var fileObj1 = new CB.CloudFile(name, data, type);
+                var obj1 = new CB.CloudObject('Sample');
+                obj1.set('name', 'ABCD');
+                obj1.set('file', fileObj1);
+                CB.CloudObject.saveAll([obj, obj1]).then(function (res) {
+                    if(res[0].get('file').get('id') && res[1].get('file').get('id'))
+                        done();
+                    else
+                        throw "Object saved but unable to save file";
+                }, function (err) {
+                    throw "Unable to Save CloudObject";
+                });
+
+            });
+        }
+    }catch(e){
+        console.log("Not in Browser");
+    }
+
+    it("Should properly save a relation in Bulk API",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'Course');
+        var obj3 = new CB.CloudObject('Custom3');
+        obj3.set('address','progress');
+        obj.set('newColumn2',obj3);
+        CB.CloudObject.saveAll([obj,obj3]).then(function(res) {
+            if(res[1].get('id') === res[0].get('newColumn2').get('id'))
+                done();
+            else
+                throw "Unable to Save Relation properly";
+        }, function () {
+            throw "Relation Save error";
+        });
+    });
+
+    it("Should properly save a relation in Bulk API",function(done){
+
+        this.timeout(10000);
+
+        var obj = new CB.CloudObject('Custom2');
+        obj.set('newColumn1', 'Course');
+        var obj3 = new CB.CloudObject('Custom3');
+        obj3.set('address','progress');
+        obj.set('newColumn2',obj3);
+        CB.CloudObject.saveAll([obj3,obj]).then(function(res) {
+            if(res[0].get('id') === res[1].get('newColumn2').get('id'))
+                done();
+            else
+                throw "Unable to Save Relation properly";
+        }, function () {
+            throw "Relation Save error";
+        });
+    });
+});
 describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
@@ -1661,7 +1824,7 @@ describe("Cloud Objects Files", function() {
 
             it("should save a file inside of an object", function (done) {
 
-                this.timeout(20000);
+                this.timeout(40000);
 
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
@@ -1683,7 +1846,8 @@ describe("Cloud Objects Files", function() {
                         obj.set('file', file);
 
                         obj.save().then(function (newobj) {
-                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').url) {
+                            console.log(newobj);
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                 done();
                             } else {
                                 throw "object saved but didnot return file.";
@@ -1702,7 +1866,7 @@ describe("Cloud Objects Files", function() {
             });
 
             it("should save an array of files.", function (done) {
-                this.timeout(200000);
+                this.timeout(400000);
                 //save file first.
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
@@ -1756,9 +1920,6 @@ describe("Cloud Objects Files", function() {
                 });
             });
 
-            it("should save an object with unsaved file.", function (done) {
-                done();
-            });
         }
     }catch(e){
         console.log("Not in Browser");
@@ -3060,7 +3221,7 @@ describe("Query on Cloud Object Notifications ", function() {
                 done("Object cannot be saved");
             }
         });
-    });                              
+    });
 });
 describe("Cloud Object", function() {
 
@@ -3093,6 +3254,7 @@ describe("Cloud Object", function() {
          throw "Unable to Save Date TIme";
      });
  });
+
 
 it("should not save a string into date column",function(done){
 
@@ -3848,6 +4010,29 @@ it("should not save a string into date column",function(done){
             throw "should save the object";
         });
     });
+
+
+    it("should fetch a CloudObject", function(done) {
+
+        this.timeout(30000);
+
+        var obj1 = new CB.CloudObject('Custom18');
+        obj1.set('number',0);
+        obj1.save().then(function(obj){
+            delete obj1.document.number;
+            obj1.fetch().then(function(res){
+                if(res.get('number') === 0)
+                    done();
+                else
+                    throw "Unable to Fetch Data Using fetch function";
+            },function(err){
+                throw "Unable to fetch";
+            });
+        },function(){
+            throw "should save the object";
+        });
+    });
+
 });
 describe("Version Test",function(done){
 
@@ -4842,7 +5027,7 @@ describe("Cloud Files", function(done) {
 
     it("Should delete a file with file data and name",function(done){
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -4860,7 +5045,7 @@ describe("Cloud Files", function(done) {
                     throw "unable to delete file";
                 });
             }else{
-                throw 'ún able to get the url';
+                throw 'unable to get the url';
             }
         },function(err){
             throw "Unable to save file";
@@ -4945,7 +5130,7 @@ describe("Cloud Files", function(done) {
                 obj.set('fileList', [file, file1]);
                 obj.set('name', 'abcd');
                 obj.save().then(function (file) {
-                    if (file.get('fileList')[0].url && file.get('fileList')[1].url) {
+                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
                         done();
                     } else {
                         throw "Upload success. But cannot find the URL.";
@@ -4960,12 +5145,202 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
+    it("Should Save a file file data and name then fetch it",function(done){
 
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            console.log(file);
+            if(file.url) {
+                file.fetch().then(function(res){
+                    res.getFileContent().then(function(res){
+                        console.log(res);
+                        done();
+                    },function(){
+                        throw "Unable to Fetch File";
+                    });
+                },function(){
+                    throw "Unable to Fetch File";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Include Over File",function(done) {
+
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var id = res.get('id');
+            var query = new CB.CloudQuery('Sample');
+            query.equalTo('id',id);
+            query.include('file');
+            query.find().then(function(res){
+                console.log(res);
+                done();
+            },function(){
+                throw "Unable to Find";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
+
+    it("Should Save a file file data and name then fetch it",function(done) {
+
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var file = res.get('file');
+            file.fetch().then(function(res){
+                console.log(res);
+                if(res.get('url'))
+                    done();
+                throw "Unable to fetch the file";
+            },function(err){
+                throw "Unable to fetch file";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
+    it("should save a file and get from a relation",function(done){
+
+        this.timeout(100000);
+
+        var obj1 = new CB.CloudObject('Employee');
+        var obj2 = new CB.CloudObject('Company');
+        obj1.set('Name','abcd');
+        obj2.set('Name','pqrs');
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(res){
+            obj2.set('File',res);
+            obj1.set('Company',obj2);
+            obj1.save().then(function(res){
+                var query = new CB.CloudQuery('Employee');
+                query.include('Company.File');
+                query.equalTo('id',res.get('id'));
+                query.find().then(function(res){
+                    console.log(res);
+                    done();
+                },function(err){
+                    throw "Unable to query";
+                });
+            },function(){
+                throw "Unable to Save Cloud Object";
+            });
+        },function(err){
+           throw "Unable to Save file";
+        });
+
+    });
 
     //add ACL on CloudFiles.
     
 });
 
+describe("ACL Tests Over Files",function(done){
+
+    it("should not get file Object with not read access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            res.fetch().then(function(res){
+                if(!res)
+                    done();
+                else
+                    throw "Unable to get ACL working";
+            },function(){
+                throw "Unable to perform query";
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+
+    it("should not get file with no read access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            res.getFileContent().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+    it("should not delete file no write access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicWriteAccess(false);
+        fileObj.save().then(function(res){
+            res.delete().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+});
 describe("CloudExpire", function () {
 
     it("Sets Expire in Cloud Object.", function (done) {
@@ -5567,7 +5942,7 @@ describe("CloudQuery Include", function (done) {
                     if(list.length>0){
                         for(var i=0;i<list.length;i++){
                             var student_obj=list[i].get('newColumn7');
-                            if(student_obj.get('name'))
+                            if(student_obj && student_obj.get('name'))
                                 status = true;
                         }
                         if(status === true){
@@ -7044,10 +7419,9 @@ describe("CloudSearch", function (done) {
 
 
             this.timeout(30000);
-            done();
 
-
-        /*    var obj = new CB.CloudObject('Student');
+            return done();
+            var obj = new CB.CloudObject('Student');
             obj.set('name', 'RAVI');
 
              var obj1 = new CB.CloudObject('hostel');
@@ -7097,7 +7471,7 @@ describe("CloudSearch", function (done) {
                 throw "Cannot save an object";
              });
 
-    */
+
     });
 
     it("should save a latitude and longitude when passing data are number type", function(done) {
@@ -7320,6 +7694,35 @@ describe("App Tests2",function(done){
            throw "Unable to Save";
         });
     });
+
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
 });
 describe("App Tests",function(done){
 
@@ -7404,6 +7807,34 @@ describe("App Tests",function(done){
         });
     });
 
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
 });
 describe("CloudApp Socket Test", function () {
 

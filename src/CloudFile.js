@@ -11,22 +11,27 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
         this.fileObj = file;
         this.document = {
+            _id: null,
             _type: 'file',
+            ACL: new CB.ACL(),
             name: (file && file.name && file.name !== "") ? file.name : 'unknown',
             size: file.size,
-            url: '',
+            url: null,
+            expires: null,
             contentType : (typeof file.type !== "undefined" && file.type !== "") ? file.type : 'unknown'
         };
 
     } else if(typeof file === "string") {
-
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
+                _id: null,
                 _type: 'file',
+                ACL: new CB.ACL(),
                 name: '',
                 size: '',
                 url: file,
+                expires: null,
                 contentType : ''
             };
         } else{
@@ -36,21 +41,28 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                     type = file.split('.')[file.split('.').length-1];
                 }
                 this.document = {
+                    _id: null,
                     _type: 'file',
+                    ACL: new CB.ACL(),
                     name: file,
                     size: '',
-                    url: '',
+                    url: null,
+                    expires: null,
                     contentType : type
                 };
             }else{
-                throw "Invalid File. It should be of type file or blob";
+                this.document = {
+                    _id: file,
+                    _type: 'file'
+                }
             }
         }
-    }
-    else{
+    } else{
         throw "Invalid File. It should be of type file or blob";
     }
 };
+
+CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
 
 Object.defineProperty(CB.CloudFile.prototype, 'type', {
     get: function() {
@@ -109,59 +121,34 @@ CB.CloudFile.prototype.save = function(callback) {
         throw "You cannot save a file which is null";
 
     if(!this.data) {
-        var formdata = new FormData();
-        formdata.append("fileToUpload", this.fileObj);
-        formdata.append("key", CB.appKey);
-
-        var xmlhttp = CB._loadXml();
-        var params = formdata;
+        var params = new FormData();
+        params.append("fileToUpload", this.fileObj);
+        params.append("key", CB.appKey);
+        params.append("fileObj",JSON.stringify(this.document));
         var url = CB.serverUrl + '/file/' + CB.appId;
-        xmlhttp.open('POST', url, true);
-        if (CB._isNode) {
-            var LocalStorage = require('node-localstorage').LocalStorage;
-            localStorage = new LocalStorage('./scratch');
-            xmlhttp.setRequestHeader("User-Agent",
-                "CB/" + CB.version +
-                " (NodeJS " + process.versions.node + ")");
-        }
-        var ssid = localStorage.getItem('sessionID');
-        if (ssid != null)
-            xmlhttp.setRequestHeader('sessionID', ssid);
-        xmlhttp.send(params);
-
-        xmlhttp.onreadystatechange = function () {
-            if (xmlhttp.readyState == xmlhttp.DONE) {
-                if (xmlhttp.status == 200) {
-                    thisObj.url = JSON.parse(xmlhttp.responseText)._url;
-                    var sessionID = xmlhttp.getResponseHeader('sessionID');
-                    if (sessionID)
-                        localStorage.setItem('sessionID', sessionID);
-                    else
-                        localStorage.removeItem('sessionID');
-                    if (callback) {
-                        callback.success(thisObj);
-                    } else {
-                        def.resolve(thisObj);
-                    }
-                } else {
-                    if (callback) {
-                        callback.error(xmlhttp.responseText);
-                    } else {
-                        def.reject(xmlhttp.responseText);
-                    }
-                }
+        CB._request('POST',url,params,false,true).then(function(response){
+            thisObj.document = JSON.parse(response);
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
             }
-        }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
     }else{
-        var xmlhttp = CB._loadXml();
         var params=JSON.stringify({
             data: this.data,
+            fileObj:this.document,
             key: CB.appKey
         });
         url = CB.serverUrl + '/file/' + CB.appId ;
-        //console.log(params);
         CB._request('POST',url,params).then(function(response){
-            thisObj.url = JSON.parse(response)._url;
+            thisObj.document = JSON.parse(response);
             delete thisObj.data;
             if (callback) {
                 callback.success(thisObj);
@@ -181,7 +168,7 @@ CB.CloudFile.prototype.save = function(callback) {
     if (!callback) {
         return def;
     }
-}
+};
 
 /**
  * Removes a file from Database.
@@ -203,7 +190,7 @@ CB.CloudFile.prototype.delete = function(callback) {
     var thisObj = this;
 
     var params=JSON.stringify({
-        url: thisObj.url,
+        fileObj: thisObj.document,
         key: CB.appKey
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
@@ -227,4 +214,41 @@ CB.CloudFile.prototype.delete = function(callback) {
     if (!callback) {
         return def;
     }
-}
+};
+
+
+CB.CloudFile.prototype.getFileContent = function(callback){
+
+    var def;
+
+    if(!this.url) {
+        throw "Url is Null";
+    }
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var params=JSON.stringify({
+        key: CB.appKey
+    });
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id  ;
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(response);
+        } else {
+            def.resolve(response);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+};

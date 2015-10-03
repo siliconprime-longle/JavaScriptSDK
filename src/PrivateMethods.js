@@ -1,7 +1,14 @@
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
-    var url = null;
+    if(thisObj.constructor === Array){
+        for(var i=0;i<thisObj.length;i++){
+            thisObj[i] = CB.toJSON(thisObj[i]);
+        }
+        return thisObj;
+    }
+
+    var id = null;
     var columnName = null;
     var tableName = null;
     var latitude = null;
@@ -13,7 +20,7 @@ CB.toJSON = function(thisObj) {
     }
 
     if(thisObj instanceof CB.CloudFile)
-        url=thisObj.document.url;
+        id=thisObj.document._id;
 
     if(thisObj instanceof CB.Column)
         columnName=thisObj.document.name;
@@ -21,7 +28,7 @@ CB.toJSON = function(thisObj) {
     if(thisObj instanceof CB.CloudTable)
         tableName=thisObj.document.name;
 
-    var obj= CB._clone(thisObj,url,latitude,longitude,tableName,columnName);
+    var obj= CB._clone(thisObj,id,latitude,longitude,tableName,columnName);
 
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint
         || !obj instanceof CB.CloudTable || !obj instanceof CB.Column) {
@@ -123,13 +130,13 @@ CB.fromJSON = function(data, thisObj) {
         }
 
         if(!thisObj){
-            var url=null;
+            var id=null;
             var latitude = null;
             var longitude = null;
             var tableName = null;
             var columnName = null;
             if(document._type === "file")
-                url=document.url;
+                id=document._id;
             if(document._type === "point"){
                 latitude = document.latitude;
                 longitude = document.longitude;
@@ -140,7 +147,7 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "column"){
                 columnName = document.name;
             }
-            var obj = CB._getObjectByType(document._type,url,latitude,longitude,tableName,columnName);
+            var obj = CB._getObjectByType(document._type,id,latitude,longitude,tableName,columnName);
             obj.document = document;
             return obj;
         }else{
@@ -154,7 +161,7 @@ CB.fromJSON = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,url,latitude,longitude,tableName,columnName){
+CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
 
     var obj = null;
 
@@ -171,7 +178,7 @@ CB._getObjectByType = function(type,url,latitude,longitude,tableName,columnName)
     }
 
     if (type === 'file') {
-        obj = new CB.CloudFile(url);
+        obj = new CB.CloudFile(id);
     }
 
     if(type === 'point'){
@@ -221,17 +228,17 @@ if(CB._isNode){
 }
 
 
-CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
+CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     var n_obj = null;
     if(obj.document._type && obj.document._type != 'point') {
-        n_obj = CB._getObjectByType(obj.document._type,url,latitude,longitude,tableName,columnName);
+        n_obj = CB._getObjectByType(obj.document._type,id,latitude,longitude,tableName,columnName);
         var doc=obj.document;
         var doc2={};
         for (var key in doc) {
-            if(doc[key] instanceof CB.CloudObject)
+            if(doc[key] instanceof CB.CloudFile)
+                doc2[key]=CB._clone(doc[key],doc[key].document._id);
+            else if(doc[key] instanceof CB.CloudObject){
                 doc2[key]=CB._clone(doc[key],null);
-            else if(doc[key] instanceof CB.CloudFile){
-                doc2[key]=CB._clone(doc[key],doc[key].document.url);
             }else if(doc[key] instanceof CB.CloudGeoPoint){
                 doc2[key]=CB._clone(doc[key], null);
             }
@@ -246,7 +253,7 @@ CB._clone=function(obj,url,latitude,longitude,tableName,columnName){
     return n_obj;
 };
 
-CB._request=function(method,url,params,isServiceUrl)
+CB._request=function(method,url,params,isServiceUrl,isFile)
 {
 
     CB._validate();
@@ -261,7 +268,9 @@ CB._request=function(method,url,params,isServiceUrl)
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);
-    xmlhttp.setRequestHeader('Content-Type','text/plain');
+    if(!isFile) {
+        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
+    }
 
     if(!isServiceUrl){
         var ssid = CB._getSessionId();
@@ -382,7 +391,7 @@ CB._columnDataTypeValidation = function(dataType){
   if(!dataType)
     throw "data type cannot be empty";
 
-  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object'];
+  var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object','Password'];
   var index = dataTypeList.indexOf(dataType);
   if(index < 0)
     throw "invalid data type";
@@ -397,7 +406,7 @@ CB._defaultColumns = function(type) {
     id.document.isDeletable = false;
     id.document.isEditable = false;
     var expires = new CB.Column('expires');
-    expires.dataType = 'Number';
+    expires.dataType = 'DateTime';
     expires.document.isDeletable = false;
     expires.document.isEditable = false;
     var createdAt = new CB.Column('createdAt');
@@ -466,10 +475,12 @@ CB._fileCheck = function(obj){
     for(var key in obj.document){
         if(obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile){
             for(var i=0;i<obj.document[key].length;i++){
-                promises.push(obj.document[key][i].save());
+                if(!obj.document[key][i]._id)
+                    promises.push(obj.document[key][i].save());
             }
         }else if(obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile){
-            promises.push(obj.document[key].save());
+            if(!obj.document[key]._id)
+                promises.push(obj.document[key].save());
         }
     }
     if(promises.length >0) {
@@ -479,12 +490,16 @@ CB._fileCheck = function(obj){
             for (var key in obj.document) {
                 if (obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile) {
                     for (var i = 0; i < obj.document[key].length; i++) {
-                        obj.document[key][i] = res[j];
-                        j = j + 1;
+                        if(!obj.document[key][i]._id) {
+                            obj.document[key][i] = res[j];
+                            j = j + 1;
+                        }
                     }
                 } else if (obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile) {
-                    obj.document[key] = res[j];
-                    j = j + 1;
+                    if(!obj.document[key]._id) {
+                        obj.document[key] = res[j];
+                        j = j + 1;
+                    }
                 }
             }
             deferred.resolve(obj);
@@ -495,4 +510,28 @@ CB._fileCheck = function(obj){
         deferred.resolve(obj);
     }
     return deferred;
+};
+
+CB._bulkObjFileCheck = function(array){
+    var deferred = new CB.Promise();
+    var promises = [];
+    for(var i=0;i<array.length;i++){
+        promises.push(CB._fileCheck(array[i]));
+    }
+    CB.Promise.all(promises).then(function(){
+        deferred.resolve(arguments);
+    },function(err){
+        deferred.reject(err);
+    });
+    return deferred;
+};
+
+CB._generateHash = function(){
+    var hash="";
+    var possible="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(i=0;i<8;i++)
+    {
+        hash=hash+possible.charAt(Math.floor(Math.random()*possible.length));
+    }
+    return hash;
 };

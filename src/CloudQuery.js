@@ -746,7 +746,7 @@ CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the doc
         sort : {}
     });
 
-    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         response = JSON.parse(response);
