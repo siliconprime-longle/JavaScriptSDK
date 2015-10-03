@@ -7736,7 +7736,7 @@ describe("App Tests2",function(done){
 
     it("should save a record",function(done){
 
-        this.timeout(20000);
+        this.timeout(100000);
 
         var obj = new CB.CloudObject('Tests1');
         obj.save().then(function(res){
@@ -7848,7 +7848,7 @@ describe("App Tests",function(done){
 
     it("should save a record",function(done){
 
-        this.timeout(20000);
+        this.timeout(100000);
 
         var obj = new CB.CloudObject('Tests');
         obj.save().then(function(res){
