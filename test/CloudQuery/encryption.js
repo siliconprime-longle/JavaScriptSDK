@@ -2,7 +2,7 @@ describe("CloudQuery - Encryption", function () {
 
     it("should get encrypted passwords", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
          
         var username = util.makeEmail();
 
@@ -46,7 +46,7 @@ describe("CloudQuery - Encryption", function () {
 
      it("should get encrypted passwords over OR query", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
          
         var username = util.makeEmail();
 

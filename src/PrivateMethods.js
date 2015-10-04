@@ -229,7 +229,7 @@ if(CB._isNode){
 
 
 CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
-    var n_obj = null;
+    var n_obj = {};
     if(obj.document._type && obj.document._type != 'point') {
         n_obj = CB._getObjectByType(obj.document._type,id,latitude,longitude,tableName,columnName);
         var doc=obj.document;
@@ -249,7 +249,9 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
         n_obj = new CB.CloudGeoPoint(obj.get('longitude'),obj.get('latitude'));
         return n_obj;
     }
+
     n_obj.document=doc2;
+    
     return n_obj;
 };
 
