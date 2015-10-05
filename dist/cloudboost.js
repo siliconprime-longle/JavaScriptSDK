@@ -8221,7 +8221,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     }
     var query = null;
     if(thisObj.document._type === 'file'){
-        query = new CB.CloudQuery('cbFile');
+        query = new CB.CloudQuery('File');
     }else{
         query = new CB.CloudQuery(thisObj.document._tableName);
     }
