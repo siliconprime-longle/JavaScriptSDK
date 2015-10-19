@@ -247,13 +247,15 @@ CB.CloudTable.prototype.delete = function(callback){
         name: this.name
     });
 
+    var thisObj = this;
+
     var url = CB.serviceUrl + '/' + CB.appId + "/table/" +this.name;
 
     CB._request('DELETE',url,params,true).then(function(response){
         if (callback) {
-            callback.success(response);
+            callback.success(thisObj);
         } else {
-            def.resolve(response);
+            def.resolve(thisObj);
         }
     },function(err){
         if(callback){
@@ -286,15 +288,17 @@ CB.CloudTable.prototype.save = function(callback){
       data:CB.toJSON(thisObj)
   });
 
+  var thisObj = this;
+
   var url = CB.serviceUrl +'/' + CB.appId + "/table/" + thisObj.document.name;
 
     CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
-      var obj = CB.fromJSON(response);
+      thisObj = CB.fromJSON(response);
       if (callback) {
-          callback.success(obj);
+          callback.success(thisObj);
       } else {
-          def.resolve(obj);
+          def.resolve(thisObj);
       }
   },function(err){
       if(callback){

@@ -472,6 +472,7 @@ CB._defaultColumns = function(type) {
 
 CB._fileCheck = function(obj){
 
+    //obj is an instance of CloudObject.
     var deferred = new CB.Promise();
     var promises = [];
     for(var key in obj.document){

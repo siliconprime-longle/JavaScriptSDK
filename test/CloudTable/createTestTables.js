@@ -21,6 +21,18 @@ describe("Should Create All Test Tables",function(done){
     it("should delete tables",function(done){
 
         this.timeout(20000);
+        var obj = new CB.CloudTable('UnderScoreTable_a');
+        obj.delete().then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    });
+
+    it("should delete tables",function(done){
+
+        this.timeout(20000);
         var obj = new CB.CloudTable('Company');
         obj.delete().then(function(){
             done();
@@ -65,6 +77,35 @@ describe("Should Create All Test Tables",function(done){
         obj.save().then(function(res){
             console.log(res);
             done();
+        },function(err){
+            throw "Unable to Create Table";
+        });
+    });
+
+
+     it("should create a table with two underscore columns",function(done){
+
+        this.timeout(50000);
+
+        obj = new CB.CloudTable('UnderScoreTable_a');
+
+        var Age = new CB.Column('Age_a');
+        Age.dataType = 'Text';
+        
+        obj.addColumn(Age);
+
+        obj.save().then(function(obj){
+           
+            var Age = new CB.Column('Age_b');
+            Age.dataType = 'Text';
+            
+            obj.addColumn(Age);
+            obj.save().then(function(obj){
+               done();
+            },function(err){
+                done("Cannot save two underscore columns.");
+            });
+
         },function(err){
             throw "Unable to Create Table";
         });

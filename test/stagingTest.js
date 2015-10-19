@@ -467,6 +467,18 @@ describe("Should Create All Test Tables",function(done){
     it("should delete tables",function(done){
 
         this.timeout(20000);
+        var obj = new CB.CloudTable('UnderScoreTable_a');
+        obj.delete().then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    });
+
+    it("should delete tables",function(done){
+
+        this.timeout(20000);
         var obj = new CB.CloudTable('Company');
         obj.delete().then(function(){
             done();
@@ -511,6 +523,35 @@ describe("Should Create All Test Tables",function(done){
         obj.save().then(function(res){
             console.log(res);
             done();
+        },function(err){
+            throw "Unable to Create Table";
+        });
+    });
+
+
+     it("should create a table with two underscore columns",function(done){
+
+        this.timeout(50000);
+
+        obj = new CB.CloudTable('UnderScoreTable_a');
+
+        var Age = new CB.Column('Age_a');
+        Age.dataType = 'Text';
+        
+        obj.addColumn(Age);
+
+        obj.save().then(function(obj){
+           
+            var Age = new CB.Column('Age_b');
+            Age.dataType = 'Text';
+            
+            obj.addColumn(Age);
+            obj.save().then(function(obj){
+               done();
+            },function(err){
+                done("Cannot save two underscore columns.");
+            });
+
         },function(err){
             throw "Unable to Create Table";
         });
@@ -1857,6 +1898,57 @@ describe("Cloud Objects Files", function() {
                             console.log(newobj);
                             if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                 done();
+                            } else {
+                                throw "object saved but didnot return file.";
+                            }
+                        }, function (error) {
+                            throw "error saving an object.";
+                        });
+
+                    } else {
+                        throw "upload success. but cannot find the url.";
+                    }
+                }, function (err) {
+                    throw "error uploading file";
+                });
+
+            });
+
+
+             it("should save a file inside of an object and can update the CloudObject", function (done) {
+
+                this.timeout(40000);
+
+                //save file first.
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        console.log(file);
+                        //create a new object.
+                        var obj = new CB.CloudObject('Sample');
+                        obj.set('name', 'sample');
+                        obj.set('file', file);
+
+                        obj.save().then(function (newobj) {
+                            console.log(newobj);
+                            if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
+                               
+                                newobj.set('name','sample2');
+                                newobj.save().then(function(){
+                                    done();
+                                }, function(){
+                                    done("Error saving CLoudObject");
+                                });
+
                             } else {
                                 throw "object saved but didnot return file.";
                             }
@@ -4288,6 +4380,46 @@ describe("ACL", function () {
             }
             else
                 throw "public write access set error"
+        }, function () {
+            throw "public write access save error";
+        });
+    });
+
+     it("Should persist ACL object inside of CloudObject after save.", function (done) {
+
+        this.timeout(20000);
+
+    
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess('id',true);
+        obj.save().then(function(obj) {
+            var acl=obj.get('ACL');
+            if(acl.write.allow.user.length === 1 && acl.write.allow.user[0] === 'id') {
+               //query this object and see if ACL persisted. 
+               var query = new CB.CloudQuery("student4");
+               query.equalTo('id',obj.id);
+               query.find({
+                    success : function(list){
+                        if(list.length ===1)
+                        {
+                            var acl = list[0].ACL;
+                            if(acl.write.allow.user.length === 1 && acl.write.allow.user[0] === 'id'){
+                                done();
+                            }else{
+                                done("Cannot persist ACL object");
+                            }
+                        }   
+                        else{
+                            done("Cannot get cloudobject");
+                        }
+                    }, error : function(error){
+
+                    }
+               });
+            }
+            else
+                done("ACL write access on user cannot be set");
         }, function () {
             throw "public write access save error";
         });

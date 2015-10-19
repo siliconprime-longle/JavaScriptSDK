@@ -31,6 +31,46 @@ describe("ACL", function () {
         });
     });
 
+     it("Should persist ACL object inside of CloudObject after save.", function (done) {
+
+        this.timeout(20000);
+
+    
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess('id',true);
+        obj.save().then(function(obj) {
+            var acl=obj.get('ACL');
+            if(acl.write.allow.user.length === 1 && acl.write.allow.user[0] === 'id') {
+               //query this object and see if ACL persisted. 
+               var query = new CB.CloudQuery("student4");
+               query.equalTo('id',obj.id);
+               query.find({
+                    success : function(list){
+                        if(list.length ===1)
+                        {
+                            var acl = list[0].ACL;
+                            if(acl.write.allow.user.length === 1 && acl.write.allow.user[0] === 'id'){
+                                done();
+                            }else{
+                                done("Cannot persist ACL object");
+                            }
+                        }   
+                        else{
+                            done("Cannot get cloudobject");
+                        }
+                    }, error : function(error){
+
+                    }
+               });
+            }
+            else
+                done("ACL write access on user cannot be set");
+        }, function () {
+            throw "public write access save error";
+        });
+    });
+
     it("Should set the public read access", function (done) {
 
         this.timeout(20000);
