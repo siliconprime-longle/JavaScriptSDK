@@ -3,6 +3,11 @@ CloudQueue
  */
 
 CB.CloudQueue = function(queueName,queueType){
+
+    if(queueName ===null){
+        throw "Cannot create a queue with empty name";
+    }
+
     this.document = {};
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'queue';
@@ -121,6 +126,9 @@ Object.defineProperty(CB.CloudQueue.prototype, 'expires', {
 
 CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
+    if(queueMessage === null)
+        throw "Message cannot be null";
+
     var def;
     CB._validate();
 
@@ -144,8 +152,7 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
     this.document.messages = messages;
 
-    //POST TO SERVER. 
-
+    //PUT TO SERVER. 
     var thisObj = this;
 
     var xmlhttp = CB._loadXml();
@@ -184,8 +191,7 @@ CB.CloudQueue.prototype.pull = function(count) {
     }
 
     if(!count)
-        count=1;
-    //POST TO SERVER. 
+        count=1; 
 
     var thisObj = this;
 
@@ -198,7 +204,7 @@ CB.CloudQueue.prototype.pull = function(count) {
 
     var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
 
-    CB._request('GET',url,params).then(function(response){
+    CB._request('POST',url,params).then(function(response){
         
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
@@ -231,7 +237,7 @@ CB.CloudQueue.prototype.getMessage = function(id) {
 
     var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message/'+id;
 
-    CB._request('GET',url,params).then(function(response){
+    CB._request('POST',url,params).then(function(response){
         
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));

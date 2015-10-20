@@ -11817,6 +11817,9 @@ Object.defineProperty(CB.CloudQueue.prototype, 'expires', {
 
 CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
+    if(queueMessage === null)
+        throw "Message cannot be null";
+
     var def;
     CB._validate();
 
@@ -11867,7 +11870,6 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
             def.reject(err);
         }
     });
- 
 };
 
 
