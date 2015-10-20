@@ -10775,6 +10775,12 @@ Object.defineProperty(CB.CloudTable.prototype,'name',{
     }
 });
 
+Object.defineProperty(CB.CloudTable.prototype,'id',{
+    get: function(){
+        return this.document.id;
+    }
+});
+
 
 CB.CloudTable.prototype.addColumn = function(column){
     if(Object.prototype.toString.call(column) === '[object String]') {
