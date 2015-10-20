@@ -11703,8 +11703,10 @@ CB.CloudQueue = function(queueName,queueType){
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'queue';
     this.document.expires = null;  
+    this.document.name = queueName;
     this.document.retry = null;  
     this.document.subscribers = [];
+    this.document.messages = [];
     if(queueType && queueType !== "push" && queueType !== "pull"){
         throw "Type can be push or pull";
     }
@@ -11727,6 +11729,17 @@ Object.defineProperty(CB.CloudQueue.prototype, 'retry', {
 
         this.document.retry = retry;
         CB._modified(this,'retry');
+    }
+});
+
+Object.defineProperty(CB.CloudQueue.prototype, 'name', {
+    get: function() {
+        return this.document.name;
+    },
+    set: function(name) {
+
+        this.document.name = name;
+        CB._modified(this,'name');
     }
 });
 
@@ -11811,10 +11824,21 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
         def = new CB.Promise();
     }
 
-    if(!queueMessage instanceof CB.QueueMessage){
-        var queueMessage = new CB.QueueMessage(queueMessage);
-        this.document.messages = [queueMessage];
+    var messages = [];
+
+    if(queueMessage.constructor !== Array){
+        messages.push(queueMessage);
+    }else{
+        messages = queueMessage;
     }
+
+    for(var i=0;i<messages.length; i++){
+        if(!(messages[i] instanceof CB.QueueMessage)){
+            messages[i] = new CB.QueueMessage(messages[i]);
+        }
+    }
+
+    this.document.messages = messages;
 
     //POST TO SERVER. 
 
@@ -11830,11 +11854,11 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
     var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
 
     CB._request('PUT',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+        var messages = CB.fromJSON(JSON.parse(response));
         if (callback) {
-            callback.success(thisObj.messages[0]);
+            callback.success(messages);
         } else {
-            def.resolve(thisObj.messages[0]);
+            def.resolve(messages);
         }
     },function(err){
         if(callback){
@@ -12199,16 +12223,10 @@ CB.QueueMessage = function(data) {
     this.document.timeout = 3600;
     this.document.delay = null;
     this.document.message = data;
+    this.document._id = null;
+    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires','timeout','delay','message'];
+    this.document._isModified = true;
 
-    if(!id){
-        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires','timeout','delay','message'];
-        this.document._isModified = true;
-    }
-    else{
-        this.document._modifiedColumns = [];
-        this.document._isModified = false;
-        this.document._id = id;
-    }
 };
 
 Object.defineProperty(CB.QueueMessage.prototype, 'message', {

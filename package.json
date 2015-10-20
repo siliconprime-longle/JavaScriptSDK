@@ -1,6 +1,6 @@
 {
   "name": "cloudboost",
-  "version": "1.1.37",
+  "version": "1.1.42",
   "description": "Cloudboost is a hybrid No-Sql database as a service ",
   "main": "lib/cloudboost",
   "engines": {
