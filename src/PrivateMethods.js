@@ -169,6 +169,14 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
         obj = new CB.CloudObject();
     }
 
+    if (type === 'queue') {
+        obj = new CB.CloudQueue();
+    }
+
+    if (type === 'queue-message') {
+        obj = new CB.QueueMessage();
+    }
+
     if (type === 'role') {
         obj = new CB.CloudRole();
     }
@@ -238,6 +246,10 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
             if(doc[key] instanceof CB.CloudFile)
                 doc2[key]=CB._clone(doc[key],doc[key].document._id);
             else if(doc[key] instanceof CB.CloudObject){
+                doc2[key]=CB._clone(doc[key],null);
+            }else if(doc[key] instanceof CB.CloudQueue){
+                doc2[key]=CB._clone(doc[key],null);
+            }else if(doc[key] instanceof CB.QueueMessage){
                 doc2[key]=CB._clone(doc[key],null);
             }else if(doc[key] instanceof CB.CloudGeoPoint){
                 doc2[key]=CB._clone(doc[key], null);
