@@ -42,7 +42,7 @@ Object.defineProperty(CB.CloudTable.prototype,'name',{
 
 Object.defineProperty(CB.CloudTable.prototype,'id',{
     get: function(){
-        return this.document.id;
+        return this.document._id;
     }
 });
 
