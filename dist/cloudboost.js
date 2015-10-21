@@ -7967,6 +7967,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     },
     set: function(ACL) {
         this.document.ACL = ACL;
+        this.document.ACL.parent = this;
         CB._modified(this,'ACL');
     }
 });
@@ -8445,6 +8446,10 @@ CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { 
  CloudQuery
  */
 CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
+
+    if(!tableName)
+        throw "Table Name cannot be null";
+
     this.tableName = tableName;
     this.query = {};
     this.query.$include = [];
@@ -10392,9 +10397,6 @@ Object.defineProperty(CB.CloudRole.prototype, 'name', {
 
 CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
-    if(!file)
-        throw "File is null.";
-
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
@@ -10445,9 +10447,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 }
             }
         }
-    } else{
-        throw "Invalid File. It should be of type file or blob";
-    }
+    } 
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -10512,7 +10512,7 @@ CB.CloudFile.prototype.save = function(callback) {
         var params = new FormData();
         params.append("fileToUpload", this.fileObj);
         params.append("key", CB.appKey);
-        params.append("fileObj",JSON.stringify(this.document));
+        params.append("fileObj",JSON.stringify(CB.toJSON(thisObj)));
         var url = CB.serverUrl + '/file/' + CB.appId;
         CB._request('POST',url,params,false,true).then(function(response){
             thisObj.document = JSON.parse(response);
@@ -10529,9 +10529,10 @@ CB.CloudFile.prototype.save = function(callback) {
             }
         });
     }else{
+        var data = this.data;
         var params=JSON.stringify({
-            data: this.data,
-            fileObj:this.document,
+            data: data,
+            fileObj:CB.toJSON(this),
             key: CB.appKey
         });
         url = CB.serverUrl + '/file/' + CB.appId ;
@@ -10578,7 +10579,7 @@ CB.CloudFile.prototype.delete = function(callback) {
     var thisObj = this;
 
     var params=JSON.stringify({
-        fileObj: thisObj.document,
+        fileObj: CB.toJSON(thisObj),
         key: CB.appKey
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
@@ -11194,6 +11195,9 @@ CB.toJSON = function(thisObj) {
     if(thisObj instanceof CB.Column)
         columnName=thisObj.document.name;
 
+    if(thisObj instanceof CB.CloudQueue)
+        tableName=thisObj.document.name;
+
     if(thisObj instanceof CB.CloudTable)
         tableName=thisObj.document.name;
 
@@ -11205,9 +11209,6 @@ CB.toJSON = function(thisObj) {
     }
 
     if(obj instanceof CB.Column)
-        return obj.document;
-
-    if(obj instanceof CB.CloudFile)
         return obj.document;
 
     if(obj instanceof CB.CloudGeoPoint)
@@ -11280,7 +11281,6 @@ CB.fromJSON = function(data, thisObj) {
                     //this is an ACL.
                     document[key] = new CB.ACL();
                     document[key].document= data[key];
-                    document[key].parent = data;
 
                 } else if(data[key]._type) {
                     if(thisObj)
@@ -11313,13 +11313,24 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "column"){
                 columnName = document.name;
             }
+            if(document._type === "queue"){
+                tableName = document.name;
+            }
             var obj = CB._getObjectByType(document._type,id,latitude,longitude,tableName,columnName);
             obj.document = document;
-            return obj;
+
+            thisObj = obj;
         }else{
-            thisObj.document = document;
-            return thisObj;
+            thisObj.document = document;    
         }
+
+        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile){
+            //activate ACL.
+            if(thisObj.document["ACL"])
+                thisObj.document["ACL"].parent = thisObj;
+        }
+
+        return thisObj;
 
     }else {
         //if this is plain json.
@@ -11336,7 +11347,8 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
     }
 
     if (type === 'queue') {
-        obj = new CB.CloudQueue();
+        //tablename is queue name in this instance.
+        obj = new CB.CloudQueue(tableName);
     }
 
     if (type === 'queue-message') {
@@ -11723,7 +11735,7 @@ CloudQueue
 
 CB.CloudQueue = function(queueName,queueType){
 
-    if(queueName ===null){
+    if(typeof queueName === 'undefined' || queueName == null){
         throw "Cannot create a queue with empty name";
     }
 
@@ -11845,7 +11857,7 @@ Object.defineProperty(CB.CloudQueue.prototype, 'expires', {
 
 CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
-    if(queueMessage === null)
+    if(queueMessage == null)
         throw "Message cannot be null";
 
     var def;

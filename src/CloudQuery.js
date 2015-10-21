@@ -2,6 +2,10 @@
  CloudQuery
  */
 CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
+
+    if(!tableName)
+        throw "Table Name cannot be null";
+
     this.tableName = tableName;
     this.query = {};
     this.query.$include = [];

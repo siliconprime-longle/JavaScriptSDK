@@ -25,6 +25,9 @@ CB.toJSON = function(thisObj) {
     if(thisObj instanceof CB.Column)
         columnName=thisObj.document.name;
 
+    if(thisObj instanceof CB.CloudQueue)
+        tableName=thisObj.document.name;
+
     if(thisObj instanceof CB.CloudTable)
         tableName=thisObj.document.name;
 
@@ -36,9 +39,6 @@ CB.toJSON = function(thisObj) {
     }
 
     if(obj instanceof CB.Column)
-        return obj.document;
-
-    if(obj instanceof CB.CloudFile)
         return obj.document;
 
     if(obj instanceof CB.CloudGeoPoint)
@@ -111,7 +111,6 @@ CB.fromJSON = function(data, thisObj) {
                     //this is an ACL.
                     document[key] = new CB.ACL();
                     document[key].document= data[key];
-                    document[key].parent = data;
 
                 } else if(data[key]._type) {
                     if(thisObj)
@@ -144,13 +143,24 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "column"){
                 columnName = document.name;
             }
+            if(document._type === "queue"){
+                tableName = document.name;
+            }
             var obj = CB._getObjectByType(document._type,id,latitude,longitude,tableName,columnName);
             obj.document = document;
-            return obj;
+
+            thisObj = obj;
         }else{
-            thisObj.document = document;
-            return thisObj;
+            thisObj.document = document;    
         }
+
+        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile){
+            //activate ACL.
+            if(thisObj.document["ACL"])
+                thisObj.document["ACL"].parent = thisObj;
+        }
+
+        return thisObj;
 
     }else {
         //if this is plain json.
@@ -167,7 +177,8 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
     }
 
     if (type === 'queue') {
-        obj = new CB.CloudQueue();
+        //tablename is queue name in this instance.
+        obj = new CB.CloudQueue(tableName);
     }
 
     if (type === 'queue-message') {

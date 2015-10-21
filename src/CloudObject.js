@@ -28,6 +28,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     },
     set: function(ACL) {
         this.document.ACL = ACL;
+        this.document.ACL.parent = this;
         CB._modified(this,'ACL');
     }
 });

@@ -4,7 +4,7 @@ CloudQueue
 
 CB.CloudQueue = function(queueName,queueType){
 
-    if(queueName ===null){
+    if(typeof queueName === 'undefined' || queueName == null){
         throw "Cannot create a queue with empty name";
     }
 
@@ -126,7 +126,7 @@ Object.defineProperty(CB.CloudQueue.prototype, 'expires', {
 
 CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
-    if(queueMessage === null)
+    if(queueMessage == null)
         throw "Message cannot be null";
 
     var def;

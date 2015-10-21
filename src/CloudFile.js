@@ -4,9 +4,6 @@
 
 CB.CloudFile = CB.CloudFile || function(file,data,type) {
 
-    if(!file)
-        throw "File is null.";
-
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]' ) {
 
         this.fileObj = file;
@@ -57,9 +54,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 }
             }
         }
-    } else{
-        throw "Invalid File. It should be of type file or blob";
-    }
+    } 
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -124,7 +119,7 @@ CB.CloudFile.prototype.save = function(callback) {
         var params = new FormData();
         params.append("fileToUpload", this.fileObj);
         params.append("key", CB.appKey);
-        params.append("fileObj",JSON.stringify(this.document));
+        params.append("fileObj",JSON.stringify(CB.toJSON(thisObj)));
         var url = CB.serverUrl + '/file/' + CB.appId;
         CB._request('POST',url,params,false,true).then(function(response){
             thisObj.document = JSON.parse(response);
@@ -141,9 +136,10 @@ CB.CloudFile.prototype.save = function(callback) {
             }
         });
     }else{
+        var data = this.data;
         var params=JSON.stringify({
-            data: this.data,
-            fileObj:this.document,
+            data: data,
+            fileObj:CB.toJSON(this),
             key: CB.appKey
         });
         url = CB.serverUrl + '/file/' + CB.appId ;
@@ -190,7 +186,7 @@ CB.CloudFile.prototype.delete = function(callback) {
     var thisObj = this;
 
     var params=JSON.stringify({
-        fileObj: thisObj.document,
+        fileObj: CB.toJSON(thisObj),
         key: CB.appKey
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;

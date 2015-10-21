@@ -46,7 +46,7 @@
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.allow.user.indexOf('all') === -1) {
+            if(acl.document.read.allow.user.indexOf('all') === -1) {
              var cs = new CB.CloudSearch('student4');
                 cs.searchQuery = new CB.SearchQuery();
                 cs.searchQuery.searchOn('age',150);
@@ -54,7 +54,7 @@
                     if(list.length>0)
                     {
                         for(var i=0;i<list.length;i++)
-                            if(list[i].get('age') && list[i].ACL.read.allow.user.indexOf('all') === -1)
+                            if(list[i].get('age') && list[i].ACL.document.read.allow.user.indexOf('all') === -1)
                                 throw "should not return items";
                     }
                     

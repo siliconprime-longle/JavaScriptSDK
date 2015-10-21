@@ -100,7 +100,7 @@ describe("Cloud Files", function(done) {
             });
             it("should delete a file", function (done) {
 
-                this.timeout(200000);
+                this.timeout(20000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});

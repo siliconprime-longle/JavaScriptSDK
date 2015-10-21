@@ -45,7 +45,7 @@ describe("Query_ACL", function () {
         obj.ACL.setPublicReadAccess(false);
         obj.save().then(function(list) {
             acl=list.get('ACL');
-            if(acl.read.allow.user.length === 0) {
+            if(acl.document.read.allow.user.length === 0) {
                 var cq = new CB.CloudQuery('student4');
                 cq. equalTo('age',55);
                 cq.find().then(function(list){
