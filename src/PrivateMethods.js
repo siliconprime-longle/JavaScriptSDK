@@ -53,10 +53,7 @@ CB.toJSON = function(thisObj) {
             doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
             //if this is an ACL, then. Convert this from CB.ACL object to JSON - to strip all the ACL Methods.
-            var acl = {
-                write: doc[key].write,
-                read: doc[key].read
-            };
+            var acl = doc[key].document;
             doc[key] = acl;
         } else if (doc[key] instanceof Array) {
             //if this is an array.
@@ -113,8 +110,8 @@ CB.fromJSON = function(data, thisObj) {
                 if (key === 'ACL') {
                     //this is an ACL.
                     document[key] = new CB.ACL();
-                    document[key].write = data[key].write;
-                    document[key].read = data[key].read;
+                    document[key].document= data[key];
+                    document[key].parent = data;
 
                 } else if(data[key]._type) {
                     if(thisObj)

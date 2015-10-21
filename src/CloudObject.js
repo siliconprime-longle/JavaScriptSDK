@@ -19,7 +19,7 @@ CB.CloudObject = function(tableName, id) { //object for documents
         this.document._modifiedColumns = [];
         this.document._isModified = false;
         this.document._id = id;
-    }
+    }   
 };
 
 Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
