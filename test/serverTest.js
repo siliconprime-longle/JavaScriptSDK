@@ -29,17 +29,16 @@ describe("Server Check",function(){
 
                 }
                 else {
-                    if(window.mochaPhantomJS){
-                         console.log('RUNNING IN PHANTOM JS'); 
-                         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-                         CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
-                         CB.socketIoUrl = CB.serverUrl;
-                         CB.apiUrl = CB.serverUrl;
-                    }
-                    CB.appId = 'travis123';
-                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+                    
+                    console.log("Pinging staging");
+                    CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+                    CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
+                    CB.socketIoUrl = CB.serverUrl;
+                    CB.apiUrl = CB.serverUrl;
+                    CB.appId = 'stagingtest';
+                    CB.appKey = 'G3y7rAQJ9B+/TtliBknHsQ==';
                     CB.jsKey = CB.appKey;
-                    CB.masterKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM="
+                    CB.masterKey = "VvGQGjpKau/a4Z+XzB2E2o3Ih4D6CPWzKrK07TqntWg="
                     done();
                 }
             }

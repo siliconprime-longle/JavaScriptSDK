@@ -47,9 +47,11 @@ describe("Server Check",function(){
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(500000);
-
         CB.CloudApp.init(CB.appId, CB.appKey);
-
+        console.log("Service URL :"+CB.serviceUrl);
+        console.log("API URL :"+CB.apiUrl);	
+        console.log("App ID : "+CB.appId);
+        console.log("App Key : "+ CB.appKey);
         done();
     });
 });
@@ -458,10 +460,9 @@ describe("Should Create All Test Tables",function(done){
         var obj = new CB.CloudTable('Address');
         obj.delete().then(function(){
             done();
-        },function(){
+        },function(error){
             throw "Unable to delete";
         });
-
     });
 
     it("should delete tables",function(done){
@@ -793,11 +794,11 @@ describe("Should Create All Test Tables",function(done){
             custom.addColumn(newColumn);
             custom.save().then(function(res){
                 done();
-            },function(){
+            },function(error){
                 throw "Unable to create Custom5";
             });
         };
-        callback.error = function(){
+        callback.error = function(error){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom5');

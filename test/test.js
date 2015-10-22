@@ -51,17 +51,16 @@ describe("Server Check",function(){
 
                 }
                 else {
-                    if(window.mochaPhantomJS){
-                         console.log('RUNNING IN PHANTOM JS'); 
-                         CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
-                         CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
-                         CB.socketIoUrl = CB.serverUrl;
-                         CB.apiUrl = CB.serverUrl;
-                    }
-                    CB.appId = 'travis123';
-                    CB.appKey = '6dzZJ1e6ofDamGsdgwxLlQ==';
+                    
+                    console.log("Pinging staging");
+                    CB.serverUrl = 'http://stagingdataservices.azurewebsites.net';
+                    CB.serviceUrl = 'http://stagingfrontendservice.azurewebsites.net';
+                    CB.socketIoUrl = CB.serverUrl;
+                    CB.apiUrl = CB.serverUrl;
+                    CB.appId = 'stagingtest';
+                    CB.appKey = 'G3y7rAQJ9B+/TtliBknHsQ==';
                     CB.jsKey = CB.appKey;
-                    CB.masterKey = "Qopoy/kXd+6G734HsjQMqGPGOvwEJYmBG84lQawRmWM="
+                    CB.masterKey = "VvGQGjpKau/a4Z+XzB2E2o3Ih4D6CPWzKrK07TqntWg="
                     done();
                 }
             }
@@ -72,9 +71,11 @@ describe("Server Check",function(){
 describe("Cloud App", function() {
     it("should init the CloudApp and SDK.", function(done) {
         this.timeout(500000);
-
         CB.CloudApp.init(CB.appId, CB.appKey);
-
+        console.log("Service URL :"+CB.serviceUrl);
+        console.log("API URL :"+CB.apiUrl);	
+        console.log("App ID : "+CB.appId);
+        console.log("App Key : "+ CB.appKey);
         done();
     });
 });
@@ -483,10 +484,9 @@ describe("Should Create All Test Tables",function(done){
         var obj = new CB.CloudTable('Address');
         obj.delete().then(function(){
             done();
-        },function(){
+        },function(error){
             throw "Unable to delete";
         });
-
     });
 
     it("should delete tables",function(done){
@@ -818,11 +818,11 @@ describe("Should Create All Test Tables",function(done){
             custom.addColumn(newColumn);
             custom.save().then(function(res){
                 done();
-            },function(){
+            },function(error){
                 throw "Unable to create Custom5";
             });
         };
-        callback.error = function(){
+        callback.error = function(error){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom5');

@@ -12,10 +12,9 @@ describe("Should Create All Test Tables",function(done){
         var obj = new CB.CloudTable('Address');
         obj.delete().then(function(){
             done();
-        },function(){
+        },function(error){
             throw "Unable to delete";
         });
-
     });
 
     it("should delete tables",function(done){
@@ -347,11 +346,11 @@ describe("Should Create All Test Tables",function(done){
             custom.addColumn(newColumn);
             custom.save().then(function(res){
                 done();
-            },function(){
+            },function(error){
                 throw "Unable to create Custom5";
             });
         };
-        callback.error = function(){
+        callback.error = function(error){
             throw "Unable to Delete";
         };
         var obj = new CB.CloudTable('Custom5');
