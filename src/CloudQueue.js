@@ -181,13 +181,18 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 };
 
 
-CB.CloudQueue.prototype.pull = function(count) {
+CB.CloudQueue.prototype.pull = function(count,callback) {
 
     var def;
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
+    }
+
+    if(typeof count === 'object' && !callback ){
+        callback = count;
+        count = null;
     }
 
     if(!count)
@@ -202,10 +207,14 @@ CB.CloudQueue.prototype.pull = function(count) {
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/pull';
 
     CB._request('POST',url,params).then(function(response){
         
+        if(!response || response===""){
+            response = null;
+        }
+
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
@@ -220,7 +229,7 @@ CB.CloudQueue.prototype.pull = function(count) {
     });
 };
 
-CB.CloudQueue.prototype.getMessage = function(id) {
+CB.CloudQueue.prototype.getMessage = function(id, callback) {
     var def;
     
     CB._validate();
@@ -235,10 +244,46 @@ CB.CloudQueue.prototype.getMessage = function(id) {
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message/'+id;
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/message/'+id;
 
     CB._request('POST',url,params).then(function(response){
         
+        if(!response || response === ""){
+            response = null;
+        }
+
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response)));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response)));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+};
+
+CB.CloudQueue.prototype.get = function(callback) {
+    var def;
+    
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+
+    var params=JSON.stringify({       
+        key: CB.appKey
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/';
+
+    CB._request('POST',url,params).then(function(response){
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
@@ -271,7 +316,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url) {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/subscriber/';
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/subscriber/';
 
    CB._request('POST',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -308,7 +353,7 @@ CB.CloudQueue.prototype.removeSubscriber = function(url) {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/subscriber/';
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/subscriber/';
 
    CB._request('DELETE',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -327,7 +372,7 @@ CB.CloudQueue.prototype.removeSubscriber = function(url) {
 
 };
 
-CB.CloudQueue.prototype.peek = function(count) {
+CB.CloudQueue.prototype.peek = function(count, callback) {
 
     var def;
     
@@ -337,8 +382,13 @@ CB.CloudQueue.prototype.peek = function(count) {
         def = new CB.Promise();
     }
 
+    if(typeof count === 'object' && !callback ){
+        callback = count;
+        count = null;
+    }
+
     if(!count)
-        count = 1;
+        count=1; 
     
     var xmlhttp = CB._loadXml();
 
@@ -347,9 +397,9 @@ CB.CloudQueue.prototype.peek = function(count) {
         count : count
     });
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/peek/';
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/peek/';
 
-   CB._request('GET',url,params).then(function(response){
+   CB._request('POST',url,params).then(function(response){
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
@@ -383,7 +433,7 @@ CB.CloudQueue.prototype.delete = function() {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName;
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name;
 
    CB._request('DELETE',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -419,7 +469,7 @@ CB.CloudQueue.prototype.clear = function() {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+"/clear";
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/clear";
 
    CB._request('DELETE',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -455,7 +505,7 @@ CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout) {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+"/refresh-message-timeout/"+id;
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/refresh-message-timeout/"+id;
 
    CB._request('PUT',url,params).then(function(response){
         if (callback) {
@@ -489,7 +539,7 @@ CB.CloudQueue.prototype.deleteMessage = function(id) {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+"/message/"+id;
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/message/"+id;
 
    CB._request('DELETE',url,params).then(function(response){
         if (callback) {
@@ -515,11 +565,13 @@ CB.CloudQueue.getQueues = function(){
 };
 
 CB.CloudQueue.getQueue = function(queueName){
-
+    var queue = new CB.CloudQueue(queueName);
+    return queue.get(callback);
 };
 
-CB.CloudQueue.deleteQueue = function(queueName){
-
+CB.CloudQueue.deleteQueue = function(queueName, callback){
+    var queue = new CB.CloudQueue(queueName);
+    return queue.delete(callback);
 };
 
 
@@ -529,7 +581,7 @@ CB.QueueMessage = function(data) {
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'queue-message';
     this.document.expires = null;
-    this.document.timeout = 3600;
+    this.document.timeout = 1800; //30 mins by default.
     this.document.delay = null;
     this.document.message = data;
     this.document._id = null;
@@ -611,6 +663,7 @@ Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
         return this.document.delay;
     },
     set: function(delay) {
+        delay *=1000; //converting to seconds from milli seconds,
         this.document.delay = delay;
         CB._modified(this,'delay');
     }

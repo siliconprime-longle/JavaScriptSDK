@@ -106,7 +106,546 @@ it("Should not create a queue with empty name",function(done){
      }
 });
 
+it("Should push and pull data from the queue.",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample');
+     //message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample'){
+                         //now pull it. 
+                         queue.pull({
+                              success : function(message){
+                                   if(message.message === 'sample'){
+                                        done();
+                                   }
+                              }, error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+it("Should peek.",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample');
+     //message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample'){
+                         //now pull it. 
+                         queue.peek({
+                              success : function(message){
+                                   if(message.message === 'sample'){
+                                       //peek again. 
+                                       queue.peek({
+                                             success : function(message){
+                                                  if(message.message === 'sample'){
+                                                      done();
+                                                  }
+                                             }, error : function(error){
+                                                  done(error);
+                                             }
+                                        });
+                                   }
+                              }, error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+it("Should get the messages in FIFO",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample1');
+     //message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample1'){
+                         var message = new CB.QueueMessage('sample2');
+                         //message.delay = 3000;
+                         queue.push(message,{
+                              success : function(response){
+                                   if(response instanceof CB.QueueMessage && response.id){
+                                        if(response.message === 'sample2'){
+                                             //now pull it. 
+                                             queue.pull({
+                                                  success : function(message){
+                                                       if(message.message === 'sample1'){
+                                                            queue.pull({
+                                                                 success : function(message){
+                                                                      if(message.message === 'sample2'){
+                                                                           done();
+                                                                      }
+                                                                 }, error : function(error){
+                                                                      done(error);
+                                                                 }
+                                                            });
+                                                       }
+                                                  }, error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+                                            
+                                        }
+                                        else{
+                                             done("Pushed but incorrect data");
+                                        }
+                                   }else{
+                                        done("Message pushed but response is not QueueMessage");
+                                   }
+                              },error : function(error){
+                                   done(error);
+                              }
+                         });
+                        
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+it("Should peek 2 messages at the same time.",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample1');
+     //message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample1'){
+                         var message = new CB.QueueMessage('sample2');
+                         //message.delay = 3000;
+                         queue.push(message,{
+                              success : function(response){
+                                   if(response instanceof CB.QueueMessage && response.id){
+                                        if(response.message === 'sample2'){
+                                             //now pull it. 
+                                             queue.peek(2, {
+                                                  success : function(messages){
+                                                      if(messages.length ===2 && messages[0].id && messages[1].id){
+                                                            done();
+                                                      }
+                                                  }, error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+                                        }
+                                        else{
+                                             done("Pushed but incorrect data");
+                                        }
+                                   }else{
+                                        done("Message pushed but response is not QueueMessage");
+                                   }
+                              },error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+
+it("Should pull 2 messages at the same time.",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample1');
+     //message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample1'){
+                         var message = new CB.QueueMessage('sample2');
+                         //message.delay = 3000;
+                         queue.push(message,{
+                              success : function(response){
+                                   if(response instanceof CB.QueueMessage && response.id){
+                                        if(response.message === 'sample2'){
+                                             //now pull it. 
+                                             queue.pull(2, {
+                                                  success : function(messages){
+                                                      if(messages.length ===2 && messages[0].id && messages[1].id){
+                                                            done();
+                                                      }
+                                                  }, error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+                                            
+                                        }
+                                        else{
+                                             done("Pushed but incorrect data");
+                                        }
+                                   }else{
+                                        done("Message pushed but response is not QueueMessage");
+                                   }
+                              },error : function(error){
+                                   done(error);
+                              }
+                         });
+                        
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
 
 
 
+it("Should not pull message with the delay ",function(done){
+
+     this.timeout(20000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     var message = new CB.QueueMessage('sample');
+     message.delay = 3000;
+     queue.push(message,{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample'){
+                         //now pull it. 
+                         queue.pull({
+                              success : function(message){
+                                   if(!message){
+                                        done();
+                                   }
+                                   else{
+                                        done("Got the message inspite of the delay");
+                                   }
+                              }, error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Message pushed but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+      });
+     });
+
+     it("should give an error if queue doesnot exists.",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          //message.delay = 3000;
+          queue.pull({
+               success : function(message){
+                   done("Got the message");
+               }, error : function(error){
+                    done();
+               }
+          });
+     });
+
+
+     it("should not pull the same message twice. ",function(done){
+         this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              queue.pull({
+                                   success : function(message){
+                                        if(message){
+                                              queue.pull({
+                                                  success : function(message){
+                                                       if(!message){
+                                                           done(); 
+                                                       }else{
+                                                            done("Got a message.")
+                                                       }
+                                                  }, error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+                                        }else{
+                                             done("Cannot pull the message.")
+                                        }
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("should be able to pull message after the timeout.",function(done){
+          this.timeout(30000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.timeout =3; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+
+                               queue.pull({
+                                        success : function(message){
+                                             if(message.message = 'sample'){
+                                                  //pull it again.
+                                                  setTimeout(function(){
+                                                       queue.pull({
+                                                            success : function(message){
+                                                                 if(!message){
+                                                                      done("Message is null");
+                                                                 }
+                                                                 if(message.message = 'sample'){
+                                                                      done();
+                                                                 }else{
+                                                                      done("Cannot get the message");
+                                                                 }
+                                                            }, error : function(error){
+                                                                 done(error);
+                                                            }
+                                                       });
+                                                  },7000);
+                                             }else{
+                                                  done("Cannot get the message");
+                                             }
+                                        }, error : function(error){
+                                             done(error);
+                                        }
+                                   });
+                              
+                             
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("Should be able to pull messages after the delay.",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              setTimeout(function(){
+                                   queue.pull({
+                                        success : function(message){
+                                             if(message.message = 'sample'){
+                                                  done();
+                                             }else{
+                                                  done("Cannot get the message");
+                                             }
+                                        }, error : function(error){
+                                             done(error);
+                                        }
+                                   });
+                              },2000);
+                             
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+
+     it("Should be able to get message with an id",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              
+                              queue.getMessage(response.id,{
+                                   success : function(message){
+                                        if(message.message = 'sample'){
+                                             done();
+                                        }else{
+                                             done("Cannot get the message");
+                                        }
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("Should get null when invalid message id is requested.",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              
+                              queue.getMessage("sample",{
+                                   success : function(message){
+                                        if(!message){
+                                             done();
+                                        }else{
+                                             done("Got the wrong message");
+                                        }
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("Should delete message with message id.",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              
+                              queue.getMessage("sample",{
+                                   success : function(message){
+                                        if(!message){
+                                             done();
+                                        }else{
+                                             done("Got the wrong message");
+                                        }
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
 });

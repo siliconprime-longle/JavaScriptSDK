@@ -34,7 +34,7 @@ CB.toJSON = function(thisObj) {
     var obj= CB._clone(thisObj,id,latitude,longitude,tableName,columnName);
 
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint
-        || !obj instanceof CB.CloudTable || !obj instanceof CB.Column) {
+        || !obj instanceof CB.CloudTable || !obj instanceof CB.Column || !obj instanceof CB.QueueMessage || !obj instanceof CB.CloudQueue) {
         throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
@@ -48,7 +48,7 @@ CB.toJSON = function(thisObj) {
 
     for (var key in doc) {
         if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile
-            || doc[key] instanceof CB.CloudGeoPoint  || doc[key] instanceof CB.Column) {
+            || doc[key] instanceof CB.CloudGeoPoint  || doc[key] instanceof CB.Column || doc[key] instanceof CB.QueueMessage || doc[key] instanceof CB.CloudQueue) {
             //if something is a relation.
             doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -59,7 +59,7 @@ CB.toJSON = function(thisObj) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
             if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile
-                || doc[key][0] instanceof CB.CloudGeoPoint || doc[key][0] instanceof CB.Column )) {
+                || doc[key][0] instanceof CB.CloudGeoPoint || doc[key][0] instanceof CB.Column || doc[key][0] instanceof CB.QueueMessage || doc[key][0] instanceof CB.CloudQueue )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB.toJSON(doc[key][i]));
@@ -77,8 +77,9 @@ CB.fromJSON = function(data, thisObj) {
     //prevObj : is a copy of object before update.
     //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
     //if data is a list it will return a list of Cl oudObjects.
-    if (!data)
+    if (!data || data === "")
         return null;
+
 
     if (data instanceof Array) {
 
