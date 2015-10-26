@@ -1840,7 +1840,7 @@ it("Should not pull message with the delay ",function(done){
                          if(response.message === 'sample'){
                               //now pull it. 
                               
-                              queue.getMessage(response.id,{
+                              queue.getMessageById(response.id,{
                                    success : function(message){
                                         if(message.message = 'sample'){
                                              done();
@@ -1876,7 +1876,7 @@ it("Should not pull message with the delay ",function(done){
                          if(response.message === 'sample'){
                               //now pull it. 
                               
-                              queue.getMessage("sample",{
+                              queue.getMessageById("sample",{
                                    success : function(message){
                                         if(!message){
                                              done();
@@ -1912,13 +1912,99 @@ it("Should not pull message with the delay ",function(done){
                          if(response.message === 'sample'){
                               //now pull it. 
                               
-                              queue.getMessage("sample",{
+                              queue.deleteMessage(response.id,{
                                    success : function(message){
-                                        if(!message){
+                                        if(message!=null && message.id === response.id){
                                              done();
                                         }else{
-                                             done("Got the wrong message");
+                                             done("Error, Null  or wrong message returned.")
                                         }
+
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("Should delete message by passing queueMessage to the function",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              
+                              queue.deleteMessage(response,{
+                                   success : function(message){
+                                        if(message!=null && message.id === response.id){
+                                             done();
+                                        }else{
+                                             done("Error, Null  or wrong message returned.")
+                                        }
+
+                                   }, error : function(error){
+                                        done(error);
+                                   }
+                              });
+                         }
+                         else{
+                              done("Pushed but incorrect data");
+                         }
+                    }else{
+                         done("Message pushed but response is not QueueMessage");
+                    }
+               },error : function(error){
+                    done(error);
+               }
+          });
+     });
+
+     it("Should not get the message after it was deleted",function(done){
+          this.timeout(20000);
+
+          var queue = new CB.CloudQueue(util.makeString());
+          var message = new CB.QueueMessage('sample');
+          message.delay =1; //1 sec
+          queue.push(message,{
+               success : function(response){
+                    if(response instanceof CB.QueueMessage && response.id){
+                         if(response.message === 'sample'){
+                              //now pull it. 
+                              
+                              queue.deleteMessage(response,{
+                                   success : function(message){
+                                        if(message!=null && message.id === response.id){
+                                             
+                                             queue.getMessageById(response.id, {
+                                                  success : function(message){
+                                                      if(!message)
+                                                        done();
+                                                       else
+                                                        done("Received the message after it was deleted.");
+                                                  }, error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+
+                                        }else{
+                                             done("Error, Null  or wrong message returned.")
+                                        }
+
                                    }, error : function(error){
                                         done(error);
                                    }

@@ -11961,7 +11961,7 @@ CB.CloudQueue.prototype.pull = function(count,callback) {
     });
 };
 
-CB.CloudQueue.prototype.getMessage = function(id, callback) {
+CB.CloudQueue.prototype.getMessageById = function(id, callback) {
     var def;
     
     CB._validate();
@@ -12147,7 +12147,7 @@ CB.CloudQueue.prototype.peek = function(count, callback) {
 
 };
 
-CB.CloudQueue.prototype.delete = function() {
+CB.CloudQueue.prototype.delete = function(calback) {
     var def;
     
     CB._validate();
@@ -12219,7 +12219,7 @@ CB.CloudQueue.prototype.clear = function() {
     });
 };
 
-CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout) {
+CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout ,callback) {
     var def;
     
     CB._validate();
@@ -12254,10 +12254,18 @@ CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout) {
     });
 };
 
-CB.CloudQueue.prototype.deleteMessage = function(id) {
-        var def;
+CB.CloudQueue.prototype.deleteMessage = function(id,callback) {
+    var def;
     
     CB._validate();
+
+    if(!id || (!(id instanceof CB.QueueMessage)&&typeof id !== 'string')){
+        throw "Delete Message function should have id of the message or insance of QueueMessage as the first parameter. ";
+    }
+
+    if(id instanceof CB.QueueMessage){
+        id = id.id;
+    }
 
     if (!callback) {
         def = new CB.Promise();
@@ -12305,7 +12313,6 @@ CB.CloudQueue.deleteQueue = function(queueName, callback){
     var queue = new CB.CloudQueue(queueName);
     return queue.delete(callback);
 };
-
 
 CB.QueueMessage = function(data) { 
     
