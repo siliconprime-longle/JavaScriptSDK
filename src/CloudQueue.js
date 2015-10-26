@@ -565,7 +565,7 @@ CB.CloudQueue.prototype.deleteMessage = function(id,callback) {
 };
 
 CB.CloudQueue.prototype.update = function() {
-
+    
 };
 
 CB.CloudQueue.getQueues = function(){
