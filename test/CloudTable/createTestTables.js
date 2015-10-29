@@ -41,6 +41,19 @@ describe("Should Create All Test Tables",function(done){
 
     }); 
 
+    it("should delete empty table",function(done){
+
+        this.timeout(20000);
+        var obj = new CB.CloudTable('Empty');
+        obj.delete().then(function(){
+            done();
+        },function(){
+            throw "Unable to delete";
+        });
+
+    }); 
+
+
     it("should delete tables",function(done){
 
         this.timeout(20000);
@@ -76,6 +89,22 @@ describe("Should Create All Test Tables",function(done){
         obj.save().then(function(res){
             console.log(res);
             done();
+        },function(err){
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("should create an empty table",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Empty');
+    
+        obj.save().then(function(res){
+            if(res.id){
+                done();
+            }else
+                done("Table saved but didnot return the id.");
         },function(err){
             throw "Unable to Create Table";
         });

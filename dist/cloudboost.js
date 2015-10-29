@@ -12030,7 +12030,7 @@ CB.CloudQueue.prototype.get = function(callback) {
     });
 };
 
-CB.CloudQueue.prototype.addSubscriber = function(url) {
+CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
     var def;
     
     CB._validate();
@@ -12066,7 +12066,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url) {
     });
 };
 
-CB.CloudQueue.prototype.removeSubscriber = function(url) {
+CB.CloudQueue.prototype.removeSubscriber = function(url,callback) {
 
     var def;
     
@@ -12297,7 +12297,7 @@ CB.CloudQueue.prototype.deleteMessage = function(id,callback) {
 };
 
 CB.CloudQueue.prototype.update = function() {
-
+    
 };
 
 CB.CloudQueue.getQueues = function(){
