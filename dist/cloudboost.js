@@ -11748,6 +11748,7 @@ CB.CloudQueue = function(queueName,queueType){
     this.document.retry = null;  
     this.document.subscribers = [];
     this.document.messages = [];
+
     if(queueType && queueType !== "push" && queueType !== "pull"){
         throw "Type can be push or pull";
     }
@@ -11776,30 +11777,16 @@ Object.defineProperty(CB.CloudQueue.prototype, 'retry', {
 Object.defineProperty(CB.CloudQueue.prototype, 'name', {
     get: function() {
         return this.document.name;
-    },
-    set: function(name) {
-
-        this.document.name = name;
-        CB._modified(this,'name');
     }
 });
 
 Object.defineProperty(CB.CloudQueue.prototype, 'subscribers', {
     get: function() {
         return this.document.subscribers;
-    },
-    set: function(subscribers) {
-
-        if(this.queueType !== "push"){
-            throw "Queue Type should be push to set this property";
-        }
-
-        this.document.subscribers = subscribers;
-        CB._modified(this,'subscribers');
     }
 });
 
-Object.defineProperty(CB.CloudQueue.prototype, 'queueType', {
+Object.defineProperty(CB.CloudQueue.prototype, 'type', {
     get: function() {
         return this.document.queueType;
     },
@@ -11828,20 +11815,12 @@ Object.defineProperty(CB.CloudQueue.prototype, 'id', {
 Object.defineProperty(CB.CloudQueue.prototype, 'createdAt', {
     get: function() {
         return this.document.createdAt;
-    },
-    set: function(createdAt) {
-        this.document.createdAt = createdAt;
-        CB._modified(this,'createdAt');
     }
 });
 
 Object.defineProperty(CB.CloudQueue.prototype, 'updatedAt', {
     get: function() {
         return this.document.updatedAt;
-    },
-    set: function(updatedAt) {
-        this.document.updatedAt = updatedAt;
-        CB._modified(this,'updatedAt');
     }
 });
 
@@ -12009,17 +11988,19 @@ CB.CloudQueue.prototype.get = function(callback) {
 
     var xmlhttp = CB._loadXml();
 
+    var thisObj = this;
+
     var params=JSON.stringify({       
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/';
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/';
 
     CB._request('POST',url,params).then(function(response){
         if (callback) {
-            callback.success(CB.fromJSON(JSON.parse(response)));
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
         } else {
-            def.resolve(CB.fromJSON(JSON.parse(response)));
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
         }
     },function(err){
         if(callback){
@@ -12031,6 +12012,7 @@ CB.CloudQueue.prototype.get = function(callback) {
 };
 
 CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
+
     var def;
     
     CB._validate();
@@ -12041,14 +12023,26 @@ CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
     
     var xmlhttp = CB._loadXml();
 
+    var tempSubscribers =  this.document.subscribers;
+
+    this.document.subscribers = [];
+
+    if(url.constructor === Array){
+        for(var i=0;i<url.length;i++){
+            this.document.subscribers.push(url[i]);
+        }
+    }else{
+        this.document.subscribers.push(url);
+    }
+
     var params=JSON.stringify({       
         key: CB.appKey,
-        subscriber : url
+        document : CB.toJSON(this)
     });
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/subscriber/';
+   var url = CB.apiUrl + '/queue/' + CB.appId + '/'+thisObj.document.name+'/subscriber/';
 
    CB._request('POST',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -12058,6 +12052,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
             def.resolve(thisObj);
         }
     },function(err){
+        this.document.subscribers = tempSubscribers;
         if(callback){
             callback.error(err);
         }else {
@@ -12078,14 +12073,27 @@ CB.CloudQueue.prototype.removeSubscriber = function(url,callback) {
     
     var xmlhttp = CB._loadXml();
 
+    var tempSubscribers =  this.document.subscribers;
+
+    this.document.subscribers = [];
+
+    if(url.constructor === Array){
+        for(var i=0;i<url.length;i++){
+            this.document.subscribers.push(url[i]);
+        }
+    }else{
+        this.document.subscribers.push(url);
+    }
+
+    var thisObj =this;
+
     var params=JSON.stringify({       
         key: CB.appKey,
-        subscriber : url
+        document : CB.toJSON(thisObj)
     });
 
-   var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/subscriber/';
+   var url = CB.apiUrl + '/queue/' + CB.appId + '/'+thisObj.document.name+'/subscriber/';
 
    CB._request('DELETE',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -12095,6 +12103,7 @@ CB.CloudQueue.prototype.removeSubscriber = function(url,callback) {
             def.resolve(thisObj);
         }
     },function(err){
+        this.document.subscribers = tempSubscribers;
         if(callback){
             callback.error(err);
         }else {
@@ -12147,7 +12156,7 @@ CB.CloudQueue.prototype.peek = function(count, callback) {
 
 };
 
-CB.CloudQueue.prototype.delete = function(calback) {
+CB.CloudQueue.prototype.delete = function(callback) {
     var def;
     
     CB._validate();
@@ -12160,7 +12169,7 @@ CB.CloudQueue.prototype.delete = function(calback) {
 
     var params=JSON.stringify({       
         key: CB.appKey,
-        document : this.document
+        document : CB.toJSON(this)
     });
 
    var thisObj = this;
@@ -12183,7 +12192,7 @@ CB.CloudQueue.prototype.delete = function(calback) {
     });
 };
 
-CB.CloudQueue.prototype.clear = function() {
+CB.CloudQueue.prototype.clear = function(callback) {
     var def;
     
     CB._validate();
@@ -12196,7 +12205,7 @@ CB.CloudQueue.prototype.clear = function() {
 
     var params=JSON.stringify({       
         key: CB.appKey,
-        document : this.document
+        document : CB.toJSON(this)
     });
 
    var thisObj = this;
@@ -12227,6 +12236,22 @@ CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout ,callback) {
     if (!callback) {
         def = new CB.Promise();
     }
+
+    if(!id)
+        throw "Message Id cannot be null";
+
+    if(id instanceof CB.QueueMessage){
+        if(!id.id){
+            throw "Queue Message should have an id.";
+        }else{
+            id = id.id;
+        }
+    }
+
+    if(!callback && (timeout.success || timeout.error)){
+        callback = timeout;
+        timeout = null;
+    }
     
     var xmlhttp = CB._loadXml();
 
@@ -12237,7 +12262,7 @@ CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout ,callback) {
 
    var thisObj = this;
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/refresh-message-timeout/"+id;
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/"+id+"/refresh-message-timeout";
 
    CB._request('PUT',url,params).then(function(response){
         if (callback) {
@@ -12296,20 +12321,82 @@ CB.CloudQueue.prototype.deleteMessage = function(id,callback) {
     });
 };
 
-CB.CloudQueue.prototype.update = function() {
+CB.CloudQueue.prototype.update = function(callback) {
+    var def;
     
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    
+    var xmlhttp = CB._loadXml();
+
+    var thisObj = this;
+
+    var params=JSON.stringify({       
+        key: CB.appKey,
+        document : CB.toJSON(thisObj)
+    });
+
+
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name;
+
+   CB._request('PUT',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 };
 
-CB.CloudQueue.getQueues = function(){
+CB.CloudQueue.getAll = function(callback){
+    var def;
+    
+    CB._validate();
 
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+
+    var thisObj = this;
+
+    var params=JSON.stringify({       
+        key: CB.appKey
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/';
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response)));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response)));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
 };
 
-CB.CloudQueue.getQueue = function(queueName){
+CB.CloudQueue.get = function(queueName,callback){
     var queue = new CB.CloudQueue(queueName);
     return queue.get(callback);
 };
 
-CB.CloudQueue.deleteQueue = function(queueName, callback){
+CB.CloudQueue.delete = function(queueName, callback){
     var queue = new CB.CloudQueue(queueName);
     return queue.delete(callback);
 };
@@ -12407,4 +12494,3 @@ Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
         CB._modified(this,'delay');
     }
 });
-

@@ -735,92 +735,466 @@ describe("Cloud Queue Tests", function() {
 //           });
 //      });
 
-     it("Should add subscriber to the queue.",function(done){
+//      it("Should add subscriber to the queue.",function(done){
+//           this.timeout(20000);
+
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url = "http://sample.sample.com";
+//           queue.addSubscriber(url,{
+//                success : function(response){
+//                     if(response.subscribers.indexOf(url)>=0){
+//                          done();
+//                     }else{
+//                          done("subscribers not added to the queue");
+//                     }
+//                },error : function(error){
+//                     done(error);
+//                }
+//           });
+//      });
+
+//      it("Should multiple subscribers to the queue.",function(done){
+//           this.timeout(20000);
+
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url = ["http://sample.sample.com","http://sample1.cloudapp.net"];
+//           queue.addSubscriber(url,{
+//                success : function(response){
+//                     for(var i=0;i<url.length;i++){
+//                          if(response.subscribers.indexOf(url[i])===-1){
+//                               done("Subscribers not added.");
+//                          }
+//                     }
+//                     done();
+//                },error : function(error){
+//                     done(error);
+//                }
+//           });
+//      });
+
+//      it("Should remove subscriber from the queue.",function(done){
+//           this.timeout(20000);
+
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url ="http://sample1.cloudapp.net";
+//           queue.removeSubscriber(url,{
+//                success : function(response){
+//                     if(response.subscribers.indexOf(url)===-1){
+//                          done();
+//                     }else{
+//                          done("subscribers not added to the queue");
+//                     }
+//                },error : function(error){
+//                     done(error);
+//                }
+//           });
+//      });
+
+//      it("Should remove multiple subscriber from the queue.",function(done){
+//           this.timeout(20000);
+
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url =["http://sample1.cloudapp.net","http://sample2.cloudapp.net"];
+//           queue.removeSubscriber(url,{
+//                success : function(response){
+//                     for(var i=0;i<url.length;i++){
+//                          if(response.subscribers.indexOf(url[i])>=0){
+//                               done("Subscribers not removed.");
+//                          }
+//                     }
+//                     done();
+//                },error : function(error){
+//                     done(error);
+//                }
+//           });
+//      });
+
+//      it("Should not add subscriber with invalid URL.",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url = "sample.sample";
+//           queue.addSubscriber(url,{
+//                success : function(response){
+//                    done("Success called with invalid URL");
+//                },error : function(error){
+//                    done();
+//                }
+//           });
+//      });
+
+//      it("Should add a subscriber and then remove a subscriber from the queue.",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//           var url = "https://sample.sample.com";
+//           queue.addSubscriber(url,{
+//                success : function(response){
+//                    if(queue.subscribers.length === 1){
+
+//                          queue.removeSubscriber(url,{
+//                               success : function(response){
+//                                   if(queue.subscribers.length === 0){
+//                                         done();
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to remove a subscriber");
+//                               }
+//                          });
+
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a subscriber");
+//                }
+//           });
+//      });
+
+
+//      it("Should delete the queue.",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//           queue.push("sample",{
+//                success : function(response){
+//                    if(response.id){
+//                        //now delete the queue. 
+//                        queue.delete({
+//                               success : function(response){
+//                                   if(response.name){
+//                                         //pull message from the queue. 
+//                                         queue.pull({
+//                                              success : function(response){
+//                                                  if(response.id){
+//                                                       done("Pulled message from the queue which is deleted.");
+//                                                  }else{     
+//                                                     done("Pulled message from deleted queue.");
+//                                                  }
+//                                              },error : function(error){
+//                                                  done();
+//                                              }
+//                                         });
+//                                   }else{     
+//                                      done("Failed to delete the queue.");
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to add a subscriber");
+//                               }
+//                          });
+//                    }else{
+//                       done("Failed to add the message.");
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a subscriber");
+//                }
+//           });
+//      });
+
+//      it("Should clear the queue.",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//           queue.push("sample",{
+//                success : function(response){
+//                    if(response.id){
+//                        //now delete the queue. 
+//                        queue.clear({
+//                               success : function(response){
+//                                   if(response.name){
+//                                         //pull message from the queue. 
+//                                         queue.pull({
+//                                              success : function(response){
+//                                                  if(response){
+//                                                       done("Pulled message from the queue which is deleted.");
+//                                                  }else{     
+//                                                     done();
+//                                                  }
+//                                              },error : function(error){
+//                                                  done("Error getting data");
+//                                              }
+//                                         });
+//                                   }else{     
+//                                      done("Failed to delete the queue.");
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to clear a message.");
+//                               }
+//                          });
+//                    }else{
+//                       done("Failed to add a message");
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a message");
+//                }
+//           });
+//      });
+
+//      it("Should get the queue.",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//           queue.push("sample",{
+//                success : function(response){
+//                    if(response.id){
+//                        //now delete the queue. 
+//                        queue.get({
+//                               success : function(response){
+//                                   if(response.id){
+//                                         //pull message from the queue. 
+//                                        done();
+//                                   }else{     
+//                                      done("Failed to get the queue.");
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to get the message.");
+//                               }
+//                          });
+//                    }else{
+//                       done("Failed to add  a message");
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a message");
+//                }
+//           });
+//      });
+
+//       it("Should get the queue.",function(done){
+//           this.timeout(20000);
+//           var name = util.makeString();
+//           var queue = new CB.CloudQueue(name);
+//           queue.push("sample",{
+//                success : function(response){
+//                    if(response.id){
+//                        //now delete the queue. 
+//                        CB.CloudQueue.get(name,{
+//                               success : function(response){
+//                                   if(response.id){
+//                                         //pull message from the queue. 
+//                                        done();
+//                                   }else{     
+//                                      done("Failed to get the queue.");
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to get the message.");
+//                               }
+//                          });
+//                    }else{
+//                       done("Failed to add  a message");
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a message");
+//                }
+//           });
+//      });
+
+//      it("Should not get the queue with null name", function(done){
+//           this.timeout(20000);
+//           var name = util.makeString();
+//           var queue = new CB.CloudQueue(name);
+//           queue.push("sample",{
+//                success : function(response){
+//                    if(response.id){
+//                     try{
+//                        //now delete the queue. 
+//                        CB.CloudQueue.get(null,{
+//                               success : function(response){
+//                                   if(response.id){
+//                                         //pull message from the queue. 
+//                                        done();
+//                                   }else{     
+//                                      done("Failed to get the queue.");
+//                                   }
+//                               },error : function(error){
+//                                   done("Failed to get the message.");
+//                               }
+//                          });
+//                        done("Error.")
+//                   }catch(e){
+//                     done();
+//                   }
+
+//                    }else{
+//                       done("Failed to add  a message");
+//                    }
+//                },error : function(error){
+//                    done("Failed to add a message");
+//                }
+//           });
+//      });
+
+//      it("Should get All Queues", function(done){
+//           this.timeout(20000);
+          
+//           CB.CloudQueue.getAll({
+//                success : function(response){
+//                   if(response.length>0){
+//                     done();
+//                   }else{
+//                     done("Error getting queues.");
+//                   }
+//                },error : function(error){
+//                    done("Failed to add a message");
+//                }
+//           });
+//      });
+
+
+
+//      it("Should not get the queue which does not exist",function(done){
+//           this.timeout(20000);
+//           var queue = new CB.CloudQueue(util.makeString());
+//              queue.get({
+//                     success : function(response){
+//                        done("Got the queue which does not exist");
+//                     },error : function(error){
+//                         done();
+//                     }
+//                });
+//           });
+
+
+//      it("Should refresh message timeout with timeout specified. ",function(done){
+//           this.timeout(20000);
+//               var queue = new CB.CloudQueue(util.makeString());
+//               queue.push('sample',{
+//                  success : function(response){
+//                       if(response instanceof CB.QueueMessage && response.id){
+//                            if(response.message === 'sample'){
+//                                 queue.refreshMessageTimeout(response,3600,{
+//                                 success : function(response){
+//                                      if(response instanceof CB.QueueMessage && response.id){
+//                                           if(response.timeout === 3600){
+//                                                done();
+//                                           }
+//                                           else{
+//                                                done("Refreshed the timeout but didnot return the data.");
+//                                           }
+//                                      }else{
+//                                           done("Message pushed but response is not QueueMessage");
+//                                      }
+//                                 },error : function(error){
+//                                      done(error);
+//                                 }
+//                              });
+//                            }
+//                            else{
+//                                 done("Pushed but incorrect data");
+//                            }
+//                       }else{
+//                            done("Message pushed but response is not QueueMessage");
+//                       }
+//                  },error : function(error){
+//                       done(error);
+//                  }
+//               });
+//      });
+
+//      it("Should refresh message timeout wiht timeout NOT specified. ",function(done){
+//          this.timeout(20000);
+//          var queue = new CB.CloudQueue(util.makeString());
+//               queue.push('sample',{
+//                  success : function(response){
+//                       if(response instanceof CB.QueueMessage && response.id){
+//                            if(response.message === 'sample'){
+//                                 queue.refreshMessageTimeout(response,{
+//                                 success : function(response){
+//                                      if(response instanceof CB.QueueMessage && response.id){
+//                                           if(response.timeout === 1800){
+//                                                done();
+//                                           }
+//                                           else{
+//                                                done("Refreshed the timeout but didnot return the data.");
+//                                           }
+//                                      }else{
+//                                           done("Message pushed but response is not QueueMessage");
+//                                      }
+//                                 },error : function(error){
+//                                      done(error);
+//                                 }
+//                              });
+//                            }
+//                            else{
+//                                 done("Pushed but incorrect data");
+//                            }
+//                       }else{
+//                            done("Message pushed but response is not QueueMessage");
+//                       }
+//                  },error : function(error){
+//                       done(error);
+//                  }
+//               });
+//      });
+
+//      it("Should not refresh message timeout when message is pulled form the queue.",function(done){
+//             this.timeout(20000);
+//          var queue = new CB.CloudQueue(util.makeString());
+//               queue.push('sample',{
+//                  success : function(response){
+//                       if(response instanceof CB.QueueMessage && response.id){
+//                            if(response.message === 'sample'){
+//                               queue.pull({
+//                                      success : function(response){
+//                                           if(response instanceof CB.QueueMessage && response.id){
+//                                                queue.refreshMessageTimeout(response,{
+//                                                     success : function(response){
+//                                                          done("Error, Success called.")
+//                                                     },error : function(error){
+//                                                          done()
+//                                                     }
+//                                                  });
+//                                           }else{
+//                                                done("Message cant be pulled out of the queue.");
+//                                           }
+//                                      },error : function(error){
+//                                           done(error);
+//                                      }
+//                                   });
+                                
+//                            }
+//                            else{
+//                                 done("Pushed but incorrect data");
+//                            }
+//                       }else{
+//                            done("Message pushed but response is not QueueMessage");
+//                       }
+//                  },error : function(error){
+//                       done(error);
+//                  }
+//               });
+//      });
+
+     it("Should update the queue.",function(done){
+
           this.timeout(20000);
 
           var queue = new CB.CloudQueue(util.makeString());
-          var url = "sample.sample.com";
-          queue.addSubscriber(url,{
-               success : function(response){
-                    if(response.subscribers.indexOf(url)>=0){
-                         done();
-                    }else{
-                         done("subscribers not added to the queue");
-                    }
-               },error : function(error){
-                    done(error);
-               }
+          queue.push('sample',{
+            success : function(response){
+                 if(response instanceof CB.QueueMessage && response.id){
+                      if(response.message === 'sample'){
+                           //now change the type of the queue to push. 
+                           queue.addSubscriber("https://www.google.com", {
+                              success : function(){
+                                   queue.type = "push";
+                                     queue.update({
+                                          success : function(response){
+                                               if(response.type === "push"){
+                                                  done();
+                                               }else{
+                                                   done("Error. Didnot update the queue.")
+                                               }
+                                          },error : function(error){
+                                               done(error);
+                                          }
+                                        });
+                              }, error : function(){
+                                   done("Canot add subscriber to the queue");
+                              }
+                           });
+                      }
+                      else{
+                           done("Pushed but incorrect data");
+                      }
+                 }else{
+                      done("Message pushed but response is not QueueMessage");
+                 }
+            },error : function(error){
+                 done(error);
+            }
           });
-     });
-
-     it("Should multiple subscribers to the queue.",function(done){
-          this.timeout(20000);
-
-          var queue = new CB.CloudQueue(util.makeString());
-          var url = ["sample.sample.com","sample1.cloudapp.net"];
-          queue.addSubscriber(url,{
-               success : function(response){
-                    for(var i=0;i<url.length;i++){
-                         if(response.subscribers.indexOf(url[i])===-1){
-                              done("Subscribers not added.");
-                         }
-                    }
-                    done();
-               },error : function(error){
-                    done(error);
-               }
-          });
-     });
-
-     it("Should remove subscriber from the queue.",function(done){
-          this.timeout(20000);
-
-          var queue = new CB.CloudQueue(util.makeString());
-          var url ="sample1.cloudapp.net";
-          queue.removeSubscriber(url,{
-               success : function(response){
-                    if(response.subscribers.indexOf(url)===-1){
-                         done();
-                    }else{
-                         done("subscribers not added to the queue");
-                    }
-               },error : function(error){
-                    done(error);
-               }
-          });
-     });
-
-     it("Should remove multiple subscriber from the queue.",function(done){
-          this.timeout(20000);
-
-          var queue = new CB.CloudQueue(util.makeString());
-          var url =["sample1.cloudapp.net","sample2.cloudapp.net"];
-          queue.removeSubscriber(url,{
-               success : function(response){
-                    for(var i=0;i<url.length;i++){
-                         if(response.subscribers.indexOf(url[i])>=0){
-                              done("Subscribers not removed.");
-                         }
-                    }
-                    done();
-               },error : function(error){
-                    done(error);
-               }
-          });
-     });
-
-     it("Should not add subscriber with invalid URL.",function(done){
-          this.timeout(20000);
-          var queue = new CB.CloudQueue(util.makeString());
-          var url = "sample.sample";
-          queue.addSubscriber(url,{
-               success : function(response){
-                   done("Success called with invalid URL");
-               },error : function(error){
-                   done();
-               }
-          });
-     });
-
-     
+      });
 });
