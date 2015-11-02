@@ -10662,11 +10662,12 @@ CB.CloudGeoPoint = CB.CloudGeoPoint || function(longitude , latitude) {
     //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
     if((Number(latitude)>= -90 && Number(latitude)<=90)&&(Number(longitude)>= -180 && Number(longitude)<=180)) {
         this.document.coordinates = [Number(longitude), Number(latitude)];
-        this.document.latitude = Number(longitude);
-        this.document.longitude = Number(latitude);
+        this.document.latitude = Number(latitude);
+        this.document.longitude = Number(longitude);
     }
-    else
+    else{
         throw "latitude and longitudes are not in range";
+    }
 };
 
 Object.defineProperty(CB.CloudGeoPoint.prototype, 'latitude', {

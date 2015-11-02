@@ -41,11 +41,56 @@ describe("CloudQuery", function (done) {
                      throw "Error querying object.";
                   }
                 });
-               
             },function(){
                throw "should save the object";
             });
         });
+
+
+        it("containedIn should work on Id",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj1){
+                 var obj2 = new CB.CloudObject('Custom1');
+                obj2.set('newColumn','sample');
+                obj2.set('description','sample2');
+                obj2.save().then(function(obj2){
+                     var obj3 = new CB.CloudObject('Custom1');
+                    obj3.set('newColumn','sample');
+                    obj3.set('description','sample2');
+                    obj3.save().then(function(obj3){
+
+                        var cbQuery = new CB.CloudQuery('Custom1');
+                        cbQuery.containedIn('id', [obj1.id,obj3.id]);
+                        cbQuery.find({
+                          success: function(objList){
+                            if(objList.length===2)
+                               done();
+                            else
+                                done("Cannot do contains in on Id");
+                          },
+                          error: function(err){
+                             throw "Error querying object.";
+                          }
+                        });
+                    },function(){
+                       throw "should save the object";
+                    });
+
+                   
+                   
+                },function(){
+                   throw "should save the object";
+                });
+
+               
+               
+            },function(){
+               throw "should save the object";
+            });
+        }); 
 
         it("select column should work on distinct",function(done){
             this.timeout(20000);

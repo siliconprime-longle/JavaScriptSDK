@@ -10,7 +10,6 @@ describe("Cloud Table", function(){
 
         this.timeout(80000);
 
-
         var obj = new CB.CloudTable(tableName);
 
         obj.save().then(function(){

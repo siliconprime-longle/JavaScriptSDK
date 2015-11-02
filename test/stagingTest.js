@@ -68,7 +68,6 @@ describe("Cloud Table", function(){
 
         this.timeout(80000);
 
-
         var obj = new CB.CloudTable(tableName);
 
         obj.save().then(function(){
@@ -4571,7 +4570,7 @@ describe("Cloud Object", function() {
 
  it("Should Save data in Custom date field",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var obj = new CB.CloudObject('Employee');
      obj.set('dob',new Date());
@@ -4585,10 +4584,42 @@ describe("Cloud Object", function() {
      });
  });
 
+ it("Should Save data in a CloudObject without attaching a file.",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Company');
+     obj.set('Name','sample');
+     obj.save().then(function(res){
+            if(res)
+                done();
+            else
+                throw "Unable to Save Object";
+     },function(err){
+         throw "Unable to Save Date TIme";
+     });
+ });
+
+ it("Should Save geo point",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom5');
+     obj.set('location',new CB.CloudGeoPoint(100,80));
+     obj.save().then(function(res){
+            if(res)
+                done();
+            else
+                throw "Unable to Save Object";
+     },function(err){
+         throw "Unable to Save Date TIme";
+     });
+ });
+
 
 it("should not save a string into date column",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('createdAt','abcd');
@@ -4606,7 +4637,7 @@ it("should not save a string into date column",function(done){
     it("should not set the id",function(done){
 
         try{
-            this.timeout(20000);
+            this.timeout(30000);
 
             var obj = new CB.CloudObject('Sample');
             obj.set('id', '123');
@@ -4619,7 +4650,7 @@ it("should not save a string into date column",function(done){
 
     it("should save.", function(done) {
 
-    	this.timeout('20000');
+    	this.timeout('30000');
 
      	var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -4639,12 +4670,8 @@ it("should not save a string into date column",function(done){
      	});
     });
 
-
-   
-
-
    it("should update the object after save and update.", function(done) {
-        this.timeout('20000');
+        this.timeout('30000');
 
      	var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -4691,7 +4718,7 @@ it("should not save a string into date column",function(done){
 
     it("should update a saved CloudObject",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student1');
         var obj1 = new CB.CloudObject('hostel');
@@ -4721,7 +4748,7 @@ it("should not save a string into date column",function(done){
 
    it("should delete an object after save.", function(done) {
 
-    	this.timeout('20000');
+    	this.timeout('30000');
         
         var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -4741,7 +4768,7 @@ it("should not save a string into date column",function(done){
     });
 
     it("should not save an object which has required column which is missing. ", function(done) {
-        this.timeout('20000');
+        this.timeout('30000');
 
      	var obj = new CB.CloudObject('Sample');
    		//name is required which is missing.
@@ -4755,7 +4782,7 @@ it("should not save a string into date column",function(done){
     });
 
     it("should not save an object with wrong dataType.", function(done) {
-       this.timeout('20000');
+       this.timeout('30000');
 
      	var obj = new CB.CloudObject('Sample');
    		//name is string and we have a wrong datatype here.
@@ -4771,7 +4798,7 @@ it("should not save a string into date column",function(done){
 
     it("should not save an object with duplicate values in unique fields.", function(done) {
 
-    	this.timeout('20000');
+    	this.timeout('30000');
         
         var text = util.makeString();
 
@@ -4800,7 +4827,7 @@ it("should not save a string into date column",function(done){
 
     it("should save an array.", function(done) {
 
-    	this.timeout('20000');
+    	this.timeout('30000');
 
         var text = util.makeString();
 
@@ -4818,7 +4845,7 @@ it("should not save a string into date column",function(done){
 
     it("should not save wrong datatype in an  array.", function(done) {
        	
-       	this.timeout(20000);
+       	this.timeout(30000);
 
 		var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4835,7 +4862,7 @@ it("should not save a string into date column",function(done){
 
     it("should not allow multiple dataTypes in an array. ", function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
     	var text = util.makeString();
 
@@ -4853,7 +4880,7 @@ it("should not save a string into date column",function(done){
 
     it("should save an array with JSON objects. ", function(done) {
 
-    	this.timeout(20000);
+    	this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4870,7 +4897,7 @@ it("should not save a string into date column",function(done){
     });
 
    it("should save a CloudObject as a relation. ", function(done) {
-       	this.timeout(20000);
+       	this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4890,7 +4917,7 @@ it("should not save a string into date column",function(done){
     });
 
     it("should save a CloudObject as a relation with relate function. ", function(done) {
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4918,7 +4945,7 @@ it("should not save a string into date column",function(done){
 
 
     it("should keep relations intact.", function(done) {
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn2',new CB.CloudObject('Custom3'));
@@ -4946,7 +4973,7 @@ it("should not save a string into date column",function(done){
 
 
      it("should not save a a wrong relation.", function(done) {
-       this.timeout(20000);
+       this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4966,7 +4993,7 @@ it("should not save a string into date column",function(done){
     });
 
     it("should not save a CloudObject Relation when the schema of a related object is wrong. ", function(done) {
-       this.timeout(20000);
+       this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -4987,7 +5014,7 @@ it("should not save a string into date column",function(done){
 
     it("should not save a duplicate relation in unique fields. ", function(done) {
 
-       this.timeout(20000);
+       this.timeout(30000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -5017,7 +5044,7 @@ it("should not save a string into date column",function(done){
     });
 
     it("should save an array of CloudObject with an empty array", function(done) {
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name','sample');
@@ -5044,7 +5071,7 @@ it("should not save a string into date column",function(done){
 
 
     it("should save an array of CloudObject.", function(done) {
-       this.timeout(20000);
+       this.timeout(30000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -5105,7 +5132,7 @@ it("should not save a string into date column",function(done){
      });
 
     it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
-       this.timeout(20000);
+       this.timeout(30000);
 
        var obj = new CB.CloudObject('Sample');
        obj.set('name','sample');
@@ -5162,7 +5189,7 @@ it("should not save a string into date column",function(done){
 
  // Test for error of getting duplicate objects while saving a object after updating
     it("Should not duplicate the values in a list after updating",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudObject('student1');
         obj.set('age',5);
         obj.set('name','abcd');
@@ -5187,7 +5214,7 @@ it("should not save a string into date column",function(done){
 
 // Test Case for error saving an object in a column
     it("should save a JSON object in a column",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
         var json= {"name":"vipul","location":"uoh","age":10};
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn6',json);
@@ -5204,7 +5231,7 @@ it("should not save a string into date column",function(done){
 
     it("should save list of numbers",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom14');
         obj.set('ListNumber',[1,2,3]);
@@ -5218,7 +5245,7 @@ it("should not save a string into date column",function(done){
 
     it("should save a list of GeoPoint",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom14');
         var GP1 = new CB.CloudGeoPoint(17,89);
@@ -5234,7 +5261,7 @@ it("should not save a string into date column",function(done){
 
     it("should save the relation",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',123);
@@ -5260,7 +5287,7 @@ it("should not save a string into date column",function(done){
 
     it("should display correct error message when you save a string in a number field. ", function(done) {
         
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom7');
         obj.set('requiredNumber','sample');
@@ -5277,7 +5304,7 @@ it("should not save a string into date column",function(done){
 
      it("should unset the field. ", function(done) {
         
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',123);
@@ -5823,6 +5850,51 @@ describe("ACL", function () {
         });
 
     });
+});
+
+
+describe("MasterKey ACL", function () {
+
+     before(function(){
+        CB.appKey = CB.masterKey;
+      });
+
+
+    it("Should save an object with master key with no ACL access.", function (done) {
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        
+        obj.save().then(function(obj) {
+
+            if(obj.id){
+                obj.ACL = new CB.ACL();
+                obj.ACL.setPublicReadAccess(false);
+                obj.ACL.setPublicWriteAccess(false);
+                 obj.save().then(function(obj) {
+
+                    if(obj.id){
+                        done();
+                    }else{
+                        done("Obj did not save.");
+                    }
+                
+                }, function (error) {
+                    done(error);
+                });
+            }else{
+                done("Obj did not save.");
+            }
+        
+        }, function (error) {
+           done(error);
+        });
+    });
+
+     after(function(){
+        CB.appKey = CB.jsKey;
+     });
+
 });
 
 
@@ -7580,11 +7652,56 @@ describe("CloudQuery", function (done) {
                      throw "Error querying object.";
                   }
                 });
-               
             },function(){
                throw "should save the object";
             });
         });
+
+
+        it("containedIn should work on Id",function(done){
+            this.timeout(20000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj1){
+                 var obj2 = new CB.CloudObject('Custom1');
+                obj2.set('newColumn','sample');
+                obj2.set('description','sample2');
+                obj2.save().then(function(obj2){
+                     var obj3 = new CB.CloudObject('Custom1');
+                    obj3.set('newColumn','sample');
+                    obj3.set('description','sample2');
+                    obj3.save().then(function(obj3){
+
+                        var cbQuery = new CB.CloudQuery('Custom1');
+                        cbQuery.containedIn('id', [obj1.id,obj3.id]);
+                        cbQuery.find({
+                          success: function(objList){
+                            if(objList.length===2)
+                               done();
+                            else
+                                done("Cannot do contains in on Id");
+                          },
+                          error: function(err){
+                             throw "Error querying object.";
+                          }
+                        });
+                    },function(){
+                       throw "should save the object";
+                    });
+
+                   
+                   
+                },function(){
+                   throw "should save the object";
+                });
+
+               
+               
+            },function(){
+               throw "should save the object";
+            });
+        }); 
 
         it("select column should work on distinct",function(done){
             this.timeout(20000);
