@@ -17,12 +17,9 @@ CB.CloudCache.prototype.put = function(key, val, option, callback){
     CB._fileCheck(this).then(function(thisObj){
 
         var xmlhttp = CB._loadXml();
-        // var params=JSON.stringify({
-        //     document: CB.toJSON(thisObj),
-        //     key: CB.appKey
-        // });
-        var url = CB.apiUrl + "/cache/" + this.appId + '/'+thisObj.cacheName+'/'+key+'/'+val+'/'+option;
-        CB._request('POST',url,params).then(function(response){
+
+        var url = CB.apiUrl + "/cache/" + thisObj.appId + '/'+thisObj.cacheName+'/'+key+'/'+val+'/'+option;
+        CB._request('POST',url).then(function(response){
             // thisObj = CB.fromJSON(JSON.parse(response),thisObj);
             if (callback) {
                 callback.success(thisObj);
@@ -49,16 +46,118 @@ CB.CloudCache.prototype.put = function(key, val, option, callback){
     }
 };
 
-CB.CloudCache.prototype.get = function(key){
+CB.CloudCache.prototype.get = function(key, callback){
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+    CB._fileCheck(this).then(function(thisObj){
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + thisObj.appId + '/'+thisObj.cacheName+'/'+key;
+        CB._request('GET',url).then(function(response){
+            // thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
 
 };
 
-CB.CloudCache.prototype.delete = function(){
+CB.CloudCache.prototype.delete = function(key, callback){
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+    CB._fileCheck(this).then(function(thisObj){
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + thisObj.appId + '/'+thisObj.cacheName+'/'+key;
+        CB._request('DELETE',url).then(function(response){
+
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
 
 };
 
-CB>CloudCache.prototype.clear = function(){
+CB.CloudCache.prototype.clear = function(key, callback){
+   if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+    CB._fileCheck(this).then(function(thisObj){
 
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + thisObj.appId + '/'+thisObj.cacheName+'/'+key;
+        CB._request('POST',url).then(function(response){
+
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
 };
 
 CB.CloudCache.prototype.increment = function(){
@@ -70,5 +169,39 @@ CB.CloudCache.prototype.getInfo = function(){
 };
 
 CB.CloudCache.prototype.getAll = function(){
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    var thisObj = this;
+    CB._fileCheck(this).then(function(thisObj){
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + thisObj.appId ;
+        CB._request('GET',url).then(function(response){
+
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+    if (!callback) {
+        return def;
+    }
 
 };
