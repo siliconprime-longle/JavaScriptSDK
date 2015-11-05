@@ -7689,7 +7689,7 @@ CB.CloudApp.onConnect = function(functionToFire) { //static function for initial
     }
 
     CB.Socket.on('connect', functionToFire);
-    
+
 
 };
 
@@ -7916,7 +7916,7 @@ CB.CloudNotification.publish = function(channelName, data, done) {
  */
 
 CB.CloudObject = function(tableName, id) { //object for documents
-    
+
     this.document = {};
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
@@ -7987,12 +7987,12 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
     var def;
-    
-    //shift variables. 
+
+    //shift variables.
     if(cloudQuery && !(cloudQuery instanceof CB.CloudQuery)){
-        //this is a function. 
+        //this is a function.
         if(callback !== null && typeof callback === 'object'){
-            //callback is actually done. 
+            //callback is actually done.
             done = callback;
             callback = null;
         }
@@ -8004,7 +8004,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
         def = new CB.Promise();
     }
 
-    //validate query. 
+    //validate query.
     if(cloudQuery && cloudQuery instanceof CB.CloudQuery){
 
         if(cloudQuery.tableName!== tableName){
@@ -8383,19 +8383,19 @@ CB.CloudObject.deleteAll = function(array,callback){
 
 /* Private Methods */
 CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
-   
+
    if(!cloudQuery)
         throw "CloudQuery is null";
 
     if(!cloudQuery.query)
         throw "There is no query in CloudQuery";
-   
-   //validate query. 
+
+   //validate query.
    var query = cloudQuery.query;
 
    if(cloudQuery.limit===0)
         return false;
-    
+
    if(cloudQuery.skip>0){
         --cloudQuery.skip;
         return false;
@@ -8523,7 +8523,7 @@ CB.CloudQuery.prototype.notEqualTo = function(columnName, data) {
         };
     }else{
         //This is for people who code : obj.notEqualTo('column', null);
-        this.exists(columnName); 
+        this.exists(columnName);
     }
 
     return this;
@@ -8920,11 +8920,11 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     var regex = '^' + value;
     if (!this.query[columnName]) {
         this.query[columnName] = {};
-    } 
+    }
 
     this.query[columnName]["$regex"] = regex;
     this.query[columnName]["$options"] = 'im';
-    
+
     return this;
 }
 
@@ -9041,7 +9041,7 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
     }
 
     var thisObj = this;
-    
+
     var params=JSON.stringify({
         onKey: keys,
         query: thisObj.query,
@@ -9126,7 +9126,7 @@ CB.CloudQuery.prototype.get = function(objectId,callback){
 };
 
 CB.CloudQuery.prototype.findById = function(objectId, callback) { //find the document(s) matching the given query
-    
+
     var thisObj = this;
 
     if (!CB.appId) {
@@ -9229,9 +9229,9 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
 
 
 CB.CloudQuery._validateQuery = function(cloudObject, query){
-    //validate query. 
+    //validate query.
    for(var key in query){
-        
+
         if(query[key]){
             var value = query[key];
             if(typeof value === 'object'){
@@ -9274,7 +9274,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                 }
                             }
 
-                            //greater than and equalTo. 
+                            //greater than and equalTo.
                             if(objectKeys === '$gte'){
                                 if(cloudObject.get(key) < query[key]['$gte']){
                                     return false;
@@ -9282,14 +9282,14 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                             }
 
 
-                            //less than and equalTo. 
+                            //less than and equalTo.
                             if(objectKeys === '$lte'){
                                 if(cloudObject.get(key) > query[key]['$lte']){
                                     return false;
                                 }
                             }
 
-                            //exists 
+                            //exists
                             if(objectKeys === '$exists'){
                                 if(query[key][objectKeys] && cloudObject.get(key)){
                                     //do nothing.
@@ -9298,20 +9298,20 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                 }
                             }
 
-                            //doesNot exists. 
+                            //doesNot exists.
                             if(objectKeys === '$exists'){
                                 if(!query[key][objectKeys] && cloudObject.get(key)){
                                     return false;
                                 }
                             }
 
-                            //startsWith. 
+                            //startsWith.
                             if(objectKeys === '$regex'){
 
                                 var reg = new RegExp(query[key][objectKeys]);
 
                                 if(!query[key]['$options'] ){
-                                    if(!reg.test(cloudObject.get(key))) //test actial regex. 
+                                    if(!reg.test(cloudObject.get(key))) //test actial regex.
                                         return false;
                                 }else{
                                     if(query[key]['$options']==='im'){ //test starts with.
@@ -9325,7 +9325,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                             }
 
 
-                            //containedIn. 
+                            //containedIn.
                             if(objectKeys === '$in'){
 
                                 if(query[key][objectKeys]){
@@ -9351,7 +9351,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                                     break;
                                                 }
                                             }
-                                           
+
                                         }
 
                                         if(!exists){
@@ -9367,7 +9367,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                 }
                             }
 
-                            //doesNot containedIn. 
+                            //doesNot containedIn.
                             if(objectKeys === '$nin'){
                                 if(query[key][objectKeys]){
                                     var arr =  query[key][objectKeys];
@@ -9392,9 +9392,9 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                                     break;
                                                 }
                                             }
-                                            
+
                                         }
-                                        
+
                                         if(exists){
                                             return false;
                                         }
@@ -9408,7 +9408,7 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                 }
                             }
 
-                            //containsAll. 
+                            //containsAll.
                              if(objectKeys === '$all'){
                                 if(query[key][objectKeys]){
                                     var arr =  query[key][objectKeys];
@@ -9440,10 +9440,10 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                                 }
                             }
                         }
-                    
+
                 }
             }else{
-                //it might be a plain equalTo query. 
+                //it might be a plain equalTo query.
                 if(key.indexOf('.')!==-1){ // for keys with "key._id" - This is for CloudObjects.
                     var temp = key.substring(0, key.indexOf('.'));
                     if(!cloudObject.get(temp)){
@@ -9458,10 +9458,10 @@ CB.CloudQuery._validateQuery = function(cloudObject, query){
                         return false;
                     }
                 }
-                
+
             }
         }
-        
+
    }
 
    return true;
@@ -9627,7 +9627,7 @@ CB.SearchFilter.prototype.near = function(columnName,geoPoint,distance){
     this.bool.must.push(obj);
 };
 
-//And logical function. 
+//And logical function.
 CB.SearchFilter.prototype.and = function(searchFilter) {
 
     if(searchFilter.$include.length>0){
@@ -9757,15 +9757,15 @@ CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, op
             obj.multi_match = {};
             obj.multi_match.query = query;
             obj.multi_match.fields = columns;
-            
+
             if (operator) {
                 obj.multi_match.operator = operator;
-            } 
+            }
 
             if(match_percent){
                 obj.multi_match.minimum_should_match = match_percent;
             }
-            
+
             if(boost){
                 obj.multi_match.boost = boost;
             }
@@ -9779,7 +9779,7 @@ CB.SearchQuery.prototype._buildSearchOn = function(columns, query, fuzziness, op
             obj.match = {};
             obj.match[columns] = {};
             obj.match[columns].query = query;
-            
+
             if (operator) {
                 obj.match[columns].operator = operator;
             }
@@ -9807,21 +9807,21 @@ CB.SearchQuery.prototype.searchOn = function(columns, query, fuzziness, all_word
     if(all_words){
         all_words='and';
     }
-        
+
     var obj = this._buildSearchOn(columns,query, fuzziness,all_words,match_percent,priority);
     //save in query 'and' clause.
-    this.bool.should.push(obj); 
+    this.bool.should.push(obj);
 
     return this;
-    
+
 };
 
 CB.SearchQuery.prototype.phrase = function(columns, query,fuzziness, priority) {
 
-        
+
     var obj = this._buildSearchPhrase(columns, query,fuzziness, priority);
     //save in query 'and' clause.
-    this.bool.should.push(obj); 
+    this.bool.should.push(obj);
 
     return this;
 };
@@ -9837,7 +9837,7 @@ CB.SearchQuery.prototype.bestColumns = function(columns, query, fuzziness, all_w
 
     var obj = this._buildBestColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
-    this.bool.should.push(obj); 
+    this.bool.should.push(obj);
 
     return this;
 };
@@ -9853,7 +9853,7 @@ CB.SearchQuery.prototype.mostColumns = function(columns, query, fuzziness, all_w
 
     var obj = this._buildMostColumns(columns, query, fuzziness, all_words, match_percent, priority);
     //save in query 'and' clause.
-    this.bool.should.push(obj); 
+    this.bool.should.push(obj);
 
     return this;
 };
@@ -9864,7 +9864,7 @@ CB.SearchQuery.prototype.startsWith = function(column, value, priority) {
     obj.prefix = {};
     obj.prefix[column] = {};
     obj.prefix[column].value = value;
-    
+
     if(priority){
         obj.prefix[column].boost = priority;
     }
@@ -9878,7 +9878,7 @@ CB.SearchQuery.prototype.wildcard = function(column, value, priority) {
     obj.wildcard = {};
     obj.wildcard[column] = {};
     obj.wildcard[column].value = value;
-    
+
     if(priority){
         obj.wildcard[column].boost = priority;
     }
@@ -9894,7 +9894,7 @@ CB.SearchQuery.prototype.regexp = function(column, value, priority) {
     obj.regexp = {};
     obj.regexp[column] = {};
     obj.regexp[column].value = value;
-    
+
     if(priority){
         obj.regexp[column].boost = priority;
     }
@@ -9902,7 +9902,7 @@ CB.SearchQuery.prototype.regexp = function(column, value, priority) {
     this.bool.must.push(obj);
 };
 
-//And logical function. 
+//And logical function.
 CB.SearchQuery.prototype.and = function(searchQuery) {
 
     if(!searchQuery instanceof CB.SearchQuery){
@@ -9934,9 +9934,9 @@ CB.SearchQuery.prototype.not = function(searchQuery) {
 };
 
 
-/* This is CloudSearch Function, 
+/* This is CloudSearch Function,
 
-Params : 
+Params :
 CollectionNames : string or string[] of collection names. (Required)
 SearchQuery : CB.SearchQuery Object (optional)
 SearchFilter : CB.SearchFilter Object (optional)
@@ -9949,8 +9949,8 @@ CB.CloudSearch = function(collectionNames, searchQuery, searchFilter) {
 
     this.query = {};
     this.query.filtered = {};
-    
-    
+
+
     if(searchQuery){
         this.query.filtered.query = searchQuery;
     }else{
@@ -11394,7 +11394,7 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     }
 
     n_obj.document=doc2;
-    
+
     return n_obj;
 };
 
@@ -11681,3 +11681,170 @@ CB._generateHash = function(){
     }
     return hash;
 };
+
+/*
+ CloudCache
+ */
+
+CB.CloudCache = function(cacheName){
+    this.cacheName = cacheName;
+
+};
+
+CB.CloudCache.prototype.put = function(key, val, option, callback){
+
+    if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId + '/'+this.cacheName+'/'+key+'/'+val+'/'+option;
+        CB._request('POST',url).then(function(response){
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(this);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+
+};
+
+CB.CloudCache.prototype.get = function(key, callback){
+
+    if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId + '/'+this.cacheName+'/'+key;
+        CB._request('GET',url).then(function(response){
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(this);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+};
+
+CB.CloudCache.prototype.delete = function(key, callback){
+    if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId + '/'+this.cacheName+'/'+key;
+        CB._request('DELETE',url).then(function(response){
+
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(this);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+};
+
+CB.CloudCache.prototype.clear = function(key, callback){
+   if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId + '/'+this.cacheName+'/'+key;
+        CB._request('POST',url).then(function(response){
+
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+};
+
+CB.CloudCache.prototype.increment = function(){
+
+};
+
+CB.CloudCache.prototype.getInfo = function(key, callback){
+     if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId +"/"+this.cacheName+"/"+key;
+        CB._request('GET',url).then(function(response){
+
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(this);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+};
+
+CB.CloudCache.prototype.getAll = function(callback){
+    if (!callback) {
+        def = new CB.Promise();
+        return def;
+    }
+
+        var xmlhttp = CB._loadXml();
+
+        var url = CB.apiUrl + "/cache/" + CB.appId ;
+        CB._request('GET',url).then(function(response){
+
+            if (callback) {
+                callback.success(this);
+            } else {
+                def.resolve(this);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+};
+

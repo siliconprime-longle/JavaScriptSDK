@@ -62,8 +62,8 @@ describe("Cloud Cache", function(){
 
     it("Should get all the caches", function(done){
         this.timeout(30000);
-
-        CB.CloudCache.getAll(function(err){
+        var cache = new CB.CloudCache('test');
+        cache.getAll(function(err){
             if(err) throw "Failed to get all the cache";
             done();
         });
