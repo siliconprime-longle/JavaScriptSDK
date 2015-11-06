@@ -24,7 +24,7 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('test');
-        cache.clear(function(err){
+        cache.clear('test1',function(err){
             if(err) throw "Failed to clear the cache";
             done();
         });
@@ -34,27 +34,27 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('test');
-        cache.delete(function(err){
+        cache.delete('test1',function(err){
             if(err) throw "Failed to delete the cache";
             done();
         });
     });
 
-    it("Should increment the cache", function(done){
-        this.timeout(30000);
+    // it("Should increment the cache", function(done){
+    //     this.timeout(30000);
 
-        var cache = new CB.CloudCache('test');
-        cache.increment('test1', function(err){
-            if(err) throw "Failed to increment the cache";
-            done();
-        });
-    });
+    //     var cache = new CB.CloudCache('test');
+    //     cache.increment('test1', function(err){
+    //         if(err) throw "Failed to increment the cache";
+    //         done();
+    //     });
+    // });
 
     it("Should get information about the cache", function(done){
         this.timeout(30000);
 
-        var cache = new CB.CloudCache('test');
-        cache.getInfo(function(err){
+        var cache = new CB.CloudCache('student');
+        cache.getInfo('test1',function(err){
             if(err) throw "Failed to get information about the cache";
             done();
         });
