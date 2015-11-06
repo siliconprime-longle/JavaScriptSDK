@@ -287,9 +287,23 @@ describe("Should Create All Test Tables",function(done){
 
         var callback = {};
         callback.success = function(res){
+
             var user = new CB.CloudTable('User');
-            user.save().then(function(res){
-                done();
+            
+            var newColumn = new CB.Column('newColumn');
+            newColumn.dataType = 'Text';
+            user.addColumn(newColumn);
+
+            user.save().then(function(user){
+                var newColumn1 = new CB.Column('newColumn1');
+                newColumn1.dataType = 'Text';
+                user.addColumn(newColumn1);
+
+                user.save().then(function(res){
+                    done();
+                },function(error){
+                    throw "Unable to create user";
+                });
             },function(error){
                 throw "Unable to create user";
             });

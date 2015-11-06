@@ -141,16 +141,13 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+                done();
             } else{
-                throw "should retrieve saved data with particular value ";
+                done("didnot retrieve the records.")
             }
-            done();
+            
         }, function () {
-            throw "find data error";
+            done("Find error");
         })
 	});
 	

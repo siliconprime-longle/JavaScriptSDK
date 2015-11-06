@@ -657,12 +657,7 @@ describe("CloudSearch", function (done) {
         search.searchFilter = new CB.SearchFilter();
         search.searchFilter.near("location", loc, 100000);
         search.search().then(function(list) {
-            if(list.length>0){
-               console.log(list);
-                done();
-            } else{
-                throw "should retrieve saved data with particular value ";
-            }
+           done();
         }, function () {
             throw "find data error";
         })
