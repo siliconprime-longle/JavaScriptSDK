@@ -1,71 +1,60 @@
 describe("Cloud Cache", function(){
-
+     before(function(){
+        CB.appKey = CB.masterKey;
+      });
     it("Should add an item to the cache", function(done){
         this.timeout(30000);
 
-        var cache = new CB.CloudCache('test');
-        cache.put('test1','name:cloudboost name', null, function(err){
-            if(err) throw "Failed to add an item to the cache";
+        var cache = new CB.CloudCache('student');
+        cache.put('test5').then(function(){
             done();
+        }, function(){
+            throw "Failed to add an item to the cache";
         });
     });
 
     it("Should get the value in the cache", function(done){
         this.timeout(30000);
 
-        var cache = new CB.CloudCache('test');
-        cache.get('test1', function(err, result){
-            if(err) throw "Failed to get value";
+        var cache = new CB.CloudCache('student');
+        cache.get('test5').then(function(){
             done();
+        }, function(){
+            throw "Failed to get value";
         });
     });
 
-    it("Should clear the cache", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('test');
-        cache.clear('test1',function(err){
-            if(err) throw "Failed to clear the cache";
-            done();
-        });
-    });
-
-    it("Should delete the cache", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('test');
-        cache.delete('test1',function(err){
-            if(err) throw "Failed to delete the cache";
-            done();
-        });
-    });
-
-    // it("Should increment the cache", function(done){
-    //     this.timeout(30000);
-
-    //     var cache = new CB.CloudCache('test');
-    //     cache.increment('test1', function(err){
-    //         if(err) throw "Failed to increment the cache";
-    //         done();
-    //     });
-    // });
 
     it("Should get information about the cache", function(done){
-        this.timeout(30000);
+        this.timeout(3000);
 
         var cache = new CB.CloudCache('student');
-        cache.getInfo('test1',function(err){
-            if(err) throw "Failed to get information about the cache";
+        cache.info().then(function(){
+            if ("" == "") return done(new Error("Async error message"));
             done();
+        }, function(){
+            throw "Failed to get information about the cache";
         });
     });
 
     it("Should get all the caches", function(done){
         this.timeout(30000);
-        var cache = new CB.CloudCache('test');
-        cache.getAll(function(err){
-            if(err) throw "Failed to get all the cache";
+        var cache = new CB.CloudCache('student');
+        cache.getAll().then(function(){
             done();
+        }, function(){
+            throw "Failed to get all the cache";
+        });
+    });
+
+     it("Should clear the cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student1');
+        cache.clear().then(function(){
+            done();
+        }, function(){
+            throw "Failed to clear the cache";
         });
     });
 });

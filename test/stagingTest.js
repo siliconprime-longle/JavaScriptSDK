@@ -450,7 +450,7 @@ describe("Should Create All Test Tables",function(done){
         this.timeout(10000);
         CB.appKey = CB.masterKey;
     });
-   
+
 
   it("should delete tables",function(done){
 
@@ -486,12 +486,12 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to delete";
         });
 
-    }); 
+    });
 
     it("should delete tables",function(done){
 
         this.timeout(20000);
-     
+
         var obj = new CB.CloudTable('Employee');
         obj.delete().then(function(){
             done();
@@ -537,14 +537,14 @@ describe("Should Create All Test Tables",function(done){
 
         var Age = new CB.Column('Age_a');
         Age.dataType = 'Text';
-        
+
         obj.addColumn(Age);
 
         obj.save().then(function(obj){
-           
+
             var Age = new CB.Column('Age_b');
             Age.dataType = 'Text';
-            
+
             obj.addColumn(Age);
             obj.save().then(function(obj){
                done();
@@ -1157,7 +1157,7 @@ describe("Should Create All Test Tables",function(done){
             var newColumn2 = new CB.Column('newColumn1');
             newColumn2.dataType = 'Boolean';
             custom.addColumn(newColumn2);
-            
+
             custom.save().then(function(res){
                 done();
             },function(){
@@ -1180,6 +1180,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 });
+
 describe("Table Tests", function (done) {
 
     before(function(){
@@ -8049,4 +8050,64 @@ describe("CloudApp Socket Test", function () {
     });
 
 
+});
+describe("Cloud Cache", function(){
+     before(function(){
+        CB.appKey = CB.masterKey;
+      });
+    it("Should add an item to the cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student');
+        cache.put('test5').then(function(){
+            done();
+        }, function(){
+            throw "Failed to add an item to the cache";
+        });
+    });
+
+    it("Should get the value in the cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student');
+        cache.get('test5').then(function(){
+            done();
+        }, function(){
+            throw "Failed to get value";
+        });
+    });
+
+
+    it("Should get information about the cache", function(done){
+        this.timeout(3000);
+
+        var cache = new CB.CloudCache('student');
+        cache.info().then(function(){
+            if ("" == "") return done(new Error("Async error message"));
+            done();
+        }, function(){
+            throw "Failed to get information about the cache";
+        });
+    });
+
+    it("Should get all the caches", function(done){
+        this.timeout(30000);
+        var cache = new CB.CloudCache('student');
+        cache.getAll().then(function(){
+            done();
+        }, function(){
+            throw "Failed to get all the cache";
+        });
+    });
+
+     it("Should clear the cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student1');
+        cache.clear().then(function(){
+            done();
+        }, function(){
+            throw "Failed to clear the cache";
+        });
+    });
 });

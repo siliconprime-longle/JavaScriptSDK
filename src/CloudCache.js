@@ -3,26 +3,59 @@
  */
 
 CB.CloudCache = function(cacheName){
-    this.cacheName = cacheName;
-
+    this.document = {};
+    this.document.cacheName = cacheName;
 };
 
-CB.CloudCache.prototype.put = function(cacheKey, val, callback){
-
-    if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
+CB.CloudCache.prototype.put = function(key, item, callback){
   var def;
+  CB._validate();
   if (!callback) {
       def = new CB.Promise();
   }
 
   var params=JSON.stringify({
+      key: CB.appKey,
+      item: item
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.cacheName+'/'+key;
+  CB._request('PUT',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+
+};
+CB.CloudCache.prototype.get = function(key, callback){
+
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
       key: CB.appKey
   });
 
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.cacheName+'/'+cacheKey+'/'+val;
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.cacheName+'/'+key;
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -44,132 +77,21 @@ CB.CloudCache.prototype.put = function(cacheKey, val, callback){
 
 };
 
-CB.CloudCache.prototype.get = function(cacheKey, callback){
+CB.CloudCache.prototype.info = function(callback){
+    var def;
+    CB._validate();
 
-     if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-
-  var params=JSON.stringify({
-      key: CB.appKey
-  });
-
-  var url = CB.apiUrl+'/cache/get/'+CB.appId+'/'+this.cacheName+'/'+cacheKey;
-  CB._request('GET',url,params,true).then(function(response){
-    response = JSON.parse(response);
-    var obj = CB.fromJSON(response);
-    if (callback) {
-        callback.success(obj);
-    } else {
-        def.resolve(obj);
+    if (!callback) {
+        def = new CB.Promise();
     }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-  if (!callback) {
-      return def;
-  }
-
-};
-
-CB.CloudCache.prototype.delete = function(cacheKey, callback){
-     if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
 
   var params=JSON.stringify({
+    document: CB.toJSON(this),
       key: CB.appKey
   });
 
-  var url = CB.apiUrl+'/cache/delete/'+CB.appId +'/'+this.cacheName+'/'+cacheKey;
-  CB._request('DELETE',url,params,true).then(function(response){
-    response = JSON.parse(response);
-    var obj = CB.fromJSON(response);
-    if (callback) {
-        callback.success(obj);
-    } else {
-        def.resolve(obj);
-    }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-  if (!callback) {
-      return def;
-  }
-
-};
-
-CB.CloudCache.prototype.clear = function(cacheKey, callback){
-    if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-
-  var params=JSON.stringify({
-      key: CB.appKey
-  });
-
-  var url = CB.apiUrl+'/cache/clear/'+CB.appId +'/'+this.cacheName+'/'+cacheKey;
-  CB._request('PUT',url,params,true).then(function(response){
-    response = JSON.parse(response);
-    var obj = CB.fromJSON(response);
-    if (callback) {
-        callback.success(obj);
-    } else {
-        def.resolve(obj);
-    }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-  if (!callback) {
-      return def;
-  }
-};
-
-
-
-CB.CloudCache.prototype.getInfo = function(cacheKey, callback){
-     if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
-
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-
-  var params=JSON.stringify({
-      key: CB.appKey
-  });
-
-  var url = CB.apiUrl+'/cache/info/'+CB.appId +'/'+this.cacheName+'/'+cacheKey;
-  CB._request('GET',url,params,true).then(function(response){
+  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.cacheName;
+  CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
     if (callback) {
@@ -190,21 +112,19 @@ CB.CloudCache.prototype.getInfo = function(cacheKey, callback){
 };
 
 CB.CloudCache.prototype.getAll = function(callback){
-    if (!CB.appId) {
-      throw "CB.appId is null.";
-  }
+    var def;
+    CB._validate();
 
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
+    if (!callback) {
+        def = new CB.Promise();
+    }
 
   var params=JSON.stringify({
+    document: CB.toJSON(this),
       key: CB.appKey
   });
-
   var url = CB.apiUrl+'/cache/'+CB.appId;
-  CB._request('GET',url,params,true).then(function(response){
+  CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
     if (callback) {
@@ -224,3 +144,41 @@ CB.CloudCache.prototype.getAll = function(callback){
   }
 
 };
+
+CB.CloudCache.prototype.clear = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.cacheName;
+  CB._request('DELETE',url,params,true).then(function(response){
+    // response = JSON.parse(response);
+    // var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+
+
+
