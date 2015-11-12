@@ -6,7 +6,8 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test5').then(function(){
+        cache.document.item = "education:Mbarara High School";
+        cache.put('test8').then(function(){
             done();
         }, function(){
             throw "Failed to add an item to the cache";
@@ -17,41 +18,40 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
-        cache.get('test5').then(function(){
+        cache.get('test8').then(function(){
             done();
         }, function(){
             throw "Failed to get value";
         });
     });
 
-
-    it("Should get information about the cache", function(done){
-        this.timeout(3000);
-
-        var cache = new CB.CloudCache('student');
-        cache.info().then(function(){
-            if ("" == "") return done(new Error("Async error message"));
-            done();
-        }, function(){
-            throw "Failed to get information about the cache";
-        });
-    });
-
     it("Should get all the caches", function(done){
         this.timeout(30000);
         var cache = new CB.CloudCache('student');
-        cache.getAll().then(function(){
+        cache.listCache().then(function(){
             done();
         }, function(){
             throw "Failed to get all the cache";
         });
     });
 
+    it("Should get information about the cache", function(done){
+        this.timeout(3000);
+
+        var cache = new CB.CloudCache('student');
+        cache.getInfo().then(function(res){
+            done();
+        }, function(){
+            throw "Failed to get information about the cache";
+        });
+    });
+
      it("Should clear the cache", function(done){
         this.timeout(30000);
 
-        var cache = new CB.CloudCache('student1');
-        cache.clear().then(function(){
+        var cache = new CB.CloudCache('student');
+
+        cache.clear().then(function(res){
             done();
         }, function(){
             throw "Failed to clear the cache";

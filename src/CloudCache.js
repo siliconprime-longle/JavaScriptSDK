@@ -4,10 +4,13 @@
 
 CB.CloudCache = function(cacheName){
     this.document = {};
-    this.document.cacheName = cacheName;
+    this.document._tableName = "_cache";
+    this.document.name = cacheName;
+    this.document.size = "";
+    this.document.keys = [];
 };
 
-CB.CloudCache.prototype.put = function(key, item, callback){
+CB.CloudCache.prototype.put = function(key, callback){
   var def;
   CB._validate();
   if (!callback) {
@@ -16,10 +19,10 @@ CB.CloudCache.prototype.put = function(key, item, callback){
 
   var params=JSON.stringify({
       key: CB.appKey,
-      item: item
+      item: this.document.item
   });
 
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.cacheName+'/'+key;
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('PUT',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -55,7 +58,7 @@ CB.CloudCache.prototype.get = function(key, callback){
   });
 
 
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.cacheName+'/'+key;
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -77,7 +80,7 @@ CB.CloudCache.prototype.get = function(key, callback){
 
 };
 
-CB.CloudCache.prototype.info = function(callback){
+CB.CloudCache.prototype.getInfo = function(callback){
     var def;
     CB._validate();
 
@@ -90,7 +93,7 @@ CB.CloudCache.prototype.info = function(callback){
       key: CB.appKey
   });
 
-  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.cacheName;
+  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.name;
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -111,7 +114,7 @@ CB.CloudCache.prototype.info = function(callback){
   }
 };
 
-CB.CloudCache.prototype.getAll = function(callback){
+CB.CloudCache.prototype.listCache = function(callback){
     var def;
     CB._validate();
 
@@ -158,10 +161,10 @@ CB.CloudCache.prototype.clear = function(callback){
       key: CB.appKey
   });
 
-  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.cacheName;
+  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.name;
   CB._request('DELETE',url,params,true).then(function(response){
-    // response = JSON.parse(response);
-    // var obj = CB.fromJSON(response);
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
     if (callback) {
         callback.success(obj);
     } else {
