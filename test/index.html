@@ -15,9 +15,10 @@
     <!-- <script src="stageTest.js"></script> -->
     <script src="serverTest.js"></script>
     <script src="init/init.js"></script>
-    <script src="CloudTable/createTestTables.js"></script>
-    <script src="CloudQueue/tests.js"></script>
-    <script src="CloudObject/test.js"></script>
+    <!--<script src="CloudTable/createTestTables.js"></script>
+    <script src="CloudQueue/tests.js"></script>-->
+    <!--<script src="CloudObject/test.js"></script>
+
     <script src="CloudObject/bulkApi.js"></script>
     <script src="CloudObject/file.js"></script>
     <script src="CloudFile/CloudFile.js"></script>
@@ -34,17 +35,18 @@
     <script src="CloudUser/userTest.js"></script>
     <script src="CloudSearch/CloudSearch.js"></script>
     <script src="CloudRole/role.js"></script>
-    <script src="ACL/aclTest1.js"></script> 
-    <script src="ACL/queryAcl.js"></script> 
+    <script src="ACL/aclTest1.js"></script>
+    <script src="ACL/queryAcl.js"></script>
     <script src="ACL/searchAcl.js"></script>
     <script src="CloudGeoPoint/CloudGeoPoint.js"></script>
     <script src="CloudObject/versionTest.js"></script>
     <script src="CloudSearch/include.js"></script>
     <script src="CloudTable/test.js"></script>
     <script src="CloudTable/cloudtable.js"></script>
-    <script src="AtomicityTests/atomicity.js"></script>
-    <script src="AppTests/apptest.js"></script>
-    <script src="AppTests/apptest2.js"></script>
+    <script src="AtomicityTests/atomicity.js"></script> -->
+    <!--<script src="AppTests/apptest.js"></script>
+    <script src="AppTests/apptest2.js"></script>-->
+    <script src="CloudCache/CloudCache.js"></script>
 
 </head>
 <body>
@@ -53,6 +55,7 @@
   <div id="fixtures"></div>
 
   <script>
+   mocha.setup({ignoreLeaks: true});
       if (window.mochaPhantomJS) {
           mochaPhantomJS.run();
       }

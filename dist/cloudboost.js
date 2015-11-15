@@ -7942,7 +7942,7 @@ CB.CloudNotification.publish = function(channelName, data, done) {
  */
 
 CB.CloudObject = function(tableName, id) { //object for documents
-    
+
     this.document = {};
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
@@ -8014,12 +8014,12 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
     var def;
-    
-    //shift variables. 
+
+    //shift variables.
     if(cloudQuery && !(cloudQuery instanceof CB.CloudQuery)){
-        //this is a function. 
+        //this is a function.
         if(callback !== null && typeof callback === 'object'){
-            //callback is actually done. 
+            //callback is actually done.
             done = callback;
             callback = null;
         }
@@ -8031,7 +8031,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
         def = new CB.Promise();
     }
 
-    //validate query. 
+    //validate query.
     if(cloudQuery && cloudQuery instanceof CB.CloudQuery){
 
         if(cloudQuery.tableName!== tableName){
@@ -8410,19 +8410,19 @@ CB.CloudObject.deleteAll = function(array,callback){
 
 /* Private Methods */
 CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
-   
+
    if(!cloudQuery)
         throw "CloudQuery is null";
 
     if(!cloudQuery.query)
         throw "There is no query in CloudQuery";
-   
-   //validate query. 
+
+   //validate query.
    var query = cloudQuery.query;
 
    if(cloudQuery.limit===0)
         return false;
-    
+
    if(cloudQuery.skip>0){
         --cloudQuery.skip;
         return false;
@@ -11431,6 +11431,8 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
                 doc2[key]=CB._clone(doc[key],null);
             }else if(doc[key] instanceof CB.CloudGeoPoint){
                 doc2[key]=CB._clone(doc[key], null);
+            }else if(doc[key] instanceof CB.CloudCache){
+                doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
@@ -11441,7 +11443,7 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     }
 
     n_obj.document=doc2;
-    
+
     return n_obj;
 };
 
@@ -12346,4 +12348,260 @@ Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
         CB._modified(this,'delay');
     }
 });
+
+
+/*
+ CloudCache
+ */
+
+CB.CloudCache = function(cacheName){
+    this.document = {};
+    this.document._tableName = "_cache";
+    this.document.name = cacheName;
+    this.document.size = "";
+    this.document.keys = [];
+};
+
+CB.CloudCache.prototype.put = function(key, callback){
+  var def;
+  CB._validate();
+  if (!callback) {
+      def = new CB.Promise();
+  }
+
+  var params=JSON.stringify({
+      key: CB.appKey,
+      item: this.document.item
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
+  CB._request('PUT',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+
+};
+CB.CloudCache.prototype.get = function(key, callback){
+
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key+'/item';
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+
+};
+
+
+CB.CloudCache.prototype.getInfo = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId +'/'+this.document.name;
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+CB.CloudCache.prototype.getAll = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/items';
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+
+};
+
+CB.CloudCache.prototype.deleteAll = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name;
+  CB._request('DELETE',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+CB.CloudCache.getAll = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId;
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+CB.CloudCache.deleteAll = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    // document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId;
+  CB._request('DELETE',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+
+
 

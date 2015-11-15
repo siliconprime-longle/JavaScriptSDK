@@ -261,6 +261,8 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
                 doc2[key]=CB._clone(doc[key],null);
             }else if(doc[key] instanceof CB.CloudGeoPoint){
                 doc2[key]=CB._clone(doc[key], null);
+            }else if(doc[key] instanceof CB.CloudCache){
+                doc2[key]=CB._clone(doc[key], null);
             }
             else
                 doc2[key]=doc[key];
@@ -271,7 +273,7 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     }
 
     n_obj.document=doc2;
-    
+
     return n_obj;
 };
 

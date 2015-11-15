@@ -7,8 +7,8 @@ module.exports = function(grunt) {
             sdk: {
                 // the files to concatenate
                     src: ['src/Promises.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
-                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/PrivateMethods.js','src/CloudQueue.js'],
-
+                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/PrivateMethods.js','src/CloudQueue.js',
+                    'src/CloudCache.js'],
                     // the location of the resulting JS file
                     dest: 'dist/cloudboost.js'
                 },
@@ -33,7 +33,8 @@ module.exports = function(grunt) {
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
                         'test/CloudApp/*.js',
-                        'test/AppTests/*.js'
+                        'test/AppTests/*.js',
+                        'test/CloudCache/CloudCache.js'
                     ],
 
                     dest: 'test/test.js'
@@ -58,7 +59,8 @@ module.exports = function(grunt) {
                         'test/CloudQuery/*.js',
                         'test/CloudSearch/*.js',
                         'test/AppTests/*.js',
-                        'test/CloudApp/*.js'
+                        'test/CloudApp/*.js',
+                        'test/CloudCache/CloudCache.js'
                     ],
 
                     dest: 'test/stagingTest.js'
@@ -81,7 +83,7 @@ module.exports = function(grunt) {
                 },
                 uglifyRelease: {
                     files: {
-                        
+
                     }
                 }
             },
@@ -97,8 +99,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bumpup');
-    
+
     grunt.registerTask('default',['concat:sdk','concat:test','concat:stagingTest','bumpup','uglify:uglifyDev']);
     grunt.registerTask('release',['concat:sdkRelease','uglify:uglifyRelease']);
-    
+
 };

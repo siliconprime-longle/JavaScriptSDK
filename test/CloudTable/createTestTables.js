@@ -4,7 +4,7 @@ describe("Should Create All Test Tables",function(done){
         this.timeout(10000);
         CB.appKey = CB.masterKey;
     });
-   
+
 
   it("should delete tables",function(done){
 
@@ -39,12 +39,12 @@ describe("Should Create All Test Tables",function(done){
             throw "Unable to delete";
         });
 
-    }); 
+    });
 
     it("should delete tables",function(done){
 
         this.timeout(20000);
-     
+
         var obj = new CB.CloudTable('Employee');
         obj.delete().then(function(){
             done();
@@ -90,14 +90,14 @@ describe("Should Create All Test Tables",function(done){
 
         var Age = new CB.Column('Age_a');
         Age.dataType = 'Text';
-        
+
         obj.addColumn(Age);
 
         obj.save().then(function(obj){
-           
+
             var Age = new CB.Column('Age_b');
             Age.dataType = 'Text';
-            
+
             obj.addColumn(Age);
             obj.save().then(function(obj){
                done();
@@ -710,7 +710,7 @@ describe("Should Create All Test Tables",function(done){
             var newColumn2 = new CB.Column('newColumn1');
             newColumn2.dataType = 'Boolean';
             custom.addColumn(newColumn2);
-            
+
             custom.save().then(function(res){
                 done();
             },function(){
