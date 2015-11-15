@@ -53,6 +53,7 @@
   <div id="fixtures"></div>
 
   <script>
+   mocha.setup({ignoreLeaks: true});
       if (window.mochaPhantomJS) {
           mochaPhantomJS.run();
       }
