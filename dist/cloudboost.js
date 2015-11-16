@@ -11321,10 +11321,10 @@ CB.fromJSON = function(data, thisObj) {
 
             thisObj = obj;
         }else{
-            thisObj.document = document;    
+            thisObj.document = document;
         }
 
-        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile){
+        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile || thisObj instanceof CB.CloudCache){
             //activate ACL.
             if(thisObj.document["ACL"])
                 thisObj.document["ACL"].parent = thisObj;
@@ -11377,6 +11377,9 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
 
     if(type === 'column'){
         obj = new CB.Column(columnName);
+    }
+    if(type === 'cache'){
+        obj = new CB.CloudCache();
     }
     return obj;
 };
@@ -12355,11 +12358,14 @@ Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
  */
 
 CB.CloudCache = function(cacheName){
+  if(typeof cacheName === 'undefined' || cacheName == null){
+        throw "Cannot create a cache with empty name";
+    }
     this.document = {};
-    this.document._tableName = "_cache";
+    this.document._tableName = "cache";
     this.document.name = cacheName;
     this.document.size = "";
-    this.document.keys = [];
+    this.document.items = [];
 };
 
 CB.CloudCache.prototype.put = function(key, callback){
@@ -12376,7 +12382,7 @@ CB.CloudCache.prototype.put = function(key, callback){
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('PUT',url,params,true).then(function(response){
-    response = JSON.parse(response);
+    // response = JSON.parse(response);
     var obj = CB.fromJSON(response);
     if (callback) {
         callback.success(obj);
@@ -12480,6 +12486,40 @@ CB.CloudCache.prototype.getAll = function(callback){
       key: CB.appKey
   });
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/items';
+  CB._request('POST',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+
+};
+
+CB.CloudCache.prototype.getCache = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
+    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/cache';
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);

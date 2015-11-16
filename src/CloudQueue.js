@@ -11,9 +11,9 @@ CB.CloudQueue = function(queueName,queueType){
     this.document = {};
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'queue';
-    this.document.expires = null;  
+    this.document.expires = null;
     this.document.name = queueName;
-    this.document.retry = null;  
+    this.document.retry = null;
     this.document.subscribers = [];
     this.document.messages = [];
     if(queueType && queueType !== "push" && queueType !== "pull"){
@@ -152,7 +152,7 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
 
     this.document.messages = messages;
 
-    //PUT TO SERVER. 
+    //PUT TO SERVER.
     var thisObj = this;
 
     var xmlhttp = CB._loadXml();
@@ -191,7 +191,7 @@ CB.CloudQueue.prototype.pull = function(count) {
     }
 
     if(!count)
-        count=1; 
+        count=1;
 
     var thisObj = this;
 
@@ -205,7 +205,7 @@ CB.CloudQueue.prototype.pull = function(count) {
     var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
 
     CB._request('POST',url,params).then(function(response){
-        
+
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
@@ -222,7 +222,7 @@ CB.CloudQueue.prototype.pull = function(count) {
 
 CB.CloudQueue.prototype.getMessage = function(id) {
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
@@ -231,14 +231,14 @@ CB.CloudQueue.prototype.getMessage = function(id) {
 
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey
     });
 
     var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message/'+id;
 
     CB._request('POST',url,params).then(function(response){
-        
+
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
@@ -255,16 +255,16 @@ CB.CloudQueue.prototype.getMessage = function(id) {
 
 CB.CloudQueue.prototype.addSubscriber = function(url) {
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         subscriber : url
     });
@@ -292,16 +292,16 @@ CB.CloudQueue.prototype.addSubscriber = function(url) {
 CB.CloudQueue.prototype.removeSubscriber = function(url) {
 
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         subscriber : url
     });
@@ -330,7 +330,7 @@ CB.CloudQueue.prototype.removeSubscriber = function(url) {
 CB.CloudQueue.prototype.peek = function(count) {
 
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
@@ -339,10 +339,10 @@ CB.CloudQueue.prototype.peek = function(count) {
 
     if(!count)
         count = 1;
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         count : count
     });
@@ -367,16 +367,16 @@ CB.CloudQueue.prototype.peek = function(count) {
 
 CB.CloudQueue.prototype.delete = function() {
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         document : this.document
     });
@@ -403,16 +403,16 @@ CB.CloudQueue.prototype.delete = function() {
 
 CB.CloudQueue.prototype.clear = function() {
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         document : this.document
     });
@@ -439,16 +439,16 @@ CB.CloudQueue.prototype.clear = function() {
 
 CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout) {
     var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey,
         timeout : timeout
     });
@@ -474,16 +474,16 @@ CB.CloudQueue.prototype.refreshMessageTimeout = function(id,timeout) {
 
 CB.CloudQueue.prototype.deleteMessage = function(id) {
         var def;
-    
+
     CB._validate();
 
     if (!callback) {
         def = new CB.Promise();
     }
-    
+
     var xmlhttp = CB._loadXml();
 
-    var params=JSON.stringify({       
+    var params=JSON.stringify({
         key: CB.appKey
     });
 
@@ -523,8 +523,8 @@ CB.CloudQueue.deleteQueue = function(queueName){
 };
 
 
-CB.QueueMessage = function(data) { 
-    
+CB.QueueMessage = function(data) {
+
     this.document = {};
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
     this.document._type = 'queue-message';

@@ -55,6 +55,9 @@
   <div id="fixtures"></div>
 
   <script>
+    window.onerror = function() {
+       alert("Error caught");
+    };
    mocha.setup({ignoreLeaks: true});
       if (window.mochaPhantomJS) {
           mochaPhantomJS.run();

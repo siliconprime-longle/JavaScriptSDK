@@ -151,10 +151,10 @@ CB.fromJSON = function(data, thisObj) {
 
             thisObj = obj;
         }else{
-            thisObj.document = document;    
+            thisObj.document = document;
         }
 
-        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile){
+        if(thisObj instanceof CB.CloudObject || thisObj instanceof CB.CloudUser || thisObj instanceof CB.CloudRole || thisObj instanceof CB.CloudQueue || thisObj instanceof CB.QueueMessage || thisObj instanceof CB.CloudFile || thisObj instanceof CB.CloudCache){
             //activate ACL.
             if(thisObj.document["ACL"])
                 thisObj.document["ACL"].parent = thisObj;
@@ -208,6 +208,7 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
     if(type === 'column'){
         obj = new CB.Column(columnName);
     }
+
     return obj;
 };
 
