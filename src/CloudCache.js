@@ -3,7 +3,7 @@
  */
 
 CB.CloudCache = function(cacheName){
-  if(typeof cacheName === 'undefined' || cacheName == null){
+  if(typeof cacheName === 'undefined' || cacheName === null){
         throw "Cannot create a cache with empty name";
     }
     this.document = {};
@@ -13,21 +13,40 @@ CB.CloudCache = function(cacheName){
     this.document.items = [];
 };
 
-CB.CloudCache.prototype.put = function(key, callback){
+Object.defineProperty(CB.CloudQueue.prototype, 'name', {
+    get: function() {
+        return this.document.name;
+    }
+});
+
+Object.defineProperty(CB.CloudQueue.prototype, 'size', {
+    get: function() {
+        return this.document.size;
+    }
+});
+
+Object.defineProperty(CB.CloudQueue.prototype, 'items', {
+    get: function() {
+        return this.document.items;
+    }
+});
+
+CB.CloudCache.prototype.put = function(key, value, callback){
   var def;
   CB._validate();
+
   if (!callback) {
       def = new CB.Promise();
   }
 
   var params=JSON.stringify({
       key: CB.appKey,
-      item: this.document.item
+      item:  value
   });
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('PUT',url,params,true).then(function(response){
-    // response = JSON.parse(response);
+    response = JSON.parse(response);
     var obj = CB.fromJSON(response);
     if (callback) {
         callback.success(obj);
@@ -44,8 +63,8 @@ CB.CloudCache.prototype.put = function(key, callback){
   if (!callback) {
       return def;
   }
-
 };
+
 CB.CloudCache.prototype.get = function(key, callback){
 
     var def;
@@ -56,7 +75,6 @@ CB.CloudCache.prototype.get = function(key, callback){
     }
 
   var params=JSON.stringify({
-    document: CB.toJSON(this),
       key: CB.appKey
   });
 
@@ -93,7 +111,6 @@ CB.CloudCache.prototype.getInfo = function(callback){
     }
 
   var params=JSON.stringify({
-    document: CB.toJSON(this),
       key: CB.appKey
   });
 
@@ -127,7 +144,6 @@ CB.CloudCache.prototype.getAll = function(callback){
     }
 
   var params=JSON.stringify({
-    document: CB.toJSON(this),
       key: CB.appKey
   });
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/items';
@@ -152,7 +168,7 @@ CB.CloudCache.prototype.getAll = function(callback){
 
 };
 
-CB.CloudCache.prototype.getCache = function(callback){
+CB.CloudCache.prototype.getInfo = function(callback){
     var def;
     CB._validate();
 
@@ -161,10 +177,10 @@ CB.CloudCache.prototype.getCache = function(callback){
     }
 
   var params=JSON.stringify({
-    document: CB.toJSON(this),
       key: CB.appKey
   });
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/cache';
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/info';
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -186,7 +202,7 @@ CB.CloudCache.prototype.getCache = function(callback){
 
 };
 
-CB.CloudCache.prototype.deleteAll = function(callback){
+CB.CloudCache.prototype.clear = function(callback){
     var def;
     CB._validate();
 
@@ -195,7 +211,40 @@ CB.CloudCache.prototype.deleteAll = function(callback){
     }
 
   var params=JSON.stringify({
-    document: CB.toJSON(this),
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/clear';
+  CB._request('DELETE',url,params,true).then(function(response){
+    response = JSON.parse(response);
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+
+CB.CloudCache.prototype.delete = function(callback){
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+  var params=JSON.stringify({
       key: CB.appKey
   });
 
@@ -262,7 +311,6 @@ CB.CloudCache.deleteAll = function(callback){
     }
 
   var params=JSON.stringify({
-    // document: CB.toJSON(this),
       key: CB.appKey
   });
 
@@ -286,7 +334,3 @@ CB.CloudCache.deleteAll = function(callback){
       return def;
   }
 };
-
-
-
-
