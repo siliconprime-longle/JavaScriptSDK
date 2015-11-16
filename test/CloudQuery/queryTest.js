@@ -4,7 +4,7 @@ describe("CloudQuery", function (done) {
 
    it("Should save data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         obj.set('name', 'vipul');
         obj.save().then(function(list) {
@@ -19,7 +19,7 @@ describe("CloudQuery", function (done) {
     });
 
    it("select column should work on find",function(done){
-            this.timeout(20000);
+            this.timeout(30000);
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn','sample');
             obj1.set('description','sample2');
@@ -41,14 +41,59 @@ describe("CloudQuery", function (done) {
                      throw "Error querying object.";
                   }
                 });
-               
             },function(){
                throw "should save the object";
             });
         });
 
+
+        it("containedIn should work on Id",function(done){
+            this.timeout(30000);
+            var obj1 = new CB.CloudObject('Custom1');
+            obj1.set('newColumn','sample');
+            obj1.set('description','sample2');
+            obj1.save().then(function(obj1){
+                 var obj2 = new CB.CloudObject('Custom1');
+                obj2.set('newColumn','sample');
+                obj2.set('description','sample2');
+                obj2.save().then(function(obj2){
+                     var obj3 = new CB.CloudObject('Custom1');
+                    obj3.set('newColumn','sample');
+                    obj3.set('description','sample2');
+                    obj3.save().then(function(obj3){
+
+                        var cbQuery = new CB.CloudQuery('Custom1');
+                        cbQuery.containedIn('id', [obj1.id,obj3.id]);
+                        cbQuery.find({
+                          success: function(objList){
+                            if(objList.length===2)
+                               done();
+                            else
+                                done("Cannot do contains in on Id");
+                          },
+                          error: function(err){
+                             throw "Error querying object.";
+                          }
+                        });
+                    },function(){
+                       throw "should save the object";
+                    });
+
+                   
+                   
+                },function(){
+                   throw "should save the object";
+                });
+
+               
+               
+            },function(){
+               throw "should save the object";
+            });
+        }); 
+
         it("select column should work on distinct",function(done){
-            this.timeout(20000);
+            this.timeout(30000);
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn','sample');
             obj1.set('description','sample2');
@@ -77,7 +122,7 @@ describe("CloudQuery", function (done) {
         });
 
      it("should retrieve items when column name is null (from equalTo function)",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student1');
         obj.save().then(function(obj){
@@ -110,7 +155,7 @@ describe("CloudQuery", function (done) {
 
 
     it("should retrieve items when column name is NOT null (from NotEqualTo function)",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student1');
         obj.set('name','sampleName');
@@ -140,7 +185,7 @@ describe("CloudQuery", function (done) {
     });
 
      it("should retrieve items when column name is not null (from notEqualTo function)",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
         query.equalTo('id',obj.get('id'));
@@ -156,7 +201,7 @@ describe("CloudQuery", function (done) {
 
     it("should find data with id",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
         query.equalTo("id",obj.get('id'));
@@ -174,7 +219,7 @@ describe("CloudQuery", function (done) {
 
      it("should return count as an integer",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
         query.count({
@@ -194,7 +239,7 @@ describe("CloudQuery", function (done) {
     });
 
     it("should find item by id",function(done){
-        this.timeout(20000);
+        this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
         query.equalTo('id',obj.get('id'));
@@ -210,7 +255,7 @@ describe("CloudQuery", function (done) {
 
     it("should run a find one query",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
         query.equalTo('name','vipul');
@@ -227,7 +272,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student1');
         obj.equalTo('name','vipul');
@@ -250,7 +295,7 @@ describe("CloudQuery", function (done) {
 
     it("Should save list with in column", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student4');
         obj.set('subject', ['java','python']);
@@ -264,7 +309,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve list matching with several different values", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudObject('student4');
         obj.set('subject',['java','python']);
         obj.save().then(function() {
@@ -298,7 +343,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data where column name starts which a given string", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student1');
         obj.startsWith('name','v');
@@ -321,7 +366,7 @@ describe("CloudQuery", function (done) {
 
     it("Should save list with in column", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student4');
         obj.set('subject', ['C#','python']);
@@ -335,7 +380,7 @@ describe("CloudQuery", function (done) {
 
     it("Should not retrieve data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student1');
         obj.notEqualTo('name','vipul');
@@ -358,7 +403,7 @@ describe("CloudQuery", function (done) {
 
     it("Should not retrieve data including a set of different values", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student4');
         obj.notContainedIn('subject',['java','python']);
@@ -387,7 +432,7 @@ describe("CloudQuery", function (done) {
 
     it("Should save data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('student4');
         obj.set('age', 15);
@@ -402,7 +447,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data which is greater that a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student4');
         obj.greaterThan('age',10);
@@ -425,7 +470,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data which is greater equal to a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student4');
         obj.greaterThanEqualTo('age',15);
@@ -448,7 +493,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data which is less than a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student4');
         obj.lessThan('age',20);
@@ -471,7 +516,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data which is less or equal to a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudQuery('student4');
         obj.lessThanEqualTo('age',15);
@@ -494,7 +539,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudQuery('student4');
         obj1.equalTo('subject',['java','python']);
@@ -532,7 +577,7 @@ describe("CloudQuery", function (done) {
 
    it("Should retrieve data in ascending order", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var age=null;
         var obj = new CB.CloudQuery('student4');
         obj.orderByAsc('age');
@@ -557,7 +602,7 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data in descending order", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var age=null;
         var obj = new CB.CloudQuery('student4');
         obj.orderByDesc('age');
@@ -582,7 +627,7 @@ describe("CloudQuery", function (done) {
 
     it("Should limit the number of data items received", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var age=null;
         var obj = new CB.CloudQuery('student4');
         obj.setLimit(5);
@@ -599,7 +644,7 @@ describe("CloudQuery", function (done) {
 
     it("Should limit the number of data items received to one", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var age=null;
         var obj = new CB.CloudQuery('student4');
         obj.findOne().then(function(list) {
@@ -615,7 +660,7 @@ describe("CloudQuery", function (done) {
 
     it("Should give distinct elements", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var age=[];
         var obj = new CB.CloudQuery('student4');
         obj.distinct('age').then(function(list) {
@@ -641,7 +686,7 @@ describe("CloudQuery", function (done) {
 
     it("Should save data with a particular value.", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         getidobj.set('name', 'abcd');
         getidobj.save().then(function() {
             done();
@@ -653,7 +698,7 @@ describe("CloudQuery", function (done) {
 
     it("Should get element with a given id", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudQuery('student1');
         obj.get(getidobj.get('id')).then(function(list) {
             if(list.length>0) {
@@ -673,7 +718,7 @@ describe("CloudQuery", function (done) {
 
     it("Should get element having a given column name", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
         obj.exists('age');
         obj.find().then(function(list) {
@@ -695,7 +740,7 @@ describe("CloudQuery", function (done) {
 
     it("Should get element not having a given column name", function (done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
         var obj = new CB.CloudQuery('student4');
         obj.doesNotExists('age');
@@ -718,7 +763,7 @@ describe("CloudQuery", function (done) {
 
     it("Should not give element with a given relation",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',123);
@@ -753,7 +798,7 @@ describe("CloudQuery", function (done) {
     });
 
     it("Should query over boolean dataType",function(done){
-            this.timeout(20000);
+            this.timeout(30000);
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn1',false);
             obj1.save().then(function(obj){
