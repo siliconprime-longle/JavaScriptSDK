@@ -2489,6 +2489,10 @@ it("Should not pull message with the delay ",function(done){
             }
           });
       });
+
+     after(function(){
+        CB.appKey = CB.jsKey;
+     });
 });
 describe("CloudUser", function () {
     var username = util.makeString();
@@ -9447,7 +9451,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should add an item to the cache", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
@@ -9466,14 +9470,54 @@ describe("Cloud Cache", function(){
         });
     });
 
+     it("Should add a string", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.put('test1','sample',{
+            success: function(response){
+                if(response != null){
+                    if(response === 'sample'){
+                        done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should add a number", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.put('test1',1,{
+            success: function(response){
+                if(response != null){
+                    if(response === 1){
+                        done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
     it("Should create a cache", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
         cache.create({
             success: function(response){
                 if(response != null){
-                    if(response.name === 'student' && response.size === 0){
+                    if(response.name === 'student' && response.size === "0kb"){
                         done();
                     }else{
                         done("Incorrect data");
@@ -9488,7 +9532,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should not create a cache with an empty name.", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         try{
             var cache = new CB.CloudCache('');
@@ -9500,7 +9544,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should not try to insert null value", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         try{
             var cache = new CB.CloudCache('');
@@ -9512,7 +9556,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should get items count", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
@@ -9523,7 +9567,7 @@ describe("Cloud Cache", function(){
                                if(response === 1){
                                 done();
                                }else{
-                                done("Incorrect data returned.");
+                                done("Incorrect data returned :"+response);
                                }
                             },error: function(error){
                                 done(error);
@@ -9543,7 +9587,7 @@ describe("Cloud Cache", function(){
 
 
     it("Should get the item in the cache", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
@@ -9578,24 +9622,24 @@ describe("Cloud Cache", function(){
     });
 
     it("Should get all the cache items", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.put('test1',{name:"sample2", sex:"male", age:24},{
+                        cache.put('test2',{name:"sample2", sex:"male", age:24},{
                             success: function(response){
                                 if(response != null){
-                                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                                    if(response.name === "sample2" && response.sex === "male" && response.age === 24){
                                          cache.getAll({
                                             success: function(response){
                                                 if(response.length>1){
                                                     if(response instanceof Array){
-                                                        response  = response[0];
+                                                        response1  = response[0];
                                                         response  = response[1];
-                                                         if(response.name === "sample2" && response.sex === "male" && response.age === 24){
+                                                         if(response.value.name === "sample2" && response.value.sex === "male" && response.value.age === 24){
                                                             done();
                                                          }else{
                                                             done("Returned with Incorrect data.");
@@ -9633,7 +9677,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should get information about the cache", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
@@ -9668,7 +9712,7 @@ describe("Cloud Cache", function(){
     });
 
      it("Should get null when wrong cache info is requested.", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('studsdfsdffds');
         cache.getInfo({
@@ -9685,21 +9729,21 @@ describe("Cloud Cache", function(){
     });
 
     it("Should get all the caches", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var promises = [];
 
         var cache = new CB.CloudCache('sample1');
-        promises.push(cache.put('hello'));
+        promises.push(cache.put('hello','hey'));
 
         var cache1 = new CB.CloudCache('sample2');
-        promises.push(cache1.put('hello'));
+        promises.push(cache1.put('hello','hey'));
 
         CB.Promise.all(promises).then(function(){
             CB.CloudCache.getAll({
               success : function(response){
                 if(response && response.length >1){
-                    if(response[0] instanceof CB.CloudCache && response[0].name === 'sample1' && response[1] instanceof Cb.CloudCache && response[1].name === 'sample2'){
+                    if(response[0] instanceof CB.CloudCache && response[1] instanceof CB.CloudCache){
                        done();
                     }
                     else{
@@ -9718,7 +9762,7 @@ describe("Cloud Cache", function(){
        }); 
 
     it("Should delete a cache from an app.", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
@@ -9728,18 +9772,20 @@ describe("Cloud Cache", function(){
                         cache.delete({
                             success: function(response){
                                 if(response){
-                                    if(response instanceof CB.CloudCache && response.size === 0){
+                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
                                         CB.CloudCache.getAll({
                                           success : function(response){
-                                            if(response && response.length === 0){
-                                                done();
-                                             }else{
-                                                  done("Deleted Cache exists.");
-                                               }
-                                              },error : function(error){
-                                                done(error);
-                                             }
-                                        });
+                                            
+                                            for(var i=0;i<response.length;i++){
+                                                if(response[i].name === 'student'){
+                                                    done("Cache did not delete");
+                                                }
+                                            }
+
+                                            done();
+                                        }, error : function(error) {
+                                            done(error);
+                                        }});
                                     }else{
                                         done("Cache was deleted but incorrect response");
                                     }
@@ -9763,7 +9809,7 @@ describe("Cloud Cache", function(){
     });
 
     it("Should throw error when deleting a wrong cache", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
        
@@ -9777,7 +9823,7 @@ describe("Cloud Cache", function(){
     });
 
      it("Should throw error when clearing a wrong cache", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
        
@@ -9792,7 +9838,7 @@ describe("Cloud Cache", function(){
 
 
     it("Should clear a cache from an app.", function(done){
-        this.timeout(3000);
+        this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
@@ -9802,7 +9848,7 @@ describe("Cloud Cache", function(){
                         cache.clear({
                             success: function(response){
                                 if(response){
-                                    if(response instanceof CB.CloudCache && response.size === 0){
+                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
                                         cache.get('test1', {
                                             success: function(response){
                                                 if(response === null){
@@ -9837,7 +9883,7 @@ describe("Cloud Cache", function(){
     });
 
      it("Should delete the entire caches from an app.", function(done){
-        this.timeout(30000);
+        this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
         cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
@@ -9850,7 +9896,10 @@ describe("Cloud Cache", function(){
                                     if(response instanceof Array){
                                         cache.get('test1', {
                                             success: function(response){
-                                                done("Wrong value  returned.");
+                                                if(!response)
+                                                    done();
+                                                else
+                                                    done("Wrong value returned.");
                                             },error: function(error){
                                                 done();
                                             }

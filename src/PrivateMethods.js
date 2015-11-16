@@ -31,10 +31,13 @@ CB.toJSON = function(thisObj) {
     if(thisObj instanceof CB.CloudTable)
         tableName=thisObj.document.name;
 
+     if(thisObj instanceof CB.CloudCache)
+        tableName=thisObj.document.name;
+
     var obj= CB._clone(thisObj,id,latitude,longitude,tableName,columnName);
 
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint
-        || !obj instanceof CB.CloudTable || !obj instanceof CB.Column || !obj instanceof CB.QueueMessage || !obj instanceof CB.CloudQueue) {
+        || !obj instanceof CB.CloudTable || !obj instanceof CB.Column || !obj instanceof CB.QueueMessage || !obj instanceof CB.CloudQueue || !obj instanceof CB.CloudCache) {
         throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
     }
 
@@ -48,7 +51,7 @@ CB.toJSON = function(thisObj) {
 
     for (var key in doc) {
         if (doc[key] instanceof CB.CloudObject || doc[key] instanceof CB.CloudFile
-            || doc[key] instanceof CB.CloudGeoPoint  || doc[key] instanceof CB.Column || doc[key] instanceof CB.QueueMessage || doc[key] instanceof CB.CloudQueue) {
+            || doc[key] instanceof CB.CloudGeoPoint  || doc[key] instanceof CB.Column || doc[key] instanceof CB.QueueMessage || doc[key] instanceof CB.CloudQueue || doc[key] instanceof CB.CloudCache) {
             //if something is a relation.
             doc[key] = CB.toJSON(doc[key]); //serialize this object.
         } else if (key === 'ACL') {
@@ -59,7 +62,7 @@ CB.toJSON = function(thisObj) {
             //if this is an array.
             //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
             if (doc[key][0] && (doc[key][0] instanceof CB.CloudObject || doc[key][0] instanceof CB.CloudFile
-                || doc[key][0] instanceof CB.CloudGeoPoint || doc[key][0] instanceof CB.Column || doc[key][0] instanceof CB.QueueMessage || doc[key][0] instanceof CB.CloudQueue )) {
+                || doc[key][0] instanceof CB.CloudGeoPoint || doc[key][0] instanceof CB.Column || doc[key][0] instanceof CB.QueueMessage || doc[key][0] instanceof CB.CloudQueue || doc[key][0] instanceof CB.CloudCache )) {
                 var arr = [];
                 for (var i = 0; i < doc[key].length; i++) {
                     arr.push(CB.toJSON(doc[key][i]));
@@ -130,8 +133,7 @@ CB.fromJSON = function(data, thisObj) {
             var id=null;
             var latitude = null;
             var longitude = null;
-            var tableName = null;
-            var columnName = null;
+            var name = null;
             if(document._type === "file")
                 id=document._id;
             if(document._type === "point"){
@@ -139,15 +141,18 @@ CB.fromJSON = function(data, thisObj) {
                 longitude = document.longitude;
             }
             if(document._type === "table"){
-                tableName = document.name;
+                name = document.name;
             }
             if(document._type === "column"){
-                columnName = document.name;
+                name = document.name;
             }
             if(document._type === "queue"){
-                tableName = document.name;
+                name = document.name;
             }
-            var obj = CB._getObjectByType(document._type,id,latitude,longitude,tableName,columnName);
+            if(document._type === "cache"){
+                name = document.name;
+            }
+            var obj = CB._getObjectByType(document._type,id,latitude,longitude,name);
             obj.document = document;
 
             thisObj = obj;
@@ -169,7 +174,7 @@ CB.fromJSON = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
+CB._getObjectByType = function(type,id,latitude,longitude,name){
 
     var obj = null;
 
@@ -179,11 +184,15 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
 
     if (type === 'queue') {
         //tablename is queue name in this instance.
-        obj = new CB.CloudQueue(tableName);
+        obj = new CB.CloudQueue(name);
     }
 
     if (type === 'queue-message') {
         obj = new CB.QueueMessage();
+    }
+
+    if (type === 'cache') {
+        obj = new CB.CloudCache(name);
     }
 
     if (type === 'role') {
@@ -203,11 +212,11 @@ CB._getObjectByType = function(type,id,latitude,longitude,tableName,columnName){
     }
 
     if(type === 'table'){
-        obj = new CB.CloudTable(tableName);
+        obj = new CB.CloudTable(name);
     }
 
     if(type === 'column'){
-        obj = new CB.Column(columnName);
+        obj = new CB.Column(name);
     }
 
     return obj;
@@ -562,3 +571,12 @@ CB._generateHash = function(){
     }
     return hash;
 };
+
+CB._isJsonString = function(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}

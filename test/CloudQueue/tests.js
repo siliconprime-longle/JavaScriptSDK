@@ -1197,4 +1197,8 @@ it("Should not pull message with the delay ",function(done){
             }
           });
       });
+
+     after(function(){
+        CB.appKey = CB.jsKey;
+     });
 });
