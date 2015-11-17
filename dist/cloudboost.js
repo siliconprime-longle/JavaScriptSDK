@@ -11895,7 +11895,7 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/message';
 
     CB._request('PUT',url,params).then(function(response){
         var messages = CB.fromJSON(JSON.parse(response));
