@@ -12074,7 +12074,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
             def.resolve(thisObj);
         }
     },function(err){
-        this.document.subscribers = tempSubscribers;
+        thisObj.document.subscribers = tempSubscribers;
         if(callback){
             callback.error(err);
         }else {

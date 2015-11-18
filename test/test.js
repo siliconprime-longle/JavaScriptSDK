@@ -200,10 +200,10 @@ describe("Cloud Cache", function(){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
                         cache.getItemsCount({
                             success: function(response){
-                               if(response === 1){
-                                done();
+                               if(response >= 1){
+                                 done();
                                }else{
-                                done("Incorrect data returned :"+response);
+                                 done("Incorrect data returned :"+response);
                                }
                             },error: function(error){
                                 done(error);
