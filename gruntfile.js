@@ -20,6 +20,7 @@ module.exports = function(grunt) {
                         'test/util/util.js',
                         'test/serverTest.js',
                         'test/init/init.js',
+                        'test/CloudCache/*.js',
                         'test/CloudTable/*.js',
                         'test/CloudQueue/*.js',
                         'test/ACL/*.js',
@@ -33,8 +34,8 @@ module.exports = function(grunt) {
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
                         'test/CloudApp/*.js',
-                        'test/AppTests/*.js',
-                        'test/CloudCache/CloudCache.js'
+                        'test/AppTests/*.js'
+                        
                     ],
 
                     dest: 'test/test.js'
@@ -46,6 +47,7 @@ module.exports = function(grunt) {
                         'test/util/util.js',
                         'test/stageTest.js',
                         'test/init/init.js',
+                        'test/CloudCache/*.js',
                         'test/CloudTable/*.js',
                         'test/CloudQueue/*.js',
                         'test/CloudUser/*.js',
@@ -59,8 +61,8 @@ module.exports = function(grunt) {
                         'test/CloudQuery/*.js',
                         'test/CloudSearch/*.js',
                         'test/AppTests/*.js',
-                        'test/CloudApp/*.js',
-                        'test/CloudCache/CloudCache.js'
+                        'test/CloudApp/*.js'
+                        
                     ],
 
                     dest: 'test/stagingTest.js'

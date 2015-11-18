@@ -11682,11 +11682,11 @@ CB._fileCheck = function(obj){
     for(var key in obj.document){
         if(obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile){
             for(var i=0;i<obj.document[key].length;i++){
-                if(!obj.document[key][i]._id)
+                if(!obj.document[key][i].id)
                     promises.push(obj.document[key][i].save());
             }
         }else if(obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile){
-            if(!obj.document[key]._id)
+            if(!obj.document[key].id)
                 promises.push(obj.document[key].save());
         }
     }
@@ -11697,13 +11697,13 @@ CB._fileCheck = function(obj){
             for (var key in obj.document) {
                 if (obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile) {
                     for (var i = 0; i < obj.document[key].length; i++) {
-                        if(!obj.document[key][i]._id) {
+                        if(!obj.document[key][i].id) {
                             obj.document[key][i] = res[j];
                             j = j + 1;
                         }
                     }
                 } else if (obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile) {
-                    if(!obj.document[key]._id) {
+                    if(!obj.document[key].id) {
                         obj.document[key] = res[j];
                         j = j + 1;
                     }
@@ -12074,7 +12074,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
             def.resolve(thisObj);
         }
     },function(err){
-        thisObj.document.subscribers = tempSubscribers;
+        this.document.subscribers = tempSubscribers;
         if(callback){
             callback.error(err);
         }else {

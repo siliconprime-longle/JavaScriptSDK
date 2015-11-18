@@ -23,6 +23,39 @@ describe("Cloud Files", function(done) {
     });
 
 
+    it("Should return the file with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                var obj = new CB.CloudObject('Company');
+                obj.set('File',file);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('File').url){
+                            done();
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+                
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
     it("Should Save a file and give the url",function(done){
 
         this.timeout(30000);
