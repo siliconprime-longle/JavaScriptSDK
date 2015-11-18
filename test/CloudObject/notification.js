@@ -31,7 +31,7 @@ describe("Cloud Objects Notification", function() {
 
    it("should throw an error when wrong event type is entered. ", function(done) {
 
-       this.timeout(20000);
+       this.timeout(40000);
      	try{
      	  CB.CloudObject.on('Student', 'wrongtype', function(data){
 	      	throw 'Fired event to wrong type.';
@@ -91,7 +91,7 @@ describe("Cloud Objects Notification", function() {
     });
 
     it("should alert when multiple events are passed.", function(done) {
-      this.timeout(20000);
+      this.timeout(40000);
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
       CB.CloudObject.on('Student', ['created', 'deleted'], function(data){
@@ -119,7 +119,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should alert when all three events are passed", function(done) {
 
-      this.timeout(20000);
+      this.timeout(40000);
        
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
@@ -150,7 +150,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should stop listening.", function(done) {
 
-     this.timeout(20000);
+     this.timeout(40000);
       
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;

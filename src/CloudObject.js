@@ -3,7 +3,7 @@
  */
 
 CB.CloudObject = function(tableName, id) { //object for documents
-    
+
     this.document = {};
     this.document._tableName = tableName; //the document object
     this.document.ACL = new CB.ACL(); //ACL(s) of the document
@@ -75,12 +75,12 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
     var def;
-    
-    //shift variables. 
+
+    //shift variables.
     if(cloudQuery && !(cloudQuery instanceof CB.CloudQuery)){
-        //this is a function. 
+        //this is a function.
         if(callback !== null && typeof callback === 'object'){
-            //callback is actually done. 
+            //callback is actually done.
             done = callback;
             callback = null;
         }
@@ -92,7 +92,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
         def = new CB.Promise();
     }
 
-    //validate query. 
+    //validate query.
     if(cloudQuery && cloudQuery instanceof CB.CloudQuery){
 
         if(cloudQuery.tableName!== tableName){
@@ -471,19 +471,19 @@ CB.CloudObject.deleteAll = function(array,callback){
 
 /* Private Methods */
 CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
-   
+
    if(!cloudQuery)
         throw "CloudQuery is null";
 
     if(!cloudQuery.query)
         throw "There is no query in CloudQuery";
-   
-   //validate query. 
+
+   //validate query.
    var query = cloudQuery.query;
 
    if(cloudQuery.limit===0)
         return false;
-    
+
    if(cloudQuery.skip>0){
         --cloudQuery.skip;
         return false;

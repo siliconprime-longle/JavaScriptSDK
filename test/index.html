@@ -14,6 +14,7 @@
   <!-- CloudObjects Test -->
 <script src="serverTest.js"></script>
 <script src="init/init.js"></script>
+<script src="CloudCache/CloudCache.js"></script>
 <script src="CloudTable/createTestTables.js"></script>
 <script src="CloudQueue/tests.js"></script> 
 <script src="CloudObject/test.js"></script>
@@ -53,6 +54,10 @@
   <div id="fixtures"></div>
 
   <script>
+    window.onerror = function() {
+       alert("Error caught");
+    };
+   mocha.setup({ignoreLeaks: true});
       if (window.mochaPhantomJS) {
           mochaPhantomJS.run();
       }

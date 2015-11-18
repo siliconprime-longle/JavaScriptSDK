@@ -2,7 +2,7 @@ describe("CloudExpire", function () {
 
     it("Sets Expire in Cloud Object.", function (done) {
 
-        this.timeout(10000);
+        this.timeout(30000);
         //create an object.
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
@@ -20,7 +20,7 @@ describe("CloudExpire", function () {
 
     it("Checks if the expired object shows up in the search or not", function (done) {
 
-        this.timeout(10000);
+        this.timeout(30000);
         var curr=new Date().getTime();
         var query = new CB.CloudQuery('Custom');
         query.find().then(function(list){

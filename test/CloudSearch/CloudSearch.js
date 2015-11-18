@@ -1,6 +1,107 @@
 describe("CloudSearch", function (done) {
 
 
+
+    it("should get data from server for near function", function(done) {
+
+        CB.appKey = CB.masterKey;
+
+         this.timeout(60000);
+
+
+        var callback = {};
+        callback.success = function(res){
+            var custom = new CB.CloudTable('CustomGeoPoint');
+            var newColumn7 = new CB.Column('location');
+            newColumn7.dataType = 'GeoPoint';
+            custom.addColumn(newColumn7);
+            custom.save().then(function(res){
+                CB.appKey = CB.jsKey;
+                var loc = new CB.CloudGeoPoint(17.7,80.0);
+
+                var obj = new CB.CloudObject('CustomGeoPoint');
+                obj.set("location", loc);
+
+                obj.save({
+                    success : function(newObj){
+                        var search = new CB.CloudSearch('CustomGeoPoint');
+                        search.searchFilter = new CB.SearchFilter();
+                        search.searchFilter.near("location", loc, 1);
+                        search.search().then(function(list) {
+                            if(list.length>0){
+                               console.log(list);
+                                done();
+                            } else{
+                                throw "should retrieve saved data with particular value ";
+                            }
+                        }, function (error) {
+                            done(error);
+                        });
+                    }, error : function(error){
+                        throw 'Error saving the object';
+                    }
+                });
+            },function(){
+                throw "Unable to create user";
+            });
+        };
+        callback.error = function(){
+            throw "Unable to Delete";
+        };
+        var obj = new CB.CloudTable('CustomGeoPoint');
+        obj.delete(callback);
+
+        
+    });
+
+    it("Equal to should work in CloudSearch over CloudObject",function(done){
+             CB.appKey = CB.masterKey;
+
+             this.timeout(50000);
+
+            var callback = {};
+            callback.success = function(res){
+                var custom = new CB.CloudTable('CustomRelation');
+                var newColumn1 = new CB.Column('newColumn7');
+                newColumn1.dataType = 'Relation';
+                newColumn1.relatedTo = 'student1';
+                custom.addColumn(newColumn1);
+                custom.save().then(function(res){
+                     CB.appKey = CB.jsKey;
+                    var obj = new CB.CloudObject('CustomRelation');
+                    var obj1 = new CB.CloudObject('student1');
+                    obj1.set('name', 'Vipul');
+                    obj.set('newColumn7', obj1);
+
+                    obj.save({
+                        success : function(obj){
+
+                            var cs = new CB.CloudSearch('CustomRelation');
+                            cs.searchFilter = new CB.SearchFilter();
+                            cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
+                            cs.search().then(function(list){
+                                console.log(list);
+                                done();
+                            }, function(error){
+                                throw "Unsuccessful join"
+                            });
+                        }, error : function(error){
+                            throw "Cannot save a CloudObject";
+
+                        }
+
+                    });
+                },function(){
+                    throw "Unable to create CustomRelation2";
+                });
+            };
+            callback.error = function(){
+                throw "Unable to Delete";
+            };
+            var obj = new CB.CloudTable('CustomRelation');
+            obj.delete(callback);
+        });
+
     it("should index object for search", function (done) {
 
         this.timeout(30000);
@@ -647,52 +748,5 @@ describe("CloudSearch", function (done) {
         });
     });
 
-
-    it("should get data from server for near function", function(done) {
-
-        this.timeout(20000);
-
-        var loc = new CB.CloudGeoPoint("17.7","80.0");
-        var search = new CB.CloudSearch('Custom5');
-        search.searchFilter = new CB.SearchFilter();
-        search.searchFilter.near("location", loc, 100000);
-        search.search().then(function(list) {
-           done();
-        }, function () {
-            throw "find data error";
-        })
-    });
-
-    it("Equal to should work in CloudSearch over CloudObject",function(done){
-
-            this.timeout(30000);
-
-            var obj = new CB.CloudObject('Custom2');
-            obj.set('newColumn1', 'text');
-
-            var obj1 = new CB.CloudObject('student1');
-            obj1.set('name', 'Vipul');
-            obj.set('newColumn7', obj1);
-
-            obj.save({
-                success : function(obj){
-
-                    var cs = new CB.CloudSearch('Custom2');
-                    cs.searchFilter = new CB.SearchFilter();
-                    cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
-                    cs.search().then(function(  list){
-                        console.log(list);
-                        done();
-                    }, function(error){
-                        throw "Unsuccessful join"
-                    });
-                }, error : function(error){
-                    throw "Cannot save a CloudObject";
-
-                }
-
-            });
-
-        });
 
 });
