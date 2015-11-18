@@ -10,7 +10,7 @@ describe("CloudUser", function () {
             return;
          }
 
-         this.timeout(100000);
+         this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -34,7 +34,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
         CB.CloudUser.current.logOut().then(function(){
             done();
         },function(){
@@ -49,7 +49,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
         var user = new CB.CloudUser();
         var usrname = util.makeString();
         var passwd = "abcd";
@@ -76,7 +76,7 @@ describe("CloudUser", function () {
          }
 
 
-        this.timeout(10000);
+        this.timeout(30000);
         var user = new CB.CloudUser();
         var usrname = util.makeString();
         var passwd = "abcd";
@@ -109,7 +109,7 @@ describe("CloudUser", function () {
          }
 
 
-        this.timeout(10000);
+        this.timeout(30000);
         CB.CloudUser.current.logOut().then(function(){
             done();
         },function(){
@@ -125,7 +125,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -150,7 +150,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(100000);
+        this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -179,7 +179,7 @@ describe("CloudUser", function () {
          }
          
 
-        this.timeout(1000000);
+        this.timeout(3000000);
 
         var obj = new CB.CloudUser();
         var roleName3 = util.makeString();
@@ -211,7 +211,7 @@ describe("CloudUser", function () {
 
      it('should encrypt user password',function (done){
         
-        this.timeout(100000);
+        this.timeout(300000);
 
         var pass = passwd;
 
@@ -232,7 +232,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());
@@ -256,7 +256,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());
@@ -280,7 +280,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());

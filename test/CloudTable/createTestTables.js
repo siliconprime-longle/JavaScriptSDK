@@ -8,7 +8,7 @@ describe("Should Create All Test Tables",function(done){
 
   it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Address');
         obj.delete().then(function(){
             done();
@@ -19,7 +19,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('UnderScoreTable_a');
         obj.delete().then(function(){
             done();
@@ -31,7 +31,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Company');
         obj.delete().then(function(){
             done();
@@ -43,7 +43,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete empty table",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Empty');
         obj.delete().then(function(){
             done();
@@ -56,7 +56,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudTable('Employee');
         obj.delete().then(function(){
@@ -329,6 +329,9 @@ describe("Should Create All Test Tables",function(done){
             custom.addColumn(newColumn5);
             var newColumn6 = new CB.Column('newColumn6');
             newColumn6.dataType = 'Object';
+            var newColumn7 = new CB.Column('location');
+            newColumn7.dataType = 'GeoPoint';
+            custom.addColumn(newColumn7);
             custom.addColumn(newColumn6);
             custom.save().then(function(res){
                 done();

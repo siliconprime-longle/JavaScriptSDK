@@ -98,14 +98,11 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+                done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
@@ -121,14 +118,11 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+               done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
@@ -141,14 +135,10 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+                 done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
         }, function () {
             throw "find data error";
         })
@@ -162,14 +152,11 @@ describe("Cloud GeoPoint Test", function() {
 		query.setLimit(4);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+               done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
