@@ -1287,23 +1287,9 @@ describe("Should Create All Test Tables",function(done){
 
         var callback = {};
         callback.success = function(res){
-
             var user = new CB.CloudTable('User');
-            
-            var newColumn = new CB.Column('newColumn');
-            newColumn.dataType = 'Text';
-            user.addColumn(newColumn);
-
-            user.save().then(function(user){
-                var newColumn1 = new CB.Column('newColumn1');
-                newColumn1.dataType = 'Text';
-                user.addColumn(newColumn1);
-
-                user.save().then(function(res){
-                    done();
-                },function(error){
-                    throw "Unable to create user";
-                });
+            user.save().then(function(res){
+                done();
             },function(error){
                 throw "Unable to create user";
             });
@@ -7407,14 +7393,13 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                done();
+                 done();
             } else{
-                done("didnot retrieve the records.")
+                throw "should retrieve saved data with particular value ";
             }
-
         }, function () {
-            done("Find error");
-        });
+            throw "find data error";
+        })
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
@@ -9427,6 +9412,7 @@ describe("CloudSearch", function (done) {
             }
         });
     });
+
 
 
 });

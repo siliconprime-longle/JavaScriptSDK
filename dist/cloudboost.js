@@ -12605,7 +12605,7 @@ CB.CloudCache.prototype.deleteItem = function(key, callback){
       key: CB.appKey
   });
 
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/item/'+key;
   CB._request('DELETE',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
