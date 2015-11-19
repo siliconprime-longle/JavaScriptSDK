@@ -7,7 +7,7 @@ describe("Cloud Cache", function(){
     it("Should add an item to the cache", function(done){
         this.timeout(300000);
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -27,7 +27,7 @@ describe("Cloud Cache", function(){
      it("Should add a string", function(done){
         this.timeout(300000);
         var cache = new CB.CloudCache('student');
-        cache.put('test1','sample',{
+        cache.set('test1','sample',{
             success: function(response){
                 if(response != null){
                     if(response === 'sample'){
@@ -47,11 +47,57 @@ describe("Cloud Cache", function(){
     it("Should add a number", function(done){
         this.timeout(300000);
         var cache = new CB.CloudCache('student');
-        cache.put('test1',1,{
+        cache.set('test1',1,{
             success: function(response){
                 if(response != null){
                     if(response === 1){
                         done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should delete an item", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',1,{
+            success: function(response){
+                if(response != null){
+                    if(response === 1){
+                       //delete it. 
+                       cache.deleteItem('test1',{
+                           success: function(response){
+                                if(response != null){
+                                    if(response === 'test1'){
+                                       //delete it. 
+                                       cache.get('test1',{
+                                         success: function(response){
+                                            if(response === null){
+                                               done();
+                                           }else{
+                                                done("Pushed but item was empty");
+                                           }
+                                        },error: function(error){
+                                            done(error);
+                                        }
+                                       });
+                                    }else{
+                                        done("Deleted but incorrect data");
+                                    }
+                               }else{
+                                    done("Deleted but item was empty");
+                               }
+                            },error: function(error){
+                                done(error);
+                            }
+                       });
                     }else{
                         done("Pushed but incorrect data");
                     }
@@ -102,7 +148,7 @@ describe("Cloud Cache", function(){
 
         try{
             var cache = new CB.CloudCache('');
-            cache.put('key', null);
+            cache.set('key', null);
             done("Added null value.");
         }catch(e){
             done();
@@ -112,7 +158,7 @@ describe("Cloud Cache", function(){
     it("Should get items count", function(done){
         this.timeout(300000);
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -144,7 +190,7 @@ describe("Cloud Cache", function(){
         this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -179,11 +225,11 @@ describe("Cloud Cache", function(){
         this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.put('test2',{name:"sample2", sex:"male", age:24},{
+                        cache.set('test2',{name:"sample2", sex:"male", age:24},{
                             success: function(response){
                                 if(response != null){
                                     if(response.name === "sample2" && response.sex === "male" && response.age === 24){
@@ -234,7 +280,7 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -288,10 +334,10 @@ describe("Cloud Cache", function(){
         var promises = [];
 
         var cache = new CB.CloudCache('sample1');
-        promises.push(cache.put('hello','hey'));
+        promises.push(cache.set('hello','hey'));
 
         var cache1 = new CB.CloudCache('sample2');
-        promises.push(cache1.put('hello','hey'));
+        promises.push(cache1.set('hello','hey'));
 
         CB.Promise.all(promises).then(function(){
             CB.CloudCache.getAll({
@@ -311,7 +357,7 @@ describe("Cloud Cache", function(){
                  }
             });
         }, function(error){
-            done("Cannot put values in a cache.");
+            done("Cannot set values in a cache.");
         });
        }); 
 
@@ -319,7 +365,7 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -395,7 +441,7 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
@@ -440,7 +486,7 @@ describe("Cloud Cache", function(){
         this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
             success: function(response){
                 if(response != null){
                     if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){

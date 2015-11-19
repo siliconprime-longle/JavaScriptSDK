@@ -12033,6 +12033,41 @@ CB.CloudQueue.prototype.get = function(callback) {
     });
 };
 
+CB.CloudQueue.prototype.create = function(callback) {
+    var def;
+    
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+
+    var thisObj = this;
+
+    var params=JSON.stringify({       
+        key: CB.appKey,
+        document : CB.toJSON(thisObj)
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/create';
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+};
+
 CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
 
     var def;
@@ -12551,7 +12586,7 @@ Object.defineProperty(CB.CloudCache.prototype, 'items', {
     }
 });
 
-CB.CloudCache.prototype.put = function(key, value, callback){
+CB.CloudCache.prototype.set = function(key, value, callback){
   var def;
   CB._validate();
 
@@ -12570,6 +12605,43 @@ CB.CloudCache.prototype.put = function(key, value, callback){
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('PUT',url,params,true).then(function(response){
+    if(CB._isJsonString(response)){
+      response = JSON.parse(response);
+    }
+    
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+CB.CloudCache.prototype.deleteItem = function(key, callback){
+  var def;
+  CB._validate();
+
+  if (!callback) {
+      def = new CB.Promise();
+  }
+
+
+  var params=JSON.stringify({
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/item/'+key;
+  CB._request('DELETE',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }
