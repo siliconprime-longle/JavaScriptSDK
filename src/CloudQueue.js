@@ -279,6 +279,41 @@ CB.CloudQueue.prototype.get = function(callback) {
     });
 };
 
+CB.CloudQueue.prototype.create = function(callback) {
+    var def;
+    
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+
+    var thisObj = this;
+
+    var params=JSON.stringify({       
+        key: CB.appKey,
+        document : CB.toJSON(thisObj)
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/create';
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+};
+
 CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
 
     var def;

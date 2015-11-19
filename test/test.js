@@ -1875,6 +1875,29 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
+ it("Should create the Queue",function(done){
+
+     this.timeout(30000);
+     var name = util.makeString();
+     var queue = new CB.CloudQueue(name);
+     queue.create({
+          success : function(response){
+               if(response instanceof CB.CloudQueue && response.name){
+                    if(response.name === name){
+                         done();
+                    }
+                    else{
+                         done("Incorrect data");
+                    }
+               }else{
+                    done("Didnot create queue");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
  it("Should push an array into the queue",function(done){
  	 this.timeout(30000);
 
