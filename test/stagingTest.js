@@ -1263,9 +1263,23 @@ describe("Should Create All Test Tables",function(done){
 
         var callback = {};
         callback.success = function(res){
+
             var user = new CB.CloudTable('User');
-            user.save().then(function(res){
-                done();
+            
+            var newColumn = new CB.Column('newColumn');
+            newColumn.dataType = 'Text';
+            user.addColumn(newColumn);
+
+            user.save().then(function(user){
+                var newColumn1 = new CB.Column('newColumn1');
+                newColumn1.dataType = 'Text';
+                user.addColumn(newColumn1);
+
+                user.save().then(function(res){
+                    done();
+                },function(error){
+                    throw "Unable to create user";
+                });
             },function(error){
                 throw "Unable to create user";
             });
@@ -7127,6 +7141,56 @@ describe("Cloud Files", function(done) {
     });
 
 
+    it("Should return the fileList with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('fileList').length>0){
+                            if(obj.get('fileList')[0].url && obj.get('fileList')[1].url){
+                                done();
+                            }else{
+                                done("Did not get the URL's back");
+                            }
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+                
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
+
+
+
     it("Should Save a file and give the url",function(done){
 
         this.timeout(30000);
@@ -7387,8 +7451,6 @@ describe("Cloud Files", function(done) {
         });
 
     });
-
-    //add ACL on CloudFiles.
     
 });
 
@@ -7744,13 +7806,14 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                 done();
+                done();
             } else{
-                throw "should retrieve saved data with particular value ";
+                done("didnot retrieve the records.")
             }
+
         }, function () {
-            throw "find data error";
-        })
+            done("Find error");
+        });
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
@@ -9763,7 +9826,6 @@ describe("CloudSearch", function (done) {
             }
         });
     });
-
 
 
 });
