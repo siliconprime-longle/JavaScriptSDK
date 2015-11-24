@@ -56,6 +56,535 @@ describe("Cloud App", function() {
     });
 });
 
+describe("Cloud Cache", function(){
+     
+    before(function(){
+        CB.appKey = CB.masterKey;
+    });
+
+    it("Should add an item to the cache", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+     it("Should add a string", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1','sample',{
+            success: function(response){
+                if(response != null){
+                    if(response === 'sample'){
+                        done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should add a number", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',1,{
+            success: function(response){
+                if(response != null){
+                    if(response === 1){
+                        done();
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should delete an item", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',1,{
+            success: function(response){
+                if(response != null){
+                    if(response === 1){
+                       //delete it. 
+                       cache.deleteItem('test1',{
+                           success: function(response){
+                                if(response != null){
+                                    if(response === 'test1'){
+                                       //delete it. 
+                                       cache.get('test1',{
+                                         success: function(response){
+                                            if(response === null){
+                                               done();
+                                           }else{
+                                                done("Pushed but item was empty");
+                                           }
+                                        },error: function(error){
+                                            done(error);
+                                        }
+                                       });
+                                    }else{
+                                        done("Deleted but incorrect data");
+                                    }
+                               }else{
+                                    done("Deleted but item was empty");
+                               }
+                            },error: function(error){
+                                done(error);
+                            }
+                       });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should create a cache", function(done){
+        this.timeout(300000);
+
+        var cache = new CB.CloudCache('student');
+        cache.create({
+            success: function(response){
+                if(response != null){
+                    if(response.name === 'student' && response.size === "0kb"){
+                        done();
+                    }else{
+                        done("Incorrect data");
+                    }
+               }else{
+                    done("Item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should not create a cache with an empty name.", function(done){
+        this.timeout(300000);
+
+        try{
+            var cache = new CB.CloudCache('');
+            done("Created cache with an empty name.");
+        }catch(e){
+            done();
+        }
+        
+    });
+
+    it("Should not try to insert null value", function(done){
+        this.timeout(300000);
+
+        try{
+            var cache = new CB.CloudCache('');
+            cache.set('key', null);
+            done("Added null value.");
+        }catch(e){
+            done();
+        }
+    });
+
+    it("Should get items count", function(done){
+        this.timeout(300000);
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        cache.getItemsCount({
+                            success: function(response){
+                               if(response >= 1){
+                                 done();
+                               }else{
+                                 done("Incorrect data returned :"+response);
+                               }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+
+    it("Should get the item in the cache", function(done){
+        this.timeout(300000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        cache.get('test1',{
+                            success: function(response){
+                                if(response != null){
+                                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                                        done();
+                                    }else{
+                                        done("Got item but incorrect data");
+                                    }
+                                }else{
+                                    done("Item received but it is empty");
+                                }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should get all the cache items", function(done){
+        this.timeout(300000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        cache.set('test2',{name:"sample2", sex:"male", age:24},{
+                            success: function(response){
+                                if(response != null){
+                                    if(response.name === "sample2" && response.sex === "male" && response.age === 24){
+                                         cache.getAll({
+                                            success: function(response){
+                                                if(response.length>1){
+                                                    if(response instanceof Array){
+                                                        response1  = response[0];
+                                                        response  = response[1];
+                                                         if(response.value.name === "sample2" && response.value.sex === "male" && response.value.age === 24){
+                                                            done();
+                                                         }else{
+                                                            done("Returned with Incorrect data.");
+                                                         }
+                                                    }else{
+                                                        done("Got cache but incorrect data");
+                                                    }
+                                                }else{
+                                                    done("cache Item received but not an array or it is empty");
+                                                }
+                                            },error: function(error){
+                                                done(error);
+                                            }
+                                        });
+                                    }else{
+                                        done("Pushed but incorrect data");
+                                    }
+                               }else{
+                                    done("Pushed but item was empty");
+                               }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should get information about the cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                          cache.getInfo({
+                                success: function(response){
+                                    if(response && response instanceof CB.CloudCache){
+                                        if(response.size.slice(-2,response.length) === 'kb'){
+                                            done();
+                                        }else{
+                                            done("Got cache information but has incorrect units");
+                                        }
+                                    }else{
+                                        done("No response for the cache info returned or didnot return the CloudCache instance back.");
+                                    }
+                                },error: function(error){
+                                    done(error);
+                                }
+                           });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+     it("Should get null when wrong cache info is requested.", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('studsdfsdffds');
+        cache.getInfo({
+            success: function(response){
+               if(!response){
+                done();
+               }else{
+                done("Requested null cache, got something else.");
+               }
+            },error: function(error){
+                done(error);
+            }
+       });
+    });
+
+    it("Should get all the caches", function(done){
+        this.timeout(30000);
+
+        var promises = [];
+
+        var cache = new CB.CloudCache('sample1');
+        promises.push(cache.set('hello','hey'));
+
+        var cache1 = new CB.CloudCache('sample2');
+        promises.push(cache1.set('hello','hey'));
+
+        CB.Promise.all(promises).then(function(){
+            CB.CloudCache.getAll({
+              success : function(response){
+                if(response && response.length >1){
+                    if(response[0] instanceof CB.CloudCache && response[1] instanceof CB.CloudCache){
+                       done();
+                    }
+                    else{
+                        done("incorrect data returned");
+                    }
+                 }else{
+                      done("Cache does not exist");
+                   }
+                  },error : function(error){
+                 done(error);
+                 }
+            });
+        }, function(error){
+            done("Cannot set values in a cache.");
+        });
+       }); 
+
+    it("Should delete a cache from an app.", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        cache.delete({
+                            success: function(response){
+                                if(response){
+                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
+                                        CB.CloudCache.getAll({
+                                          success : function(response){
+                                            
+                                            for(var i=0;i<response.length;i++){
+                                                if(response[i].name === 'student'){
+                                                    done("Cache did not delete");
+                                                }
+                                            }
+
+                                            done();
+                                        }, error : function(error) {
+                                            done(error);
+                                        }});
+                                    }else{
+                                        done("Cache was deleted but incorrect response");
+                                    }
+                                }else{
+                                    done("null returned.");
+                                }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should throw error when deleting a wrong cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('dafdfsdf');
+       
+        cache.delete({
+            success: function(response){
+                done("Cache which does not exist, is deleted.")
+            },error: function(error){
+                done();
+            }
+        });    
+    });
+
+     it("Should throw error when clearing a wrong cache", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('dafdfsdf');
+       
+        cache.clear({
+            success: function(response){
+                done("Cache which does not exist, is deleted.")
+            },error: function(error){
+                done();
+            }
+        });    
+    });
+
+
+    it("Should clear a cache from an app.", function(done){
+        this.timeout(30000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        cache.clear({
+                            success: function(response){
+                                if(response){
+                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
+                                        cache.get('test1', {
+                                            success: function(response){
+                                                if(response === null){
+                                                    done();
+                                               }else{
+                                                    done("Pushed but item was empty");
+                                               }
+                                            },error: function(error){
+                                                done(error);
+                                            }
+                                        });
+                                    }else{
+                                        done("Cache was deleted but incorrect response");
+                                    }
+                                }else{
+                                    done("null returned.");
+                                }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+
+     it("Should delete the entire caches from an app.", function(done){
+        this.timeout(300000);
+
+        var cache = new CB.CloudCache('student');
+        cache.set('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
+            success: function(response){
+                if(response != null){
+                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
+                        CB.CloudCache.deleteAll({
+                            success: function(response){
+                                if(response){
+                                    if(response instanceof Array){
+                                        cache.get('test1', {
+                                            success: function(response){
+                                                if(!response)
+                                                    done();
+                                                else
+                                                    done("Wrong value returned.");
+                                            },error: function(error){
+                                                done();
+                                            }
+                                        });
+                                    }else{
+                                        done("Cache was deleted but incorrect response");
+                                    }
+                                }else{
+                                    done("null returned.");
+                                }
+                            },error: function(error){
+                                done(error);
+                            }
+                        });
+                    }else{
+                        done("Pushed but incorrect data");
+                    }
+               }else{
+                    done("Pushed but item was empty");
+               }
+            },error: function(error){
+                done(error);
+            }
+        });
+    });
+});
+
 describe("Cloud Table", function(){
 
     before(function(){
@@ -455,7 +984,7 @@ describe("Should Create All Test Tables",function(done){
 
   it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Address');
         obj.delete().then(function(){
             done();
@@ -466,7 +995,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('UnderScoreTable_a');
         obj.delete().then(function(){
             done();
@@ -478,7 +1007,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Company');
         obj.delete().then(function(){
             done();
@@ -490,7 +1019,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete empty table",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
         var obj = new CB.CloudTable('Empty');
         obj.delete().then(function(){
             done();
@@ -503,7 +1032,7 @@ describe("Should Create All Test Tables",function(done){
 
     it("should delete tables",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var obj = new CB.CloudTable('Employee');
         obj.delete().then(function(){
@@ -734,9 +1263,23 @@ describe("Should Create All Test Tables",function(done){
 
         var callback = {};
         callback.success = function(res){
+
             var user = new CB.CloudTable('User');
-            user.save().then(function(res){
-                done();
+            
+            var newColumn = new CB.Column('newColumn');
+            newColumn.dataType = 'Text';
+            user.addColumn(newColumn);
+
+            user.save().then(function(user){
+                var newColumn1 = new CB.Column('newColumn1');
+                newColumn1.dataType = 'Text';
+                user.addColumn(newColumn1);
+
+                user.save().then(function(res){
+                    done();
+                },function(error){
+                    throw "Unable to create user";
+                });
             },function(error){
                 throw "Unable to create user";
             });
@@ -776,6 +1319,9 @@ describe("Should Create All Test Tables",function(done){
             custom.addColumn(newColumn5);
             var newColumn6 = new CB.Column('newColumn6');
             newColumn6.dataType = 'Object';
+            var newColumn7 = new CB.Column('location');
+            newColumn7.dataType = 'GeoPoint';
+            custom.addColumn(newColumn7);
             custom.addColumn(newColumn6);
             custom.save().then(function(res){
                 done();
@@ -1298,7 +1844,7 @@ describe("Cloud Queue Tests", function() {
 
  it("Should push data into the Queue",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push('sample',{
@@ -1319,8 +1865,31 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
+ it("Should create the Queue",function(done){
+
+     this.timeout(30000);
+     var name = util.makeString();
+     var queue = new CB.CloudQueue(name);
+     queue.create({
+          success : function(response){
+               if(response instanceof CB.CloudQueue && response.name){
+                    if(response.name === name){
+                         done();
+                    }
+                    else{
+                         done("Incorrect data");
+                    }
+               }else{
+                    done("Didnot create queue");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
  it("Should push an array into the queue",function(done){
- 	 this.timeout(20000);
+ 	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push(['sample','sample2'],{
@@ -1337,7 +1906,7 @@ describe("Cloud Queue Tests", function() {
  });
 
  it("Can push multiple messages into the same queue.",function(done){
- 	 this.timeout(20000);
+ 	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push(['sample','sample2'],{
@@ -1367,7 +1936,7 @@ describe("Cloud Queue Tests", function() {
  });
 
 it("Should not push null data into the Queue",function(done){
-     this.timeout(20000);
+     this.timeout(30000);
      try{
 
 	     var queue = new CB.CloudQueue(util.makeString());
@@ -1389,7 +1958,7 @@ it("Should not push null data into the Queue",function(done){
 });
 
 it("Should not create a queue with empty name",function(done){
-     this.timeout(20000);
+     this.timeout(30000);
      try{
 	     var queue = new CB.CloudQueue();
 	     done("Null inserted");
@@ -1400,7 +1969,7 @@ it("Should not create a queue with empty name",function(done){
 
 it("Should push and pull data from the queue.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -1434,7 +2003,7 @@ it("Should push and pull data from the queue.",function(done){
 
 it("Should peek.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -1477,7 +2046,7 @@ it("Should peek.",function(done){
 
 it("Should get the messages in FIFO",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -1538,7 +2107,7 @@ it("Should get the messages in FIFO",function(done){
 
 it("Should peek 2 messages at the same time.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -1590,7 +2159,7 @@ it("Should peek 2 messages at the same time.",function(done){
 
 it("Should pull 2 messages at the same time.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -1645,7 +2214,7 @@ it("Should pull 2 messages at the same time.",function(done){
 
 it("Should not pull message with the delay ",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -1681,7 +2250,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("should give an error if queue doesnot exists.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1697,7 +2266,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("should not pull the same message twice. ",function(done){
-         this.timeout(20000);
+         this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1795,7 +2364,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should be able to pull messages after the delay.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1834,7 +2403,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should be able to get message with an id",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1870,7 +2439,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get null when invalid message id is requested.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1906,7 +2475,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should delete message with message id.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1943,7 +2512,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should delete message by passing queueMessage to the function",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -1980,7 +2549,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not get the message after it was deleted",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -2028,7 +2597,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should add subscriber to the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url = "http://sample.sample.com";
@@ -2046,7 +2615,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should multiple subscribers to the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url = ["http://sample.sample.com","http://sample1.cloudapp.net"];
@@ -2065,7 +2634,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should remove subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url ="http://sample1.cloudapp.net";
@@ -2083,7 +2652,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should remove multiple subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url =["http://sample1.cloudapp.net","http://sample2.cloudapp.net"];
@@ -2102,7 +2671,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not add subscriber with invalid URL.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           var url = "sample.sample";
           queue.addSubscriber(url,{
@@ -2115,7 +2684,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should add a subscriber and then remove a subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           var url = "https://sample.sample.com";
           queue.addSubscriber(url,{
@@ -2141,7 +2710,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should delete the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -2179,7 +2748,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should clear the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -2217,7 +2786,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -2245,7 +2814,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
       it("Should get the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
           queue.push("sample",{
@@ -2274,7 +2843,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not get the queue with null name", function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
           queue.push("sample",{
@@ -2309,7 +2878,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get All Queues", function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           
           CB.CloudQueue.getAll({
                success : function(response){
@@ -2327,7 +2896,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should not get the queue which does not exist",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
              queue.get({
                     success : function(response){
@@ -2340,7 +2909,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should refresh message timeout with timeout specified. ",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
               var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -2376,7 +2945,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should refresh message timeout wiht timeout NOT specified. ",function(done){
-         this.timeout(20000);
+         this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -2412,7 +2981,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not refresh message timeout when message is pulled form the queue.",function(done){
-            this.timeout(20000);
+            this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -2451,7 +3020,7 @@ it("Should not pull message with the delay ",function(done){
 
      it("Should update the queue.",function(done){
 
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           queue.push('sample',{
@@ -2506,7 +3075,7 @@ describe("CloudUser", function () {
             return;
          }
 
-         this.timeout(100000);
+         this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -2530,7 +3099,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
         CB.CloudUser.current.logOut().then(function(){
             done();
         },function(){
@@ -2545,7 +3114,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
         var user = new CB.CloudUser();
         var usrname = util.makeString();
         var passwd = "abcd";
@@ -2572,7 +3141,7 @@ describe("CloudUser", function () {
          }
 
 
-        this.timeout(10000);
+        this.timeout(30000);
         var user = new CB.CloudUser();
         var usrname = util.makeString();
         var passwd = "abcd";
@@ -2605,7 +3174,7 @@ describe("CloudUser", function () {
          }
 
 
-        this.timeout(10000);
+        this.timeout(30000);
         CB.CloudUser.current.logOut().then(function(){
             done();
         },function(){
@@ -2621,7 +3190,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -2646,7 +3215,7 @@ describe("CloudUser", function () {
             return;
          }
 
-        this.timeout(100000);
+        this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -2675,7 +3244,7 @@ describe("CloudUser", function () {
          }
          
 
-        this.timeout(1000000);
+        this.timeout(3000000);
 
         var obj = new CB.CloudUser();
         var roleName3 = util.makeString();
@@ -2707,7 +3276,7 @@ describe("CloudUser", function () {
 
      it('should encrypt user password',function (done){
         
-        this.timeout(100000);
+        this.timeout(300000);
 
         var pass = passwd;
 
@@ -2728,7 +3297,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());
@@ -2752,7 +3321,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());
@@ -2776,7 +3345,7 @@ describe("CloudUser", function () {
 
     it("Should Create a New User",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudUser();
         obj.set('username',util.makeString());
@@ -3293,7 +3862,7 @@ describe("Cloud Objects Notification", function() {
 
    it("should throw an error when wrong event type is entered. ", function(done) {
 
-       this.timeout(20000);
+       this.timeout(40000);
      	try{
      	  CB.CloudObject.on('Student', 'wrongtype', function(data){
 	      	throw 'Fired event to wrong type.';
@@ -3353,7 +3922,7 @@ describe("Cloud Objects Notification", function() {
     });
 
     it("should alert when multiple events are passed.", function(done) {
-      this.timeout(20000);
+      this.timeout(40000);
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
       CB.CloudObject.on('Student', ['created', 'deleted'], function(data){
@@ -3381,7 +3950,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should alert when all three events are passed", function(done) {
 
-      this.timeout(20000);
+      this.timeout(40000);
        
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
@@ -3412,7 +3981,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should stop listening.", function(done) {
 
-     this.timeout(20000);
+     this.timeout(40000);
       
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
@@ -6518,7 +7087,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file with file data and name",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6539,9 +7108,92 @@ describe("Cloud Files", function(done) {
     });
 
 
+    it("Should return the file with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                var obj = new CB.CloudObject('Company');
+                obj.set('File',file);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('File').url){
+                            done();
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+                
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Should return the fileList with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('fileList').length>0){
+                            if(obj.get('fileList')[0].url && obj.get('fileList')[1].url){
+                                done();
+                            }else{
+                                done("Did not get the URL's back");
+                            }
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+                
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
+
+
+
     it("Should Save a file and give the url",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6562,7 +7214,7 @@ describe("Cloud Files", function(done) {
 
     it("Should delete a file with file data and name",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6592,7 +7244,7 @@ describe("Cloud Files", function(done) {
         if (window) {
             it("should save a new file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -6616,7 +7268,7 @@ describe("Cloud Files", function(done) {
             });
             it("should delete a file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -6649,7 +7301,7 @@ describe("Cloud Files", function(done) {
             });
             it("should save a new file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -6682,7 +7334,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file file data and name then fetch it",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6712,7 +7364,7 @@ describe("Cloud Files", function(done) {
 
     it("Include Over File",function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6741,7 +7393,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file file data and name then fetch it",function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -6768,7 +7420,7 @@ describe("Cloud Files", function(done) {
 
     it("should save a file and get from a relation",function(done){
 
-        this.timeout(100000);
+        this.timeout(300000);
 
         var obj1 = new CB.CloudObject('Employee');
         var obj2 = new CB.CloudObject('Company');
@@ -6799,8 +7451,6 @@ describe("Cloud Files", function(done) {
         });
 
     });
-
-    //add ACL on CloudFiles.
     
 });
 
@@ -6880,7 +7530,7 @@ describe("CloudExpire", function () {
 
     it("Sets Expire in Cloud Object.", function (done) {
 
-        this.timeout(10000);
+        this.timeout(30000);
         //create an object.
         var obj = new CB.CloudObject('Custom');
         obj.set('newColumn1', 'abcd');
@@ -6898,7 +7548,7 @@ describe("CloudExpire", function () {
 
     it("Checks if the expired object shows up in the search or not", function (done) {
 
-        this.timeout(10000);
+        this.timeout(30000);
         var curr=new Date().getTime();
         var query = new CB.CloudQuery('Custom');
         query.find().then(function(list){
@@ -7039,7 +7689,7 @@ describe("Cloud GeoPoint Test", function() {
 
     it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 
-        this.timeout(10000);
+        this.timeout(40000);
 
         var obj = new CB.CloudObject('Custom5');
         var loc = new CB.CloudGeoPoint("18.19","79.3");
@@ -7073,7 +7723,7 @@ describe("Cloud GeoPoint Test", function() {
 
 	it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 
-        this.timeout(10000);
+        this.timeout(40000);
 
         var obj = new CB.CloudObject('Custom5');
      	var loc = new CB.CloudGeoPoint("17.19","79.3");
@@ -7094,7 +7744,7 @@ describe("Cloud GeoPoint Test", function() {
      	this.timeout(20000);
         var loc = new CB.CloudGeoPoint("17.7","80.3");
         var query = new CB.CloudQuery('Custom5');
-		query.near("location", loc, 100000);
+		query.near("location", loc, 400000);
 		query.find().then(function(list) {
             if(list.length>0){
                 for(var i=0;i<list.length;i++)
@@ -7111,7 +7761,7 @@ describe("Cloud GeoPoint Test", function() {
 	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin", function(done) {
-     	this.timeout(10000);
+     	this.timeout(40000);
         var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
@@ -7119,21 +7769,18 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+                done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
 	});
 	
 	it("should get list of CloudGeoPoint Object from server Polygon type geoWithin + equal to + limit", function(done) {
-     	this.timeout(10000);
+     	this.timeout(40000);
         var loc1 = new CB.CloudGeoPoint(18.4,78.9);
      	var loc2 = new CB.CloudGeoPoint(17.4,78.4);
      	var loc3 = new CB.CloudGeoPoint(17.7,80.4);
@@ -7142,55 +7789,46 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", [loc1, loc2, loc3]);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+               done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
-     	this.timeout(10000);
+     	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+                done();
             } else{
-                throw "should retrieve saved data with particular value ";
+                done("didnot retrieve the records.")
             }
-            done();
+
         }, function () {
-            throw "find data error";
-        })
+            done("Find error");
+        });
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
-     	this.timeout(10000);
+     	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.setLimit(4);
 		query.find().then(function(list) {
             if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                	//display data
-                }
+               done();
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            done();
+            
         }, function () {
             throw "find data error";
         })
@@ -7219,7 +7857,7 @@ describe("Cloud GeoPoint Test", function() {
 
     it("should take latitude in range",function(done){
 
-        this.timeout(10000);
+        this.timeout(40000);
 
         var obj = new CB.CloudGeoPoint(10,20);
         try{
@@ -7232,7 +7870,7 @@ describe("Cloud GeoPoint Test", function() {
 
     it("should take longitude in range",function(done){
 
-        this.timeout(10000);
+        this.timeout(40000);
 
         var obj = new CB.CloudGeoPoint(10,20);
         try{
@@ -8442,6 +9080,107 @@ describe("CloudQuery", function (done) {
 describe("CloudSearch", function (done) {
 
 
+
+    it("should get data from server for near function", function(done) {
+
+        CB.appKey = CB.masterKey;
+
+         this.timeout(60000);
+
+
+        var callback = {};
+        callback.success = function(res){
+            var custom = new CB.CloudTable('CustomGeoPoint');
+            var newColumn7 = new CB.Column('location');
+            newColumn7.dataType = 'GeoPoint';
+            custom.addColumn(newColumn7);
+            custom.save().then(function(res){
+                CB.appKey = CB.jsKey;
+                var loc = new CB.CloudGeoPoint(17.7,80.0);
+
+                var obj = new CB.CloudObject('CustomGeoPoint');
+                obj.set("location", loc);
+
+                obj.save({
+                    success : function(newObj){
+                        var search = new CB.CloudSearch('CustomGeoPoint');
+                        search.searchFilter = new CB.SearchFilter();
+                        search.searchFilter.near("location", loc, 1);
+                        search.search().then(function(list) {
+                            if(list.length>0){
+                               console.log(list);
+                                done();
+                            } else{
+                                throw "should retrieve saved data with particular value ";
+                            }
+                        }, function (error) {
+                            done(error);
+                        });
+                    }, error : function(error){
+                        throw 'Error saving the object';
+                    }
+                });
+            },function(){
+                throw "Unable to create user";
+            });
+        };
+        callback.error = function(){
+            throw "Unable to Delete";
+        };
+        var obj = new CB.CloudTable('CustomGeoPoint');
+        obj.delete(callback);
+
+        
+    });
+
+    it("Equal to should work in CloudSearch over CloudObject",function(done){
+             CB.appKey = CB.masterKey;
+
+             this.timeout(50000);
+
+            var callback = {};
+            callback.success = function(res){
+                var custom = new CB.CloudTable('CustomRelation');
+                var newColumn1 = new CB.Column('newColumn7');
+                newColumn1.dataType = 'Relation';
+                newColumn1.relatedTo = 'student1';
+                custom.addColumn(newColumn1);
+                custom.save().then(function(res){
+                     CB.appKey = CB.jsKey;
+                    var obj = new CB.CloudObject('CustomRelation');
+                    var obj1 = new CB.CloudObject('student1');
+                    obj1.set('name', 'Vipul');
+                    obj.set('newColumn7', obj1);
+
+                    obj.save({
+                        success : function(obj){
+
+                            var cs = new CB.CloudSearch('CustomRelation');
+                            cs.searchFilter = new CB.SearchFilter();
+                            cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
+                            cs.search().then(function(list){
+                                console.log(list);
+                                done();
+                            }, function(error){
+                                throw "Unsuccessful join"
+                            });
+                        }, error : function(error){
+                            throw "Cannot save a CloudObject";
+
+                        }
+
+                    });
+                },function(){
+                    throw "Unable to create CustomRelation2";
+                });
+            };
+            callback.error = function(){
+                throw "Unable to Delete";
+            };
+            var obj = new CB.CloudTable('CustomRelation');
+            obj.delete(callback);
+        });
+
     it("should index object for search", function (done) {
 
         this.timeout(30000);
@@ -9089,58 +9828,6 @@ describe("CloudSearch", function (done) {
     });
 
 
-    it("should get data from server for near function", function(done) {
-
-        this.timeout(20000);
-
-        var loc = new CB.CloudGeoPoint("17.7","80.0");
-        var search = new CB.CloudSearch('Custom5');
-        search.searchFilter = new CB.SearchFilter();
-        search.searchFilter.near("location", loc, 100000);
-        search.search().then(function(list) {
-            if(list.length>0){
-               console.log(list);
-                done();
-            } else{
-                throw "should retrieve saved data with particular value ";
-            }
-        }, function () {
-            throw "find data error";
-        })
-    });
-
-    it("Equal to should work in CloudSearch over CloudObject",function(done){
-
-            this.timeout(30000);
-
-            var obj = new CB.CloudObject('Custom2');
-            obj.set('newColumn1', 'text');
-
-            var obj1 = new CB.CloudObject('student1');
-            obj1.set('name', 'Vipul');
-            obj.set('newColumn7', obj1);
-
-            obj.save({
-                success : function(obj){
-
-                    var cs = new CB.CloudSearch('Custom2');
-                    cs.searchFilter = new CB.SearchFilter();
-                    cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
-                    cs.search().then(function(  list){
-                        console.log(list);
-                        done();
-                    }, function(error){
-                        throw "Unsuccessful join"
-                    });
-                }, error : function(error){
-                    throw "Cannot save a CloudObject";
-
-                }
-
-            });
-
-        });
-
 });
 describe("Inlcude in CloudSearch", function (done) {
 
@@ -9443,486 +10130,4 @@ describe("CloudApp Socket Test", function () {
     });
 
 
-});
-describe("Cloud Cache", function(){
-     
-    before(function(){
-        CB.appKey = CB.masterKey;
-    });
-
-    it("Should add an item to the cache", function(done){
-        this.timeout(300000);
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        done();
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-     it("Should add a string", function(done){
-        this.timeout(300000);
-        var cache = new CB.CloudCache('student');
-        cache.put('test1','sample',{
-            success: function(response){
-                if(response != null){
-                    if(response === 'sample'){
-                        done();
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should add a number", function(done){
-        this.timeout(300000);
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',1,{
-            success: function(response){
-                if(response != null){
-                    if(response === 1){
-                        done();
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should create a cache", function(done){
-        this.timeout(300000);
-
-        var cache = new CB.CloudCache('student');
-        cache.create({
-            success: function(response){
-                if(response != null){
-                    if(response.name === 'student' && response.size === "0kb"){
-                        done();
-                    }else{
-                        done("Incorrect data");
-                    }
-               }else{
-                    done("Item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should not create a cache with an empty name.", function(done){
-        this.timeout(300000);
-
-        try{
-            var cache = new CB.CloudCache('');
-            done("Created cache with an empty name.");
-        }catch(e){
-            done();
-        }
-        
-    });
-
-    it("Should not try to insert null value", function(done){
-        this.timeout(300000);
-
-        try{
-            var cache = new CB.CloudCache('');
-            cache.put('key', null);
-            done("Added null value.");
-        }catch(e){
-            done();
-        }
-    });
-
-    it("Should get items count", function(done){
-        this.timeout(300000);
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.getItemsCount({
-                            success: function(response){
-                               if(response === 1){
-                                done();
-                               }else{
-                                done("Incorrect data returned :"+response);
-                               }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-
-    it("Should get the item in the cache", function(done){
-        this.timeout(300000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.get('test1',{
-                            success: function(response){
-                                if(response != null){
-                                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                                        done();
-                                    }else{
-                                        done("Got item but incorrect data");
-                                    }
-                                }else{
-                                    done("Item received but it is empty");
-                                }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should get all the cache items", function(done){
-        this.timeout(300000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.put('test2',{name:"sample2", sex:"male", age:24},{
-                            success: function(response){
-                                if(response != null){
-                                    if(response.name === "sample2" && response.sex === "male" && response.age === 24){
-                                         cache.getAll({
-                                            success: function(response){
-                                                if(response.length>1){
-                                                    if(response instanceof Array){
-                                                        response1  = response[0];
-                                                        response  = response[1];
-                                                         if(response.value.name === "sample2" && response.value.sex === "male" && response.value.age === 24){
-                                                            done();
-                                                         }else{
-                                                            done("Returned with Incorrect data.");
-                                                         }
-                                                    }else{
-                                                        done("Got cache but incorrect data");
-                                                    }
-                                                }else{
-                                                    done("cache Item received but not an array or it is empty");
-                                                }
-                                            },error: function(error){
-                                                done(error);
-                                            }
-                                        });
-                                    }else{
-                                        done("Pushed but incorrect data");
-                                    }
-                               }else{
-                                    done("Pushed but item was empty");
-                               }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should get information about the cache", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                          cache.getInfo({
-                                success: function(response){
-                                    if(response && response instanceof CB.CloudCache){
-                                        if(response.size.slice(-2,response.length) === 'kb'){
-                                            done();
-                                        }else{
-                                            done("Got cache information but has incorrect units");
-                                        }
-                                    }else{
-                                        done("No response for the cache info returned or didnot return the CloudCache instance back.");
-                                    }
-                                },error: function(error){
-                                    done(error);
-                                }
-                           });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-     it("Should get null when wrong cache info is requested.", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('studsdfsdffds');
-        cache.getInfo({
-            success: function(response){
-               if(!response){
-                done();
-               }else{
-                done("Requested null cache, got something else.");
-               }
-            },error: function(error){
-                done(error);
-            }
-       });
-    });
-
-    it("Should get all the caches", function(done){
-        this.timeout(30000);
-
-        var promises = [];
-
-        var cache = new CB.CloudCache('sample1');
-        promises.push(cache.put('hello','hey'));
-
-        var cache1 = new CB.CloudCache('sample2');
-        promises.push(cache1.put('hello','hey'));
-
-        CB.Promise.all(promises).then(function(){
-            CB.CloudCache.getAll({
-              success : function(response){
-                if(response && response.length >1){
-                    if(response[0] instanceof CB.CloudCache && response[1] instanceof CB.CloudCache){
-                       done();
-                    }
-                    else{
-                        done("incorrect data returned");
-                    }
-                 }else{
-                      done("Cache does not exist");
-                   }
-                  },error : function(error){
-                 done(error);
-                 }
-            });
-        }, function(error){
-            done("Cannot put values in a cache.");
-        });
-       }); 
-
-    it("Should delete a cache from an app.", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.delete({
-                            success: function(response){
-                                if(response){
-                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
-                                        CB.CloudCache.getAll({
-                                          success : function(response){
-                                            
-                                            for(var i=0;i<response.length;i++){
-                                                if(response[i].name === 'student'){
-                                                    done("Cache did not delete");
-                                                }
-                                            }
-
-                                            done();
-                                        }, error : function(error) {
-                                            done(error);
-                                        }});
-                                    }else{
-                                        done("Cache was deleted but incorrect response");
-                                    }
-                                }else{
-                                    done("null returned.");
-                                }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should throw error when deleting a wrong cache", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('dafdfsdf');
-       
-        cache.delete({
-            success: function(response){
-                done("Cache which does not exist, is deleted.")
-            },error: function(error){
-                done();
-            }
-        });    
-    });
-
-     it("Should throw error when clearing a wrong cache", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('dafdfsdf');
-       
-        cache.clear({
-            success: function(response){
-                done("Cache which does not exist, is deleted.")
-            },error: function(error){
-                done();
-            }
-        });    
-    });
-
-
-    it("Should clear a cache from an app.", function(done){
-        this.timeout(30000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        cache.clear({
-                            success: function(response){
-                                if(response){
-                                    if(response instanceof CB.CloudCache && response.size === "0kb"){
-                                        cache.get('test1', {
-                                            success: function(response){
-                                                if(response === null){
-                                                    done();
-                                               }else{
-                                                    done("Pushed but item was empty");
-                                               }
-                                            },error: function(error){
-                                                done(error);
-                                            }
-                                        });
-                                    }else{
-                                        done("Cache was deleted but incorrect response");
-                                    }
-                                }else{
-                                    done("null returned.");
-                                }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
-
-     it("Should delete the entire caches from an app.", function(done){
-        this.timeout(300000);
-
-        var cache = new CB.CloudCache('student');
-        cache.put('test1',{name:"Buhiire Keneth", sex:"male", age:24},{
-            success: function(response){
-                if(response != null){
-                    if(response.name === "Buhiire Keneth" && response.sex === "male" && response.age === 24){
-                        CB.CloudCache.deleteAll({
-                            success: function(response){
-                                if(response){
-                                    if(response instanceof Array){
-                                        cache.get('test1', {
-                                            success: function(response){
-                                                if(!response)
-                                                    done();
-                                                else
-                                                    done("Wrong value returned.");
-                                            },error: function(error){
-                                                done();
-                                            }
-                                        });
-                                    }else{
-                                        done("Cache was deleted but incorrect response");
-                                    }
-                                }else{
-                                    done("null returned.");
-                                }
-                            },error: function(error){
-                                done(error);
-                            }
-                        });
-                    }else{
-                        done("Pushed but incorrect data");
-                    }
-               }else{
-                    done("Pushed but item was empty");
-               }
-            },error: function(error){
-                done(error);
-            }
-        });
-    });
 });

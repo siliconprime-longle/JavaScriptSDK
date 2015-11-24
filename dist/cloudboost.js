@@ -11682,11 +11682,11 @@ CB._fileCheck = function(obj){
     for(var key in obj.document){
         if(obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile){
             for(var i=0;i<obj.document[key].length;i++){
-                if(!obj.document[key][i]._id)
+                if(!obj.document[key][i].id)
                     promises.push(obj.document[key][i].save());
             }
         }else if(obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile){
-            if(!obj.document[key]._id)
+            if(!obj.document[key].id)
                 promises.push(obj.document[key].save());
         }
     }
@@ -11697,13 +11697,13 @@ CB._fileCheck = function(obj){
             for (var key in obj.document) {
                 if (obj.document[key] instanceof Array && obj.document[key][0] instanceof CB.CloudFile) {
                     for (var i = 0; i < obj.document[key].length; i++) {
-                        if(!obj.document[key][i]._id) {
+                        if(!obj.document[key][i].id) {
                             obj.document[key][i] = res[j];
                             j = j + 1;
                         }
                     }
                 } else if (obj.document[key] instanceof Object && obj.document[key] instanceof CB.CloudFile) {
-                    if(!obj.document[key]._id) {
+                    if(!obj.document[key].id) {
                         obj.document[key] = res[j];
                         j = j + 1;
                     }
@@ -11895,7 +11895,7 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document._queueName+'/message';
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/message';
 
     CB._request('PUT',url,params).then(function(response){
         var messages = CB.fromJSON(JSON.parse(response));
@@ -12033,6 +12033,41 @@ CB.CloudQueue.prototype.get = function(callback) {
     });
 };
 
+CB.CloudQueue.prototype.create = function(callback) {
+    var def;
+    
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var xmlhttp = CB._loadXml();
+
+    var thisObj = this;
+
+    var params=JSON.stringify({       
+        key: CB.appKey,
+        document : CB.toJSON(thisObj)
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/create';
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+};
+
 CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
 
     var def;
@@ -12074,7 +12109,7 @@ CB.CloudQueue.prototype.addSubscriber = function(url,callback) {
             def.resolve(thisObj);
         }
     },function(err){
-        this.document.subscribers = tempSubscribers;
+        thisObj.document.subscribers = tempSubscribers;
         if(callback){
             callback.error(err);
         }else {
@@ -12551,7 +12586,7 @@ Object.defineProperty(CB.CloudCache.prototype, 'items', {
     }
 });
 
-CB.CloudCache.prototype.put = function(key, value, callback){
+CB.CloudCache.prototype.set = function(key, value, callback){
   var def;
   CB._validate();
 
@@ -12570,6 +12605,43 @@ CB.CloudCache.prototype.put = function(key, value, callback){
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/'+key;
   CB._request('PUT',url,params,true).then(function(response){
+    if(CB._isJsonString(response)){
+      response = JSON.parse(response);
+    }
+    
+    var obj = CB.fromJSON(response);
+    if (callback) {
+        callback.success(obj);
+    } else {
+        def.resolve(obj);
+    }
+  },function(err){
+      if(callback){
+          callback.error(err);
+      }else {
+          def.reject(err);
+      }
+  });
+  if (!callback) {
+      return def;
+  }
+};
+
+CB.CloudCache.prototype.deleteItem = function(key, callback){
+  var def;
+  CB._validate();
+
+  if (!callback) {
+      def = new CB.Promise();
+  }
+
+
+  var params=JSON.stringify({
+      key: CB.appKey
+  });
+
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/item/'+key;
+  CB._request('DELETE',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }

@@ -2,7 +2,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file with file data and name",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -23,9 +23,92 @@ describe("Cloud Files", function(done) {
     });
 
 
+    it("Should return the file with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                var obj = new CB.CloudObject('Company');
+                obj.set('File',file);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('File').url){
+                            done();
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Should return the fileList with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('fileList').length>0){
+                            if(obj.get('fileList')[0].url && obj.get('fileList')[1].url){
+                                done();
+                            }else{
+                                done("Did not get the URL's back");
+                            }
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
+
+
+
     it("Should Save a file and give the url",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -46,7 +129,7 @@ describe("Cloud Files", function(done) {
 
     it("Should delete a file with file data and name",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -76,7 +159,7 @@ describe("Cloud Files", function(done) {
         if (window) {
             it("should save a new file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -100,7 +183,7 @@ describe("Cloud Files", function(done) {
             });
             it("should delete a file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -133,7 +216,7 @@ describe("Cloud Files", function(done) {
             });
             it("should save a new file", function (done) {
 
-                this.timeout(20000);
+                this.timeout(30000);
                 var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
                 try {
                     var oMyBlob = new Blob(aFileParts, {type: "text/html"});
@@ -166,7 +249,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file file data and name then fetch it",function(done){
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -196,7 +279,7 @@ describe("Cloud Files", function(done) {
 
     it("Include Over File",function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -225,7 +308,7 @@ describe("Cloud Files", function(done) {
 
     it("Should Save a file file data and name then fetch it",function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -252,7 +335,7 @@ describe("Cloud Files", function(done) {
 
     it("should save a file and get from a relation",function(done){
 
-        this.timeout(100000);
+        this.timeout(300000);
 
         var obj1 = new CB.CloudObject('Employee');
         var obj2 = new CB.CloudObject('Company');

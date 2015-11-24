@@ -6,7 +6,7 @@ describe("Cloud Queue Tests", function() {
 
  it("Should push data into the Queue",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push('sample',{
@@ -27,8 +27,31 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
+ it("Should create the Queue",function(done){
+
+     this.timeout(30000);
+     var name = util.makeString();
+     var queue = new CB.CloudQueue(name);
+     queue.create({
+          success : function(response){
+               if(response instanceof CB.CloudQueue && response.name){
+                    if(response.name === name){
+                         done();
+                    }
+                    else{
+                         done("Incorrect data");
+                    }
+               }else{
+                    done("Didnot create queue");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
  it("Should push an array into the queue",function(done){
- 	 this.timeout(20000);
+ 	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push(['sample','sample2'],{
@@ -45,7 +68,7 @@ describe("Cloud Queue Tests", function() {
  });
 
  it("Can push multiple messages into the same queue.",function(done){
- 	 this.timeout(20000);
+ 	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      queue.push(['sample','sample2'],{
@@ -75,7 +98,7 @@ describe("Cloud Queue Tests", function() {
  });
 
 it("Should not push null data into the Queue",function(done){
-     this.timeout(20000);
+     this.timeout(30000);
      try{
 
 	     var queue = new CB.CloudQueue(util.makeString());
@@ -97,7 +120,7 @@ it("Should not push null data into the Queue",function(done){
 });
 
 it("Should not create a queue with empty name",function(done){
-     this.timeout(20000);
+     this.timeout(30000);
      try{
 	     var queue = new CB.CloudQueue();
 	     done("Null inserted");
@@ -108,7 +131,7 @@ it("Should not create a queue with empty name",function(done){
 
 it("Should push and pull data from the queue.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -142,7 +165,7 @@ it("Should push and pull data from the queue.",function(done){
 
 it("Should peek.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -185,7 +208,7 @@ it("Should peek.",function(done){
 
 it("Should get the messages in FIFO",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -246,7 +269,7 @@ it("Should get the messages in FIFO",function(done){
 
 it("Should peek 2 messages at the same time.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -298,7 +321,7 @@ it("Should peek 2 messages at the same time.",function(done){
 
 it("Should pull 2 messages at the same time.",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
@@ -353,7 +376,7 @@ it("Should pull 2 messages at the same time.",function(done){
 
 it("Should not pull message with the delay ",function(done){
 
-     this.timeout(20000);
+     this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
@@ -389,7 +412,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("should give an error if queue doesnot exists.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -405,7 +428,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("should not pull the same message twice. ",function(done){
-         this.timeout(20000);
+         this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -503,7 +526,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should be able to pull messages after the delay.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -542,7 +565,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should be able to get message with an id",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -578,7 +601,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get null when invalid message id is requested.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -614,7 +637,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should delete message with message id.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -651,7 +674,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should delete message by passing queueMessage to the function",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -688,7 +711,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not get the message after it was deleted",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
@@ -736,7 +759,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should add subscriber to the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url = "http://sample.sample.com";
@@ -754,7 +777,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should multiple subscribers to the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url = ["http://sample.sample.com","http://sample1.cloudapp.net"];
@@ -773,7 +796,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should remove subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url ="http://sample1.cloudapp.net";
@@ -791,7 +814,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should remove multiple subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var url =["http://sample1.cloudapp.net","http://sample2.cloudapp.net"];
@@ -810,7 +833,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not add subscriber with invalid URL.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           var url = "sample.sample";
           queue.addSubscriber(url,{
@@ -823,7 +846,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should add a subscriber and then remove a subscriber from the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           var url = "https://sample.sample.com";
           queue.addSubscriber(url,{
@@ -849,7 +872,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should delete the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -887,7 +910,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should clear the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -925,7 +948,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
           queue.push("sample",{
                success : function(response){
@@ -953,7 +976,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
       it("Should get the queue.",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
           queue.push("sample",{
@@ -982,7 +1005,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not get the queue with null name", function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
           queue.push("sample",{
@@ -1017,7 +1040,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should get All Queues", function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           
           CB.CloudQueue.getAll({
                success : function(response){
@@ -1035,7 +1058,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should not get the queue which does not exist",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
              queue.get({
                     success : function(response){
@@ -1048,7 +1071,7 @@ it("Should not pull message with the delay ",function(done){
 
 
      it("Should refresh message timeout with timeout specified. ",function(done){
-          this.timeout(20000);
+          this.timeout(30000);
               var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -1084,7 +1107,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should refresh message timeout wiht timeout NOT specified. ",function(done){
-         this.timeout(20000);
+         this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -1120,7 +1143,7 @@ it("Should not pull message with the delay ",function(done){
      });
 
      it("Should not refresh message timeout when message is pulled form the queue.",function(done){
-            this.timeout(20000);
+            this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
               queue.push('sample',{
                  success : function(response){
@@ -1159,7 +1182,7 @@ it("Should not pull message with the delay ",function(done){
 
      it("Should update the queue.",function(done){
 
-          this.timeout(20000);
+          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           queue.push('sample',{
