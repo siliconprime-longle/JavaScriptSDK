@@ -54,7 +54,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 }
             }
         }
-    } 
+    }
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -228,6 +228,42 @@ CB.CloudFile.prototype.getFileContent = function(callback){
         key: CB.appKey
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id  ;
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success(response);
+        } else {
+            def.resolve(response);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+
+    if (!callback) {
+        return def;
+    }
+};
+
+CB.CloudFile.prototype.processImage = function(callback){
+
+    var def;
+
+    if(!this.url) {
+        throw "Url is Null";
+    }
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var params=JSON.stringify({
+        key: CB.appKey
+    });
+    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id +'/file' ;
 
     CB._request('POST',url,params).then(function(response){
         if (callback) {

@@ -284,6 +284,33 @@ describe("Cloud Files", function(done) {
 
     });
 
+    it("Should process Image",function(done) {
+
+        this.timeout(20000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var file = res.get('file');
+            file.fetch().then(function(res){
+                console.log(res);
+                if(res.get('url'))
+                    done();
+                throw "Unable to fetch the file";
+            },function(err){
+                throw "Unable to fetch file";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
     //add ACL on CloudFiles.
-    
+
 });
