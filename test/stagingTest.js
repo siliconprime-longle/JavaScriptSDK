@@ -1263,23 +1263,9 @@ describe("Should Create All Test Tables",function(done){
 
         var callback = {};
         callback.success = function(res){
-
             var user = new CB.CloudTable('User');
-            
-            var newColumn = new CB.Column('newColumn');
-            newColumn.dataType = 'Text';
-            user.addColumn(newColumn);
-
-            user.save().then(function(user){
-                var newColumn1 = new CB.Column('newColumn1');
-                newColumn1.dataType = 'Text';
-                user.addColumn(newColumn1);
-
-                user.save().then(function(res){
-                    done();
-                },function(error){
-                    throw "Unable to create user";
-                });
+            user.save().then(function(res){
+                done();
             },function(error){
                 throw "Unable to create user";
             });
@@ -7125,13 +7111,13 @@ describe("Cloud Files", function(done) {
                         if(obj.get('File').url){
                             done();
                         }else{
-                            done("Didnot get the file object back.");
+                            done("Did not get the file object back.");
                         }
                     }, error : function(error){
                         done(error);
                     }
                 });
-                
+
             }else{
                 throw 'ún able to get the url';
             }
@@ -7180,7 +7166,7 @@ describe("Cloud Files", function(done) {
                         done(error);
                     }
                 });
-                
+
             }else{
                 throw 'ún able to get the url';
             }
@@ -7212,32 +7198,32 @@ describe("Cloud Files", function(done) {
         });
     });
 
-    it("Should delete a file with file data and name",function(done){
+    // it("Should delete a file with file data and name",function(done){
 
-        this.timeout(30000);
+    //     this.timeout(30000);
 
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            if(file.url) {
-                file.delete().then(function(file){
-                    console.log(file);
-                    if(file.url === null)
-                        done();
-                    else
-                        throw "file delete error"
-                },function(err){
-                    throw "unable to delete file";
-                });
-            }else{
-                throw 'unable to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
+    //     var data = 'akldaskdhklahdasldhd';
+    //     var name = 'abc.txt';
+    //     var type = 'txt';
+    //     var fileObj = new CB.CloudFile(name,data,type);
+    //     fileObj.save().then(function(file){
+    //         if(file.url) {
+    //             file.delete().then(function(file){
+    //                 console.log(file);
+    //                 if(file.url === null)
+    //                     done();
+    //                 else
+    //                     throw "file delete error"
+    //             },function(err){
+    //                 throw "unable to delete file";
+    //             });
+    //         }else{
+    //             throw 'unable to get the url';
+    //         }
+    //     },function(err){
+    //         throw "Unable to save file";
+    //     });
+    // });
 
     try {
 
@@ -7451,7 +7437,31 @@ describe("Cloud Files", function(done) {
         });
 
     });
-    
+
+    it("Should save an image",function(done){
+
+        this.timeout(30000);
+
+
+          var data = "http://image.jianfeice.com/thumb/280x220/a/21/a218f02210f426d42883dc5ecfa85714.png";
+        var name = 'ken.png';
+        var type = 'png';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file) {
+                done();
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+     });
+
+
+
+    //add ACL on CloudFiles.
+
 });
 
 describe("ACL Tests Over Files",function(done){
@@ -7806,14 +7816,13 @@ describe("Cloud GeoPoint Test", function() {
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                done();
+                 done();
             } else{
-                done("didnot retrieve the records.")
+                throw "should retrieve saved data with particular value ";
             }
-
         }, function () {
-            done("Find error");
-        });
+            throw "find data error";
+        })
 	});
 	
 	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
@@ -9826,6 +9835,7 @@ describe("CloudSearch", function (done) {
             }
         });
     });
+
 
 
 });
