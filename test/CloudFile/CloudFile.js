@@ -367,106 +367,218 @@ describe("Cloud Files", function(done) {
 
     });
 
-    it("Should resize the image",function(done){
+    it("Should get the image",function(done){
 
-        this.timeout(400000);
-        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100,&resizeHeight=100";
+        this.timeout(20000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100&resizeHeight=100";
         var xhttp = new XMLHttpRequest();
         xhttp.open('GET', url, true);
-        xhttp.send(function(err, response){
-            if(err) throw "Unable to get resize image";
-            done();
-        });
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to get the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        xhttp.send(null);
 
         });
-    // it("Should crop the image",function(done){
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?cropX=50&cropY=50&cropW=50&cropH=50";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to crop the image";
-    //         done();
-    //     });
+    it("Should resize the image",function(done){
 
-    //     });
+        this.timeout(20000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100&resizeHeight=100";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to resize the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
 
-    // it("Should change the quality of the image",function(done){
+        };
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?quality=2";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to change the quality of the image";
-    //         done();
-    //     });
+        xhttp.send(null);
 
-    //     });
+        });
+    it("Should crop the image",function(done){
 
-    // it("Should change the opacity of the image",function(done){
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?cropX=50&cropY=50&cropW=50&cropH=50";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to crop the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?opacity=0.4";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to get the opacity of the image";
-    //         done();
-    //     });
+        };
 
-    //     });
+        xhttp.send(null);
 
-    // it("Should scale the image",function(done){
+        });
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?scale=2";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to scale the image";
-    //         done();
-    //     });
+    it("Should change the quality of the image",function(done){
 
-    //     });
-    // it("Should contain the image",function(done){
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?quality=2";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to change the quality of the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?containWidth=100&containHeight=100";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to contain the image";
-    //         done();
-    //     });
+        };
 
-    //     });
+        xhttp.send(null);
 
-    // it("Should rotate the image",function(done){
+        });
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?rDegs=0.45";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to rotate the image";
-    //         done();
-    //     });
+    it("Should change the opacity of the image",function(done){
 
-    //     });
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?opacity=0.4";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to change the opacity of the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
 
-    // it("Should blur the image",function(done){
+        };
 
-    //     this.timeout(100000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?bSigma";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.send(function(err, response){
-    //         if(err) throw "Unable to blur the image";
-    //         done();
-    //     });
+        xhttp.send(null);
 
-    //     });
+        });
+
+    it("Should scale the image",function(done){
+
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?scale=2";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to scale the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        xhttp.send(null);
+
+        });
+    it("Should contain the image",function(done){
+
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?containWidth=100&containHeight=100";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to contain the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        xhttp.send(null);
+
+        });
+
+    it("Should rotate the image",function(done){
+
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?rDegs=0.45";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to rotate the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        xhttp.send(null);
+
+        });
+
+    it("Should blur the image",function(done){
+
+        this.timeout(30000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?bSigma";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to blur the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        xhttp.send(null);
+
+        });
 
 });
