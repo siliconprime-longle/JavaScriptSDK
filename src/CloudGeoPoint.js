@@ -3,7 +3,7 @@
  */
 
 CB.CloudGeoPoint = CB.CloudGeoPoint || function(longitude , latitude) {
-    if(!latitude || !longitude)
+    if((!latitude && latitude!==0) || (!longitude && longitude!==0))
         throw "Latitude or Longitude is empty.";
 
     if(isNaN(latitude))

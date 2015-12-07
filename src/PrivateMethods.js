@@ -293,6 +293,11 @@ CB._request=function(method,url,params,isServiceUrl,isFile)
 
     CB._validate();
 
+    if(!params)
+        params = {};
+
+    params.sdk = "JavaScript";
+
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
 

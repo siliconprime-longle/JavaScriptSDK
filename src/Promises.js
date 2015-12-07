@@ -443,7 +443,7 @@ CB.Promise["all"] = function(promises) {
                 if (hadError) {
                     promise.reject(errors);
                 } else {
-                    promise.resolve.apply(promise, results);
+                    promise.resolve(results);
                 }
             }
         };

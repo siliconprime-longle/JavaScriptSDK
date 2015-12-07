@@ -6195,7 +6195,6 @@ describe("ACL", function () {
             return;
         }
 
-
         var obj = new CB.CloudObject('Employee');
         obj.ACL = new CB.ACL();
         obj.ACL.setRoleWriteAccess("x",true);
@@ -6224,6 +6223,37 @@ describe("ACL", function () {
         }, function (error) {
              done(error);
         });
+    });
+
+
+    it("Should delete the userId from the ACL", function (done) {
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Employee');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess("x",true);
+        obj.save().then(function(list) {
+            list.ACL.setUserWriteAccess("x",false);
+            list.save().then(function(obj) {
+                var query = new CB.CloudQuery("Employee");
+                query.findById(obj.id, {
+                    success : function(obj){
+                        if(obj.ACL.document.write.allow.user.indexOf("x") === -1) {
+                            done();
+                        }
+                        else
+                            done("Cannot delete the user from the ACL");
+                    }, error : function(error) {
+                         done(error);
+                    }
+                })
+            }, function(error){
+                done(error);
+            });           
+        }, function (error) {
+             done(error);
+        });
+        
     });
 
 
@@ -6323,6 +6353,8 @@ describe("ACL", function () {
         });
 
     });
+
+
     var username = util.makeString();
     var passwd = "abcd";
     var userObj = new CB.CloudUser();
@@ -7685,6 +7717,19 @@ describe("Cloud GeoPoint Test", function() {
                 throw 'Error saving the object';
             }
         });
+    });
+
+     it("should create a GeoPoint with 0,0", function(done) {
+
+        this.timeout(30000);
+
+        try{
+            var loc = new CB.CloudGeoPoint(0,0);
+            done();
+        }catch(e){
+            done("Canot create a geo point");
+        }
+        
     });
 
     it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {

@@ -16,6 +16,19 @@ describe("Cloud GeoPoint Test", function() {
         });
     });
 
+     it("should create a GeoPoint with 0,0", function(done) {
+
+        this.timeout(30000);
+
+        try{
+            var loc = new CB.CloudGeoPoint(0,0);
+            done();
+        }catch(e){
+            done("Canot create a geo point");
+        }
+        
+    });
+
     it("should save a latitude and longitude when passing a valid numeric data as string type", function(done) {
 
         this.timeout(40000);

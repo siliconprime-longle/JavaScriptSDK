@@ -443,7 +443,7 @@ CB.Promise["all"] = function(promises) {
                 if (hadError) {
                     promise.reject(errors);
                 } else {
-                    promise.resolve.apply(promise, results);
+                    promise.resolve(results);
                 }
             }
         };
@@ -10647,7 +10647,7 @@ CB.CloudFile.prototype.getFileContent = function(callback){
  */
 
 CB.CloudGeoPoint = CB.CloudGeoPoint || function(longitude , latitude) {
-    if(!latitude || !longitude)
+    if((!latitude && latitude!==0) || (!longitude && longitude!==0))
         throw "Latitude or Longitude is empty.";
 
     if(isNaN(latitude))
@@ -11463,6 +11463,11 @@ CB._request=function(method,url,params,isServiceUrl,isFile)
 {
 
     CB._validate();
+
+    if(!params)
+        params = {};
+
+    params.sdk = "JavaScript";
 
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
