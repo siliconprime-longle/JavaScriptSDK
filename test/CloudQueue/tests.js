@@ -35,7 +35,7 @@ describe("Cloud Queue Tests", function() {
      queue.create({
           success : function(response){
                if(response instanceof CB.CloudQueue && response.name){
-                    if(response.name === name){
+                    if(response.name === name && response.createdAt && response.updatedAt){
                          done();
                     }
                     else{

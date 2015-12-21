@@ -1873,7 +1873,7 @@ describe("Cloud Queue Tests", function() {
      queue.create({
           success : function(response){
                if(response instanceof CB.CloudQueue && response.name){
-                    if(response.name === name){
+                    if(response.name === name && response.createdAt && response.updatedAt){
                          done();
                     }
                     else{
@@ -6225,38 +6225,6 @@ describe("ACL", function () {
         });
     });
 
-
-    it("Should delete the userId from the ACL", function (done) {
-        this.timeout(20000);
-
-        var obj = new CB.CloudObject('Employee');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess("x",true);
-        obj.save().then(function(list) {
-            list.ACL.setUserWriteAccess("x",false);
-            list.save().then(function(obj) {
-                var query = new CB.CloudQuery("Employee");
-                query.findById(obj.id, {
-                    success : function(obj){
-                        if(obj.ACL.document.write.allow.user.indexOf("x") === -1) {
-                            done();
-                        }
-                        else
-                            done("Cannot delete the user from the ACL");
-                    }, error : function(error) {
-                         done(error);
-                    }
-                })
-            }, function(error){
-                done(error);
-            });           
-        }, function (error) {
-             done(error);
-        });
-        
-    });
-
-
     it("Should set the public write access", function (done) {
 
         this.timeout(20000);
@@ -6266,7 +6234,6 @@ describe("ACL", function () {
             done();
             return;
         }
-
 
         var obj = new CB.CloudObject('student4');
         obj.ACL = new CB.ACL();
@@ -6495,6 +6462,37 @@ describe("MasterKey ACL", function () {
         }, function (error) {
            done(error);
         });
+    });
+
+    it("Should delete the userId from the ACL", function (done) {
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Employee');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess("x",true);
+        obj.save().then(function(list) {
+            list.ACL.setUserWriteAccess("x",false);
+            list.save().then(function(obj) {
+                var query = new CB.CloudQuery("Employee");
+                query.findById(obj.id, {
+                    success : function(obj){
+                        if(obj.ACL.document.write.allow.user.indexOf("x") === -1) {
+                            done();
+                        }
+                        else
+                            done("Cannot delete the user from the ACL");
+                    }, error : function(error) {
+                         done(error);
+                    }
+                })
+            }, function(error){
+                done(error);
+            });           
+        }, function (error) {
+             done(error);
+        });
+        
     });
 
      after(function(){
@@ -7157,13 +7155,13 @@ describe("Cloud Files", function(done) {
                         if(obj.get('File').url){
                             done();
                         }else{
-                            done("Didnot get the file object back.");
+                            done("Did not get the file object back.");
                         }
                     }, error : function(error){
                         done(error);
                     }
                 });
-                
+
             }else{
                 throw 'ún able to get the url';
             }
@@ -7212,7 +7210,7 @@ describe("Cloud Files", function(done) {
                         done(error);
                     }
                 });
-                
+
             }else{
                 throw 'ún able to get the url';
             }
@@ -7483,7 +7481,229 @@ describe("Cloud Files", function(done) {
         });
 
     });
-    
+
+    it("Should get the image",function(done){
+
+        this.timeout(20000);
+        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = getImage;
+        xhttp.open('GET', url, true);
+        xhttp.onload = function(e){
+            if(xhttp.readyState === 4){
+                if(xhttp.status === 200){
+                    done();
+                }else{
+                    throw "Failed to get the image";
+                }
+            };
+            xhttp.onerror = function(e){
+                throw "Error"
+            }
+
+        };
+
+        function getImage(){
+            console.log(xhttp.responseType);
+        }
+
+        xhttp.send(null);
+
+        });
+
+    // it("Should resize the image",function(done){
+
+    //     this.timeout(20000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100&resizeHeight=100";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.onreadystatechange = resizeImage;
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to resize the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+    //       function resizeImage(){
+    //         console.log(xhttp.responseType);
+    //       }
+    //     xhttp.send(null);
+
+    //     });
+    // it("Should crop the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?cropX=50&cropY=50&cropW=50&cropH=50";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to crop the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should change the quality of the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?quality=2";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to change the quality of the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should change the opacity of the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?opacity=0.4";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to change the opacity of the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should scale the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?scale=2";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to scale the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+    // it("Should contain the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?containWidth=100&containHeight=100";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to contain the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should rotate the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?rDegs=0.45";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to rotate the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should blur the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?bSigma";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to blur the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
 });
 
 describe("ACL Tests Over Files",function(done){

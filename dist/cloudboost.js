@@ -10447,7 +10447,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 }
             }
         }
-    } 
+    }
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -10641,6 +10641,7 @@ CB.CloudFile.prototype.getFileContent = function(callback){
         return def;
     }
 };
+
 
 /*
  *CloudGeoPoint
@@ -11775,7 +11776,7 @@ CB.CloudQueue = function(queueName,queueType){
     this.document.retry = null;
     this.document.subscribers = [];
     this.document.messages = [];
-
+    
     if(queueType && queueType !== "push" && queueType !== "pull"){
         throw "Type can be push or pull";
     }
@@ -12421,6 +12422,7 @@ CB.CloudQueue.prototype.update = function(callback) {
 };
 
 CB.CloudQueue.getAll = function(callback){
+    
     var def;
     
     CB._validate();

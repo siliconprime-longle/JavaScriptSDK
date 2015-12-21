@@ -54,7 +54,7 @@ CB.CloudFile = CB.CloudFile || function(file,data,type) {
                 }
             }
         }
-    } 
+    }
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -248,3 +248,4 @@ CB.CloudFile.prototype.getFileContent = function(callback){
         return def;
     }
 };
+
