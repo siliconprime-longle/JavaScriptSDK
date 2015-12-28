@@ -7657,15 +7657,17 @@ if(!CB._isNode) {
 CB.CloudApp = CB.CloudApp || {};
 CB.CloudApp._isConnected = false;
 
-CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
+CB.CloudApp.init = function(serverUrl, applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
     {
         applicationKey=applicationId;
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.apiUrl = serverUrl;
         CB.socketIoUrl=serverUrl;
     }
+
     CB.appId = applicationId;
     CB.appKey = applicationKey;
     //load socket.io.
@@ -8248,7 +8250,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     }
     var query = null;
     if(thisObj.document._type === 'file'){
-        query = new CB.CloudQuery('File');
+        query = new CB.CloudQuery('_File');
     }else{
         query = new CB.CloudQuery(thisObj.document._tableName);
     }
@@ -8265,7 +8267,6 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
             callback.error(err);
         }
     });
-
 
     if (!callback) {
         return def;
@@ -10620,9 +10621,9 @@ CB.CloudFile.prototype.getFileContent = function(callback){
     var params=JSON.stringify({
         key: CB.appKey
     });
-    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id  ;
+    var url = this.url;
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('GET',url,params).then(function(response){
         if (callback) {
             callback.success(response);
         } else {
@@ -10635,7 +10636,6 @@ CB.CloudFile.prototype.getFileContent = function(callback){
             def.reject(err);
         }
     });
-
 
     if (!callback) {
         return def;
@@ -10911,7 +10911,7 @@ CB.CloudTable.getAll = function(callback){
       key: CB.appKey
   });
 
-  var url = CB.serviceUrl+'/'+CB.appId +"/table";
+  var url = CB.apiUrl+'/app/'+CB.appId +"/_getAll";
   CB._request('POST',url,params,true).then(function(response){
     response = JSON.parse(response);
     var obj = CB.fromJSON(response);
@@ -10963,7 +10963,7 @@ CB.CloudTable.get = function(table, callback){
           appId: CB.appId
       });
 
-      var url = CB.serviceUrl + '/' + CB.appId + "/table/" + table.document.name;
+      var url = CB.apiUrl + '/app/' + CB.appId + "/" + table.document.name;
       CB._request('POST',url,params,true).then(function(response){
           if(response === "null"){
             obj = null;
@@ -11003,9 +11003,7 @@ CB.CloudTable.get = function(table, callback){
  */
 
 CB.CloudTable.prototype.delete = function(callback){
-    if (!CB.appId) {
-        throw "CB.appId is null.";
-    }
+    CB._validate();
 
     var def;
     if (!callback) {
@@ -11019,7 +11017,7 @@ CB.CloudTable.prototype.delete = function(callback){
 
     var thisObj = this;
 
-    var url = CB.serviceUrl + '/' + CB.appId + "/table/" +this.name;
+    var url = CB.apiUrl + '/app/' + CB.appId + "/" +this.name;
 
     CB._request('DELETE',url,params,true).then(function(response){
         if (callback) {
@@ -11034,6 +11032,7 @@ CB.CloudTable.prototype.delete = function(callback){
             def.reject(err);
         }
     });
+
     if (!callback) {
         return def;
     }
@@ -11060,7 +11059,7 @@ CB.CloudTable.prototype.save = function(callback){
 
   var thisObj = this;
 
-  var url = CB.serviceUrl +'/' + CB.appId + "/table/" + thisObj.document.name;
+  var url = CB.apiUrl +'/app/' + CB.appId + "/" + thisObj.document.name;
 
     CB._request('PUT',url,params,true).then(function(response){
       response = JSON.parse(response);
@@ -11397,11 +11396,11 @@ CB._getObjectByType = function(type,id,latitude,longitude,name){
 
 CB._validate = function() {
     if (!CB.appId) {
-        throw "AppID is null. Please use CB.CLoudApp.init to initialize your app.";
+        throw "AppID is null. Please use CB.CloudApp.init to initialize your app.";
     }
 
     if(!CB.appKey){
-        throw "AppKey is null. Please use CB.CLoudApp.init to initialize your app.";
+        throw "AppKey is null. Please use CB.CloudApp.init to initialize your app.";
     }
 };
 

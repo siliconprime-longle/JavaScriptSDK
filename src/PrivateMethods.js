@@ -225,11 +225,11 @@ CB._getObjectByType = function(type,id,latitude,longitude,name){
 
 CB._validate = function() {
     if (!CB.appId) {
-        throw "AppID is null. Please use CB.CLoudApp.init to initialize your app.";
+        throw "AppID is null. Please use CB.CloudApp.init to initialize your app.";
     }
 
     if(!CB.appKey){
-        throw "AppKey is null. Please use CB.CLoudApp.init to initialize your app.";
+        throw "AppKey is null. Please use CB.CloudApp.init to initialize your app.";
     }
 };
 

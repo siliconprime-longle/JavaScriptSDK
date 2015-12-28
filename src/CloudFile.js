@@ -218,7 +218,7 @@ CB.CloudFile.prototype.getFileContent = function(callback){
     var def;
 
     if(!this.url) {
-        throw "Url is Null";
+        throw "URL is null. Fetch this file object first using fetch()";
     }
     if (!callback) {
         def = new CB.Promise();
@@ -227,9 +227,9 @@ CB.CloudFile.prototype.getFileContent = function(callback){
     var params=JSON.stringify({
         key: CB.appKey
     });
-    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id  ;
+    var url = this.url;
 
-    CB._request('POST',url,params).then(function(response){
+    CB._request('GET',url,params).then(function(response){
         if (callback) {
             callback.success(response);
         } else {
@@ -242,7 +242,6 @@ CB.CloudFile.prototype.getFileContent = function(callback){
             def.reject(err);
         }
     });
-
 
     if (!callback) {
         return def;

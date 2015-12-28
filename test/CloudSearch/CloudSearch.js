@@ -6,12 +6,9 @@ describe("CloudSearch", function (done) {
 
         CB.appKey = CB.masterKey;
 
-         this.timeout(60000);
+         this.timeout(50000);
 
-
-        var callback = {};
-        callback.success = function(res){
-            var custom = new CB.CloudTable('CustomGeoPoint');
+        var custom = new CB.CloudTable('CustomGeoPoint');
             var newColumn7 = new CB.Column('location');
             newColumn7.dataType = 'GeoPoint';
             custom.addColumn(newColumn7);
@@ -44,12 +41,6 @@ describe("CloudSearch", function (done) {
             },function(){
                 throw "Unable to create user";
             });
-        };
-        callback.error = function(){
-            throw "Unable to Delete";
-        };
-        var obj = new CB.CloudTable('CustomGeoPoint');
-        obj.delete(callback);
 
         
     });
@@ -59,9 +50,7 @@ describe("CloudSearch", function (done) {
 
              this.timeout(50000);
 
-            var callback = {};
-            callback.success = function(res){
-                var custom = new CB.CloudTable('CustomRelation');
+           var custom = new CB.CloudTable('CustomRelation');
                 var newColumn1 = new CB.Column('newColumn7');
                 newColumn1.dataType = 'Relation';
                 newColumn1.relatedTo = 'student1';
@@ -94,12 +83,6 @@ describe("CloudSearch", function (done) {
                 },function(){
                     throw "Unable to create CustomRelation2";
                 });
-            };
-            callback.error = function(){
-                throw "Unable to Delete";
-            };
-            var obj = new CB.CloudTable('CustomRelation');
-            obj.delete(callback);
         });
 
     it("should index object for search", function (done) {
@@ -352,35 +335,45 @@ describe("CloudSearch", function (done) {
 
         this.timeout(30000);
 
-        var cs = new CB.CloudSearch('Student');
-        cs.searchFilter = new CB.SearchFilter();
-        cs.searchFilter.notEqualTo('age', 19);
-        cs.setSkip(9999999);
-        cs.search({
-            success : function(list){
-                if(list.length===0){
-                    var cs = new CB.CloudSearch('Student');
-                    cs.searchFilter = new CB.SearchFilter();
-                    cs.searchFilter.notEqualTo('age', 19);
-                    cs.setSkip(1);
-                    cs.search({
-                        success : function(list){
-                            if(list.length>0){
-                                done();
-                            }else{
-                                throw "should skip elements";
+        var obj = new CB.CloudObject("Student");
+        obj.set("age",21);
+
+        obj.save().then(function(obj){
+            var cs = new CB.CloudSearch('Student');
+            cs.searchFilter = new CB.SearchFilter();
+            cs.searchFilter.notEqualTo('age', 19);
+            cs.setSkip(9999999);
+            cs.search({
+                success : function(list){
+                    if(list.length===0){
+                        var cs = new CB.CloudSearch('Student');
+                        cs.searchFilter = new CB.SearchFilter();
+                        cs.searchFilter.notEqualTo('age', 19);
+                        cs.setSkip(1);
+                        cs.search({
+                            success : function(list){
+                                if(list.length>0){
+                                    done();
+                                }else{
+                                    throw "should skip elements";
+                                }
+                            },error : function(error){
+                                throw "should skip elements"
                             }
-                        },error : function(error){
-                            throw "should skip elements"
-                        }
-                    });
-                }else{
-                    throw "should search for elements";
+                        });
+                    }else{
+                        throw "should search for elements";
+                    }
+                },error : function(error){
+                    throw "should search for elements"
                 }
-            },error : function(error){
-                throw "should search for elements"
-            }
+            });
+        }, function(error){
+            console.log(error);
+            done(error);
         });
+
+        
     });
 
     it("should sort the results in ascending order",function(done){

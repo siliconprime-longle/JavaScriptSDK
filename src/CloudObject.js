@@ -309,7 +309,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     }
     var query = null;
     if(thisObj.document._type === 'file'){
-        query = new CB.CloudQuery('File');
+        query = new CB.CloudQuery('_File');
     }else{
         query = new CB.CloudQuery(thisObj.document._tableName);
     }
@@ -326,7 +326,6 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
             callback.error(err);
         }
     });
-
 
     if (!callback) {
         return def;

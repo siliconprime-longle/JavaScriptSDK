@@ -7132,15 +7132,17 @@ if(!CB._isNode) {
 CB.CloudApp = CB.CloudApp || {};
 CB.CloudApp._isConnected = false;
 
-CB.CloudApp.init = function(serverUrl,applicationId, applicationKey) { //static function for initialisation of the app
+CB.CloudApp.init = function(serverUrl, applicationId, applicationKey) { //static function for initialisation of the app
     if(!applicationKey)
     {
         applicationKey=applicationId;
         applicationId=serverUrl;
     }else {
         CB.serverUrl=serverUrl;
+        CB.apiUrl = serverUrl;
         CB.socketIoUrl=serverUrl;
     }
+
     CB.appId = applicationId;
     CB.appKey = applicationKey;
     //load socket.io.

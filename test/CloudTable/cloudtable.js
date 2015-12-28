@@ -6,19 +6,18 @@ describe("Cloud Table", function(){
 
     var tableName = util.makeString();
 
-    it("should not create duplicate table",function(done){
+    it("should create a table",function(done){
 
         this.timeout(80000);
 
         var obj = new CB.CloudTable(tableName);
 
-        obj.save().then(function(){
-            var obj1 = new CB.CloudTable(tableName);
-            obj1.save().then(function(){
-                throw("should not create duplicate table");
-            },function(){
-                done();
-            })
+        obj.save().then(function(table){
+            if(table.id){
+              done();
+            }else{
+              done("Table cannot be created");
+            }
         },function(){
             throw "Should Create a table";
         });
@@ -178,8 +177,12 @@ describe("Cloud Table", function(){
         var obj = new CB.CloudTable(tableName);
         CB.CloudTable.get(obj).then(function(table){
             table.document.name = "sadjhkasj";
-            table.save().then(function(){
-                done("Should not rename the tableName");
+            table.save().then(function(res){
+               if(res.id !== table.id){
+                done();
+               }else{
+                done("Table renamed");
+               }
             },function(){
                done();
             });
@@ -197,7 +200,11 @@ describe("Cloud Table", function(){
       CB.CloudTable.get(obj).then(function(table){
           table.document.type = "NewType";
           table.save().then(function(newTable){
-              done( "should not change the type of a table");
+              if(table.document.type === "NewType"){
+                done("Changed the type of the table");
+              }else{
+                done();
+              }
           },function(){
               done();
           });
