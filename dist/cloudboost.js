@@ -10612,7 +10612,7 @@ CB.CloudFile.prototype.getFileContent = function(callback){
     var def;
 
     if(!this.url) {
-        throw "Url is Null";
+        throw "URL is null. Fetch this file object first using fetch()";
     }
     if (!callback) {
         def = new CB.Promise();
@@ -10965,7 +10965,7 @@ CB.CloudTable.get = function(table, callback){
 
       var url = CB.apiUrl + '/app/' + CB.appId + "/" + table.document.name;
       CB._request('POST',url,params,true).then(function(response){
-          if(response === "null"){
+          if(response === "null" || response === ""){
             obj = null;
         }else{
             response = JSON.parse(response);

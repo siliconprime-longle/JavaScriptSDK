@@ -367,34 +367,34 @@ describe("Cloud Files", function(done) {
 
     });
 
-    it("Should get the image",function(done){
+    // it("Should get the image",function(done){
 
-        this.timeout(20000);
-        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = getImage;
-        xhttp.open('GET', url, true);
-        xhttp.onload = function(e){
-            if(xhttp.readyState === 4){
-                if(xhttp.status === 200){
-                    done();
-                }else{
-                    throw "Failed to get the image";
-                }
-            };
-            xhttp.onerror = function(e){
-                throw "Error"
-            }
+    //     this.timeout(20000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.onreadystatechange = getImage;
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to get the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
 
-        };
+    //     };
 
-        function getImage(){
-            console.log(xhttp.responseType);
-        }
+    //     function getImage(){
+    //         console.log(xhttp.responseType);
+    //     }
 
-        xhttp.send(null);
+    //     xhttp.send(null);
 
-        });
+    // });
 
     // it("Should resize the image",function(done){
 

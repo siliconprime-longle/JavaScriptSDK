@@ -141,24 +141,24 @@ describe("Cloud GeoPoint Test", function() {
         })
 	});
 	
-	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
      	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                done();
+               done();
             } else{
-                done("didnot retrieve the records.")
+               done("didnot retrieve the records.")
             }
-
-        }, function () {
-            done("Find error");
+        }, function (error) {
+            console.log(error);
+            done(error);
         });
 	});
 	
-	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
+	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
      	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
@@ -170,7 +170,6 @@ describe("Cloud GeoPoint Test", function() {
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            
         }, function () {
             throw "find data error";
         })

@@ -200,11 +200,15 @@ describe("Cloud Table", function(){
       CB.CloudTable.get(obj).then(function(table){
           table.document.type = "NewType";
           table.save().then(function(newTable){
-              if(table.document.type === "NewType"){
-                done("Changed the type of the table");
-              }else{
-                done();
-              }
+              CB.CloudTable.get(obj).then(function(table){
+                if(table.document.type === "NewType"){
+                  done("Error. Cnanged the type of the table "+table.name);
+                }else{
+                  done();
+                }
+              }, function(error){
+                done("Cannot get the table");
+              });
           },function(){
               done();
           });

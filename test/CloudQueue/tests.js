@@ -835,7 +835,7 @@ it("Should not pull message with the delay ",function(done){
      it("Should not add subscriber with invalid URL.",function(done){
           this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
-          var url = "sample.sample";
+          var url = "sample,sample";
           queue.addSubscriber(url,{
                success : function(response){
                    done("Success called with invalid URL");

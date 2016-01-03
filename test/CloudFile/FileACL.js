@@ -1,5 +1,9 @@
 describe("ACL Tests Over Files",function(done){
 
+    before(function(){
+         CB.appKey = CB.jsKey;
+    });
+
     it("should not get file Object with not read access",function(done){
 
         this.timeout(30000);

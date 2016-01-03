@@ -126,31 +126,31 @@ describe("Atomicity Tests",function(done){
         CB._request('POST',url).then(function(){
             var table = new CB.CloudTable(tableName);
             table.save().then(function(){
-                throw "should not create the table when DB is disconnected";
-            },function(){
+                done("should not create the table when DB is disconnected");
+            },function(error){
                 CB.CloudTable.get(table).then(function(res){
                     if(!res)
                         done();
                     else
-                        throw "Unable to have atomicity in create table";
+                        done("Unable to have atomicity in create table");
                 },function(){
-                    throw "Unable to run get query";
+                    done("Unable to run get query");
                 });
             });
         },function(err){
-            throw "Unable to disconnect Mongo";
+            done("Unable to disconnect Mongo");
         });
 
     });
 
-    it("",function(done) {
+    it("Connect back to MongoDB",function(done) {
         this.timeout(10000);
         CB.appKey = CB.jsKey;
         var url = CB.serverUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
-            throw "Unable to connect back Mongo";
+            done("Unable to connect back Mongo");
         });
     });
 
