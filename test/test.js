@@ -16,9 +16,6 @@
    };
 
    
-
-	
-
 describe("Cloud App", function() {
     
     it("Change the Server URL", function(done) {
