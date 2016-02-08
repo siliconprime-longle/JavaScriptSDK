@@ -103,7 +103,7 @@ Object.defineProperty(CB.CloudQueue.prototype, 'expires', {
     }
 });
 
-CB.CloudQueue.prototype.push = function(queueMessage, callback) {
+CB.CloudQueue.prototype.addMessage = function(queueMessage, callback) {
 
     if(queueMessage == null)
         throw "Message cannot be null";
@@ -159,8 +159,45 @@ CB.CloudQueue.prototype.push = function(queueMessage, callback) {
     });
 };
 
+CB.CloudQueue.prototype.updateMessage = function(queueMessage, callback) {
 
-CB.CloudQueue.prototype.pull = function(count,callback) {
+    if(queueMessage == null)
+        throw "Message cannot be null";
+
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var messages = [];
+
+    if(queueMessage.constructor !== Array){
+        if(!queueMessage.id){
+            throw "Message cannot be updated because it has never been saved.";
+        }else{
+            messages.push(queueMessage);
+        }
+       
+    }else{
+         messages = queueMessage;
+         for(var i=0;i<messages.length; i++){
+            if(!(messages[i] instanceof CB.QueueMessage)){
+                throw "Message is not an instance of QueueMessage.";
+            }
+
+            if(!message[i].id){
+                throw "Message cannot be updated because it has never been saved.";
+            }
+        }
+    }
+
+    return this.addMessage(queueMessage,callback);
+};
+
+
+CB.CloudQueue.prototype.getMessage = function(count,callback) {
 
     var def;
     CB._validate();
@@ -186,7 +223,53 @@ CB.CloudQueue.prototype.pull = function(count,callback) {
         key: CB.appKey
     });
 
-    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/pull';
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/getMessage';
+
+    CB._request('POST',url,params).then(function(response){
+        
+        if(!response || response===""){
+            response = null;
+        }
+
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response)));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response)));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+};
+
+
+CB.CloudQueue.prototype.getAllMessages = function(callback) {
+
+    var def;
+    CB._validate();
+
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    if(typeof count === 'object' && !callback ){
+        callback = count;
+        count = null;
+    }
+
+    
+    var thisObj = this;
+
+    var xmlhttp = CB._loadXml();
+
+    var params=JSON.stringify({
+        key: CB.appKey
+    });
+
+    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+'/messages';
 
     CB._request('POST',url,params).then(function(response){
         
@@ -416,7 +499,7 @@ CB.CloudQueue.prototype.removeSubscriber = function(url,callback) {
 
 };
 
-CB.CloudQueue.prototype.peek = function(count, callback) {
+CB.CloudQueue.prototype.peekMessage = function(count, callback) {
 
     var def;
 
@@ -441,7 +524,7 @@ CB.CloudQueue.prototype.peek = function(count, callback) {
         count : count
     });
 
-   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/peek/';
+   var url = CB.apiUrl + "/queue/" + CB.appId + '/'+this.document.name+'/peekMessage';
 
    CB._request('POST',url,params).then(function(response){
         if (callback) {

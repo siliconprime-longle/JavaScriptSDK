@@ -1791,27 +1791,139 @@ describe("Cloud Queue Tests", function() {
 	// -> Which has columns : 
 	// name : string : required
 
- it("Should push data into the Queue",function(done){
+ it("Should add data into the Queue",function(done){
 
      this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
-     queue.push('sample',{
+     queue.addMessage('sample',{
      	success : function(response){
      		if(response instanceof CB.QueueMessage && response.id){
      			if(response.message === 'sample'){
      				done();
      			}
      			else{
-     				done("Pushed but incorrect data");
+     				done("Added but incorrect data");
      			}
      		}else{
-     			done("Message pushed but response is not QueueMessage");
+     			done("Message added but response is not QueueMessage");
      		}
      	},error : function(error){
      		done(error);
      	}
      });
+ });
+
+ it("Should add multiple messages and get all messages.",function(done){
+
+     this.timeout(30000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     queue.addMessage('sample',{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample'){
+                         queue.addMessage('sample1',{
+                              success : function(response){
+                                   if(response instanceof CB.QueueMessage && response.id){
+                                        if(response.message === 'sample1'){
+                                             queue.getAllMessages({
+                                                  success : function(response){
+                                                       if(response.length===2){
+                                                            for(var i=0;i<response.length;i++){
+                                                                 if(response[i] instanceof CB.QueueMessage){
+                                                                      done();
+                                                                 }else{
+                                                                      done("Wrong queue message.");
+                                                                 }
+                                                            }
+                                                       }else{
+                                                            done("Wrong queue message");
+                                                       }
+                                                  },error : function(error){
+                                                       done(error);
+                                                  }
+                                             });
+                                        }
+                                        else{
+                                             done("Added but incorrect data");
+                                        }
+                                   }else{
+                                        done("Message added but response is not QueueMessage");
+                                   }
+                              },error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Added but incorrect data");
+                    }
+               }else{
+                    done("Message added but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+ it("Should update data into the Queue",function(done){
+
+     this.timeout(30000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     queue.addMessage('sample',{
+          success : function(response){
+               if(response instanceof CB.QueueMessage && response.id){
+                    if(response.message === 'sample'){
+                         response.message = "Hey!";
+                         queue.updateMessage(response,{
+                              success : function(response){
+                                   if(response instanceof CB.QueueMessage && response.id){
+                                        if(response.message === 'Hey!'){
+                                            done();
+                                        }
+                                        else{
+                                             done("Added but incorrect data");
+                                        }
+                                   }else{
+                                        done("Message added but response is not QueueMessage");
+                                   }
+                              },error : function(error){
+                                   done(error);
+                              }
+                         });
+                    }
+                    else{
+                         done("Added but incorrect data");
+                    }
+               }else{
+                    done("Message added but response is not QueueMessage");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+ it("Should not update data in the queue which is not saved.",function(done){
+
+     this.timeout(30000);
+
+     var queue = new CB.CloudQueue(util.makeString());
+     try{
+          queue.updateMessage('sample',{
+               success : function(response){
+                    done("Updated unsaved data");
+                         
+               },error : function(error){
+                    done(error);
+               }
+          });
+     }catch(e){
+          done();
+     }
  });
 
  it("Should create the Queue",function(done){
@@ -1837,16 +1949,16 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
- it("Should push an array into the queue",function(done){
+ it("Should add an array into the queue",function(done){
  	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
-     queue.push(['sample','sample2'],{
+     queue.addMessage(['sample','sample2'],{
      	success : function(response){
      		if(response.constructor === Array && response.length === 2 && response[0] instanceof CB.QueueMessage && response[0].id && response[1] instanceof CB.QueueMessage && response[1].id){
      			done();
      		}else{
-     			done("Message pushed but response is not QueueMessage");
+     			done("Message added but response is not QueueMessage");
      		}
      	},error : function(error){
      		done(error);
@@ -1854,21 +1966,21 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
- it("Can push multiple messages into the same queue.",function(done){
+ it("Can add multiple messages into the same queue.",function(done){
  	 this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
-     queue.push(['sample','sample2'],{
+     queue.addMessage(['sample','sample2'],{
      	success : function(response){
      		if(response.constructor === Array && response.length === 2 && response[0] instanceof CB.QueueMessage && response[0].id && response[1] instanceof CB.QueueMessage && response[1].id){
-     			//push again. 
-     			 queue.push(['sample','sample2'],{
+     			//addMessage again. 
+     			 queue.addMessage(['sample','sample2'],{
 			     	success : function(response){
 			     		if(response.constructor === Array && response.length === 2 && response[0] instanceof CB.QueueMessage && response[0].id && response[1] instanceof CB.QueueMessage && response[1].id){
-			     			//push again. 
+			     			//addMessage again. 
 			     			done();
 			     		}else{
-			     			done("Message pushed but response is not QueueMessage");
+			     			done("Message added but response is not QueueMessage");
 			     		}
 			     	},error : function(error){
 			     		done(error);
@@ -1876,7 +1988,7 @@ describe("Cloud Queue Tests", function() {
 			     });
 
      		}else{
-     			done("Message pushed but response is not QueueMessage");
+     			done("Message added but response is not QueueMessage");
      		}
      	},error : function(error){
      		done(error);
@@ -1884,17 +1996,17 @@ describe("Cloud Queue Tests", function() {
      });
  });
 
-it("Should not push null data into the Queue",function(done){
+it("Should not add null data into the Queue",function(done){
      this.timeout(30000);
      try{
 
 	     var queue = new CB.CloudQueue(util.makeString());
-	     queue.push(null,{
+	     queue.addMessage(null,{
 	     	success : function(response){
 	     		if(response instanceof CB.QueueMessage && response.id){
 	     			done();
 	     		}else{
-	     			done("Message pushed but response is not QueueMessage");
+	     			done("Message added but response is not QueueMessage");
 	     		}
 	     	},error : function(error){
 	     		done(error);
@@ -1916,19 +2028,19 @@ it("Should not create a queue with empty name",function(done){
      }
 });
 
-it("Should push and pull data from the queue.",function(done){
+it("Should add and get data from the queue.",function(done){
 
      this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
      //message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample'){
-                         //now pull it. 
-                         queue.pull({
+                         //now getMessage it. 
+                         queue.getMessage({
                               success : function(message){
                                    if(message.message === 'sample'){
                                         done();
@@ -1939,10 +2051,10 @@ it("Should push and pull data from the queue.",function(done){
                          });
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("Added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -1957,16 +2069,16 @@ it("Should peek.",function(done){
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
      //message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample'){
-                         //now pull it. 
-                         queue.peek({
+                         //now getMessage it. 
+                         queue.peekMessage({
                               success : function(message){
                                    if(message.message === 'sample'){
-                                       //peek again. 
-                                       queue.peek({
+                                       //peekMessage again. 
+                                       queue.peekMessage({
                                              success : function(message){
                                                   if(message.message === 'sample'){
                                                       done();
@@ -1982,10 +2094,10 @@ it("Should peek.",function(done){
                          });
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("Added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -2000,21 +2112,21 @@ it("Should get the messages in FIFO",function(done){
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
      //message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample1'){
                          var message = new CB.QueueMessage('sample2');
                          //message.delay = 3000;
-                         queue.push(message,{
+                         queue.addMessage(message,{
                               success : function(response){
                                    if(response instanceof CB.QueueMessage && response.id){
                                         if(response.message === 'sample2'){
-                                             //now pull it. 
-                                             queue.pull({
+                                             //now getMessage it. 
+                                             queue.getMessage({
                                                   success : function(message){
                                                        if(message.message === 'sample1'){
-                                                            queue.pull({
+                                                            queue.getMessage({
                                                                  success : function(message){
                                                                       if(message.message === 'sample2'){
                                                                            done();
@@ -2031,10 +2143,10 @@ it("Should get the messages in FIFO",function(done){
                                             
                                         }
                                         else{
-                                             done("Pushed but incorrect data");
+                                             done("Added but incorrect data");
                                         }
                                    }else{
-                                        done("Message pushed but response is not QueueMessage");
+                                        done("Message added but response is not QueueMessage");
                                    }
                               },error : function(error){
                                    done(error);
@@ -2043,10 +2155,10 @@ it("Should get the messages in FIFO",function(done){
                         
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("Added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message Added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -2061,18 +2173,18 @@ it("Should peek 2 messages at the same time.",function(done){
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
      //message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample1'){
                          var message = new CB.QueueMessage('sample2');
                          //message.delay = 3000;
-                         queue.push(message,{
+                         queue.addMessage(message,{
                               success : function(response){
                                    if(response instanceof CB.QueueMessage && response.id){
                                         if(response.message === 'sample2'){
-                                             //now pull it. 
-                                             queue.peek(2, {
+                                             //now getMessage it. 
+                                             queue.peekMessage(2, {
                                                   success : function(messages){
                                                       if(messages.length ===2 && messages[0].id && messages[1].id){
                                                             done();
@@ -2083,10 +2195,10 @@ it("Should peek 2 messages at the same time.",function(done){
                                              });
                                         }
                                         else{
-                                             done("Pushed but incorrect data");
+                                             done("Added but incorrect data");
                                         }
                                    }else{
-                                        done("Message pushed but response is not QueueMessage");
+                                        done("Message added but response is not QueueMessage");
                                    }
                               },error : function(error){
                                    done(error);
@@ -2094,10 +2206,10 @@ it("Should peek 2 messages at the same time.",function(done){
                          });
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("Added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message Added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -2106,25 +2218,25 @@ it("Should peek 2 messages at the same time.",function(done){
  });
 
 
-it("Should pull 2 messages at the same time.",function(done){
+it("Should get 2 messages at the same time.",function(done){
 
      this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample1');
      //message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample1'){
                          var message = new CB.QueueMessage('sample2');
                          //message.delay = 3000;
-                         queue.push(message,{
+                         queue.addMessage(message,{
                               success : function(response){
                                    if(response instanceof CB.QueueMessage && response.id){
                                         if(response.message === 'sample2'){
-                                             //now pull it. 
-                                             queue.pull(2, {
+                                             //now getMessage it. 
+                                             queue.getMessage(2, {
                                                   success : function(messages){
                                                       if(messages.length ===2 && messages[0].id && messages[1].id){
                                                             done();
@@ -2136,10 +2248,10 @@ it("Should pull 2 messages at the same time.",function(done){
                                             
                                         }
                                         else{
-                                             done("Pushed but incorrect data");
+                                             done("Add but incorrect data");
                                         }
                                    }else{
-                                        done("Message pushed but response is not QueueMessage");
+                                        done("Message add but response is not QueueMessage");
                                    }
                               },error : function(error){
                                    done(error);
@@ -2148,10 +2260,10 @@ it("Should pull 2 messages at the same time.",function(done){
                         
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("Added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -2161,19 +2273,19 @@ it("Should pull 2 messages at the same time.",function(done){
 
 
 
-it("Should not pull message with the delay ",function(done){
+it("Should not getMessage message with the delay ",function(done){
 
      this.timeout(30000);
 
      var queue = new CB.CloudQueue(util.makeString());
      var message = new CB.QueueMessage('sample');
      message.delay = 3000;
-     queue.push(message,{
+     queue.addMessage(message,{
           success : function(response){
                if(response instanceof CB.QueueMessage && response.id){
                     if(response.message === 'sample'){
-                         //now pull it. 
-                         queue.pull({
+                         //now getMessage it. 
+                         queue.getMessage({
                               success : function(message){
                                    if(!message){
                                         done();
@@ -2187,10 +2299,10 @@ it("Should not pull message with the delay ",function(done){
                          });
                     }
                     else{
-                         done("Pushed but incorrect data");
+                         done("added but incorrect data");
                     }
                }else{
-                    done("Message pushed but response is not QueueMessage");
+                    done("Message added but response is not QueueMessage");
                }
           },error : function(error){
                done(error);
@@ -2204,7 +2316,7 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           //message.delay = 3000;
-          queue.pull({
+          queue.getMessage({
                success : function(message){
                    done("Got the message");
                }, error : function(error){
@@ -2214,20 +2326,20 @@ it("Should not pull message with the delay ",function(done){
      });
 
 
-     it("should not pull the same message twice. ",function(done){
+     it("should not get the same message twice. ",function(done){
          this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
-                              queue.pull({
+                              //now getMessage it. 
+                              queue.getMessage({
                                    success : function(message){
                                         if(message){
-                                              queue.pull({
+                                              queue.getMessage({
                                                   success : function(message){
                                                        if(!message){
                                                            done(); 
@@ -2239,7 +2351,7 @@ it("Should not pull message with the delay ",function(done){
                                                   }
                                              });
                                         }else{
-                                             done("Cannot pull the message.")
+                                             done("Cannot get the message.")
                                         }
                                    }, error : function(error){
                                         done(error);
@@ -2247,10 +2359,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("Get message but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message get but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2258,24 +2370,24 @@ it("Should not pull message with the delay ",function(done){
           });
      });
 
-     it("should be able to pull message after the timeout.",function(done){
+     it("should be able to get message after the timeout.",function(done){
           this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.timeout =3; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
 
-                               queue.pull({
+                               queue.getMessage({
                                         success : function(message){
                                              if(message.message = 'sample'){
-                                                  //pull it again.
+                                                  //getMessage it again.
                                                   setTimeout(function(){
-                                                       queue.pull({
+                                                       queue.getMessage({
                                                             success : function(message){
                                                                  if(!message){
                                                                       done("Message is null");
@@ -2301,10 +2413,10 @@ it("Should not pull message with the delay ",function(done){
                              
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2312,19 +2424,19 @@ it("Should not pull message with the delay ",function(done){
           });
      });
 
-     it("Should be able to pull messages after the delay.",function(done){
+     it("Should be able to get messages after the delay.",function(done){
           this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               setTimeout(function(){
-                                   queue.pull({
+                                   queue.getMessage({
                                         success : function(message){
                                              if(message.message = 'sample'){
                                                   done();
@@ -2339,10 +2451,10 @@ it("Should not pull message with the delay ",function(done){
                              
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2357,11 +2469,11 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               
                               queue.getMessageById(response.id,{
                                    success : function(message){
@@ -2376,10 +2488,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2393,11 +2505,11 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               
                               queue.getMessageById("sample",{
                                    success : function(message){
@@ -2412,10 +2524,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2429,11 +2541,11 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               
                               queue.deleteMessage(response.id,{
                                    success : function(message){
@@ -2449,10 +2561,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2466,11 +2578,11 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               
                               queue.deleteMessage(response,{
                                    success : function(message){
@@ -2486,10 +2598,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2503,11 +2615,11 @@ it("Should not pull message with the delay ",function(done){
           var queue = new CB.CloudQueue(util.makeString());
           var message = new CB.QueueMessage('sample');
           message.delay =1; //1 sec
-          queue.push(message,{
+          queue.addMessage(message,{
                success : function(response){
                     if(response instanceof CB.QueueMessage && response.id){
                          if(response.message === 'sample'){
-                              //now pull it. 
+                              //now getMessage it. 
                               
                               queue.deleteMessage(response,{
                                    success : function(message){
@@ -2534,10 +2646,10 @@ it("Should not pull message with the delay ",function(done){
                               });
                          }
                          else{
-                              done("Pushed but incorrect data");
+                              done("added but incorrect data");
                          }
                     }else{
-                         done("Message pushed but response is not QueueMessage");
+                         done("Message added but response is not QueueMessage");
                     }
                },error : function(error){
                     done(error);
@@ -2622,7 +2734,7 @@ it("Should not pull message with the delay ",function(done){
      it("Should not add subscriber with invalid URL.",function(done){
           this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
-          var url = "sample.sample";
+          var url = "sample,sample";
           queue.addSubscriber(url,{
                success : function(response){
                    done("Success called with invalid URL");
@@ -2661,20 +2773,20 @@ it("Should not pull message with the delay ",function(done){
      it("Should delete the queue.",function(done){
           this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
-          queue.push("sample",{
+          queue.addMessage("sample",{
                success : function(response){
                    if(response.id){
                        //now delete the queue. 
                        queue.delete({
                               success : function(response){
                                   if(response.name){
-                                        //pull message from the queue. 
-                                        queue.pull({
+                                        //getMessage message from the queue. 
+                                        queue.getMessage({
                                              success : function(response){
                                                  if(response.id){
-                                                      done("Pulled message from the queue which is deleted.");
+                                                      done("get message from the queue which is deleted.");
                                                  }else{     
-                                                    done("Pulled message from deleted queue.");
+                                                    done("get message from deleted queue.");
                                                  }
                                              },error : function(error){
                                                  done();
@@ -2699,18 +2811,18 @@ it("Should not pull message with the delay ",function(done){
      it("Should clear the queue.",function(done){
           this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
-          queue.push("sample",{
+          queue.addMessage("sample",{
                success : function(response){
                    if(response.id){
                        //now delete the queue. 
                        queue.clear({
                               success : function(response){
                                   if(response.name){
-                                        //pull message from the queue. 
-                                        queue.pull({
+                                        //getMessage message from the queue. 
+                                        queue.getMessage({
                                              success : function(response){
                                                  if(response){
-                                                      done("Pulled message from the queue which is deleted.");
+                                                      done("get message from the queue which is deleted.");
                                                  }else{     
                                                     done();
                                                  }
@@ -2737,14 +2849,14 @@ it("Should not pull message with the delay ",function(done){
      it("Should get the queue.",function(done){
           this.timeout(30000);
           var queue = new CB.CloudQueue(util.makeString());
-          queue.push("sample",{
+          queue.addMessage("sample",{
                success : function(response){
                    if(response.id){
                        //now delete the queue. 
                        queue.get({
                               success : function(response){
                                   if(response.id){
-                                        //pull message from the queue. 
+                                        //getMessage message from the queue. 
                                        done();
                                   }else{     
                                      done("Failed to get the queue.");
@@ -2762,18 +2874,18 @@ it("Should not pull message with the delay ",function(done){
           });
      });
 
-      it("Should get the queue.",function(done){
+     it("Should get the queue.",function(done){
           this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
-          queue.push("sample",{
+          queue.addMessage("sample",{
                success : function(response){
                    if(response.id){
                        //now delete the queue. 
                        CB.CloudQueue.get(name,{
                               success : function(response){
                                   if(response.id){
-                                        //pull message from the queue. 
+                                        //getMessage message from the queue. 
                                        done();
                                   }else{     
                                      done("Failed to get the queue.");
@@ -2791,11 +2903,13 @@ it("Should not pull message with the delay ",function(done){
           });
      });
 
+     
+
      it("Should not get the queue with null name", function(done){
           this.timeout(30000);
           var name = util.makeString();
           var queue = new CB.CloudQueue(name);
-          queue.push("sample",{
+          queue.addMessage("sample",{
                success : function(response){
                    if(response.id){
                     try{
@@ -2803,7 +2917,7 @@ it("Should not pull message with the delay ",function(done){
                        CB.CloudQueue.get(null,{
                               success : function(response){
                                   if(response.id){
-                                        //pull message from the queue. 
+                                        //getMessage message from the queue. 
                                        done();
                                   }else{     
                                      done("Failed to get the queue.");
@@ -2860,7 +2974,7 @@ it("Should not pull message with the delay ",function(done){
      it("Should refresh message timeout with timeout specified. ",function(done){
           this.timeout(30000);
               var queue = new CB.CloudQueue(util.makeString());
-              queue.push('sample',{
+              queue.addMessage('sample',{
                  success : function(response){
                       if(response instanceof CB.QueueMessage && response.id){
                            if(response.message === 'sample'){
@@ -2874,7 +2988,7 @@ it("Should not pull message with the delay ",function(done){
                                                done("Refreshed the timeout but didnot return the data.");
                                           }
                                      }else{
-                                          done("Message pushed but response is not QueueMessage");
+                                          done("Message added but response is not QueueMessage");
                                      }
                                 },error : function(error){
                                      done(error);
@@ -2882,10 +2996,10 @@ it("Should not pull message with the delay ",function(done){
                              });
                            }
                            else{
-                                done("Pushed but incorrect data");
+                                done("added but incorrect data");
                            }
                       }else{
-                           done("Message pushed but response is not QueueMessage");
+                           done("Message added but response is not QueueMessage");
                       }
                  },error : function(error){
                       done(error);
@@ -2896,7 +3010,7 @@ it("Should not pull message with the delay ",function(done){
      it("Should refresh message timeout wiht timeout NOT specified. ",function(done){
          this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
-              queue.push('sample',{
+              queue.addMessage('sample',{
                  success : function(response){
                       if(response instanceof CB.QueueMessage && response.id){
                            if(response.message === 'sample'){
@@ -2910,7 +3024,7 @@ it("Should not pull message with the delay ",function(done){
                                                done("Refreshed the timeout but didnot return the data.");
                                           }
                                      }else{
-                                          done("Message pushed but response is not QueueMessage");
+                                          done("Message added but response is not QueueMessage");
                                      }
                                 },error : function(error){
                                      done(error);
@@ -2918,10 +3032,10 @@ it("Should not pull message with the delay ",function(done){
                              });
                            }
                            else{
-                                done("Pushed but incorrect data");
+                                done("added but incorrect data");
                            }
                       }else{
-                           done("Message pushed but response is not QueueMessage");
+                           done("Message added but response is not QueueMessage");
                       }
                  },error : function(error){
                       done(error);
@@ -2929,14 +3043,14 @@ it("Should not pull message with the delay ",function(done){
               });
      });
 
-     it("Should not refresh message timeout when message is pulled form the queue.",function(done){
+     it("Should not refresh message timeout when message is get form the queue.",function(done){
             this.timeout(30000);
          var queue = new CB.CloudQueue(util.makeString());
-              queue.push('sample',{
+              queue.addMessage('sample',{
                  success : function(response){
                       if(response instanceof CB.QueueMessage && response.id){
                            if(response.message === 'sample'){
-                              queue.pull({
+                              queue.getMessage({
                                      success : function(response){
                                           if(response instanceof CB.QueueMessage && response.id){
                                                queue.refreshMessageTimeout(response,{
@@ -2947,7 +3061,7 @@ it("Should not pull message with the delay ",function(done){
                                                     }
                                                  });
                                           }else{
-                                               done("Message cant be pulled out of the queue.");
+                                               done("Message cant be get out of the queue.");
                                           }
                                      },error : function(error){
                                           done(error);
@@ -2956,10 +3070,10 @@ it("Should not pull message with the delay ",function(done){
                                 
                            }
                            else{
-                                done("Pushed but incorrect data");
+                                done("added but incorrect data");
                            }
                       }else{
-                           done("Message pushed but response is not QueueMessage");
+                           done("Message added but response is not QueueMessage");
                       }
                  },error : function(error){
                       done(error);
@@ -2972,17 +3086,17 @@ it("Should not pull message with the delay ",function(done){
           this.timeout(30000);
 
           var queue = new CB.CloudQueue(util.makeString());
-          queue.push('sample',{
+          queue.addMessage('sample',{
             success : function(response){
                  if(response instanceof CB.QueueMessage && response.id){
                       if(response.message === 'sample'){
-                           //now change the type of the queue to push. 
+                           //now change the type of the queue to addMessage. 
                            queue.addSubscriber("https://www.google.com", {
                               success : function(){
                                    queue.type = "push";
                                      queue.update({
                                           success : function(response){
-                                               if(response.type === "push"){
+                                               if(response.type === "addMessage"){
                                                   done();
                                                }else{
                                                    done("Error. Didnot update the queue.")
@@ -2997,10 +3111,10 @@ it("Should not pull message with the delay ",function(done){
                            });
                       }
                       else{
-                           done("Pushed but incorrect data");
+                           done("added but incorrect data");
                       }
                  }else{
-                      done("Message pushed but response is not QueueMessage");
+                      done("Message added but response is not QueueMessage");
                  }
             },error : function(error){
                  done(error);
@@ -3645,11 +3759,19 @@ describe("Cloud Objects Files", function() {
                         var obj = new CB.CloudObject('Sample');
                         obj.set('name', 'sample');
                         obj.set('file', file);
-
                         obj.save().then(function (newobj) {
-                            console.log(newobj);
                             if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
-                                done();
+                                var query = new CB.CloudQuery('Sample');
+                                query.include("file");
+                                query.findById(newobj.id).then(function(obj){
+                                    if(obj.get('file').url){
+                                        done();
+                                    }else{
+                                        done("Error. File saved, but object not present. ")
+                                    }
+                                }, function(error){
+                                    done("Error. Cannot get the object.");
+                                });
                             } else {
                                 throw "object saved but didnot return file.";
                             }
@@ -7431,34 +7553,34 @@ describe("Cloud Files", function(done) {
 
     });
 
-    it("Should get the image",function(done){
+    // it("Should get the image",function(done){
 
-        this.timeout(20000);
-        var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = getImage;
-        xhttp.open('GET', url, true);
-        xhttp.onload = function(e){
-            if(xhttp.readyState === 4){
-                if(xhttp.status === 200){
-                    done();
-                }else{
-                    throw "Failed to get the image";
-                }
-            };
-            xhttp.onerror = function(e){
-                throw "Error"
-            }
+    //     this.timeout(20000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.onreadystatechange = getImage;
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to get the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
 
-        };
+    //     };
 
-        function getImage(){
-            console.log(xhttp.responseType);
-        }
+    //     function getImage(){
+    //         console.log(xhttp.responseType);
+    //     }
 
-        xhttp.send(null);
+    //     xhttp.send(null);
 
-        });
+    // });
 
     // it("Should resize the image",function(done){
 
@@ -7656,6 +7778,10 @@ describe("Cloud Files", function(done) {
 });
 
 describe("ACL Tests Over Files",function(done){
+
+    before(function(){
+         CB.appKey = CB.jsKey;
+    });
 
     it("should not get file Object with not read access",function(done){
 
@@ -8013,24 +8139,24 @@ describe("Cloud GeoPoint Test", function() {
         })
 	});
 	
-	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
      	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
 		query.geoWithin("location", loc, 1000);
 		query.find().then(function(list) {
             if(list.length>0){
-                done();
+               done();
             } else{
-                done("didnot retrieve the records.")
+               done("didnot retrieve the records.")
             }
-
-        }, function () {
-            done("Find error");
+        }, function (error) {
+            console.log(error);
+            done(error);
         });
 	});
 	
-	it("should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
+	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
      	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
@@ -8042,7 +8168,6 @@ describe("Cloud GeoPoint Test", function() {
             } else{
                 throw "should retrieve saved data with particular value ";
             }
-            
         }, function () {
             throw "find data error";
         })
@@ -10085,229 +10210,6 @@ describe("Inlcude in CloudSearch", function (done) {
 
         });
 
-    });
-});
-describe("App Tests2",function(done){
-
-    var appId = util.makeString();
-    var name = util.makeString();
-
-    it("should create an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/create';
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('POST',url,params,true).then(function(res){
-                res = JSON.parse(res);
-                CB.appId = res.appId;
-                CB.appKey = res.keys.js;
-                CB.jsKey = res.keys.js;
-                CB.masterKey = res.keys.master;
-                console.log(res);
-                done();
-            },function(err){
-                throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
-    });
-
-    it("",function(done){
-
-        this.timeout(10000);
-
-        CB.CloudApp.init(CB.appId,CB.appKey);
-        CB.appKey = CB.masterKey;
-        done();
-    });
-
-    it("should create a table",function(done){
-
-        this.timeout(50000);
-
-        var table = new CB.CloudTable('Tests1');
-        table.save().then(function(){
-            done();
-        },function(){
-            throw "Unable to create Table";
-        });
-
-    });
-
-    it("",function(done){
-
-        this.timeout(1000);
-
-        CB.appKey = CB.jsKey;
-        done();
-    });
-
-
-    it("should save a record",function(done){
-
-        this.timeout(100000);
-
-        var obj = new CB.CloudObject('Tests1');
-        obj.save().then(function(res){
-            done();
-        },function(err){
-           throw "Unable to Save";
-        });
-    });
-
-    it("should Delete an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        console.log(CB.serviceUrl);
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/'+appId;
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('DELETE',url,params,true).then(function(res){
-                done();
-            },function(err){
-                throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
-    });
-});
-describe("App Tests",function(done){
-
-    var appId = util.makeString();
-    var name = util.makeString();
-
-    it("should create an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        console.log(CB.serviceUrl);
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/create';
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('POST',url,params,true).then(function(res){
-                res = JSON.parse(res);
-                CB.appId = res.appId;
-                CB.appKey = res.keys.js;
-                CB.masterKey = res.keys.master;
-                CB.jsKey = res.keys.js;
-                console.log(res);
-                done();
-            },function(err){
-               throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
-    });
-
-     it("",function(done){
-
-         this.timeout(10000);
-
-         CB.CloudApp.init(CB.appId,CB.appKey);
-         CB.appKey = CB.masterKey;
-            done();
-     });
-
-    it("should create a table",function(done){
-
-        this.timeout(50000);
-
-        var table = new CB.CloudTable('Tests');
-        table.save().then(function(){
-            done();    
-        },function(){
-            throw "Unable to create Table";
-        });    
-
-    });
-
-    it("",function(done){
-
-        this.timeout(1000);
-
-        CB.appKey = CB.jsKey;
-        done();
-    });
-
-
-    it("should save a record",function(done){
-
-        this.timeout(100000);
-
-        var obj = new CB.CloudObject('Tests');
-        obj.save().then(function(res){
-            done();
-        },function(err){
-            throw "Unable to Save";
-        });
-    });
-
-    it("should Delete an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        console.log(CB.serviceUrl);
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/'+appId;
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('DELETE',url,params,true).then(function(res){
-                done();
-            },function(err){
-                throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
     });
 });
 describe("Delete App", function() {
