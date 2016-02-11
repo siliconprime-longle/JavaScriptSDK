@@ -1,3 +1,129 @@
+var SECURE_KEY = "0824ff47-252e-4828-8bfd-1feddb659b24";
+var URL = "http://localhost:4730";
+
+var window = window || null;
+var request = require('request');
+var CB = require('../dist/cloudboost');
+describe("Cloud App", function() {
+    
+    it("Change the Server URL", function(done) {
+        this.timeout(100000);
+        var appId = util.makeString();
+        var url = URL+'/server/url';
+        var params = {};
+        params.secureKey = SECURE_KEY;
+        params.url = URL;
+
+        if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'POST',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			    json: params //Set the body as a string
+			}, function(error, response, body){
+			    if(error) {
+			        done(error);
+			    } else {
+			       done();
+			    }
+			});
+        }else{
+        	$.ajax({
+ 
+			    // The URL for the request
+			    url: url,
+			 
+			    // The data to send (will be converted to a query string)
+			    data: params,
+			 
+			    // Whether this is a POST or GET request
+			    type: "POST",
+			 
+			    // The type of data we expect back
+			    dataType : "json",
+			 
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( json ) {
+			       done();
+			    },
+			 
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Error thrown.");
+			    },
+			 
+			});
+        }
+
+    });
+
+
+    it("should create the app and init the CloudApp.", function(done) {
+        this.timeout(100000);
+        var appId = util.makeString();
+        var url = URL+'/app/'+appId;
+        var params = {};
+        params.secureKey = SECURE_KEY;
+          if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'POST',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			    json: params //Set the body as a string
+			}, function(error, response, json){
+			    if(error) {
+			        done(error);
+			    } else {
+			       CB.CloudApp.init(URL, json.appId, json.keys.js);
+			       CB.masterKey = json.keys.master;
+			       CB.jsKey = json.keys.js;
+			       done();
+			    }
+			});
+        }else{
+	       $.ajax({
+	 
+			    // The URL for the request
+			    url: url,
+			 
+			    // The data to send (will be converted to a query string)
+			    data: params,
+			 
+			    // Whether this is a POST or GET request
+			    type: "POST",
+			 
+			    // The type of data we expect back
+			    dataType : "json",
+			 
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( json ) {
+			       CB.CloudApp.init(URL, json.appId, json.keys.js);
+			       CB.masterKey = json.keys.master;
+			       CB.jsKey = json.keys.js;
+			       done();
+			    },
+			 
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Error thrown.");
+			    },
+			 
+			});
+		}
+
+	 });
+});
+
    var util = {
      makeString : function(){
 	    var text = "x";
@@ -18,90 +144,6 @@
    
 
 	
-
-describe("Cloud App", function() {
-    
-    it("Change the Server URL", function(done) {
-        this.timeout(100000);
-        var appId = util.makeString();
-        var url = URL+'/server/url';
-        var params = {};
-        params.secureKey = SECURE_KEY;
-        params.url = URL;
-
-       $.ajax({
- 
-		    // The URL for the request
-		    url: url,
-		 
-		    // The data to send (will be converted to a query string)
-		    data: params,
-		 
-		    // Whether this is a POST or GET request
-		    type: "POST",
-		 
-		    // The type of data we expect back
-		    dataType : "json",
-		 
-		    // Code to run if the request succeeds;
-		    // the response is passed to the function
-		    success: function( json ) {
-		       done();
-		    },
-		 
-		    // Code to run if the request fails; the raw request and
-		    // status codes are passed to the function
-		    error: function( xhr, status, errorThrown ) {
-		        done("Error thrown.");
-		    },
-		 
-		});
-
-
-    });
-
-
-    it("should create the app and init the CloudApp.", function(done) {
-        this.timeout(100000);
-        var appId = util.makeString();
-        var url = URL+'/app/'+appId;
-        var params = {};
-        params.secureKey = SECURE_KEY;
-
-       $.ajax({
- 
-		    // The URL for the request
-		    url: url,
-		 
-		    // The data to send (will be converted to a query string)
-		    data: params,
-		 
-		    // Whether this is a POST or GET request
-		    type: "POST",
-		 
-		    // The type of data we expect back
-		    dataType : "json",
-		 
-		    // Code to run if the request succeeds;
-		    // the response is passed to the function
-		    success: function( json ) {
-		       CB.CloudApp.init(URL, json.appId, json.keys.js);
-		       CB.masterKey = json.keys.master;
-		       CB.jsKey = json.keys.js;
-		       done();
-		    },
-		 
-		    // Code to run if the request fails; the raw request and
-		    // status codes are passed to the function
-		    error: function( xhr, status, errorThrown ) {
-		        done("Error thrown.");
-		    },
-		 
-		});
-
-
-    });
-});
 
 describe("Cloud Cache", function(){
      
@@ -5006,19 +5048,11 @@ describe("Cloud Objects Files", function() {
                         var obj = new CB.CloudObject('Sample');
                         obj.set('name', 'sample');
                         obj.set('file', file);
+
                         obj.save().then(function (newobj) {
+                            console.log(newobj);
                             if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
-                                var query = new CB.CloudQuery('Sample');
-                                query.include("file");
-                                query.findById(newobj.id).then(function(obj){
-                                    if(obj.get('file').url){
-                                        done();
-                                    }else{
-                                        done("Error. File saved, but object not present. ")
-                                    }
-                                }, function(error){
-                                    done("Error. Cannot get the object.");
-                                });
+                                done();
                             } else {
                                 throw "object saved but didnot return file.";
                             }
@@ -10280,4 +10314,124 @@ describe("CloudApp Socket Test", function () {
     });
 
 
+});
+describe("App Tests2",function(done){
+
+    var appId = util.makeString();
+    var name = util.makeString();
+
+    it("should create an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/create';
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('POST',url,params,true).then(function(res){
+                res = JSON.parse(res);
+                CB.appId = res.appId;
+                CB.appKey = res.keys.js;
+                CB.jsKey = res.keys.js;
+                CB.masterKey = res.keys.master;
+                console.log(res);
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
+
+    it("",function(done){
+
+        this.timeout(10000);
+
+        CB.CloudApp.init(CB.appId,CB.appKey);
+        CB.appKey = CB.masterKey;
+        done();
+    });
+
+    it("should create a table",function(done){
+
+        this.timeout(50000);
+
+        var table = new CB.CloudTable('Tests1');
+        table.save().then(function(){
+            done();
+        },function(){
+            throw "Unable to create Table";
+        });
+
+    });
+
+    it("",function(done){
+
+        this.timeout(1000);
+
+        CB.appKey = CB.jsKey;
+        done();
+    });
+
+
+    it("should save a record",function(done){
+
+        this.timeout(100000);
+
+        var obj = new CB.CloudObject('Tests1');
+        obj.save().then(function(res){
+            done();
+        },function(err){
+           throw "Unable to Save";
+        });
+    });
+
+    it("should Delete an App",function(done){
+
+        this.timeout(100000);
+
+        var url = CB.serviceUrl+'/user/signin';
+        console.log(CB.serviceUrl);
+        var params = {};
+        params.email = 'a@gmail.com';
+        params.password = 'abcd';
+        params = JSON.stringify(params);
+        CB._request('POST',url,params,true).then(function(res) {
+            res = JSON.parse(res);
+            console.log(res);
+            url = CB.serviceUrl+'/app/'+appId;
+            params = {};
+            params.appId = appId;
+            params.name = name;
+            params.userId = res._id;
+            params = JSON.stringify(params);
+            CB._request('DELETE',url,params,true).then(function(res){
+                done();
+            },function(err){
+                throw "unable to create App";
+            });
+        },function(){
+            throw "unable to create App";
+        });
+    });
+});
+describe("App Tests",function(done){
+
+    var appId = util.makeString();
+    var name = util.makeString();
+
+    
+
+    
 });

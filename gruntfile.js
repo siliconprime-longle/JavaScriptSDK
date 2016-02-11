@@ -16,7 +16,9 @@ module.exports = function(grunt) {
             test:{
               // the files to concatenate
                     src: [
+                        'test/config.js',
                         'test/requireCloudBoost.js',
+                        'test/init/init.js',
                         'test/util/util.js',
                         'test/serverTest.js',
                         'test/init/init.js',
@@ -40,31 +42,7 @@ module.exports = function(grunt) {
                     dest: 'test/test.js'
                 },
 
-            stagingTest:{
-                    src: [
-                        'test/requireCloudBoost.js',
-                        'test/util/util.js',
-                        'test/stageTest.js',
-                        'test/init/init.js',
-                        'test/CloudCache/*.js',
-                        'test/CloudTable/*.js',
-                        'test/CloudQueue/*.js',
-                        'test/CloudUser/*.js',
-                        'test/CloudRole/*.js',
-                        'test/CloudObject/*.js',
-                        'test/ACL/*.js',
-                        'test/CloudFile/*.js',
-                        'test/CloudExpire/*.js',
-                        'test/CloudNotification/*.js',
-                        'test/CloudGeoPoint/*.js',
-                        'test/CloudQuery/*.js',
-                        'test/CloudSearch/*.js',
-                        'test/AppTests/*.js',
-                        'test/CloudApp/*.js'
-                    ],
 
-                    dest: 'test/stagingTest.js'
-                },
 
             sdkRelease: {
                 // the files to concatenate
@@ -100,7 +78,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bumpup');
 
-    grunt.registerTask('default',['concat:sdk','concat:test','concat:stagingTest','bumpup','uglify:uglifyDev']);
+    grunt.registerTask('default',['concat:sdk','concat:test','bumpup','uglify:uglifyDev']);
     grunt.registerTask('release',['concat:sdkRelease','uglify:uglifyRelease']);
 
 };
