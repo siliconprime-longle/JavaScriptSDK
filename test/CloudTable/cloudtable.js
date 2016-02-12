@@ -2,7 +2,7 @@ describe("Cloud Table", function(){
 
     before(function(){
         CB.appKey = CB.masterKey;
-      });
+    });
 
     var tableName = util.makeString();
 
