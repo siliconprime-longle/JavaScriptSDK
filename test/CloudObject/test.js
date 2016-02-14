@@ -4,16 +4,6 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required.
 
-
- it("Should timeout",function(done){
-
-     this.timeout(100000);
-
-     setTimeout(function(){
-         done();
-     },10000);
- });
-
  it("Should Save data in Custom date field",function(done){
 
      this.timeout(30000);

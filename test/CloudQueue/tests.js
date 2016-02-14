@@ -1309,7 +1309,7 @@ it("Should not getMessage message with the delay ",function(done){
                                    queue.type = "push";
                                      queue.update({
                                           success : function(response){
-                                               if(response.type === "addMessage"){
+                                               if(response.type === "push"){
                                                   done();
                                                }else{
                                                    done("Error. Didnot update the queue.")

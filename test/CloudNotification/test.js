@@ -17,7 +17,7 @@ describe("CloudNotification", function() {
 
     it("should publish data to the channel.", function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         CB.CloudNotification.on('sample',
       function(data){
       	if(data === 'data'){
