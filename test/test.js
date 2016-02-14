@@ -1,6 +1,27 @@
 var SECURE_KEY = "0824ff47-252e-4828-8bfd-1feddb659b24";
 var URL = "http://localhost:4730";
 
+   var util = {
+     makeString : function(){
+	    var text = "x";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	    for( var i=0; i < 5; i++ )
+	        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	    return 'x'+text;
+	},	
+
+	makeEmail : function(){
+	    return this.makeString()+'@sample.com';
+	}
+
+   };
+
+   
+
+	
+
 var window = window || null;
 var request = require('request');
 var CB = require('../dist/cloudboost');
@@ -123,27 +144,6 @@ describe("Cloud App", function() {
 
 	 });
 });
-
-   var util = {
-     makeString : function(){
-	    var text = "x";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	    for( var i=0; i < 5; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	    return 'x'+text;
-	},	
-
-	makeEmail : function(){
-	    return this.makeString()+'@sample.com';
-	}
-
-   };
-
-   
-
-	
 
 describe("Cloud Cache", function(){
      
@@ -3138,7 +3138,7 @@ it("Should not getMessage message with the delay ",function(done){
                                    queue.type = "push";
                                      queue.update({
                                           success : function(response){
-                                               if(response.type === "addMessage"){
+                                               if(response.type === "push"){
                                                   done();
                                                }else{
                                                    done("Error. Didnot update the queue.")
@@ -3167,1605 +3167,6 @@ it("Should not getMessage message with the delay ",function(done){
      after(function(){
         CB.appKey = CB.jsKey;
      });
-});
-describe("ACL", function () {
-
-     it("Should update the ACL object.", function (done) {
-
-        this.timeout(20000);
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-        var obj = new CB.CloudObject('Employee');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setRoleWriteAccess("x",true);
-        obj.ACL.setPublicWriteAccess(true);
-        obj.save().then(function(list) {
-            list.ACL.setRoleWriteAccess("y",true);
-            list.ACL.setPublicWriteAccess(true);
-            list.save().then(function(obj) {
-                var query = new CB.CloudQuery("Employee");
-                query.findById(obj.id, {
-                    success : function(obj){
-                        if(obj.ACL.document.write.allow.role.length === 2) {
-                            done();
-                        }
-                        else
-                            done("Cannot update the ACL");
-                    }, error : function(error) {
-                         done(error);
-                    }
-                })
-            }, function(error){
-                done(error);
-            });
-
-           
-        }, function (error) {
-             done(error);
-        });
-    });
-
-    it("Should set the public write access", function (done) {
-
-        this.timeout(20000);
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicWriteAccess(false);
-        obj.save().then(function(list) {
-            var acl=list.get('ACL');
-            if(acl.document.write.deny.user.length === 0) {
-                obj.set('age',15);
-                obj.save().then(function(){
-                    throw "Should not save object with no right access";
-                },function(){
-                    done();
-                });
-            }
-            else
-                throw "public write access set error"
-        }, function () {
-            throw "public write access save error";
-        });
-    });
-
-     it("Should persist ACL object inside of CloudObject after save.", function (done) {
-
-        this.timeout(20000);
-
-    
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess('id',true);
-        obj.save().then(function(obj) {
-            var acl=obj.get('ACL');
-            if(acl.document.write.allow.user.length === 1 && acl.document.write.allow.user[0] === 'id') {
-               //query this object and see if ACL persisted. 
-               var query = new CB.CloudQuery("student4");
-               query.equalTo('id',obj.id);
-               query.find({
-                    success : function(list){
-                        if(list.length ===1)
-                        {
-                            var acl = list[0].ACL;
-                            if(acl.document.write.allow.user.length === 1 && acl.document.write.allow.user[0] === 'id'){
-                                done();
-                            }else{
-                                done("Cannot persist ACL object");
-                            }
-                        }   
-                        else{
-                            done("Cannot get cloudobject");
-                        }
-                    }, error : function(error){
-
-                    }
-               });
-            }
-            else
-                done("ACL write access on user cannot be set");
-        }, function () {
-            throw "public write access save error";
-        });
-    });
-
-    it("Should set the public read access", function (done) {
-
-        this.timeout(20000);
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicReadAccess(false);
-        obj.save().then(function(list) {
-            var acl=list.get('ACL');
-            if(acl.document.read.deny.user.length === 0)
-                done();
-            else
-                throw "public read access set error"
-        }, function () {
-            throw "public read access save error";
-        });
-
-    });
-
-
-    var username = util.makeString();
-    var passwd = "abcd";
-    var userObj = new CB.CloudUser();
-
-    it("Should create new user", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(20000);
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(list) {
-            if(list.get('username') === username)
-                done();
-            else
-                throw "create user error"
-        }, function () {
-            throw "user create error";
-        });
-
-    });
-
-    it("Should set the user read access", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(20000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserReadAccess(userObj.get('id'),true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.document.read.allow.user.indexOf(userObj.get('id')) >= 0)
-                done();
-            else
-                throw "user read access set error"
-        }, function () {
-            throw "user read access save error";
-        });
-
-    });
-
-    it("Should allow users of role to write", function (done) {
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-
-        this.timeout(20000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setRoleWriteAccess(userObj.get('id'),true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.document.write.allow.role.indexOf(userObj.get('id'))>=0)
-                done();
-            else
-                throw "user role write access set error"
-        }, function () {
-            throw "user role write access save error";
-        });
-
-    });
-
-    it("Should allow users of role to read", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-        this.timeout(20000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL.setRoleReadAccess(userObj.get('id'),true);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.document.read.allow.role.indexOf(userObj.get('id'))>=0)
-                done();
-            else
-                throw "user role read access set error"
-        }, function () {
-            throw "user role read access save error";
-        });
-
-    });
-});
-
-
-describe("MasterKey ACL", function () {
-
-     before(function(){
-        CB.appKey = CB.masterKey;
-      });
-
-
-    it("Should save an object with master key with no ACL access.", function (done) {
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudObject('student4');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicReadAccess(false);
-        obj.ACL.setPublicWriteAccess(false);
-        
-        obj.save().then(function(obj) {
-
-            if(obj.id){
-                 obj.set('age',19);        
-                 obj.save().then(function(obj) {
-                    if(obj.id){
-                        done();
-                    }else{
-                        done("Obj did not save.");
-                    }
-                }, function (error) {
-                    done(error);
-                });
-            }else{
-                done("Obj did not save.");
-            }
-        
-        }, function (error) {
-           done(error);
-        });
-    });
-
-    it("Should delete the userId from the ACL", function (done) {
-
-        this.timeout(20000);
-
-        var obj = new CB.CloudObject('Employee');
-        obj.ACL = new CB.ACL();
-        obj.ACL.setUserWriteAccess("x",true);
-        obj.save().then(function(list) {
-            list.ACL.setUserWriteAccess("x",false);
-            list.save().then(function(obj) {
-                var query = new CB.CloudQuery("Employee");
-                query.findById(obj.id, {
-                    success : function(obj){
-                        if(obj.ACL.document.write.allow.user.indexOf("x") === -1) {
-                            done();
-                        }
-                        else
-                            done("Cannot delete the user from the ACL");
-                    }, error : function(error) {
-                         done(error);
-                    }
-                })
-            }, function(error){
-                done(error);
-            });           
-        }, function (error) {
-             done(error);
-        });
-        
-    });
-
-     after(function(){
-        CB.appKey = CB.jsKey;
-     });
-
-});
-
-
-describe("ACL on CloudObject Notifications", function () {
-
-    it("Should create new user and listen to CloudNotification events.", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        var isDone = false;
-
-        this.timeout(20000);
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('User', 'created', function(){
-                CB.CloudObject.off('User','created');
-                if(!isDone){
-                    isDone=true;
-                    done();
-                }
-                
-            });
-
-            var username = util.makeString();
-            var passwd = "abcd";
-            var userObj = new CB.CloudUser();
-
-            userObj.set('username', username);
-            userObj.set('password',passwd);
-            userObj.set('email',util.makeEmail());
-
-            userObj.save();
-           
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-
-    it("Should NOT receieve a  notification when public read access is false;", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        var isDone = false;
-
-        this.timeout(30000);
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('User', 'created', function(data){
-                CB.CloudObject.off('User','created');
-                if(!isDone){
-                    isDone=true;
-                     done("Sent notification when set public read access is false");
-                }
-            });
-
-            var username = util.makeString();
-            var passwd = "abcd";
-            var userObj = new CB.CloudUser();
-
-            userObj.set('username', username);
-            userObj.set('password',passwd);
-            userObj.set('email',util.makeEmail());
-
-            userObj.ACL = new CB.ACL();
-            userObj.ACL.setPublicReadAccess(false);
-
-            userObj.save();
-
-            setTimeout(function(){ 
-                console.log('Done!');
-                if(!isDone){
-                    isDone=true;
-                    done();
-                }
-
-            }, 1000); //wait for sometime and done! 
-           
-        }, function (error) {
-            throw "user create error";
-        });
-
-    });
-
-    it("Should NOT receivee an event when user read access is false;", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(30000);
-
-        var isDone = false;
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('User', 'created', function(){
-                CB.CloudObject.off('User','created');
-                if(!isDone){
-                    isDone=true;
-                     done("Sent notification when set public read access is false");
-                }
-            });
-
-            var username = util.makeString();
-            var passwd = "abcd";
-            var userObj = new CB.CloudUser();
-
-            userObj.set('username', username);
-            userObj.set('password',passwd);
-            userObj.set('email',util.makeEmail());
-
-            userObj.ACL = new CB.ACL();
-            userObj.ACL.setUserReadAccess(user.id, false);
-
-            userObj.save();
-
-            setTimeout(function(){ 
-               if(!isDone){
-                    isDone=true;
-                    done();
-                }
-            }, 10000); //wait for sometime and done! 
-           
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-
-    it("Should NOT receieve a  notification when public read access is true but user is false;", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(30000);
-
-        var isDone = false;
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('User', 'created', function(){
-                CB.CloudObject.off('User','created');
-                if(!isDone){
-                    isDone=true;
-                     done("Sent notification when set public read access is false");
-                }
-               
-            });
-
-            var username = util.makeString();
-            var passwd = "abcd";
-            var userObj = new CB.CloudUser();
-
-            userObj.set('username', username);
-            userObj.set('password',passwd);
-            userObj.set('email',util.makeEmail());
-
-            userObj.ACL = new CB.ACL();
-            userObj.ACL.setPublicReadAccess(true);
-            userObj.ACL.setUserReadAccess(user.id, false);
-
-            userObj.save();
-
-            setTimeout(function(){ 
-                if(!isDone){
-                    isDone=true;
-                    done();
-                }
-             }, 10000); //wait for sometime and done! 
-           
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-
-
-    it("Should receieve a notification when public read access is false but user is true;", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(30000);
-
-        var isDone = false;
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('User', 'created', function(){
-               CB.CloudObject.off('User','created');
-               if(!isDone){
-                    isDone=true;
-                    done();
-                }
-            });
-
-            var username = util.makeString();
-            var passwd = "abcd";
-            var userObj = new CB.CloudUser();
-
-            userObj.set('username', username);
-            userObj.set('password',passwd);
-            userObj.set('email',util.makeEmail());
-
-            userObj.ACL = new CB.ACL();
-            userObj.ACL.setPublicReadAccess(false);
-            userObj.ACL.setUserReadAccess(user.id, true);
-
-            userObj.save();
-
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-
-    it("Should NOT receieve a notification when user is logged out.", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(30000);
-
-        var isDone = false;
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('Custom1', 'created', function(){
-               CB.CloudObject.off('Custom1','created');
-               if(!isDone){
-                    isDone=true;
-                    done("Wrong event fired");
-                }
-            });
-
-            var obj = new CB.CloudObject('Custom1'); 
-            obj.set('newColumn', 'Sample');
-            obj.ACL = new CB.ACL();
-            obj.ACL.setPublicReadAccess(false);
-            obj.ACL.setPublicWriteAccess(true);
-            obj.ACL.setUserReadAccess(user.id, true);
-
-            user.logOut({
-                success: function(user){
-
-                    obj.save();
-
-                    setTimeout(function(){ 
-                        if(!isDone){
-                            isDone=true;
-                            done();
-                        }
-                     }, 10000); //wait for sometime and done! 
-
-                }, error : function(error){
-                    done("Error");
-                }
-            });
-
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-
-    it("Should receieve a notification when user is logged out and logged back in.", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(30000);
-
-        var isDone = false;
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var userObj = new CB.CloudUser();
-
-        userObj.set('username', username);
-        userObj.set('password',passwd);
-        userObj.set('email',util.makeEmail());
-        userObj.signUp().then(function(user) {
-            
-            CB.CloudObject.on('Custom1', 'created', function(){
-               CB.CloudObject.off('Custom1','created');
-               if(!isDone){
-                    isDone=true;
-                    done();
-                }
-            });
-
-            var obj = new CB.CloudObject('Custom1'); 
-            obj.set('newColumn', 'Sample');
-            obj.ACL = new CB.ACL();
-            obj.ACL.setPublicReadAccess(false);
-            obj.ACL.setPublicWriteAccess(true);
-            obj.ACL.setUserReadAccess(user.id, true);
-
-            user.logOut({
-                success: function(user){
-                console.log(user);
-                    user.set("password",passwd);
-                    user.logIn({
-                        success : function(){
-                             obj.save();
-
-                        }, error: function(){
-                            done("Failed to login a user");
-                        }
-                    });
-
-                   
-
-                }, error : function(error){
-                    done("Error");
-                }
-            });
-
-        }, function (error) {
-            done("user create error");
-        });
-
-    });
-});
-
-
-describe("Query_ACL", function () {
-
-    var obj = new CB.CloudObject('student4');
-    obj.isSearchable = true;
-    obj.set('age',55);
-
-    var username = util.makeString();
-    var passwd = "abcd";
-    var user = new CB.CloudUser();
-    it("Should create new user", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(20000);
-        user.set('username', username);
-        user.set('password',passwd);
-        user.set('email',util.makeEmail());
-        user.signUp().then(function(list) {
-            if(list.get('username') === username)
-                done();
-            else
-                throw "create user error"
-        }, function () {
-            throw "user create error";
-        });
-
-    });
-
-    it("Should set the public read access", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-
-        this.timeout(20000);
-
-        obj.ACL = new CB.ACL();
-        obj.ACL.setPublicReadAccess(false);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.document.read.allow.user.length === 0) {
-                var cq = new CB.CloudQuery('student4');
-                cq. equalTo('age',55);
-                cq.find().then(function(list){
-                    if(list.length>0)
-                    {
-                        throw "should not return items";
-                    }
-                    else
-                        done();
-                },function(){
-                    throw "should perform the query";
-                });
-            }
-            else
-                throw "public read access set error"
-        }, function () {
-            throw "public read access save error";
-        });
-
-    });
-
-    var obj1 = new CB.CloudObject('student4');
-    obj1.isSearchable = true;
-    obj1.set('age',60);
-    it("Should search object with user read access", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-        this.timeout(20000);
-        obj1.ACL = new CB.ACL();
-        obj1.ACL.setUserReadAccess(user.document._id,false);
-        obj1.save().then(function(list) {
-            acl=list.get('ACL');
-           // if(acl.read.indexOf(user.document._id) >= 0) {
-                var user = new CB.CloudUser();
-                user.set('username', username);
-                user.set('password', passwd);
-                user.logIn().then(function(){
-                    var cq = new CB.CloudQuery('student4');
-                    cq.equalTo('age',60);
-                    cq.find().then(function(){
-                        done();
-                    },function(){
-                        throw "should retrieve object with user read access";
-                    });
-                },function(){
-                    throw "should login";
-                });
-        }, function () {
-            throw "user read access save error";
-        });
-
-    });
-
-
-
-});
-
-
-    describe("Search_ACL", function () {
-
-    var obj = new CB.CloudObject('student4');
-    obj.set('age',150);
-
-        var username = util.makeString();
-        var passwd = "abcd";
-        var user = new CB.CloudUser();
-        it("Should create new user", function (done) {
-
-            if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-         }
-
-            this.timeout(20000);
-            user.set('username', username);
-            user.set('password',passwd);
-            user.set('email',util.makeEmail());
-            user.signUp().then(function(list) {
-                if(list.get('username') === username)
-                    done();
-                else
-                    throw "create user error"
-            }, function () {
-                throw "user create error";
-            });
-
-        });
-
-
-   it("Should set the public read access to false", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-        this.timeout(20000);
-
-        obj.ACL = new CB.ACL();
-        CB.CloudUser.current.logOut();
-        obj.ACL.setUserReadAccess(CB.CloudUser.current.id,true);
-        obj.ACL.setPublicReadAccess(false);
-        obj.save().then(function(list) {
-            acl=list.get('ACL');
-            if(acl.document.read.allow.user.indexOf('all') === -1) {
-             var cs = new CB.CloudSearch('student4');
-                cs.searchQuery = new CB.SearchQuery();
-                cs.searchQuery.searchOn('age',150);
-                cs.search().then(function(list){
-                    if(list.length>0)
-                    {
-                        for(var i=0;i<list.length;i++)
-                            if(list[i].get('age') && list[i].ACL.document.read.allow.user.indexOf('all') === -1)
-                                throw "should not return items";
-                    }
-                    
-                    done();
-                },function(){
-                    done();
-                });
-            }
-            else
-                throw "public read access set error"
-        }, function () {
-            throw "public read access save error";
-        });
-
-    });
-
-   it("Should search object with user read access", function (done) {
-
-        if(CB._isNode){
-            console.log('Skipped, Not meant for NodeJS');
-            done();
-            return;
-        }
-
-        this.timeout(20000);
-       var user = new CB.CloudUser();
-       user.set('username', username);
-       user.set('password', passwd);
-       user.logIn().then(function(){
-            obj.ACL = new CB.ACL();
-            obj.save().then(function(list) {
-                acl=list.get('ACL');
-                    var cs = new CB.CloudSearch('student4');
-                     cs.searchQuery = new CB.SearchQuery();
-                    cs.searchQuery.searchOn('age',15);
-
-                    cs.search().then(function(){
-                        done();
-                    },function(){
-                        throw "should retrieve object with user read access";
-                    });
-            }, function () {
-                throw "user read access save error";
-            });
-       },function(){
-           throw "should login";
-       });
-
-    });
-
-});
-
-
-describe("Cloud Files", function(done) {
-
-    it("Should Save a file with file data and name",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            console.log(file);
-            if(file.url) {
-                console.log(file);
-                console.log("Saved file");
-                done();
-            }else{
-                throw 'ún able to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
-
-
-    it("Should return the file with CloudObject",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            if(file.url) {
-                var obj = new CB.CloudObject('Company');
-                obj.set('File',file);
-                obj.save({
-                    success : function(obj){
-                        if(obj.get('File').url){
-                            done();
-                        }else{
-                            done("Did not get the file object back.");
-                        }
-                    }, error : function(error){
-                        done(error);
-                    }
-                });
-
-            }else{
-                throw 'ún able to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
-
-
-    it("Should return the fileList with CloudObject",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-
-        var promises = [];
-        promises.push(fileObj.save());
-
-        var data = 'DFSAF';
-        var name = 'aDSbc.txt';
-        var type = 'txt';
-        var fileObj2 = new CB.CloudFile(name,data,type);
-
-        promises.push(fileObj2.save());
-
-        CB.Promise.all(promises).then(function(files){
-            if(files.length>0) {
-                var obj = new CB.CloudObject('Sample');
-                obj.set('name','sample');
-                obj.set('fileList',files);
-                obj.save({
-                    success : function(obj){
-                        if(obj.get('fileList').length>0){
-                            if(obj.get('fileList')[0].url && obj.get('fileList')[1].url){
-                                done();
-                            }else{
-                                done("Did not get the URL's back");
-                            }
-                        }else{
-                            done("Didnot get the file object back.");
-                        }
-                    }, error : function(error){
-                        done(error);
-                    }
-                });
-
-            }else{
-                throw 'ún able to get the url';
-            }
-        }, function(error){
-            done(error);
-        });
-    });
-
-
-
-    it("Should Save a file and give the url",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            if(file.url) {
-                console.log(file);
-                console.log("Saved file");
-                done();
-            }else{
-                throw 'ún able to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
-
-    it("Should delete a file with file data and name",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            if(file.url) {
-                file.delete().then(function(file){
-                    console.log(file);
-                    if(file.url === null)
-                        done();
-                    else
-                        throw "file delete error"
-                },function(err){
-                    throw "unable to delete file";
-                });
-            }else{
-                throw 'unable to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
-
-    try {
-
-        if (window) {
-            it("should save a new file", function (done) {
-
-                this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
-
-                file.save().then(function (file) {
-                    if (file.url) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
-                    }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
-
-            });
-            it("should delete a file", function (done) {
-
-                this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
-
-                file.save().then(function (file) {
-                    if (file.url) {
-                        //received the blob's url
-                        console.log(file.url);
-                        file.delete().then(function (file) {
-                            if (file.url === null) {
-                                done();
-                            } else {
-                                throw "File deleted, url in SDK not deleted";
-                            }
-                        }, function (err) {
-                            throw "Error deleting file";
-                        })
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
-                    }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
-            });
-            it("should save a new file", function (done) {
-
-                this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
-                var file1 = new CB.CloudFile(oMyBlob);
-
-                var obj = new CB.CloudObject('Sample');
-                obj.set('fileList', [file, file1]);
-                obj.set('name', 'abcd');
-                obj.save().then(function (file) {
-                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
-                    }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
-
-            });
-        }
-    }catch(e){
-        console.log('In node');
-    }
-
-    it("Should Save a file file data and name then fetch it",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save().then(function(file){
-            console.log(file);
-            if(file.url) {
-                file.fetch().then(function(res){
-                    res.getFileContent().then(function(res){
-                        console.log(res);
-                        done();
-                    },function(){
-                        throw "Unable to Fetch File";
-                    });
-                },function(){
-                    throw "Unable to Fetch File";
-                });
-            }else{
-                throw 'ún able to get the url';
-            }
-        },function(err){
-            throw "Unable to save file";
-        });
-    });
-
-
-    it("Include Over File",function(done) {
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name, data, type);
-        var obj = new CB.CloudObject('Sample');
-        obj.set('file',fileObj);
-        obj.set('name','abcd');
-        obj.save().then(function(res){
-            console.log(res);
-            var id = res.get('id');
-            var query = new CB.CloudQuery('Sample');
-            query.equalTo('id',id);
-            query.include('file');
-            query.find().then(function(res){
-                console.log(res);
-                done();
-            },function(){
-                throw "Unable to Find";
-            });
-        },function(err){
-            throw "unable to save object";
-        });
-    });
-
-
-    it("Should Save a file file data and name then fetch it",function(done) {
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name, data, type);
-        var obj = new CB.CloudObject('Sample');
-        obj.set('file',fileObj);
-        obj.set('name','abcd');
-        obj.save().then(function(res){
-            console.log(res);
-            var file = res.get('file');
-            file.fetch().then(function(res){
-                console.log(res);
-                if(res.get('url'))
-                    done();
-                throw "Unable to fetch the file";
-            },function(err){
-                throw "Unable to fetch file";
-            });
-        },function(err){
-            throw "unable to save object";
-        });
-    });
-
-    it("should save a file and get from a relation",function(done){
-
-        this.timeout(300000);
-
-        var obj1 = new CB.CloudObject('Employee');
-        var obj2 = new CB.CloudObject('Company');
-        obj1.set('Name','abcd');
-        obj2.set('Name','pqrs');
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name, data, type);
-        fileObj.save().then(function(res){
-            obj2.set('File',res);
-            obj1.set('Company',obj2);
-            obj1.save().then(function(res){
-                var query = new CB.CloudQuery('Employee');
-                query.include('Company.File');
-                query.equalTo('id',res.get('id'));
-                query.find().then(function(res){
-                    console.log(res);
-                    done();
-                },function(err){
-                    throw "Unable to query";
-                });
-            },function(){
-                throw "Unable to Save Cloud Object";
-            });
-        },function(err){
-           throw "Unable to Save file";
-        });
-
-    });
-
-    // it("Should get the image",function(done){
-
-    //     this.timeout(20000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.onreadystatechange = getImage;
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to get the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     function getImage(){
-    //         console.log(xhttp.responseType);
-    //     }
-
-    //     xhttp.send(null);
-
-    // });
-
-    // it("Should resize the image",function(done){
-
-    //     this.timeout(20000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100&resizeHeight=100";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.onreadystatechange = resizeImage;
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to resize the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-    //       function resizeImage(){
-    //         console.log(xhttp.responseType);
-    //       }
-    //     xhttp.send(null);
-
-    //     });
-    // it("Should crop the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?cropX=50&cropY=50&cropW=50&cropH=50";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to crop the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-    // it("Should change the quality of the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?quality=2";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to change the quality of the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-    // it("Should change the opacity of the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?opacity=0.4";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to change the opacity of the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-    // it("Should scale the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?scale=2";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to scale the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-    // it("Should contain the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?containWidth=100&containHeight=100";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to contain the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-    // it("Should rotate the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?rDegs=0.45";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to rotate the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-    // it("Should blur the image",function(done){
-
-    //     this.timeout(30000);
-    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?bSigma";
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.open('GET', url, true);
-    //     xhttp.onload = function(e){
-    //         if(xhttp.readyState === 4){
-    //             if(xhttp.status === 200){
-    //                 done();
-    //             }else{
-    //                 throw "Failed to blur the image";
-    //             }
-    //         };
-    //         xhttp.onerror = function(e){
-    //             throw "Error"
-    //         }
-
-    //     };
-
-    //     xhttp.send(null);
-
-    //     });
-
-});
-
-describe("ACL Tests Over Files",function(done){
-
-    before(function(){
-         CB.appKey = CB.jsKey;
-    });
-
-    it("should not get file Object with not read access",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.ACL.setPublicReadAccess(false);
-        fileObj.save().then(function(res){
-            res.fetch().then(function(res){
-                if(!res)
-                    done();
-                else
-                    throw "Unable to get ACL working";
-            },function(){
-                throw "Unable to perform query";
-            });
-        },function(){
-            throw "Unable to save file";
-        });
-
-    });
-
-
-    it("should not get file with no read access",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.ACL.setPublicReadAccess(false);
-        fileObj.save().then(function(res){
-            res.getFileContent().then(function(res){
-                throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
-                done();
-            });
-        },function(){
-            throw "Unable to save file";
-        });
-
-    });
-
-    it("should not delete file no write access",function(done){
-
-        this.timeout(30000);
-
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.ACL.setPublicWriteAccess(false);
-        fileObj.save().then(function(res){
-            res.delete().then(function(res){
-                throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
-                done();
-            });
-        },function(){
-            throw "Unable to save file";
-        });
-
-    });
-
 });
 describe("Bulk API",function(done){
 
@@ -6484,16 +4885,6 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required.
 
-
- it("Should timeout",function(done){
-
-     this.timeout(100000);
-
-     setTimeout(function(){
-         done();
-     },10000);
- });
-
  it("Should Save data in Custom date field",function(done){
 
      this.timeout(30000);
@@ -7535,54 +5926,673 @@ describe("Version Test",function(done){
         });
     });
 });
-describe("CloudExpire", function () {
+describe("Cloud Files", function(done) {
 
-    it("Sets Expire in Cloud Object.", function (done) {
+    it("Should Save a file with file data and name",function(done){
 
         this.timeout(30000);
-        //create an object.
-        var obj = new CB.CloudObject('Custom');
-        obj.set('newColumn1', 'abcd');
-        obj.save().then(function(obj1) {
-            if(obj1)
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            console.log(file);
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
                 done();
-            else
-                throw "unable to save expires";
-        }, function (err) {
-            console.log(err);
-            throw "Relation Expire error";
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Should return the file with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                var obj = new CB.CloudObject('Company');
+                obj.set('File',file);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('File').url){
+                            done();
+                        }else{
+                            done("Did not get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Should return the fileList with CloudObject",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        if(obj.get('fileList').length>0){
+                            if(obj.get('fileList')[0].url && obj.get('fileList')[1].url){
+                                done();
+                            }else{
+                                done("Did not get the URL's back");
+                            }
+                        }else{
+                            done("Didnot get the file object back.");
+                        }
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
+
+
+
+    it("Should Save a file and give the url",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                console.log(file);
+                console.log("Saved file");
+                done();
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+    it("Should delete a file with file data and name",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            if(file.url) {
+                file.delete().then(function(file){
+                    console.log(file);
+                    if(file.url === null)
+                        done();
+                    else
+                        throw "file delete error"
+                },function(err){
+                    throw "unable to delete file";
+                });
+            }else{
+                throw 'unable to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+    try {
+
+        if (window) {
+            it("should save a new file", function (done) {
+
+                this.timeout(30000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
+            it("should delete a file", function (done) {
+
+                this.timeout(30000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+
+                file.save().then(function (file) {
+                    if (file.url) {
+                        //received the blob's url
+                        console.log(file.url);
+                        file.delete().then(function (file) {
+                            if (file.url === null) {
+                                done();
+                            } else {
+                                throw "File deleted, url in SDK not deleted";
+                            }
+                        }, function (err) {
+                            throw "Error deleting file";
+                        })
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+            });
+            it("should save a new file", function (done) {
+
+                this.timeout(30000);
+                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                try {
+                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                } catch (e) {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append(aFileParts);
+                    var oMyBlob = builder.getBlob();
+                }
+                var file = new CB.CloudFile(oMyBlob);
+                var file1 = new CB.CloudFile(oMyBlob);
+
+                var obj = new CB.CloudObject('Sample');
+                obj.set('fileList', [file, file1]);
+                obj.set('name', 'abcd');
+                obj.save().then(function (file) {
+                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
+                        done();
+                    } else {
+                        throw "Upload success. But cannot find the URL.";
+                    }
+                }, function (err) {
+                    throw "Error uploading file";
+                });
+
+            });
+        }
+    }catch(e){
+        console.log('In node');
+    }
+
+    it("Should Save a file file data and name then fetch it",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save().then(function(file){
+            console.log(file);
+            if(file.url) {
+                file.fetch().then(function(res){
+                    res.getFileContent().then(function(res){
+                        console.log(res);
+                        done();
+                    },function(){
+                        throw "Unable to Fetch File";
+                    });
+                },function(){
+                    throw "Unable to Fetch File";
+                });
+            }else{
+                throw 'ún able to get the url';
+            }
+        },function(err){
+            throw "Unable to save file";
+        });
+    });
+
+
+    it("Include Over File",function(done) {
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var id = res.get('id');
+            var query = new CB.CloudQuery('Sample');
+            query.equalTo('id',id);
+            query.include('file');
+            query.find().then(function(res){
+                console.log(res);
+                done();
+            },function(){
+                throw "Unable to Find";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
+
+    it("Should Save a file file data and name then fetch it",function(done) {
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        var obj = new CB.CloudObject('Sample');
+        obj.set('file',fileObj);
+        obj.set('name','abcd');
+        obj.save().then(function(res){
+            console.log(res);
+            var file = res.get('file');
+            file.fetch().then(function(res){
+                console.log(res);
+                if(res.get('url'))
+                    done();
+                throw "Unable to fetch the file";
+            },function(err){
+                throw "Unable to fetch file";
+            });
+        },function(err){
+            throw "unable to save object";
+        });
+    });
+
+    it("should save a file and get from a relation",function(done){
+
+        this.timeout(300000);
+
+        var obj1 = new CB.CloudObject('Employee');
+        var obj2 = new CB.CloudObject('Company');
+        obj1.set('Name','abcd');
+        obj2.set('Name','pqrs');
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(res){
+            obj2.set('File',res);
+            obj1.set('Company',obj2);
+            obj1.save().then(function(res){
+                var query = new CB.CloudQuery('Employee');
+                query.include('Company.File');
+                query.equalTo('id',res.get('id'));
+                query.find().then(function(res){
+                    console.log(res);
+                    done();
+                },function(err){
+                    throw "Unable to query";
+                });
+            },function(){
+                throw "Unable to Save Cloud Object";
+            });
+        },function(err){
+           throw "Unable to Save file";
         });
 
     });
 
-    it("Checks if the expired object shows up in the search or not", function (done) {
+    // it("Should get the image",function(done){
+
+    //     this.timeout(20000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.onreadystatechange = getImage;
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to get the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     function getImage(){
+    //         console.log(xhttp.responseType);
+    //     }
+
+    //     xhttp.send(null);
+
+    // });
+
+    // it("Should resize the image",function(done){
+
+    //     this.timeout(20000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?resizeWidth=100&resizeHeight=100";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.onreadystatechange = resizeImage;
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to resize the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+    //       function resizeImage(){
+    //         console.log(xhttp.responseType);
+    //       }
+    //     xhttp.send(null);
+
+    //     });
+    // it("Should crop the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?cropX=50&cropY=50&cropW=50&cropH=50";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to crop the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should change the quality of the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?quality=2";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to change the quality of the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should change the opacity of the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?opacity=0.4";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to change the opacity of the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should scale the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?scale=2";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to scale the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+    // it("Should contain the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?containWidth=100&containHeight=100";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to contain the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should rotate the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?rDegs=0.45";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to rotate the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+    // it("Should blur the image",function(done){
+
+    //     this.timeout(30000);
+    //     var url = "http://localhost:4730/file/sample123/youthempowerment.jpg?bSigma";
+    //     var xhttp = new XMLHttpRequest();
+    //     xhttp.open('GET', url, true);
+    //     xhttp.onload = function(e){
+    //         if(xhttp.readyState === 4){
+    //             if(xhttp.status === 200){
+    //                 done();
+    //             }else{
+    //                 throw "Failed to blur the image";
+    //             }
+    //         };
+    //         xhttp.onerror = function(e){
+    //             throw "Error"
+    //         }
+
+    //     };
+
+    //     xhttp.send(null);
+
+    //     });
+
+});
+
+describe("ACL Tests Over Files",function(done){
+
+    before(function(){
+         CB.appKey = CB.jsKey;
+    });
+
+    it("should not get file Object with not read access",function(done){
 
         this.timeout(30000);
-        var curr=new Date().getTime();
-        var query = new CB.CloudQuery('Custom');
-        query.find().then(function(list){
-            if(list.length>0){
-                var __success = false;
-                for(var i=0;i<list.length;i++){
-                    if(list[i].get('expires')>curr || !list[i].get('expires')){
-                           __success = true;
-                            done();
-                            break;
-                        }
-                    else{
-                        throw "Expired Values also shown Up";
-                    }
-                    }
-                }else{
-                done();
-            }
 
-        }, function(error){
-
-        })
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            res.fetch().then(function(res){
+                if(!res)
+                    done();
+                else
+                    throw "Unable to get ACL working";
+            },function(){
+                throw "Unable to perform query";
+            });
+        },function(){
+            throw "Unable to save file";
+        });
 
     });
 
+
+    it("should not get file with no read access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicReadAccess(false);
+        fileObj.save().then(function(res){
+            res.getFileContent().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
+
+    it("should not delete file no write access",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.ACL.setPublicWriteAccess(false);
+        fileObj.save().then(function(res){
+            res.delete().then(function(res){
+                throw "Should not retrieve file";
+            },function(err){
+                console.log(err);
+                done();
+            });
+        },function(){
+            throw "Unable to save file";
+        });
+
+    });
 
 });
 describe("CloudNotification", function() {
@@ -7604,7 +6614,7 @@ describe("CloudNotification", function() {
 
     it("should publish data to the channel.", function(done) {
 
-        this.timeout(20000);
+        this.timeout(30000);
         CB.CloudNotification.on('sample',
       function(data){
       	if(data === 'data'){
@@ -7676,6 +6686,986 @@ describe("CloudNotification", function() {
 
 
     });
+
+});
+describe("ACL", function () {
+
+     it("Should update the ACL object.", function (done) {
+
+        this.timeout(20000);
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+        var obj = new CB.CloudObject('Employee');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setRoleWriteAccess("x",true);
+        obj.ACL.setPublicWriteAccess(true);
+        obj.save().then(function(list) {
+            list.ACL.setRoleWriteAccess("y",true);
+            list.ACL.setPublicWriteAccess(true);
+            list.save().then(function(obj) {
+                var query = new CB.CloudQuery("Employee");
+                query.findById(obj.id, {
+                    success : function(obj){
+                        if(obj.ACL.document.write.allow.role.length === 2) {
+                            done();
+                        }
+                        else
+                            done("Cannot update the ACL");
+                    }, error : function(error) {
+                         done(error);
+                    }
+                })
+            }, function(error){
+                done(error);
+            });
+
+           
+        }, function (error) {
+             done(error);
+        });
+    });
+
+    it("Should set the public write access", function (done) {
+
+        this.timeout(20000);
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicWriteAccess(false);
+        obj.save().then(function(list) {
+            var acl=list.get('ACL');
+            if(acl.document.write.deny.user.length === 0) {
+                obj.set('age',15);
+                obj.save().then(function(){
+                    throw "Should not save object with no right access";
+                },function(){
+                    done();
+                });
+            }
+            else
+                throw "public write access set error"
+        }, function () {
+            throw "public write access save error";
+        });
+    });
+
+     it("Should persist ACL object inside of CloudObject after save.", function (done) {
+
+        this.timeout(20000);
+
+    
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess('id',true);
+        obj.save().then(function(obj) {
+            var acl=obj.get('ACL');
+            if(acl.document.write.allow.user.length === 1 && acl.document.write.allow.user[0] === 'id') {
+               //query this object and see if ACL persisted. 
+               var query = new CB.CloudQuery("student4");
+               query.equalTo('id',obj.id);
+               query.find({
+                    success : function(list){
+                        if(list.length ===1)
+                        {
+                            var acl = list[0].ACL;
+                            if(acl.document.write.allow.user.length === 1 && acl.document.write.allow.user[0] === 'id'){
+                                done();
+                            }else{
+                                done("Cannot persist ACL object");
+                            }
+                        }   
+                        else{
+                            done("Cannot get cloudobject");
+                        }
+                    }, error : function(error){
+
+                    }
+               });
+            }
+            else
+                done("ACL write access on user cannot be set");
+        }, function () {
+            throw "public write access save error";
+        });
+    });
+
+    it("Should set the public read access", function (done) {
+
+        this.timeout(20000);
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicReadAccess(false);
+        obj.save().then(function(list) {
+            var acl=list.get('ACL');
+            if(acl.document.read.deny.user.length === 0)
+                done();
+            else
+                throw "public read access set error"
+        }, function () {
+            throw "public read access save error";
+        });
+
+    });
+
+
+    var username = util.makeString();
+    var passwd = "abcd";
+    var userObj = new CB.CloudUser();
+
+    it("Should create new user", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(20000);
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(list) {
+            if(list.get('username') === username)
+                done();
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
+    it("Should set the user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserReadAccess(userObj.get('id'),true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.document.read.allow.user.indexOf(userObj.get('id')) >= 0)
+                done();
+            else
+                throw "user read access set error"
+        }, function () {
+            throw "user read access save error";
+        });
+
+    });
+
+    it("Should allow users of role to write", function (done) {
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setRoleWriteAccess(userObj.get('id'),true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.document.write.allow.role.indexOf(userObj.get('id'))>=0)
+                done();
+            else
+                throw "user role write access set error"
+        }, function () {
+            throw "user role write access save error";
+        });
+
+    });
+
+    it("Should allow users of role to read", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL.setRoleReadAccess(userObj.get('id'),true);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.document.read.allow.role.indexOf(userObj.get('id'))>=0)
+                done();
+            else
+                throw "user role read access set error"
+        }, function () {
+            throw "user role read access save error";
+        });
+
+    });
+});
+
+
+describe("MasterKey ACL", function () {
+
+     before(function(){
+        CB.appKey = CB.masterKey;
+      });
+
+
+    it("Should save an object with master key with no ACL access.", function (done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudObject('student4');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicReadAccess(false);
+        obj.ACL.setPublicWriteAccess(false);
+        
+        obj.save().then(function(obj) {
+
+            if(obj.id){
+                 obj.set('age',19);        
+                 obj.save().then(function(obj) {
+                    if(obj.id){
+                        done();
+                    }else{
+                        done("Obj did not save.");
+                    }
+                }, function (error) {
+                    done(error);
+                });
+            }else{
+                done("Obj did not save.");
+            }
+        
+        }, function (error) {
+           done(error);
+        });
+    });
+
+    it("Should delete the userId from the ACL", function (done) {
+
+        this.timeout(20000);
+
+        var obj = new CB.CloudObject('Employee');
+        obj.ACL = new CB.ACL();
+        obj.ACL.setUserWriteAccess("x",true);
+        obj.save().then(function(list) {
+            list.ACL.setUserWriteAccess("x",false);
+            list.save().then(function(obj) {
+                var query = new CB.CloudQuery("Employee");
+                query.findById(obj.id, {
+                    success : function(obj){
+                        if(obj.ACL.document.write.allow.user.indexOf("x") === -1) {
+                            done();
+                        }
+                        else
+                            done("Cannot delete the user from the ACL");
+                    }, error : function(error) {
+                         done(error);
+                    }
+                })
+            }, function(error){
+                done(error);
+            });           
+        }, function (error) {
+             done(error);
+        });
+        
+    });
+
+     after(function(){
+        CB.appKey = CB.jsKey;
+     });
+
+});
+
+
+describe("ACL on CloudObject Notifications", function () {
+
+    it("Should create new user and listen to CloudNotification events.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        var isDone = false;
+
+        this.timeout(20000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
+                
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.save();
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should NOT receieve a  notification when public read access is false;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        var isDone = false;
+
+        this.timeout(30000);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(data){
+                CB.CloudObject.off('User','created');
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(false);
+
+            userObj.save();
+
+            setTimeout(function(){ 
+                console.log('Done!');
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
+
+            }, 1000); //wait for sometime and done! 
+           
+        }, function (error) {
+            throw "user create error";
+        });
+
+    });
+
+    it("Should NOT receivee an event when user read access is false;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setUserReadAccess(user.id, false);
+
+            userObj.save();
+
+            setTimeout(function(){ 
+               if(!isDone){
+                    isDone=true;
+                    done();
+                }
+            }, 10000); //wait for sometime and done! 
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should NOT receieve a  notification when public read access is true but user is false;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+                CB.CloudObject.off('User','created');
+                if(!isDone){
+                    isDone=true;
+                     done("Sent notification when set public read access is false");
+                }
+               
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(true);
+            userObj.ACL.setUserReadAccess(user.id, false);
+
+            userObj.save();
+
+            setTimeout(function(){ 
+                if(!isDone){
+                    isDone=true;
+                    done();
+                }
+             }, 10000); //wait for sometime and done! 
+           
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+
+    it("Should receieve a notification when public read access is false but user is true;", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('User', 'created', function(){
+               CB.CloudObject.off('User','created');
+               if(!isDone){
+                    isDone=true;
+                    done();
+                }
+            });
+
+            var username = util.makeString();
+            var passwd = "abcd";
+            var userObj = new CB.CloudUser();
+
+            userObj.set('username', username);
+            userObj.set('password',passwd);
+            userObj.set('email',util.makeEmail());
+
+            userObj.ACL = new CB.ACL();
+            userObj.ACL.setPublicReadAccess(false);
+            userObj.ACL.setUserReadAccess(user.id, true);
+
+            userObj.save();
+
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should NOT receieve a notification when user is logged out.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('Custom1', 'created', function(){
+               CB.CloudObject.off('Custom1','created');
+               if(!isDone){
+                    isDone=true;
+                    done("Wrong event fired");
+                }
+            });
+
+            var obj = new CB.CloudObject('Custom1'); 
+            obj.set('newColumn', 'Sample');
+            obj.ACL = new CB.ACL();
+            obj.ACL.setPublicReadAccess(false);
+            obj.ACL.setPublicWriteAccess(true);
+            obj.ACL.setUserReadAccess(user.id, true);
+
+            user.logOut({
+                success: function(user){
+
+                    obj.save();
+
+                    setTimeout(function(){ 
+                        if(!isDone){
+                            isDone=true;
+                            done();
+                        }
+                     }, 10000); //wait for sometime and done! 
+
+                }, error : function(error){
+                    done("Error");
+                }
+            });
+
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+
+    it("Should receieve a notification when user is logged out and logged back in.", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(30000);
+
+        var isDone = false;
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var userObj = new CB.CloudUser();
+
+        userObj.set('username', username);
+        userObj.set('password',passwd);
+        userObj.set('email',util.makeEmail());
+        userObj.signUp().then(function(user) {
+            
+            CB.CloudObject.on('Custom1', 'created', function(){
+               CB.CloudObject.off('Custom1','created');
+               if(!isDone){
+                    isDone=true;
+                    done();
+                }
+            });
+
+            var obj = new CB.CloudObject('Custom1'); 
+            obj.set('newColumn', 'Sample');
+            obj.ACL = new CB.ACL();
+            obj.ACL.setPublicReadAccess(false);
+            obj.ACL.setPublicWriteAccess(true);
+            obj.ACL.setUserReadAccess(user.id, true);
+
+            user.logOut({
+                success: function(user){
+                console.log(user);
+                    user.set("password",passwd);
+                    user.logIn({
+                        success : function(){
+                             obj.save();
+
+                        }, error: function(){
+                            done("Failed to login a user");
+                        }
+                    });
+
+                   
+
+                }, error : function(error){
+                    done("Error");
+                }
+            });
+
+        }, function (error) {
+            done("user create error");
+        });
+
+    });
+});
+
+
+describe("Query_ACL", function () {
+
+    var obj = new CB.CloudObject('student4');
+    obj.isSearchable = true;
+    obj.set('age',55);
+
+    var username = util.makeString();
+    var passwd = "abcd";
+    var user = new CB.CloudUser();
+    it("Should create new user", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(20000);
+        user.set('username', username);
+        user.set('password',passwd);
+        user.set('email',util.makeEmail());
+        user.signUp().then(function(list) {
+            if(list.get('username') === username)
+                done();
+            else
+                throw "create user error"
+        }, function () {
+            throw "user create error";
+        });
+
+    });
+
+    it("Should set the public read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+
+        this.timeout(20000);
+
+        obj.ACL = new CB.ACL();
+        obj.ACL.setPublicReadAccess(false);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.document.read.allow.user.length === 0) {
+                var cq = new CB.CloudQuery('student4');
+                cq. equalTo('age',55);
+                cq.find().then(function(list){
+                    if(list.length>0)
+                    {
+                        throw "should not return items";
+                    }
+                    else
+                        done();
+                },function(){
+                    throw "should perform the query";
+                });
+            }
+            else
+                throw "public read access set error"
+        }, function () {
+            throw "public read access save error";
+        });
+
+    });
+
+    var obj1 = new CB.CloudObject('student4');
+    obj1.isSearchable = true;
+    obj1.set('age',60);
+    it("Should search object with user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+        this.timeout(20000);
+        obj1.ACL = new CB.ACL();
+        obj1.ACL.setUserReadAccess(user.document._id,false);
+        obj1.save().then(function(list) {
+            acl=list.get('ACL');
+           // if(acl.read.indexOf(user.document._id) >= 0) {
+                var user = new CB.CloudUser();
+                user.set('username', username);
+                user.set('password', passwd);
+                user.logIn().then(function(){
+                    var cq = new CB.CloudQuery('student4');
+                    cq.equalTo('age',60);
+                    cq.find().then(function(){
+                        done();
+                    },function(){
+                        throw "should retrieve object with user read access";
+                    });
+                },function(){
+                    throw "should login";
+                });
+        }, function () {
+            throw "user read access save error";
+        });
+
+    });
+
+
+
+});
+
+
+    describe("Search_ACL", function () {
+
+    var obj = new CB.CloudObject('student4');
+    obj.set('age',150);
+
+        var username = util.makeString();
+        var passwd = "abcd";
+        var user = new CB.CloudUser();
+        it("Should create new user", function (done) {
+
+            if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+         }
+
+            this.timeout(20000);
+            user.set('username', username);
+            user.set('password',passwd);
+            user.set('email',util.makeEmail());
+            user.signUp().then(function(list) {
+                if(list.get('username') === username)
+                    done();
+                else
+                    throw "create user error"
+            }, function () {
+                throw "user create error";
+            });
+
+        });
+
+
+   it("Should set the public read access to false", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+        this.timeout(20000);
+
+        obj.ACL = new CB.ACL();
+        CB.CloudUser.current.logOut();
+        obj.ACL.setUserReadAccess(CB.CloudUser.current.id,true);
+        obj.ACL.setPublicReadAccess(false);
+        obj.save().then(function(list) {
+            acl=list.get('ACL');
+            if(acl.document.read.allow.user.indexOf('all') === -1) {
+             var cs = new CB.CloudSearch('student4');
+                cs.searchQuery = new CB.SearchQuery();
+                cs.searchQuery.searchOn('age',150);
+                cs.search().then(function(list){
+                    if(list.length>0)
+                    {
+                        for(var i=0;i<list.length;i++)
+                            if(list[i].get('age') && list[i].ACL.document.read.allow.user.indexOf('all') === -1)
+                                throw "should not return items";
+                    }
+                    
+                    done();
+                },function(){
+                    done();
+                });
+            }
+            else
+                throw "public read access set error"
+        }, function () {
+            throw "public read access save error";
+        });
+
+    });
+
+   it("Should search object with user read access", function (done) {
+
+        if(CB._isNode){
+            console.log('Skipped, Not meant for NodeJS');
+            done();
+            return;
+        }
+
+        this.timeout(20000);
+       var user = new CB.CloudUser();
+       user.set('username', username);
+       user.set('password', passwd);
+       user.logIn().then(function(){
+            obj.ACL = new CB.ACL();
+            obj.save().then(function(list) {
+                acl=list.get('ACL');
+                    var cs = new CB.CloudSearch('student4');
+                     cs.searchQuery = new CB.SearchQuery();
+                    cs.searchQuery.searchOn('age',15);
+
+                    cs.search().then(function(){
+                        done();
+                    },function(){
+                        throw "should retrieve object with user read access";
+                    });
+            }, function () {
+                throw "user read access save error";
+            });
+       },function(){
+           throw "should login";
+       });
+
+    });
+
+});
+
+
+describe("CloudExpire", function () {
+
+    it("Sets Expire in Cloud Object.", function (done) {
+
+        this.timeout(30000);
+        //create an object.
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn1', 'abcd');
+        obj.save().then(function(obj1) {
+            if(obj1)
+                done();
+            else
+                throw "unable to save expires";
+        }, function (err) {
+            console.log(err);
+            throw "Relation Expire error";
+        });
+
+    });
+
+    it("Checks if the expired object shows up in the search or not", function (done) {
+
+        this.timeout(30000);
+        var curr=new Date().getTime();
+        var query = new CB.CloudQuery('Custom');
+        query.find().then(function(list){
+            if(list.length>0){
+                var __success = false;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].get('expires')>curr || !list[i].get('expires')){
+                           __success = true;
+                            done();
+                            break;
+                        }
+                    else{
+                        throw "Expired Values also shown Up";
+                    }
+                    }
+                }else{
+                done();
+            }
+
+        }, function(error){
+
+        })
+
+    });
+
 
 });
 describe("Cloud GeoPoint Test", function() {
@@ -10246,6 +10236,34 @@ describe("CloudRole", function (done) {
     });
 });
 
+describe("CloudApp Socket Test", function () {
+
+    it("Should fire an event when disconnect", function (done) {
+
+       this.timeout(40000);
+
+       CB.CloudApp.onDisconnect(function(){
+        done();
+       });
+
+       CB.CloudApp.disconnect();
+
+    });
+
+    it("Should fire an event when connect.", function (done) {
+
+       this.timeout(30000);
+
+       CB.CloudApp.onConnect(function(){
+        done();
+       });
+
+       CB.CloudApp.connect();
+
+    });
+
+
+});
 describe("Delete App", function() {
     it("should delete the app and teardown", function(done) {
         this.timeout(100000);
@@ -10304,153 +10322,4 @@ describe("Delete App", function() {
 
 
     });
-});
-
-describe("CloudApp Socket Test", function () {
-
-    it("Should fire an event when disconnect", function (done) {
-
-       this.timeout(40000);
-
-       CB.CloudApp.onDisconnect(function(){
-        done();
-       });
-
-       CB.CloudApp.disconnect();
-
-    });
-
-    it("Should fire an event when connect.", function (done) {
-
-       this.timeout(30000);
-
-       CB.CloudApp.onConnect(function(){
-        done();
-       });
-
-       CB.CloudApp.connect();
-
-    });
-
-
-});
-describe("App Tests2",function(done){
-
-    var appId = util.makeString();
-    var name = util.makeString();
-
-    it("should create an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/create';
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('POST',url,params,true).then(function(res){
-                res = JSON.parse(res);
-                CB.appId = res.appId;
-                CB.appKey = res.keys.js;
-                CB.jsKey = res.keys.js;
-                CB.masterKey = res.keys.master;
-                console.log(res);
-                done();
-            },function(err){
-                throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
-    });
-
-    it("",function(done){
-
-        this.timeout(10000);
-
-        CB.CloudApp.init(CB.appId,CB.appKey);
-        CB.appKey = CB.masterKey;
-        done();
-    });
-
-    it("should create a table",function(done){
-
-        this.timeout(50000);
-
-        var table = new CB.CloudTable('Tests1');
-        table.save().then(function(){
-            done();
-        },function(){
-            throw "Unable to create Table";
-        });
-
-    });
-
-    it("",function(done){
-
-        this.timeout(1000);
-
-        CB.appKey = CB.jsKey;
-        done();
-    });
-
-
-    it("should save a record",function(done){
-
-        this.timeout(100000);
-
-        var obj = new CB.CloudObject('Tests1');
-        obj.save().then(function(res){
-            done();
-        },function(err){
-           throw "Unable to Save";
-        });
-    });
-
-    it("should Delete an App",function(done){
-
-        this.timeout(100000);
-
-        var url = CB.serviceUrl+'/user/signin';
-        console.log(CB.serviceUrl);
-        var params = {};
-        params.email = 'a@gmail.com';
-        params.password = 'abcd';
-        params = JSON.stringify(params);
-        CB._request('POST',url,params,true).then(function(res) {
-            res = JSON.parse(res);
-            console.log(res);
-            url = CB.serviceUrl+'/app/'+appId;
-            params = {};
-            params.appId = appId;
-            params.name = name;
-            params.userId = res._id;
-            params = JSON.stringify(params);
-            CB._request('DELETE',url,params,true).then(function(res){
-                done();
-            },function(err){
-                throw "unable to create App";
-            });
-        },function(){
-            throw "unable to create App";
-        });
-    });
-});
-describe("App Tests",function(done){
-
-    var appId = util.makeString();
-    var name = util.makeString();
-
-    
-
-    
 });

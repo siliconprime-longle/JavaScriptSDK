@@ -17,32 +17,28 @@ module.exports = function(grunt) {
               // the files to concatenate
                     src: [
                         'test/config.js',
-                        'test/requireCloudBoost.js',
-                        'test/init/init.js',
                         'test/util/util.js',
-                        'test/serverTest.js',
+                        'test/requireCloudBoost.js',
                         'test/init/init.js',
                         'test/CloudCache/*.js',
                         'test/CloudTable/*.js',
                         'test/CloudQueue/*.js',
-                        'test/ACL/*.js',
-                        'test/CloudFile/*.js',
                         'test/CloudObject/*.js',
-                        'test/CloudExpire/*.js',
+                        'test/CloudFile/*.js',
                         'test/CloudNotification/*.js',
+                        'test/ACL/*.js',
+                        'test/CloudExpire/*.js',
                         'test/CloudGeoPoint/*.js',
                         'test/CloudQuery/*.js',
                         'test/CloudSearch/*.js',
                         'test/CloudUser/*.js',
                         'test/CloudRole/*.js',
-                        'test/CloudApp/*.js',
-                        'test/AppTests/*.js'
+                        'test/CloudApp/socket.js',
+                        'test/CloudApp/deleteApp.js',
                     ],
 
                     dest: 'test/test.js'
                 },
-
-
 
             sdkRelease: {
                 // the files to concatenate
