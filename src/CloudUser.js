@@ -12,6 +12,45 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
 
+//Private Static fucntions
+
+//Description  : This function gets the current user from the cookie or from local storage.
+//Params : 
+//returns : CloudUser object if the current user is still in session or null. 
+CB.CloudUser._getCurrentUser = function(){
+    var content = CB._getCookie("CBCurrentUser");
+    if(content && content.length > 0){
+        return CB.fromJSON(JSON.parse(content));
+    }else{
+        return null;
+    }
+};
+
+//Description  : This function saves the current user to the cookie or to local storage.
+//Params : @user - Instance of CB.CloudUser Object.
+//returns : void. 
+CB.CloudUser._setCurrentUser = function(user){
+    //save the user to the cookie. 
+    if(!user){
+        return;
+    }
+    
+    //expiration time of 30 days.
+    CB._createCookie("CBCurrentUser", JSON.stringify(CB.toJSON(user)),30*24*60*60*1000);
+    
+    //TODO : Also add local storage support if cookies are not supoorted.
+};
+
+//Description  : This function saves the current user to the cookie or to local storage.
+//Params : @user - Instance of CB.CloudUser Object.
+//returns : void. 
+CB.CloudUser._removeCurrentUser = function(){
+    //save the user to the cookie. 
+    CB._deleteCookie("CBCurrentUser");
+
+    //TODO : Also add local storage support if cookies are not supoorted.
+};
+
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
 
 Object.defineProperty(CB.CloudUser.prototype, 'username', {
@@ -42,7 +81,7 @@ Object.defineProperty(CB.CloudUser.prototype, 'email', {
     }
 });
 
-CB.CloudUser.current = new CB.CloudUser();
+CB.CloudUser.current = CB.CloudUser._getCurrentUser();
 
 CB.CloudUser.prototype.signUp = function(callback) {
 
@@ -79,6 +118,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
         } else {
             def.resolve(thisObj);
         }
+        CB.CloudUser._setCurrentUser(thisObj);
     },function(err){
         if(callback){
             callback.error(err);
@@ -124,6 +164,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
         } else {
             def.resolve(thisObj);
         }
+        CB.CloudUser._setCurrentUser(thisObj);
     },function(err){
         if(callback){
             callback.error(err);
@@ -168,6 +209,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
         } else {
             def.resolve(thisObj);
         }
+        CB.CloudUser._removeCurrentUser();
     },function(err){
         if(callback){
             callback.error(err);
@@ -223,6 +265,7 @@ CB.CloudUser.prototype.isInRole = function(role) {
     }
     return (this.get('roles').indexOf(role.document._id) >= 0);
 };
+
 CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     if (!role) {
         throw "Role is null";
@@ -259,3 +302,4 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
         return def;
     }
 };
+

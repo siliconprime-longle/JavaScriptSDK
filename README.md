@@ -25,7 +25,7 @@ bower install cloudboost
 ### JavaScript Usage
 
 ``` js
-<script src="bower_components/cloudboost/dist/cloudboost.js"><script>
+<script src="bower_components/cloudboost/dist/cloudboost.js"></script>
 ```
 
 ### Sample Code

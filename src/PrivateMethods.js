@@ -585,3 +585,70 @@ CB._isJsonString = function(str) {
     }
     return true;
 }
+
+//Description : This fucntion get the content of the cookie .
+//Params : @name : Name of the cookie.
+//Returns : content as string.  
+CB._getCookie = function(name) {
+    if(typeof(Storage) !== "undefined") {
+        // Code for localStorage/sessionStorage.
+        if(new Date(localStorage.getItem(name+"_expires"))>new Date()){
+            return localStorage.getItem(name);
+        }else{
+            CB._deleteCookie(name);
+        }
+    } else {
+        // Sorry! No Web Storage support..
+        if(document){
+            var name = name + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1);
+                if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }
+    }
+    
+}
+
+//Description : Deletes the cookie
+//Params : @name : Name of the cookie.
+//Returns : void
+CB._deleteCookie = function(name){
+    //save the user to the cookie. 
+    if(typeof(Storage) !== "undefined") {
+        // Code for localStorage/sessionStorage.
+        localStorage.removeItem(name);
+        localStorage.removeItem(name+"_expires");
+    } else {
+        if(document){
+            var d = new Date();
+            d.setTime(d.getTime() + (0*0*0*0*0));
+            var expires = "expires="+d.toUTCString();
+            document.cookie =  name+ "=" +  + "; " + expires;
+        }
+    }
+}
+
+//Description : Creates cookie. 
+//Params : @name : Name of the cookie.
+//         @content : Content as string / JSON / int / etc. 
+//         @expires : Expiration time in millisecinds.
+//Returns : content as string.  
+CB._createCookie = function(name, content, expires){
+    var d = new Date();
+    d.setTime(d.getTime() + (expires));
+    if(typeof(Storage) !== "undefined") {
+        // Code for localStorage/sessionStorage.
+        localStorage.setItem(name,content.toString());
+        localStorage.setItem(name+"_expires",d);
+    } else {
+        if(document){
+            
+            var expires = "expires="+d.toUTCString();
+            document.cookie =  + name+"=" + content.toString() + "; " + expires;
+        }
+    }
+}
