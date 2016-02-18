@@ -11,9 +11,48 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file){
             console.log(file);
             if(file.url) {
-                console.log(file);
-                console.log("Saved file");
-                done();
+               
+              if(!window){
+                //Lets configure and request
+                request({
+                        url: url, //URL to hit
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/text'
+                        }
+                    }, function(error, response, body){
+                        if(error) {
+                            done(error);
+                        } else {
+                           done();
+                        }
+                    });
+                }else{
+                    $.ajax({
+         
+                        // The URL for the request
+                        url: url,
+                     
+                        // Whether this is a POST or GET request
+                        type: "GET",
+                     
+                        // The type of data we expect back
+                        dataType : "text",
+                     
+                        // Code to run if the request succeeds;
+                        // the response is passed to the function
+                        success: function(text) {
+                           done();
+                        },
+                     
+                        // Code to run if the request fails; the raw request and
+                        // status codes are passed to the function
+                        error: function( xhr, status, errorThrown ) {
+                            done("Error thrown.");
+                        },
+                     
+                    });
+                }
             }else{
                 throw 'ún able to get the url';
             }
