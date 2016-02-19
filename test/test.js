@@ -1833,6 +1833,53 @@ describe("Cloud Queue Tests", function() {
 	// -> Which has columns : 
 	// name : string : required
 
+ it("Should return no queue objects when there are no queues inthe database",function(done){
+     this.timeout(30000);
+     CB.CloudQueue.getAll({
+          success : function(response){
+               if(!response || response.length ===0)
+                    done();
+               else
+                    done("Empty results not returned.")
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+  it("Should get the message when expires is set to future date.",function(done){
+     this.timeout(30000);
+     var queue = new CB.CloudQueue(util.makeString());
+     var queueMessage = new CB.QueueMessage();
+     var today = new Date();
+     var tomorrow = new Date(today);
+     tomorrow.setDate(today.getDate()+1);
+     //
+     queueMessage.expires = tomorrow; // 1hr.  The message will appear after 1 hr.
+     queueMessage.message = "data";
+     queue.addMessage(queueMessage,{
+          success : function(response){
+               if(response.expires){
+                    queue.getMessage({
+                         success : function(response){
+                              if(response.expires){
+                                  done();
+                              }else{
+                                   done("Message is null.");
+                              }
+                         },error : function(error){
+                              done(error);
+                         }
+                    });
+               }else{
+                    done("Expires is null when set");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
  it("Should add data into the Queue",function(done){
 
      this.timeout(30000);
@@ -1853,6 +1900,70 @@ describe("Cloud Queue Tests", function() {
      	},error : function(error){
      		done(error);
      	}
+     });
+ });
+
+ it("Should create a queue and delete a queue",function(done){
+
+     this.timeout(30000);
+     
+     var queue = new CB.CloudQueue(util.makeString());
+     queue.create({
+          success : function(queue){
+              queue.delete({
+                    success : function(queue){
+                        done();
+                    },error : function(error){
+                        done(error);
+                    }
+              });
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+ it("Should add expires into the queue message.",function(done){
+     this.timeout(30000);
+     var queue = new CB.CloudQueue(util.makeString());
+     var queueMessage = new CB.QueueMessage();
+     var today = new Date();
+     var tomorrow = new Date(today);
+     tomorrow.setDate(today.getDate()+1);
+     //
+     queueMessage.expires = tomorrow; // 1hr.  The message will appear after 1 hr.
+     queueMessage.message = "data";
+     queue.addMessage(queueMessage,{
+          success : function(response){
+               if(response.expires){
+                    done();
+               }else{
+                    done("Expires is null when set");
+               }
+          },error : function(error){
+               done(error);
+          }
+     });
+ });
+
+
+
+it("Should add current time as expires into the queue.",function(done){
+     this.timeout(30000);
+     var queue = new CB.CloudQueue(util.makeString());
+     var queueMessage = new CB.QueueMessage();
+     queueMessage.expires = new Date(); 
+     queueMessage.message = "data";
+     queue.addMessage(queueMessage,{
+          success : function(response){
+               if(response.expires){
+                    done();
+               }else{
+                    done("Expires is null when set");
+               }
+          },error : function(error){
+               done(error);
+          }
      });
  });
 
@@ -2988,7 +3099,11 @@ it("Should not getMessage message with the delay ",function(done){
           CB.CloudQueue.getAll({
                success : function(response){
                   if(response.length>0){
-                    done();
+                    if(response[0].size){
+                         done();
+                    }else{
+                         done("Size not retrieved.")
+                    }
                   }else{
                     done("Error getting queues.");
                   }
@@ -2997,8 +3112,6 @@ it("Should not getMessage message with the delay ",function(done){
                }
           });
      });
-
-
 
      it("Should not get the queue which does not exist",function(done){
           this.timeout(30000);
@@ -5939,9 +6052,37 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file){
             console.log(file);
             if(file.url) {
-                console.log(file);
-                console.log("Saved file");
-                done();
+               
+              if(!window){
+                //Lets configure and request
+                request({
+                        url: file.url, //URL to hit
+                        method: 'GET',
+                    }, function(error, response, body){
+                        if(error) {
+                            done(error);
+                        } else {
+                           done();
+                        }
+                    });
+                }else{
+                    $.ajax({
+                        // The URL for the request
+                        url: file.url,
+                        // Whether this is a POST or GET request
+                        type: "GET",
+                        // Code to run if the request succeeds;
+                        // the response is passed to the function
+                        success: function(text) {
+                           done();
+                        },
+                        // Code to run if the request fails; the raw request and
+                        // status codes are passed to the function
+                        error: function( xhr, status, errorThrown ) {
+                            done("Error thrown.");
+                        },
+                    });
+                }
             }else{
                 throw 'ún able to get the url';
             }

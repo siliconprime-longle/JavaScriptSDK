@@ -11912,6 +11912,15 @@ Object.defineProperty(CB.CloudQueue.prototype, 'retry', {
     }
 });
 
+Object.defineProperty(CB.CloudQueue.prototype, 'size', {
+    get: function() {
+        if(this.document.size)
+            return this.document.size;
+        else
+            return 0;
+    }
+});
+
 Object.defineProperty(CB.CloudQueue.prototype, 'name', {
     get: function() {
         return this.document.name;
@@ -12635,6 +12644,11 @@ CB.CloudQueue.getAll = function(callback){
     var url = CB.apiUrl + "/queue/" + CB.appId + '/';
 
     CB._request('POST',url,params).then(function(response){
+
+        if(response === ""){
+            response = null;
+        }
+
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {
