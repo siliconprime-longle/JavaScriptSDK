@@ -888,7 +888,10 @@ Object.defineProperty(CB.QueueMessage.prototype, 'timeout', {
 
 Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
     get: function() {
-        return this.document.delay;
+        if(this.document.delay)
+            return this.document.delay/1000;
+        else
+            return 0;
     },
     set: function(delay) {
         delay *=1000; //converting to seconds from milli seconds,

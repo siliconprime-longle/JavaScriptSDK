@@ -20,6 +20,33 @@ describe("Cloud Object", function() {
      });
  });
 
+  it("Should NOT Save data in email field with incorrect email",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn',"email");
+     obj.save().then(function(res){
+         done("Saved with a valid email.");
+     },function(err){
+         done();
+     });
+ });
+
+
+  it("Should save data in email field",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn',"email@email.com");
+     obj.save().then(function(res){
+         done();
+     },function(err){
+         done("Cannot save email");
+     });
+ });
+
  it("Should Save data in a CloudObject without attaching a file.",function(done){
 
      this.timeout(30000);

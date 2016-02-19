@@ -6,9 +6,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
     it("should create a table",function(done){
-
         this.timeout(50000);
-
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
         var Name = new CB.Column('Name');
@@ -19,11 +17,9 @@ describe("Should Create All Test Tables",function(done){
         var dob = new CB.Column('dob');
         dob.dataType = 'DateTime';
         obj.addColumn(dob);
-
         var password = new CB.Column('password');
         password.dataType = 'EncryptedText';
         obj.addColumn(password);
-
         obj.save().then(function(res){
             console.log(res);
             done();

@@ -25,7 +25,6 @@ describe("Cloud Table", function(){
 
     it("should first create a table and then delete that table",function(done){
         this.timeout(100000);
-
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(){
@@ -37,7 +36,6 @@ describe("Cloud Table", function(){
         },function(){
             throw("should have create the table");
         });
-
     });
 
     it("should get a table information",function(done){
