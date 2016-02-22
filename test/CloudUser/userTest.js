@@ -3,14 +3,13 @@ describe("CloudUser", function () {
     var passwd = "abcd";
 
     
-
    it("Should create new user", function (done) {
-         if(CB._isNode){
-            done();
-            return;
-         }
+        if(CB._isNode){
+           done();
+           return;
+        }
 
-         this.timeout(300000);
+        this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -24,21 +23,154 @@ describe("CloudUser", function () {
         }, function (error) {
             throw error;
         });
+    });
+
+    it("Should create new user and change the password.", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var oldPassword = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username+"1");
+        obj.set('password',oldPassword);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username'))
+                CB.CloudUser.current.changePassword(oldPassword, 'newPassword', {
+                    success : function(user){
+                        done();
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+            else
+               done("create user error");
+        }, function (error) {
+            throw error;
+        });
 
     });
 
-    it('should logout the user',function (done){
 
+    it("Should not reset the password when old password is wrong.", function (done) {
         if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var oldPassword = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username+"2");
+        obj.set('password',oldPassword);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username'))
+                CB.CloudUser.current.changePassword("sample", 'newPassword', {
+                    success : function(user){
+                        done("Password reset with old password is wrong.");
+                    }, error : function(error){
+                        done();
+                    }
+                });
+            else
+               done("create user error");
+        }, function (error) {
+            throw error;
+        });
+
+    });
+
+
+    it("Should not reset the password when user is logged in.", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        CB.CloudUser.current.logOut({
+            success : function(){
+                try{
+                    CB.CloudUser.current.changePassword("sample", 'newPassword', {
+                        success : function(user){
+                            done("Password reset when user is not logged in.");
+                        }, error : function(error){
+                            done();
+                        }
+                    });
+                    }catch(e){
+                        done();
+                    }
+            }, error : function(error){
+                done("Failed to log out a user. ")
+            }
+        });
+    });
+
+   it("Should not reset Password when user is logged in.", function (done) {
+         if(CB._isNode){
             done();
             return;
          }
 
-        this.timeout(30000);
-        CB.CloudUser.current.logOut().then(function(){
-            done();
-        },function(){
-            throw "err";
+         this.timeout(300000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', "911@cloudboost.io");
+        obj.set('password',passwd);
+        obj.set('email',"911@cloudboost.io");
+        obj.signUp().then(function(list) {
+            if(list.get('username') === "911@cloudboost.io")
+               CB.CloudUser.resetPassword("911@cloudboost.io",{
+                    success : function(){
+                        CB.CloudUser.current.logOut({
+                            success : function(){
+                                done("Reset password called when the user is logged in.");
+                            }, error : function(){
+                                done("Reset password called when the user is logged in.");
+                            }
+                        });
+                        done("Reset password when the user is logged in.");
+                    }, error : function(error){
+                         CB.CloudUser.current.logOut({
+                            success : function(){
+                                done();
+                            }, error : function(){
+                                done("Failed to log out.");
+                            }
+                        });
+                    }
+               });
+            else
+                throw "create user error"
+        }, function (error) {
+            throw error;
+        });
+
+    });
+
+    it("Should reset Password", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+        CB.CloudUser.resetPassword("911@cloudboost.io",{
+            success : function(){
+               done()
+            }, error : function(error){
+                 done();
+            }
         });
     });
 

@@ -515,6 +515,26 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     return this;
 }
 
+
+CB.CloudQuery.prototype.regex = function(columnName, value) {
+    if (columnName === 'id' )
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    } 
+
+    this.query[columnName]["$regex"] = value;
+    
+    return this;
+}
+
+CB.CloudQuery.prototype.substring = function(columnName, value) {
+
+    this.regex(columnName,".*"+value+".*");
+    return this;
+}
+
 //GeoPoint near query
 CB.CloudQuery.prototype.near = function(columnName, geoPoint, maxDistance, minDistance){
     if(!this.query[columnName]){

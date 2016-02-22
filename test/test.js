@@ -1,4 +1,4 @@
-var SECURE_KEY = "0824ff47-252e-4828-8bfd-1feddb659b24";
+var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
 var URL = "http://localhost:4730";
 
    var util = {
@@ -138,6 +138,120 @@ describe("Cloud App", function() {
 			    error: function( xhr, status, errorThrown ) {
 			        done("Error thrown.");
 			    },
+			 
+			});
+		}
+
+	 });
+
+
+     it("should add a sample setting to an app.", function(done) {
+        this.timeout(100000);
+        var url = URL+'/settings/'+CB.appId+"/settings";
+        var params = {};
+        params.key = CB.masterKey;
+        params.settings = {
+        	"keykey" : "valuevalue"
+        };
+          if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'PUT',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			    json: params //Set the body as a string
+			}, function(error, response, json){
+			    if(error) {
+			        done(error);
+			    } else {
+			      done();
+			    }
+			});
+        }else{
+	       $.ajax({
+	 
+			    // The URL for the request
+			    url: url,
+			    // The data to send (will be converted to a query string)
+			    data: params,
+			    // Whether this is a POST or GET request
+			    type: "PUT",
+			    // The type of data we expect back
+			    dataType : "json",
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( json ) {
+			       if(json.category === "settings"){
+			       	 done();
+			       }else{
+			       	 done("Wrong json.");
+			       }
+			    },
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Error thrown.");
+			    },
+			 
+			});
+		}
+	 });
+
+
+	 it("should get sample setting to an app.", function(done) {
+        this.timeout(100000);
+        var url = URL+'/settings/'+CB.appId;
+        var params = {};
+        params.key = CB.masterKey;
+        
+          if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'POST',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			    json: params //Set the body as a string
+			}, function(error, response, json){
+			    if(error) {
+			      done(error);
+			    } else {
+			      done();
+			    }
+			});
+        }else{
+	       $.ajax({
+	 
+			    // The URL for the request
+			    url: url,
+			 
+			    // The data to send (will be converted to a query string)
+			    data: params,
+			 
+			    // Whether this is a POST or GET request
+			    type: "POST",
+			 
+			    // The type of data we expect back
+			    dataType : "json",
+			 
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( json ) {
+			       if(json[0]._id){
+			       	done();
+			       }else{
+			       	done("Success but Id not defined.");
+			       }
+			    },
+			 
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Error thrown.");
+			    }
 			 
 			});
 		}
@@ -701,7 +815,6 @@ describe("Cloud Table", function(){
 
     it("should first create a table and then delete that table",function(done){
         this.timeout(100000);
-
         var tableName = util.makeString();
         var obj = new CB.CloudTable(tableName);
         obj.save().then(function(){
@@ -713,7 +826,6 @@ describe("Cloud Table", function(){
         },function(){
             throw("should have create the table");
         });
-
     });
 
     it("should get a table information",function(done){
@@ -1082,9 +1194,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
     it("should create a table",function(done){
-
         this.timeout(50000);
-
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
         var Name = new CB.Column('Name');
@@ -1095,11 +1205,9 @@ describe("Should Create All Test Tables",function(done){
         var dob = new CB.Column('dob');
         dob.dataType = 'DateTime';
         obj.addColumn(dob);
-
         var password = new CB.Column('password');
         password.dataType = 'EncryptedText';
         obj.addColumn(password);
-
         obj.save().then(function(res){
             console.log(res);
             done();
@@ -5014,6 +5122,33 @@ describe("Cloud Object", function() {
      });
  });
 
+  it("Should NOT Save data in email field with incorrect email",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn',"email");
+     obj.save().then(function(res){
+         done("Saved with a valid email.");
+     },function(err){
+         done();
+     });
+ });
+
+
+  it("Should save data in email field",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn',"email@email.com");
+     obj.save().then(function(res){
+         done();
+     },function(err){
+         done("Cannot save email");
+     });
+ });
+
  it("Should Save data in a CloudObject without attaching a file.",function(done){
 
      this.timeout(30000);
@@ -5029,6 +5164,35 @@ describe("Cloud Object", function() {
          throw "Unable to Save Date TIme";
      });
  });
+
+  it("Should NOT Save data in URL field with incorrect URL",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn2',"url");
+     obj.save().then(function(res){
+         done("Saved with an invalid.");
+     },function(err){
+         done();
+     });
+
+ });
+
+
+  it("Should save data in URL field",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn2',"https://localhost.com");
+     obj.save().then(function(res){
+         done();
+     },function(err){
+         done("Cannot save URL");
+     });
+ });
+
 
  it("Should Save geo point",function(done){
 
@@ -8424,6 +8588,39 @@ describe("CloudQuery", function (done) {
 
     });
 
+
+    it("Should save data with a particular value.", function (done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'vipul');
+        obj.save().then(function(list) {
+            if(list.get('name') === 'vipul'){
+               var query  = new CB.CloudQuery('student1');
+               query.substring("name", "pu");
+               query.find({
+                success : function(list){
+                    if(list.length>0){
+                        if(list[0].get("name") === "vipul"){
+                            done();
+                        }else{
+                            done("Got the list but got incorrect name");
+                        }
+                    }else{
+                        done("Failed to get the list");
+                    }
+                }, error : function(error){
+                    done("Failed to save the object");
+                }
+               });
+            }
+            else
+                done("object could not saved properly");
+        }, function () {
+            throw "data Save error";
+        });
+    });
+
    it("select column should work on find",function(done){
             this.timeout(30000);
             var obj1 = new CB.CloudObject('Custom1');
@@ -10030,14 +10227,13 @@ describe("CloudUser", function () {
     var passwd = "abcd";
 
     
-
    it("Should create new user", function (done) {
-         if(CB._isNode){
-            done();
-            return;
-         }
+        if(CB._isNode){
+           done();
+           return;
+        }
 
-         this.timeout(300000);
+        this.timeout(300000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
@@ -10051,21 +10247,154 @@ describe("CloudUser", function () {
         }, function (error) {
             throw error;
         });
+    });
+
+    it("Should create new user and change the password.", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var oldPassword = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username+"1");
+        obj.set('password',oldPassword);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username'))
+                CB.CloudUser.current.changePassword(oldPassword, 'newPassword', {
+                    success : function(user){
+                        done();
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+            else
+               done("create user error");
+        }, function (error) {
+            throw error;
+        });
 
     });
 
-    it('should logout the user',function (done){
 
+    it("Should not reset the password when old password is wrong.", function (done) {
         if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var oldPassword = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username+"2");
+        obj.set('password',oldPassword);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username'))
+                CB.CloudUser.current.changePassword("sample", 'newPassword', {
+                    success : function(user){
+                        done("Password reset with old password is wrong.");
+                    }, error : function(error){
+                        done();
+                    }
+                });
+            else
+               done("create user error");
+        }, function (error) {
+            throw error;
+        });
+
+    });
+
+
+    it("Should not reset the password when user is logged in.", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        CB.CloudUser.current.logOut({
+            success : function(){
+                try{
+                    CB.CloudUser.current.changePassword("sample", 'newPassword', {
+                        success : function(user){
+                            done("Password reset when user is not logged in.");
+                        }, error : function(error){
+                            done();
+                        }
+                    });
+                    }catch(e){
+                        done();
+                    }
+            }, error : function(error){
+                done("Failed to log out a user. ")
+            }
+        });
+    });
+
+   it("Should not reset Password when user is logged in.", function (done) {
+         if(CB._isNode){
             done();
             return;
          }
 
-        this.timeout(30000);
-        CB.CloudUser.current.logOut().then(function(){
-            done();
-        },function(){
-            throw "err";
+         this.timeout(300000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', "911@cloudboost.io");
+        obj.set('password',passwd);
+        obj.set('email',"911@cloudboost.io");
+        obj.signUp().then(function(list) {
+            if(list.get('username') === "911@cloudboost.io")
+               CB.CloudUser.resetPassword("911@cloudboost.io",{
+                    success : function(){
+                        CB.CloudUser.current.logOut({
+                            success : function(){
+                                done("Reset password called when the user is logged in.");
+                            }, error : function(){
+                                done("Reset password called when the user is logged in.");
+                            }
+                        });
+                        done("Reset password when the user is logged in.");
+                    }, error : function(error){
+                         CB.CloudUser.current.logOut({
+                            success : function(){
+                                done();
+                            }, error : function(){
+                                done("Failed to log out.");
+                            }
+                        });
+                    }
+               });
+            else
+                throw "create user error"
+        }, function (error) {
+            throw error;
+        });
+
+    });
+
+    it("Should reset Password", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+        CB.CloudUser.resetPassword("911@cloudboost.io",{
+            success : function(){
+               done()
+            }, error : function(error){
+                 done();
+            }
         });
     });
 

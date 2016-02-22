@@ -63,6 +63,35 @@ describe("Cloud Object", function() {
      });
  });
 
+  it("Should NOT Save data in URL field with incorrect URL",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn2',"url");
+     obj.save().then(function(res){
+         done("Saved with an invalid.");
+     },function(err){
+         done();
+     });
+
+ });
+
+
+  it("Should save data in URL field",function(done){
+
+     this.timeout(30000);
+
+     var obj = new CB.CloudObject('Custom');
+     obj.set('newColumn2',"https://localhost.com");
+     obj.save().then(function(res){
+         done();
+     },function(err){
+         done("Cannot save URL");
+     });
+ });
+
+
  it("Should Save geo point",function(done){
 
      this.timeout(30000);

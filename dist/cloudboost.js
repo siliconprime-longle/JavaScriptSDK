@@ -9614,6 +9614,26 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
     return this;
 }
 
+
+CB.CloudQuery.prototype.regex = function(columnName, value) {
+    if (columnName === 'id' )
+        columnName = '_' + columnName;
+
+    if (!this.query[columnName]) {
+        this.query[columnName] = {};
+    } 
+
+    this.query[columnName]["$regex"] = value;
+    
+    return this;
+}
+
+CB.CloudQuery.prototype.substring = function(columnName, value) {
+
+    this.regex(columnName,".*"+value+".*");
+    return this;
+}
+
 //GeoPoint near query
 CB.CloudQuery.prototype.near = function(columnName, geoPoint, maxDistance, minDistance){
     if(!this.query[columnName]){
@@ -10796,9 +10816,7 @@ CB.CloudUser._setCurrentUser = function(user){
     }
     
     //expiration time of 30 days.
-    CB._createCookie("CBCurrentUser", JSON.stringify(CB.toJSON(user)),30*24*60*60*1000);
-    
-    //TODO : Also add local storage support if cookies are not supoorted.
+    CB._createCookie("CBCurrentUser", JSON.stringify(CB.toJSON(user)),30*24*60*60*1000); 
 };
 
 //Description  : This function saves the current user to the cookie or to local storage.
@@ -10807,8 +10825,44 @@ CB.CloudUser._setCurrentUser = function(user){
 CB.CloudUser._removeCurrentUser = function(){
     //save the user to the cookie. 
     CB._deleteCookie("CBCurrentUser");
+};
 
-    //TODO : Also add local storage support if cookies are not supoorted.
+CB.CloudUser.resetPassword = function(email,callback){
+    
+    if (!email) {
+        throw "Email is required.";
+    }
+
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    
+    //now call the signup API.
+    var params=JSON.stringify({
+        email: email,
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/user/" + CB.appId + "/resetPassword";
+
+    CB._request('POST',url,params).then(function(response){
+        if (callback) {
+            callback.success();
+        } else {
+            def.resolve();
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
 };
 
 CB.CloudUser.prototype = Object.create(CB.CloudObject.prototype);
@@ -10892,6 +10946,44 @@ CB.CloudUser.prototype.signUp = function(callback) {
         return def;
     }
 };
+
+
+CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callback) {
+
+    var thisObj = this;
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    //now call the signup API.
+    var params=JSON.stringify({
+        oldPassword: oldPassword,
+        newPassword : newPassword,
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/user/" + CB.appId + "/changePassword" ;
+
+    CB._request('PUT',url,params).then(function(response){
+        if (callback) {
+            callback.success(CB.fromJSON(JSON.parse(response),thisObj));
+        } else {
+            def.resolve(CB.fromJSON(JSON.parse(response),thisObj));
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+
 CB.CloudUser.prototype.logIn = function(callback) {
 
     if(CB._isNode){
@@ -12758,7 +12850,10 @@ Object.defineProperty(CB.QueueMessage.prototype, 'timeout', {
 
 Object.defineProperty(CB.QueueMessage.prototype, 'delay', {
     get: function() {
-        return this.document.delay;
+        if(this.document.delay)
+            return this.document.delay/1000;
+        else
+            return 0;
     },
     set: function(delay) {
         delay *=1000; //converting to seconds from milli seconds,
