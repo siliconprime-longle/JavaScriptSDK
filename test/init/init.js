@@ -29,16 +29,12 @@ describe("Cloud App", function() {
  
 			    // The URL for the request
 			    url: url,
-			 
 			    // The data to send (will be converted to a query string)
 			    data: params,
-			 
 			    // Whether this is a POST or GET request
 			    type: "POST",
-			 
 			    // The type of data we expect back
 			    dataType : "json",
-			 
 			    // Code to run if the request succeeds;
 			    // the response is passed to the function
 			    success: function( json ) {
