@@ -56,16 +56,12 @@ describe("Cloud App", function() {
  
 			    // The URL for the request
 			    url: url,
-			 
 			    // The data to send (will be converted to a query string)
 			    data: params,
-			 
 			    // Whether this is a POST or GET request
 			    type: "POST",
-			 
 			    // The type of data we expect back
 			    dataType : "json",
-			 
 			    // Code to run if the request succeeds;
 			    // the response is passed to the function
 			    success: function( json ) {
@@ -8606,6 +8602,34 @@ describe("CloudQuery", function (done) {
                         }else{
                             done("Got the list but got incorrect name");
                         }
+                    }else{
+                        done("Failed to get the list");
+                    }
+                }, error : function(error){
+                    done("Failed to save the object");
+                }
+               });
+            }
+            else
+                done("object could not saved properly");
+        }, function () {
+            throw "data Save error";
+        });
+    });
+
+    it("Substring with an array.", function (done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'nawaz');
+        obj.save().then(function(list) {
+            if(list.get('name') === 'nawaz'){
+               var query  = new CB.CloudQuery('student1');
+               query.substring("name", ["pu","aw"]);
+               query.find({
+                success : function(list){
+                    if(list.length>0){
+                       done();
                     }else{
                         done("Failed to get the list");
                     }

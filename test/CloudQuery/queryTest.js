@@ -51,6 +51,34 @@ describe("CloudQuery", function (done) {
         });
     });
 
+    it("Substring with an array.", function (done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'nawaz');
+        obj.save().then(function(list) {
+            if(list.get('name') === 'nawaz'){
+               var query  = new CB.CloudQuery('student1');
+               query.substring("name", ["pu","aw"]);
+               query.find({
+                success : function(list){
+                    if(list.length>0){
+                       done();
+                    }else{
+                        done("Failed to get the list");
+                    }
+                }, error : function(error){
+                    done("Failed to save the object");
+                }
+               });
+            }
+            else
+                done("object could not saved properly");
+        }, function () {
+            throw "data Save error";
+        });
+    });
+
    it("select column should work on find",function(done){
             this.timeout(30000);
             var obj1 = new CB.CloudObject('Custom1');

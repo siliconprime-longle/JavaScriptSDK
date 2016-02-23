@@ -9629,9 +9629,20 @@ CB.CloudQuery.prototype.regex = function(columnName, value) {
 }
 
 CB.CloudQuery.prototype.substring = function(columnName, value) {
+      if(Object.prototype.toString.call(value) === '[object Array]' && value.length>0) {
+        if(!this.query["$or"])
+            this.query["$or"] = [];
+        for(i=0; i < value.length; i++){
+            var obj = {};
+            obj[columnName] = {};
+            obj[columnName]["$regex"] = ".*"+value[i]+".*";
+            this.query["$or"].push(obj);
+        }
+      }else{
+         this.regex(columnName,".*"+value+".*");
+      }
 
-    this.regex(columnName,".*"+value+".*");
-    return this;
+      return this;
 }
 
 //GeoPoint near query
