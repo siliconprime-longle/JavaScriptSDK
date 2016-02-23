@@ -6284,6 +6284,19 @@ describe("Cloud Files", function(done) {
         });
     });
 
+     it("Should count progress bar",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+        fileObj.save(null, function(progress){
+            done();
+        });
+    });
+
 
     it("Should return the fileList with CloudObject",function(done){
 

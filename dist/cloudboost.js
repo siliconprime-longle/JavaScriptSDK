@@ -813,7 +813,7 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     return n_obj;
 };
 
-CB._request=function(method,url,params,isServiceUrl,isFile)
+CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
 {
 
     CB._validate();
@@ -835,6 +835,15 @@ CB._request=function(method,url,params,isServiceUrl,isFile)
     xmlhttp.open(method,url,true);
     if(!isFile) {
         xmlhttp.setRequestHeader('Content-Type', 'text/plain');
+    }
+
+    if(progressCallback){
+        xmlhttp.upload.addEventListener("progress", function(evt){
+          if (evt.lengthComputable) {  
+            var percentComplete = evt.loaded / evt.total;
+            progressCallback(percentComplete);
+          }
+        }, false); 
     }
 
     if(!isServiceUrl){
@@ -11298,7 +11307,7 @@ Object.defineProperty(CB.CloudFile.prototype, 'name', {
  * @returns {*}
  */
 
-CB.CloudFile.prototype.save = function(callback) {
+CB.CloudFile.prototype.save = function(callback, progressCallback) {
 
     var def;
 
@@ -11317,7 +11326,7 @@ CB.CloudFile.prototype.save = function(callback) {
         params.append("key", CB.appKey);
         params.append("fileObj",JSON.stringify(CB.toJSON(thisObj)));
         var url = CB.serverUrl + '/file/' + CB.appId;
-        CB._request('POST',url,params,false,true).then(function(response){
+        CB._request('POST',url,params,false,true, progressCallback).then(function(response){
             thisObj.document = JSON.parse(response);
             if (callback) {
                 callback.success(thisObj);
@@ -11338,8 +11347,8 @@ CB.CloudFile.prototype.save = function(callback) {
             fileObj:CB.toJSON(this),
             key: CB.appKey
         });
-        url = CB.serverUrl + '/file/' + CB.appId ;
-        CB._request('POST',url,params).then(function(response){
+        url = CB.serverUrl + '/file/' + CB.appId;
+        CB._request('POST',url,params,null,null,progressCallback).then(function(response){
             thisObj.document = JSON.parse(response);
             delete thisObj.data;
             if (callback) {
@@ -11355,7 +11364,6 @@ CB.CloudFile.prototype.save = function(callback) {
             }
         });
     }
-
 
     if (!callback) {
         return def;

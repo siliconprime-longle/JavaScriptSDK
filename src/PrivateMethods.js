@@ -288,7 +288,7 @@ CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
     return n_obj;
 };
 
-CB._request=function(method,url,params,isServiceUrl,isFile)
+CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
 {
 
     CB._validate();
@@ -310,6 +310,15 @@ CB._request=function(method,url,params,isServiceUrl,isFile)
     xmlhttp.open(method,url,true);
     if(!isFile) {
         xmlhttp.setRequestHeader('Content-Type', 'text/plain');
+    }
+
+    if(progressCallback){
+        xmlhttp.upload.addEventListener("progress", function(evt){
+          if (evt.lengthComputable) {  
+            var percentComplete = evt.loaded / evt.total;
+            progressCallback(percentComplete);
+          }
+        }, false); 
     }
 
     if(!isServiceUrl){
