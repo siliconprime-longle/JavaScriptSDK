@@ -91,9 +91,13 @@ describe("Cloud Files", function(done) {
         var name = 'abc.txt';
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save(null, function(progress){
+        fileObj.save({uploadProgress : function(progress){
             done();
-        });
+        }, success : function(){
+            
+        }, error : function(){
+
+        }});
     });
 
 

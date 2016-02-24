@@ -102,7 +102,7 @@ Object.defineProperty(CB.CloudFile.prototype, 'name', {
  * @returns {*}
  */
 
-CB.CloudFile.prototype.save = function(callback, progressCallback) {
+CB.CloudFile.prototype.save = function(callback) {
 
     var def;
 
@@ -121,7 +121,14 @@ CB.CloudFile.prototype.save = function(callback, progressCallback) {
         params.append("key", CB.appKey);
         params.append("fileObj",JSON.stringify(CB.toJSON(thisObj)));
         var url = CB.serverUrl + '/file/' + CB.appId;
-        CB._request('POST',url,params,false,true, progressCallback).then(function(response){
+
+        var uploadProgressCallback = null;
+        
+        if(callback && callback.uploadProgress){
+            uploadProgressCallback = callback.uploadProgress;
+        }
+
+        CB._request('POST',url,params,false,true, uploadProgressCallback).then(function(response){
             thisObj.document = JSON.parse(response);
             if (callback) {
                 callback.success(thisObj);
@@ -143,7 +150,13 @@ CB.CloudFile.prototype.save = function(callback, progressCallback) {
             key: CB.appKey
         });
         url = CB.serverUrl + '/file/' + CB.appId;
-        CB._request('POST',url,params,null,null,progressCallback).then(function(response){
+        var uploadProgressCallback = null;
+
+        if(callback && callback.uploadProgress){
+            uploadProgressCallback = callback.uploadProgress;
+        }
+
+        CB._request('POST',url,params,null,null,uploadProgressCallback).then(function(response){
             thisObj.document = JSON.parse(response);
             delete thisObj.data;
             if (callback) {
