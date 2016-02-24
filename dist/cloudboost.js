@@ -9661,7 +9661,7 @@ CB.CloudQuery.prototype.substring = function(columnName, value) {
                     this.query["$or"] = [];
                 var obj = {};
                 obj[columnName[j]] = {};
-                obj[columnName[j]]["$regex"] = ".*"+value[i]+".*";
+                obj[columnName[j]]["$regex"] = ".*"+value+".*";
                 this.query["$or"].push(obj);
             }
           }
