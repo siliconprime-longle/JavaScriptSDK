@@ -9638,17 +9638,33 @@ CB.CloudQuery.prototype.regex = function(columnName, value) {
 }
 
 CB.CloudQuery.prototype.substring = function(columnName, value) {
-      if(Object.prototype.toString.call(value) === '[object Array]' && value.length>0) {
-        if(!this.query["$or"])
-            this.query["$or"] = [];
-        for(i=0; i < value.length; i++){
-            var obj = {};
-            obj[columnName] = {};
-            obj[columnName]["$regex"] = ".*"+value[i]+".*";
-            this.query["$or"].push(obj);
-        }
-      }else{
-         this.regex(columnName,".*"+value+".*");
+
+      if(typeof columnName === "string"){
+        columnName = [columnName];
+      }
+
+      for(var j=0;j<columnName.length;j++){
+          if(Object.prototype.toString.call(value) === '[object Array]' && value.length>0) {
+            if(!this.query["$or"])
+                this.query["$or"] = [];
+            for(i=0; i < value.length; i++){
+                var obj = {};
+                obj[columnName[j]] = {};
+                obj[columnName[j]]["$regex"] = ".*"+value[i]+".*";
+                this.query["$or"].push(obj);
+            }
+          }else{
+             if(columnName.length===1){
+                this.regex(columnName[j],".*"+value+".*");
+            }else{
+                if(!this.query["$or"])
+                    this.query["$or"] = [];
+                var obj = {};
+                obj[columnName[j]] = {};
+                obj[columnName[j]]["$regex"] = ".*"+value[i]+".*";
+                this.query["$or"].push(obj);
+            }
+          }
       }
 
       return this;
