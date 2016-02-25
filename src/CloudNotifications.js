@@ -4,6 +4,10 @@ CB.CloudNotification = CB.CloudNotification || {};
 
 CB.CloudNotification.on = function(channelName, callback, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     CB._validate();
 
     var def;
@@ -30,6 +34,10 @@ CB.CloudNotification.on = function(channelName, callback, done) {
 
 CB.CloudNotification.off = function(channelName, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     CB._validate();
 
     var def;
@@ -52,6 +60,10 @@ CB.CloudNotification.off = function(channelName, done) {
 };
 
 CB.CloudNotification.publish = function(channelName, data, done) {
+
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
 
     CB._validate();
 

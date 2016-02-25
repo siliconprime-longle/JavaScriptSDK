@@ -8320,7 +8320,7 @@ if(!CB._isNode) {
 CB.CloudApp = CB.CloudApp || {};
 CB.CloudApp._isConnected = false;
 
-CB.CloudApp.init = function(serverUrl, applicationId, applicationKey) { //static function for initialisation of the app
+CB.CloudApp.init = function(serverUrl, applicationId, applicationKey, opts) { //static function for initialisation of the app
     if(!applicationKey)
     {
         applicationKey=applicationId;
@@ -8331,19 +8331,30 @@ CB.CloudApp.init = function(serverUrl, applicationId, applicationKey) { //static
         CB.socketIoUrl=serverUrl;
     }
 
-    CB.appId = applicationId;
-    CB.appKey = applicationKey;
-    //load socket.io.
-    if(CB._isNode)
-    {
-        CB.io = require('socket.io-client');
-    }
-    else {
-        CB.io = io;
+    if(typeof applicationKey === "object"){
+        opts = applicationKey;
+        applicationKey=applicationId;
+        applicationId=serverUrl;
     }
 
-    CB.Socket = CB.io(CB.socketIoUrl);
-    CB.CloudApp._isConnected = true;
+    CB.appId = applicationId;
+    CB.appKey = applicationKey;
+
+    if(opts && opts.disableRealtime === true){
+        CB._isRealtimeDisabled = true;
+    }else{
+        //load socket.io.
+        if(CB._isNode)
+        {
+            CB.io = require('socket.io-client');
+        }
+        else {
+            CB.io = io;
+        }
+
+        CB.Socket = CB.io(CB.socketIoUrl);
+        CB.CloudApp._isConnected = true;
+    }   
 };
 
 CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
@@ -8533,6 +8544,10 @@ CB.CloudNotification = CB.CloudNotification || {};
 
 CB.CloudNotification.on = function(channelName, callback, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     CB._validate();
 
     var def;
@@ -8559,6 +8574,10 @@ CB.CloudNotification.on = function(channelName, callback, done) {
 
 CB.CloudNotification.off = function(channelName, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     CB._validate();
 
     var def;
@@ -8581,6 +8600,10 @@ CB.CloudNotification.off = function(channelName, done) {
 };
 
 CB.CloudNotification.publish = function(channelName, data, done) {
+
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
 
     CB._validate();
 
@@ -8678,6 +8701,10 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 /* This is Real time implementation of CloudObjects */
 CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     var def;
 
     //shift variables.
@@ -8758,6 +8785,10 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 };
 
 CB.CloudObject.off = function(tableName, eventType, done) {
+
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
 
     var def;
 

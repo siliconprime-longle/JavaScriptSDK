@@ -74,6 +74,10 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 /* This is Real time implementation of CloudObjects */
 CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
+
     var def;
 
     //shift variables.
@@ -154,6 +158,10 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 };
 
 CB.CloudObject.off = function(tableName, eventType, done) {
+
+    if(CB._isRealtimeDisabled){
+        throw "Realtime is disbaled for this app.";
+    }
 
     var def;
 
