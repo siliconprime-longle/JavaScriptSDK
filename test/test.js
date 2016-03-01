@@ -3570,7 +3570,17 @@ describe("CloudObjectExpires", function () {
 
     it("objects expired should not show up in query", function (done) {
 
+
         this.timeout(20000);
+        var obj = new CB.CloudObject('student1');
+        obj.set('name', 'vipul');
+        obj.set('age', 10);
+        obj.save().then(function(obj1) {
+            done();
+        }, function (err) {
+            console.log(err);
+            throw "Cannot save an object after expire is set";
+        });
         var curr=new Date().getTime();
         var query1 = new CB.CloudQuery('student1');
         query1.equalTo('name','vipul');
@@ -3593,8 +3603,36 @@ describe("CloudObjectExpires", function () {
             }
 
         }, function(error){
-
+            done(error);
         })
+
+    });
+
+     it("objects should show up in query if expires is set at a future date.", function (done) {
+
+        this.timeout(20000);
+
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 10);
+        
+        var obj = new CB.CloudObject('student1');
+        obj.set('name', 'vipul');
+        obj.set('age', 10);
+        obj.expires = tomorrow;
+        obj.save().then(function(obj1) {
+            var query = new CB.CloudQuery('student1');
+            query.findById(obj1.id).then(function(obj){
+               if(obj){
+                done("Object found");
+               }else{
+                done();
+               }
+            }, function(error){
+                done(error);
+            });
+        }, function (err) {
+            done(err);
+        });        
 
     });
 
@@ -6295,7 +6333,7 @@ describe("Cloud Files", function(done) {
         fileObj.save({uploadProgress : function(progress){
             done();
         }, success : function(){
-            
+
         }, error : function(){
 
         }});
@@ -6350,6 +6388,62 @@ describe("Cloud Files", function(done) {
         });
     });
 
+    it("Should return the fileList with findById",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        var query = new CB.CloudQuery("Sample");
+                        query.include('fileList');
+                        query.findById(obj.id,{
+                            success : function(newObj){
+                                if(newObj.get('fileList').length>0){
+                                    if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
+                                        done();
+                                    }else{
+                                        done("Did not get the URL's back");
+                                    }
+                                }else{
+                                    done("Didnot get the file object back.");
+                                }
+                            },error : function(error){
+                                done(error);
+                            }
+                        });
+                        
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
 
 
     it("Should Save a file and give the url",function(done){
@@ -6947,6 +7041,7 @@ describe("CloudNotification", function() {
       		CB.CloudNotification.publish('sample', 'data',{
 				success : function(){
 					//succesfully published. //do nothing. 
+					console.log("Published Successfully.");
 				},
 				error : function(err){
 					//error
