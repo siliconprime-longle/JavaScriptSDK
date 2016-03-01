@@ -135,7 +135,6 @@ describe("Disabled - Cloud Objects Notification", function() {
         var count = 0;
         CB.CloudObject.on('Student', ['created', 'deleted', 'updated'], function(data){
         	count++;
-        	}
         }, {
         	success : function(){
         		cloudObject.set('name', 'sample');

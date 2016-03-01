@@ -17,7 +17,17 @@ describe("CloudObjectExpires", function () {
 
     it("objects expired should not show up in query", function (done) {
 
+
         this.timeout(20000);
+        var obj = new CB.CloudObject('student1');
+        obj.set('name', 'vipul');
+        obj.set('age', 10);
+        obj.save().then(function(obj1) {
+            done();
+        }, function (err) {
+            console.log(err);
+            throw "Cannot save an object after expire is set";
+        });
         var curr=new Date().getTime();
         var query1 = new CB.CloudQuery('student1');
         query1.equalTo('name','vipul');
@@ -40,8 +50,36 @@ describe("CloudObjectExpires", function () {
             }
 
         }, function(error){
-
+            done(error);
         })
+
+    });
+
+     it("objects should show up in query if expires is set at a future date.", function (done) {
+
+        this.timeout(20000);
+
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 10);
+        
+        var obj = new CB.CloudObject('student1');
+        obj.set('name', 'vipul');
+        obj.set('age', 10);
+        obj.expires = tomorrow;
+        obj.save().then(function(obj1) {
+            var query = new CB.CloudQuery('student1');
+            query.findById(obj1.id).then(function(obj){
+               if(obj){
+                done("Object found");
+               }else{
+                done();
+               }
+            }, function(error){
+                done(error);
+            });
+        }, function (err) {
+            done(err);
+        });        
 
     });
 

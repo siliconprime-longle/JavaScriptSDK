@@ -94,7 +94,7 @@ describe("Cloud Files", function(done) {
         fileObj.save({uploadProgress : function(progress){
             done();
         }, success : function(){
-            
+
         }, error : function(){
 
         }});
@@ -149,6 +149,62 @@ describe("Cloud Files", function(done) {
         });
     });
 
+    it("Should return the fileList with findById",function(done){
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name,data,type);
+
+        var promises = [];
+        promises.push(fileObj.save());
+
+        var data = 'DFSAF';
+        var name = 'aDSbc.txt';
+        var type = 'txt';
+        var fileObj2 = new CB.CloudFile(name,data,type);
+
+        promises.push(fileObj2.save());
+
+        CB.Promise.all(promises).then(function(files){
+            if(files.length>0) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name','sample');
+                obj.set('fileList',files);
+                obj.save({
+                    success : function(obj){
+                        var query = new CB.CloudQuery("Sample");
+                        query.include('fileList');
+                        query.findById(obj.id,{
+                            success : function(newObj){
+                                if(newObj.get('fileList').length>0){
+                                    if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
+                                        done();
+                                    }else{
+                                        done("Did not get the URL's back");
+                                    }
+                                }else{
+                                    done("Didnot get the file object back.");
+                                }
+                            },error : function(error){
+                                done(error);
+                            }
+                        });
+                        
+                    }, error : function(error){
+                        done(error);
+                    }
+                });
+
+            }else{
+                throw 'ún able to get the url';
+            }
+        }, function(error){
+            done(error);
+        });
+    });
 
 
     it("Should Save a file and give the url",function(done){
