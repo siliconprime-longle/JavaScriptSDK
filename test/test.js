@@ -9004,9 +9004,51 @@ describe("CloudQuery", function (done) {
             }
         });
 
+    });*/
+
+    it("Should count the no.of objects", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){
+
+                var totalObjectsInDB=res.length;
+             
+                var obj = new CB.CloudQuery('student1');
+                obj.count({
+                    success : function(number){
+                        if(number!=totalObjectsInDB){
+                            done("Count is not as expected.");
+                        }else{
+                            done();
+                        }
+                    }, error : function(error){
+                      done(error);
+                    }
+                });
+             
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
     });
 
-    it("should find item by id",function(done){
+    /*it("should find item by id",function(done){
         this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
@@ -9410,11 +9452,11 @@ describe("CloudQuery", function (done) {
 
     });
 
-    it("Should limit,return count and totalpages", function (done) {
+    it("Should paginate (return list of limited objects,count and totalpages)", function (done) {
 
         this.timeout(40000);        
 
-        /*var obj1 = new CB.CloudObject('student1');
+        var obj1 = new CB.CloudObject('student1');
         obj1.set('name','abcd');        
         
         var obj2 = new CB.CloudObject('student1');
@@ -9427,19 +9469,21 @@ describe("CloudQuery", function (done) {
         obj4.set('name','sjdhsjd');
 
         CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
-            success: function(res){*/
+            success: function(res){
+
+                var totalObjectsInDB=res.length;
 
                 var pageNumber=1;
                 var totalItemsInPage=2;
 
-                var obj = new CB.CloudObject('student4');
+                var obj = new CB.CloudQuery('student1');
                 obj.paginate(pageNumber,totalItemsInPage,{
                     success : function(objectsList,count,totalPages){
 
                         if(objectsList && objectsList.length>totalItemsInPage){
                             throw "received number of items are greater than the required value";
                             done("paginate data error");
-                        }else if(count!=3){
+                        }else if(count!=totalObjectsInDB){
                             done("count is less than what it shoudl be");
                         }else if((count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
@@ -9453,10 +9497,10 @@ describe("CloudQuery", function (done) {
                     }
                 });
                 
-            /*},error: function(err){
+            },error: function(err){
                 done(err);
             }    
-        });*/       
+        });       
 
     });
 
