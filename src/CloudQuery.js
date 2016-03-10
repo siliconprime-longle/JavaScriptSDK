@@ -216,7 +216,7 @@ CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {
     }
 
     if(!totalItemsInPage){
-       totalItemsInPage=5; 
+       totalItemsInPage=1; 
     }
 
     var skip=(pageNo*totalItemsInPage)-totalItemsInPage;
@@ -244,7 +244,12 @@ CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {
         if(callback) {
             callback.success(objectsList,count,totalPages);
         } else {
-            def.resolve(object);
+            var response={
+                list:objectsList,
+                count:count,
+                totalPages:totalPages
+            };
+            def.resolve(response);
         }
     },function(error){
         if(callback){
