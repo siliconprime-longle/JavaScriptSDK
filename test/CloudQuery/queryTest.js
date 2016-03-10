@@ -347,9 +347,9 @@ describe("CloudQuery", function (done) {
             success: function(res){
 
                 var totalObjectsInDB=res.length;
-
-                var query = new CB.CloudQuery("Student1");
-                query.count({
+             
+                var obj = new CB.CloudQuery('student1');
+                obj.count({
                     success : function(number){
                         if(number!=totalObjectsInDB){
                             done("Count is not as expected.");
@@ -773,7 +773,7 @@ describe("CloudQuery", function (done) {
 
     });
 
-    it("Should limit,return count and totalpages", function (done) {
+    it("Should paginate (return list of limited objects,count and totalpages)", function (done) {
 
         this.timeout(40000);        
 
