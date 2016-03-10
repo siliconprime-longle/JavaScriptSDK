@@ -43,7 +43,7 @@ describe("Cloud Files", function(done) {
                     });
                 }
             }else{
-                throw 'ún able to get the url';
+                throw 'únable to get the url';
             }
         },function(err){
             throw "Unable to save file";
@@ -282,6 +282,7 @@ describe("Cloud Files", function(done) {
                 });
 
             });
+            
             it("should delete a file", function (done) {
 
                 this.timeout(30000);
@@ -348,7 +349,7 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
-    it("Should Save a file file data and name then fetch it",function(done){
+   it("Should Save a file file data and name then fetch it",function(done){
 
         this.timeout(30000);
 

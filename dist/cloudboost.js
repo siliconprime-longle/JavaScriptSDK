@@ -9337,6 +9337,68 @@ CB.CloudQuery.prototype.setSkip = function(data) {
     return this;
 };
 
+CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {   
+
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }
+    if (!this.tableName) {
+        throw "TableName is null.";
+    }
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }  
+
+    if(!pageNo){
+        pageNo=1;
+    }
+
+    if(!totalItemsInPage){
+       totalItemsInPage=5; 
+    }
+
+    var skip=(pageNo*totalItemsInPage)-totalItemsInPage;
+
+    this.setSkip(skip);
+    this.setLimit(totalItemsInPage);
+
+    var promises = [];
+    promises.push(this.find());
+    promises.push(this.count());
+
+    CB.Promise.all(promises).then(function(list){
+        var objectsList=null;
+        var count=null;
+        var totalPages=0;
+
+        if(list && list.length>0){
+            objectsList=list[0];
+            count=list[1];
+            totalPages=count/totalItemsInPage;
+            if( totalPages && totalPages<0){
+                totalPages=0;
+            }
+        }
+        if(callback) {
+            callback.success(objectsList,count,totalPages);
+        } else {
+            def.resolve(object);
+        }
+    },function(error){
+        if(callback){
+            callback.error(error);
+        }else {
+            def.reject(error);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }  
+
+};
+
 //select/deselect columns to show
 CB.CloudQuery.prototype.selectColumn = function(columnNames) {
 
