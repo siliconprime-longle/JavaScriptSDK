@@ -9036,7 +9036,7 @@ describe("CloudQuery", function (done) {
 
     });
 
-     it("should return count as an integer",function(done){
+    it("should return count as an integer",function(done){
 
         this.timeout(30000);
 
@@ -9059,45 +9059,126 @@ describe("CloudQuery", function (done) {
 
     it("Should count the no.of objects", function (done) {
 
-        this.timeout(40000);        
+        this.timeout(40000); 
 
-        var obj1 = new CB.CloudObject('student1');
-        obj1.set('name','abcd');        
-        
-        var obj2 = new CB.CloudObject('student1');
-        obj2.set('name','pqrs');
+        CB.appKey = CB.masterKey;        
 
-        var obj3 = new CB.CloudObject('student1');
-        obj3.set('name','gdgd');
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
 
-        var obj4 = new CB.CloudObject('student1');
-        obj4.set('name','sjdhsjd');
+        var table = new CB.CloudTable('countobjectsxx');  
+        table.addColumn(Name);       
 
-        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
-            success: function(res){
+        table.save().then(function(res){
 
-                var totalObjectsInDB=res.length;
-             
-                var obj = new CB.CloudQuery('student1');
-                obj.count({
-                    success : function(number){
-                        if(number!=totalObjectsInDB){
-                            done("Count is not as expected.");
-                        }else{
-                            done();
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('countobjectsxx');
+            obj1.set('name','abcd');        
+            
+            var obj2 = new CB.CloudObject('countobjectsxx');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('countobjectsxx');
+            obj3.set('name','gdgd');
+
+            var obj4 = new CB.CloudObject('countobjectsxx');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){
+
+                    var totalObjectsInDB=res.length;
+                 
+                    var obj = new CB.CloudQuery('countobjectsxx');
+                    obj.count({
+                        success : function(number){
+                            if(number!=totalObjectsInDB){
+                                done("Count is not as expected.");                                
+                            }else{
+                                done();                                
+                            }
+                        }, error : function(error){
+                          done(error);                          
                         }
-                    }, error : function(error){
-                      done(error);
-                    }
-                });
-             
-                
-            },error: function(err){
-                done(err);
-            }    
-        });       
+                    });
+                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
 
     });
+
+    it("Should count the no.of objects with skip,limit", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('countobjectsskip');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('countobjectsskip');
+            obj1.set('name','abcd');        
+            
+            var obj2 = new CB.CloudObject('countobjectsskip');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('countobjectsskip');
+            obj3.set('name','gdgd');
+
+            var obj4 = new CB.CloudObject('countobjectsskip');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){
+
+                    var totalObjectsInDB=res.length;
+                 
+                    var obj = new CB.CloudQuery('countobjectsskip');
+                    obj.limit(2);
+                    obj.skip(1);
+                    obj.count({
+                        success : function(number){
+                            if(number!=totalObjectsInDB){
+                                done("Count is not as expected.");                                
+                            }else{
+                                done();                                
+                            }
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });
+                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+    
 
     it("should find item by id",function(done){
         this.timeout(30000);
@@ -9964,28 +10045,28 @@ describe("CloudQuery", function (done) {
     });
 
     it("Should query over boolean dataType",function(done){
-            this.timeout(30000);
-            var obj1 = new CB.CloudObject('Custom1');
-            obj1.set('newColumn1',false);
-            obj1.save().then(function(obj){
-                var cbQuery = new CB.CloudQuery('Custom1');
-                cbQuery.equalTo('newColumn1', false);
-                cbQuery.find({
-                  success: function(objList){
-                    if(objList.length>0)
-                        done();
-                    else
-                        throw "Cannot query over boolean datatype ";
-                  },
-                  error: function(err){
-                     throw "Error querying object.";
-                  }
-                });
-               
-            },function(){
-               throw "should save the object";
+        this.timeout(30000);
+        var obj1 = new CB.CloudObject('Custom1');
+        obj1.set('newColumn1',false);
+        obj1.save().then(function(obj){
+            var cbQuery = new CB.CloudQuery('Custom1');
+            cbQuery.equalTo('newColumn1', false);
+            cbQuery.find({
+              success: function(objList){
+                if(objList.length>0)
+                    done();
+                else
+                    throw "Cannot query over boolean datatype ";
+              },
+              error: function(err){
+                 throw "Error querying object.";
+              }
             });
+           
+        },function(){
+           throw "should save the object";
         });
+    });
 
 });
 describe("CloudSearch", function (done) {
