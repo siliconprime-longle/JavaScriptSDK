@@ -235,11 +235,16 @@ CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {
     if(totalItemsInPage && typeof totalItemsInPage === 'number' && totalItemsInPage>0){        
         this.setLimit(totalItemsInPage);
     }
-    var thisObj=this;
+    var thisObj=this;    
 
     var promises = [];
     promises.push(this.find());
-    promises.push(this.count());
+
+    var countQuery = Object.create(this);
+    countQuery.setSkip(0);
+    countQuery.setLimit(99999999);
+
+    promises.push(countQuery.count());
 
     CB.Promise.all(promises).then(function(list){
         var objectsList=null;

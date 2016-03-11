@@ -421,14 +421,14 @@ describe("CloudQuery", function (done) {
                     var totalObjectsInDB=res.length;
                  
                     var obj = new CB.CloudQuery('countobjectsskip');
-                    obj.limit(2);
-                    obj.skip(1);
+                    obj.setLimit(2);
+                    obj.setSkip(1);
                     obj.count({
                         success : function(number){
-                            if(number!=totalObjectsInDB){
-                                done("Count is not as expected.");                                
+                            if(number==2){
+                                done();                                                                
                             }else{
-                                done();                                
+                                done("Count is not as expected.");                               
                             }
                         }, error : function(error){
                           done(error);                          
@@ -447,8 +447,7 @@ describe("CloudQuery", function (done) {
             throw "Unable to Create Table";            
         });                  
 
-    });
-    
+    });    
 
     it("should find item by id",function(done){
         this.timeout(30000);
@@ -880,7 +879,7 @@ describe("CloudQuery", function (done) {
                         if(objectsList && objectsList.length>totalItemsInPage){
                             throw "received number of items are greater than the required value";
                             done("paginate data error");
-                        }else if((count/totalItemsInPage)!=totalPages){
+                        }else if(Math.ceil(count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
                         }else{
                             done();
@@ -1084,7 +1083,7 @@ describe("CloudQuery", function (done) {
         CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
             success: function(res){
 
-                var pageNumber=1;
+                var pageNumber=null;
                 var totalItemsInPage=2;
 
                 var obj = new CB.CloudQuery('student1');
@@ -1094,7 +1093,7 @@ describe("CloudQuery", function (done) {
                         if(objectsList && objectsList.length==0){
                             throw "received 0 objects";
                             done("paginate received 0 objects");
-                        }else if((count/totalItemsInPage)!=totalPages){
+                        }else if(Math.ceil(count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
                         }else{
                             done();
@@ -1133,7 +1132,7 @@ describe("CloudQuery", function (done) {
             success: function(res){
                 
                 var pageNumber=1;
-                var totalItemsInPage=2;
+                var totalItemsInPage=null;
 
                 var obj = new CB.CloudQuery('student1');
                 obj.paginate(pageNumber,null,{

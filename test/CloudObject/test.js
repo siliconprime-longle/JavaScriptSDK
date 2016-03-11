@@ -240,7 +240,7 @@ it("should not save a string into date column",function(done){
 
    it("should delete an object after save.", function(done) {
 
-    	this.timeout('30000');
+    	this.timeout('40000');
         
         var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');

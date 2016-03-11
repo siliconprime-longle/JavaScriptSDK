@@ -19,7 +19,7 @@ describe("Bulk API",function(done){
 
     it("should save and then delete array of CloudObject using bulk Api",function(done){
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('name','Vipul');
@@ -77,7 +77,7 @@ describe("Bulk API",function(done){
 
     it("Should properly save a relation in Bulk API",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'Course');
@@ -96,7 +96,7 @@ describe("Bulk API",function(done){
 
     it("Should properly save a relation in Bulk API",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'Course');

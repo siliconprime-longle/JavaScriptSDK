@@ -3406,7 +3406,7 @@ describe("Bulk API",function(done){
 
     it("should save and then delete array of CloudObject using bulk Api",function(done){
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         var obj = new CB.CloudObject('Student');
         obj.set('name','Vipul');
@@ -3464,7 +3464,7 @@ describe("Bulk API",function(done){
 
     it("Should properly save a relation in Bulk API",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'Course');
@@ -3483,7 +3483,7 @@ describe("Bulk API",function(done){
 
     it("Should properly save a relation in Bulk API",function(done){
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'Course');
@@ -5376,7 +5376,7 @@ it("should not save a string into date column",function(done){
 
    it("should delete an object after save.", function(done) {
 
-    	this.timeout('30000');
+    	this.timeout('40000');
         
         var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -9151,14 +9151,14 @@ describe("CloudQuery", function (done) {
                     var totalObjectsInDB=res.length;
                  
                     var obj = new CB.CloudQuery('countobjectsskip');
-                    obj.limit(2);
-                    obj.skip(1);
+                    obj.setLimit(2);
+                    obj.setSkip(1);
                     obj.count({
                         success : function(number){
-                            if(number!=totalObjectsInDB){
-                                done("Count is not as expected.");                                
+                            if(number==2){
+                                done();                                                                
                             }else{
-                                done();                                
+                                done("Count is not as expected.");                               
                             }
                         }, error : function(error){
                           done(error);                          
@@ -9177,8 +9177,7 @@ describe("CloudQuery", function (done) {
             throw "Unable to Create Table";            
         });                  
 
-    });
-    
+    });    
 
     it("should find item by id",function(done){
         this.timeout(30000);
@@ -9610,7 +9609,7 @@ describe("CloudQuery", function (done) {
                         if(objectsList && objectsList.length>totalItemsInPage){
                             throw "received number of items are greater than the required value";
                             done("paginate data error");
-                        }else if((count/totalItemsInPage)!=totalPages){
+                        }else if(Math.ceil(count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
                         }else{
                             done();
@@ -9814,7 +9813,7 @@ describe("CloudQuery", function (done) {
         CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
             success: function(res){
 
-                var pageNumber=1;
+                var pageNumber=null;
                 var totalItemsInPage=2;
 
                 var obj = new CB.CloudQuery('student1');
@@ -9824,7 +9823,7 @@ describe("CloudQuery", function (done) {
                         if(objectsList && objectsList.length==0){
                             throw "received 0 objects";
                             done("paginate received 0 objects");
-                        }else if((count/totalItemsInPage)!=totalPages){
+                        }else if(Math.ceil(count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
                         }else{
                             done();
@@ -9863,7 +9862,7 @@ describe("CloudQuery", function (done) {
             success: function(res){
                 
                 var pageNumber=1;
-                var totalItemsInPage=2;
+                var totalItemsInPage=null;
 
                 var obj = new CB.CloudQuery('student1');
                 obj.paginate(pageNumber,null,{
