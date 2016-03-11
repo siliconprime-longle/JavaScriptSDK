@@ -207,22 +207,35 @@ CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {
         throw "TableName is null.";
     }
     var def;
+    var callback;
+    if(typeof callback === 'object' && typeof callback.success === 'function'){
+        callback=callback;
+    }    
     if (!callback) {
         def = new CB.Promise();
     }  
 
-    if(!pageNo){
-        pageNo=1;
+    if(pageNo && typeof pageNo === 'object' && typeof pageNo.success === 'function'){
+        callback=pageNo;
+        pageNo=null;
     }
+    if(totalItemsInPage && typeof totalItemsInPage === 'object' && typeof totalItemsInPage.success === 'function'){
+        callback=totalItemsInPage;
+        totalItemsInPage=null;
+    }    
 
-    if(!totalItemsInPage){
-       totalItemsInPage=1; 
+    if(pageNo && typeof pageNo === 'number' && pageNo>0){
+        if(typeof totalItemsInPage === 'number' && totalItemsInPage>0){
+            var skip=(pageNo*totalItemsInPage)-totalItemsInPage;
+            this.setSkip(skip);
+            this.setLimit(totalItemsInPage);
+        }
+    }      
+
+    if(totalItemsInPage && typeof totalItemsInPage === 'number' && totalItemsInPage>0){        
+        this.setLimit(totalItemsInPage);
     }
-
-    var skip=(pageNo*totalItemsInPage)-totalItemsInPage;
-
-    this.setSkip(skip);
-    this.setLimit(totalItemsInPage);
+    var thisObj=this;
 
     var promises = [];
     promises.push(this.find());
@@ -236,20 +249,20 @@ CB.CloudQuery.prototype.paginate = function(pageNo,totalItemsInPage,callback) {
         if(list && list.length>0){
             objectsList=list[0];
             count=list[1];
-            totalPages=count/totalItemsInPage;
-            if( totalPages && totalPages<0){
+            if(!count){
+                count=0;
+                totalPages=0;
+            }else{
+                totalPages=Math.ceil(count/thisObj.limit);
+            }            
+            if(totalPages && totalPages<0){
                 totalPages=0;
             }
         }
         if(callback) {
             callback.success(objectsList,count,totalPages);
-        } else {
-            var response={
-                list:objectsList,
-                count:count,
-                totalPages:totalPages
-            };
-            def.resolve(response);
+        }else {            
+            def.resolve(objectsList,count,totalPages);
         }
     },function(error){
         if(callback){

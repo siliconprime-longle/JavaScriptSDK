@@ -2,7 +2,7 @@ describe("CloudQuery", function (done) {
 
     var obj = new CB.CloudObject('student1');
 
-   /*it("Should save data with a particular value.", function (done) {
+    it("Should save data with a particular value.", function (done) {
 
         this.timeout(30000);
 
@@ -325,7 +325,7 @@ describe("CloudQuery", function (done) {
             }
         });
 
-    });*/
+    });
 
     it("Should count the no.of objects", function (done) {
 
@@ -369,7 +369,7 @@ describe("CloudQuery", function (done) {
 
     });
 
-    /*it("should find item by id",function(done){
+    it("should find item by id",function(done){
         this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
@@ -465,10 +465,7 @@ describe("CloudQuery", function (done) {
         });
         }, function () {
             throw "list Save error";
-        });
-
-
-        
+        });        
 
     });
 
@@ -754,7 +751,7 @@ describe("CloudQuery", function (done) {
             throw "find data error";
         });
 
-    });*/
+    });
 
     it("Should limit the number of data items received", function (done) {
 
@@ -773,7 +770,7 @@ describe("CloudQuery", function (done) {
 
     });
 
-    it("Should paginate (return list of limited objects,count and totalpages)", function (done) {
+    it("Should paginate with all params (return list of limited objects,count and totalpages)", function (done) {
 
         this.timeout(40000);        
 
@@ -790,9 +787,7 @@ describe("CloudQuery", function (done) {
         obj4.set('name','sjdhsjd');
 
         CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
-            success: function(res){
-
-                var totalObjectsInDB=res.length;
+            success: function(res){                
 
                 var pageNumber=1;
                 var totalItemsInPage=2;
@@ -804,8 +799,6 @@ describe("CloudQuery", function (done) {
                         if(objectsList && objectsList.length>totalItemsInPage){
                             throw "received number of items are greater than the required value";
                             done("paginate data error");
-                        }else if(count!=totalObjectsInDB){
-                            done("count is less than what it shoudl be");
                         }else if((count/totalItemsInPage)!=totalPages){
                             done("totalpages is not recieved as expected");
                         }else{
@@ -825,7 +818,267 @@ describe("CloudQuery", function (done) {
 
     });
 
-    /*it("Should limit the number of data items received to one", function (done) {
+    it("Should paginate with null params", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate().then(function(objectsList,count,totalPages){
+                    if(objectsList && objectsList.length==0){
+                        throw "received 0 objects";
+                        done("paginate received 0 objects");                    
+                    }else{
+                        done();
+                    }
+                },function(error){
+                    done(error);
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should paginate with callback as first param", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){               
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate({
+                    success : function(objectsList,count,totalPages){
+                        if(objectsList && objectsList.length==0){
+                            throw "received 0 objects";
+                            done("received 0 objectsr");                        
+                        }else{
+                            done();
+                        }
+                    },
+                    error : function(error){
+                        throw "paginate data error";
+                        done("paginate data error");
+                    }
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should paginate with callback as second param", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){             
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate(null,{
+                    success : function(objectsList,count,totalPages){
+
+                        if(objectsList && objectsList.length==0){
+                            throw "received 0 objects";
+                            done("received 0 objects");                        
+                        }else{
+                            done();
+                        }
+                    },
+                    error : function(error){
+                        throw "paginate data error";
+                        done("paginate data error");
+                    }
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should paginate with callback as third param", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate(null,null,{
+                    success : function(objectsList,count,totalPages){
+
+                        if(objectsList && objectsList.length==0){
+                            throw "received 0 objcts";
+                            done("paginate received 0 objcts");                        
+                        }else{
+                            done();
+                        }
+                    },
+                    error : function(error){
+                        throw "paginate data error";
+                        done("paginate data error");
+                    }
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should paginate with as pageNumber null and totalItemsInPage with value", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){
+
+                var pageNumber=1;
+                var totalItemsInPage=2;
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate(null,totalItemsInPage,{
+                    success : function(objectsList,count,totalPages){
+
+                        if(objectsList && objectsList.length==0){
+                            throw "received 0 objects";
+                            done("paginate received 0 objects");
+                        }else if((count/totalItemsInPage)!=totalPages){
+                            done("totalpages is not recieved as expected");
+                        }else{
+                            done();
+                        }
+                    },
+                    error : function(error){
+                        throw "paginate data error";
+                        done("paginate data error");
+                    }
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should paginate with pageNumber and totalItemsInPage as null", function (done) {
+
+        this.timeout(40000);        
+
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name','abcd');        
+        
+        var obj2 = new CB.CloudObject('student1');
+        obj2.set('name','pqrs');
+
+        var obj3 = new CB.CloudObject('student1');
+        obj3.set('name','gdgd');
+
+        var obj4 = new CB.CloudObject('student1');
+        obj4.set('name','sjdhsjd');
+
+        CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+            success: function(res){
+                
+                var pageNumber=1;
+                var totalItemsInPage=2;
+
+                var obj = new CB.CloudQuery('student1');
+                obj.paginate(pageNumber,null,{
+                    success : function(objectsList,count,totalPages){
+
+                        if(objectsList && objectsList.length==0){
+                            throw "received 0 objects";
+                            done("paginate received 0 objects");
+                        }else{
+                            done();
+                        }
+                    },
+                    error : function(error){
+                        throw "paginate data error";
+                        done("paginate data error");
+                    }
+                });
+                
+            },error: function(err){
+                done(err);
+            }    
+        });       
+
+    });
+
+    it("Should limit the number of data items received to one", function (done) {
 
         this.timeout(30000);
         var age=null;
@@ -839,9 +1092,8 @@ describe("CloudQuery", function (done) {
             throw "find data error";
         });
 
-    });*/
+    });
 
-    /*
     it("Should give distinct elements", function (done) {
 
         this.timeout(30000);
@@ -1003,7 +1255,6 @@ describe("CloudQuery", function (done) {
             },function(){
                throw "should save the object";
             });
-        });*/
-
+        });
 
 });

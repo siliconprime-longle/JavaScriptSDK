@@ -92,6 +92,57 @@
     });
 
 
+    it("should not return duplicate objects in relation list after saving", function (done) {
+
+        this.timeout(30000);     
+       
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'Vipul');
+       
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn7', [obj1,obj1]);
+        obj.save().then(function(respObj) {
+            if(respObj.get("newColumn7").length==2){
+                throw "returning duplicate objects";
+            }else{
+                done();
+            }            
+        }, function (error) { 
+            throw "Relation Save error";
+        });
+    });
+
+    it("should not return duplicate objects in relation list on Querying", function (done) {
+
+        this.timeout(30000);     
+       
+        var obj1 = new CB.CloudObject('student1');
+        obj1.set('name', 'sjdgsduj');
+       
+        var obj = new CB.CloudObject('Custom4');
+        obj.set('newColumn7', [obj1,obj1]);
+        obj.save().then(function(respObj) {
+
+            var obj = new CB.CloudQuery('Custom4');
+            obj.include('newColumn7');
+            obj.findById(respObj.get("id"),{success : function(queriedObj){ 
+
+                if(queriedObj.get("newColumn7").length==2){
+                    throw "returning duplicate objects";
+                }else{
+                    done();
+                } 
+            }, error : function(error){ 
+              throw "Relation query error";             
+            }});
+
+            
+        }, function (error) { 
+            throw "Relation Save error";
+        });
+    });
+
+
     it("should include a relation on distinct.", function (done) {
 
         this.timeout(30000);
