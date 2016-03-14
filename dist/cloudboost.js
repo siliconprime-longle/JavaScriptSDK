@@ -8352,9 +8352,9 @@ CB.CloudApp.init = function(serverUrl, applicationId, applicationKey, opts) { //
             CB.io = io;
         }
 
-        CB.Socket = CB.io(CB.socketIoUrl);
-        CB.CloudApp._isConnected = true;
-    }   
+        CB.Socket = CB.io(CB.socketIoUrl);        
+    } 
+    CB.CloudApp._isConnected = true;  
 };
 
 CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
