@@ -3,7 +3,7 @@ describe("CloudUser", function () {
     var passwd = "abcd";
 
     
-    /*it("Should create new user", function (done) {
+    it("Should create new user", function (done) {
         if(CB._isNode){
            done();
            return;
@@ -23,9 +23,9 @@ describe("CloudUser", function () {
         }, function (error) {
             throw error;
         });
-    });*/
+    });
 
-    /*it("Should create new user and change the password.", function (done) {
+    it("Should create new user and change the password.", function (done) {
         if(CB._isNode){
            done();
            return;
@@ -172,7 +172,7 @@ describe("CloudUser", function () {
                 done();
             }
         });
-    });*/
+    });
 
     it("should send a Reset Email with Email Settings with default Template.", function(done) {
         this.timeout(100000);
@@ -590,7 +590,7 @@ describe("CloudUser", function () {
     });
 
 
-    /*it("Should create a user and get version",function(done){
+    it("Should create a user and get version",function(done){
 
         if(CB._isNode){
             done();
@@ -848,7 +848,6 @@ describe("CloudUser", function () {
         },function(err){
             throw "Unable to Create User";
         });
-    });*/
-
+    });
 
 });

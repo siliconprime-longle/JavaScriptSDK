@@ -10869,7 +10869,7 @@ describe("CloudUser", function () {
     var passwd = "abcd";
 
     
-   it("Should create new user", function (done) {
+    it("Should create new user", function (done) {
         if(CB._isNode){
            done();
            return;
@@ -10891,7 +10891,7 @@ describe("CloudUser", function () {
         });
     });
 
-    /*it("Should create new user and change the password.", function (done) {
+    it("Should create new user and change the password.", function (done) {
         if(CB._isNode){
            done();
            return;
@@ -11038,7 +11038,7 @@ describe("CloudUser", function () {
                 done();
             }
         });
-    });*/
+    });
 
     it("should send a Reset Email with Email Settings with default Template.", function(done) {
         this.timeout(100000);
@@ -11131,7 +11131,7 @@ describe("CloudUser", function () {
           mandrillApiKey:null,
           email:null,
           from:null,
-          template:"<h3>TEST(No email Setting only template):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><p>*|LINK|*</p><p>Thank you and have a great day!</p>"            
+          template:"<h3>TEST(No email Setting only template):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
         };
 
 
@@ -11214,7 +11214,7 @@ describe("CloudUser", function () {
           mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
           email:null,
           from:"nawazdhandala",
-          template:"<h3>TEST(No email, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><p>*|LINK|*</p><p>Thank you and have a great day!</p>"            
+          template:"<h3>TEST(No email, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
         };
 
 
@@ -11297,7 +11297,7 @@ describe("CloudUser", function () {
           mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
           email:"hello@nawazdhandala.com",
           from:null,
-          template:"<h3>TEST(No from Name, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><p>*|LINK|*</p><p>Thank you and have a great day!</p>"            
+          template:"<h3>TEST(No from Name, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
         };
 
 
@@ -11380,7 +11380,7 @@ describe("CloudUser", function () {
           mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
           email:"hello@nawazdhandala.com",
           from:"nawazdhandala",
-          template:"<h3>TEST(with all settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><p>*|LINK|*</p><p>Thank you and have a great day!</p>"            
+          template:"<h3>TEST(with all settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
         };
 
 
@@ -11456,7 +11456,7 @@ describe("CloudUser", function () {
     });
 
 
-    /*it("Should create a user and get version",function(done){
+    it("Should create a user and get version",function(done){
 
         if(CB._isNode){
             done();
@@ -11714,8 +11714,7 @@ describe("CloudUser", function () {
         },function(err){
             throw "Unable to Create User";
         });
-    });*/
-
+    });
 
 });
 describe("CloudRole", function (done) {
