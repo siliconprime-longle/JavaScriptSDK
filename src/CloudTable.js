@@ -18,6 +18,10 @@ CB.CloudTable = function(tableName){  //new table constructor
       this.document.type = "role";
       this.document.maxCount = 1;
   }
+  else if(tableName.toLowerCase() === "device") {
+      this.document.type = "device";
+      this.document.maxCount = 1;
+  }
   else {
       this.document.type = "custom";
       this.document.maxCount = 9999;

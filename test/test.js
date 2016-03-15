@@ -10891,7 +10891,7 @@ describe("CloudUser", function () {
         });
     });
 
-    it("Should create new user and change the password.", function (done) {
+    /*it("Should create new user and change the password.", function (done) {
         if(CB._isNode){
            done();
            return;
@@ -11038,7 +11038,7 @@ describe("CloudUser", function () {
                 done();
             }
         });
-    });
+    });*/
 
     it("should send a Reset Email with Email Settings with default Template.", function(done) {
         this.timeout(100000);
@@ -11393,10 +11393,10 @@ describe("CloudUser", function () {
             var obj = new CB.CloudUser();
             obj.set('username', "WaterFalls");
             obj.set('password',passwd);
-            obj.set('email',"hello@nawazdhandala.com");
+            obj.set('email',"sauravtejanth99@gmail.com");
 
             obj.save({ success: function(newObj){ 
-                  CB.CloudUser.resetPassword("hello@nawazdhandala.com",{
+                  CB.CloudUser.resetPassword("sauravtejanth99@gmail.com",{
                         success : function(resp){                                    
                             done();
                         }, error : function(error){
@@ -11456,7 +11456,7 @@ describe("CloudUser", function () {
     });
 
 
-    it("Should create a user and get version",function(done){
+    /*it("Should create a user and get version",function(done){
 
         if(CB._isNode){
             done();
@@ -11714,7 +11714,7 @@ describe("CloudUser", function () {
         },function(err){
             throw "Unable to Create User";
         });
-    });
+    });*/
 
 
 });
