@@ -226,7 +226,32 @@ describe("Should Create All Test Tables",function(done){
         });
     });
 
-  it("should create table Custom",function(done){
+    it("should create table device",function(done){
+
+        this.timeout(50000);
+
+        var device = new CB.CloudTable('Device');
+        
+        var newColumn = new CB.Column('newColumn');
+        newColumn.dataType = 'Text';
+        device.addColumn(newColumn);
+
+        device.save().then(function(device){
+            var newColumn1 = new CB.Column('newColumn1');
+            newColumn1.dataType = 'Text';
+            device.addColumn(newColumn1);
+
+            device.save().then(function(res){
+                done();
+            },function(error){
+                throw "Unable to create device";
+            });
+        },function(error){
+            throw "Unable to create device";
+        });
+    });
+
+    it("should create table Custom",function(done){
 
         this.timeout(60000);
 

@@ -253,6 +253,8 @@ describe("Cloud App", function() {
 		}
 
 	 });
+
+	
 });
 
 describe("Cloud Cache", function(){
@@ -1410,7 +1412,32 @@ describe("Should Create All Test Tables",function(done){
         });
     });
 
-  it("should create table Custom",function(done){
+    it("should create table device",function(done){
+
+        this.timeout(50000);
+
+        var device = new CB.CloudTable('Device');
+        
+        var newColumn = new CB.Column('newColumn');
+        newColumn.dataType = 'Text';
+        device.addColumn(newColumn);
+
+        device.save().then(function(device){
+            var newColumn1 = new CB.Column('newColumn1');
+            newColumn1.dataType = 'Text';
+            device.addColumn(newColumn1);
+
+            device.save().then(function(res){
+                done();
+            },function(error){
+                throw "Unable to create device";
+            });
+        },function(error){
+            throw "Unable to create device";
+        });
+    });
+
+    it("should create table Custom",function(done){
 
         this.timeout(60000);
 
@@ -10068,6 +10095,260 @@ describe("CloudQuery", function (done) {
     });
 
 });
+
+describe("CloudPush", function (done) {
+
+    it("Should fail to send notification without push settings", function (done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "helloasgsgdsd");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                    CB.Push.send({title:"RT Bathula",message:"check this"},query,{
+                        success:function(data){
+                            done("Sent without notifications.");
+                        },
+                        error:function(error){
+                            done();
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+
+        
+    });
+
+    it("should add a sample setting to an app.", function(done) {
+        this.timeout(100000);
+        var url = URL+'/settings/'+CB.appId+"/push";
+        var params = {};
+        params.key = CB.masterKey;
+        params.settings = JSON.stringify({
+          apple:{
+            certificates:[]
+          },
+          andriod:{
+            credentials:[{senderId:"shdfshd",apiKey:"sdjhsdh"}]
+          },
+          windows:{
+            credentials:[{securityId:"sdsd",clientSecret:"sdjhds"}]
+          }
+        });
+
+        if(!window){
+            //Lets configure and request
+            request({
+                url: url, //URL to hit
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                json: params //Set the body as a string
+            }, function(error, response, json){
+                if(error) {
+                    done(error);
+                } else {
+                  done();
+                }
+            });
+        }else{
+           $.ajax({
+     
+                // The URL for the request
+                url: url,
+                // The data to send (will be converted to a query string)
+                data: params,
+                // Whether this is a POST or GET request
+                type: "PUT",
+                // The type of data we expect back
+                dataType : "json",
+                // Code to run if the request succeeds;
+                // the response is passed to the function
+                success: function( json ) {
+                   if(json.category === "push"){
+                     done();
+                   }else{
+                     done("Wrong json.");
+                   }
+                },
+                // Code to run if the request fails; the raw request and
+                // status codes are passed to the function
+                error: function( xhr, status, errorThrown ) {
+                    done("Error thrown.");
+                },
+             
+            });
+        }
+    });
+
+    it("Should send message with data,query and callback", function (done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "sdjhkasgsgdsd");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                    CB.Push.send({title:"RT Bathula",message:"check this"},query,{
+                        success:function(data){
+                            done();
+                        },
+                        error:function(error){
+                            done(error);
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+
+        
+    });
+
+    it("Should send message with data and callback", function (done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "datasdsdszafu");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                   
+                    CB.Push.send({title:"RT Bathula",message:"check this"},{
+                        success:function(data){
+                            done();
+                        },
+                        error:function(error){
+                            done(error);
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+        
+    });
+
+    it("Should send message with data,channelsArray and callback", function (done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "dddtasdrehf");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                   
+                    CB.Push.send({title:"RT Bathula",message:"check this"},["pirates","hackers"],{
+                        success:function(data){
+                            done();
+                        },
+                        error:function(error){
+                            done(error);
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+        
+    });
+
+    it("Should send message with data,string and callback", function (done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabaltasdrehf");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                   
+                    CB.Push.send({title:"RT Bathula",message:"check this"},"hackers",{
+                        success:function(data){
+                            done();
+                        },
+                        error:function(error){
+                            done(error);
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+        
+    });
+
+    it("Should send message with data, no callback passed", function (done) {
+
+        this.timeout(30000);
+        
+        CB.Push.send({title:"RT Bathula",message:"check this"})
+        .then(function(response){
+            done();
+        },function(error){
+            done();
+        });
+        
+    });
+
+});    
+
 describe("CloudSearch", function (done) {
 
 
@@ -10076,7 +10357,7 @@ describe("CloudSearch", function (done) {
 
         CB.appKey = CB.masterKey;
 
-         this.timeout(50000);
+         this.timeout(53000);
 
         var custom = new CB.CloudTable('CustomGeoPoint');
             var newColumn7 = new CB.Column('location');
@@ -10091,19 +10372,25 @@ describe("CloudSearch", function (done) {
 
                 obj.save({
                     success : function(newObj){
-                        var search = new CB.CloudSearch('CustomGeoPoint');
-                        search.searchFilter = new CB.SearchFilter();
-                        search.searchFilter.near("location", loc, 1);
-                        search.search().then(function(list) {
-                            if(list.length>0){
-                               console.log(list);
-                                done();
-                            } else{
-                                throw "should retrieve saved data with particular value ";
-                            }
-                        }, function (error) {
-                            done(error);
-                        });
+
+                        setTimeout(function(){
+
+                            var search = new CB.CloudSearch('CustomGeoPoint');
+                            search.searchFilter = new CB.SearchFilter();
+                            search.searchFilter.near("location", loc, 1);
+                            search.search().then(function(list) {
+                                if(list.length>0){
+                                   console.log(list);
+                                    done();
+                                } else{
+                                    throw "should retrieve saved data with particular value ";
+                                }
+                            }, function (error) {
+                                done(error);
+                            });
+
+                        }, 3000);
+                       
                     }, error : function(error){
                         throw 'Error saving the object';
                     }
@@ -10246,23 +10533,28 @@ describe("CloudSearch", function (done) {
 
     it("should search for object for a given value",function(done){
 
-        this.timeout(30000);
+        this.timeout(33000);
 
-        var cs = new CB.CloudSearch('Student');
-        cs.searchFilter = new CB.SearchFilter();
+        setTimeout(function(){ 
 
-        cs.searchFilter .equalTo('age', 19);
-        cs.search({
-            success : function(list){
-                if(list.length>0){
-                    done();
-                }else{
+            var cs = new CB.CloudSearch('Student');
+            cs.searchFilter = new CB.SearchFilter();
+
+            cs.searchFilter .equalTo('age', 19);
+            cs.search({
+                success : function(list){
+                    if(list.length>0){
+                        done();
+                    }else{
+                        throw "should search indexed object";
+                    }
+                },error : function(error){
                     throw "should search indexed object";
                 }
-            },error : function(error){
-                throw "should search indexed object";
-            }
-        });
+            });
+
+        }, 3000);
+        
     });
 
 
@@ -10403,41 +10695,46 @@ describe("CloudSearch", function (done) {
 
     it("should skip elements",function(done){
 
-        this.timeout(30000);
+        this.timeout(33000);
 
         var obj = new CB.CloudObject("Student");
         obj.set("age",21);
 
         obj.save().then(function(obj){
-            var cs = new CB.CloudSearch('Student');
-            cs.searchFilter = new CB.SearchFilter();
-            cs.searchFilter.notEqualTo('age', 19);
-            cs.setSkip(9999999);
-            cs.search({
-                success : function(list){
-                    if(list.length===0){
-                        var cs = new CB.CloudSearch('Student');
-                        cs.searchFilter = new CB.SearchFilter();
-                        cs.searchFilter.notEqualTo('age', 19);
-                        cs.setSkip(1);
-                        cs.search({
-                            success : function(list){
-                                if(list.length>0){
-                                    done();
-                                }else{
-                                    throw "should skip elements";
+
+            setTimeout(function(){ 
+                var cs = new CB.CloudSearch('Student');
+                cs.searchFilter = new CB.SearchFilter();
+                cs.searchFilter.notEqualTo('age', 19);
+                cs.setSkip(9999999);
+                cs.search({
+                    success : function(list){
+                        if(list.length===0){
+                            var cs = new CB.CloudSearch('Student');
+                            cs.searchFilter = new CB.SearchFilter();
+                            cs.searchFilter.notEqualTo('age', 19);
+                            cs.setSkip(1);
+                            cs.search({
+                                success : function(list){
+                                    if(list.length>0){
+                                        done();
+                                    }else{
+                                        throw "should skip elements";
+                                    }
+                                },error : function(error){
+                                    throw "should skip elements"
                                 }
-                            },error : function(error){
-                                throw "should skip elements"
-                            }
-                        });
-                    }else{
-                        throw "should search for elements";
+                            });
+                        }else{
+                            throw "should search for elements";
+                        }
+                    },error : function(error){
+                        throw "should search for elements"
                     }
-                },error : function(error){
-                    throw "should search for elements"
-                }
-            });
+                });
+            }, 3000);
+            
+
         }, function(error){
             console.log(error);
             done(error);
@@ -10548,7 +10845,7 @@ describe("CloudSearch", function (done) {
 
     it("OR should work between tables",function(done){
 
-        this.timeout(30000);
+        this.timeout(33000);
 
 
         var obj = new CB.CloudObject('Student');
@@ -10562,44 +10859,45 @@ describe("CloudSearch", function (done) {
                 
                 var tableNames = ['Student','hostel'];
 
-                
-                var sq = new CB.SearchQuery();
-                sq.searchOn('name','ravi');
+                setTimeout(function(){ 
+                   var sq = new CB.SearchQuery();
+                    sq.searchOn('name','ravi');
 
-                var sq1 = new CB.SearchQuery();
-                sq1.searchOn('room',509);
+                    var sq1 = new CB.SearchQuery();
+                    sq1.searchOn('room',509);
 
-                var cs = new CB.CloudSearch(tableNames);
-                cs.searchQuery = new CB.SearchQuery();
-                cs.searchQuery.or(sq);
-                cs.searchQuery.or(sq1);
+                    var cs = new CB.CloudSearch(tableNames);
+                    cs.searchQuery = new CB.SearchQuery();
+                    cs.searchQuery.or(sq);
+                    cs.searchQuery.or(sq1);
 
-                cs.setLimit(9999);
+                    cs.setLimit(9999);
 
-                cs.search({
-                    success : function(list){
-                        for(var i=0;i<list.length;i++){
-                            if(list[i].document._tableName){
-                                if(tableNames.indexOf(list[i].document._tableName)>-1){
-                                    tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                    cs.search({
+                        success : function(list){
+                            for(var i=0;i<list.length;i++){
+                                if(list[i].document._tableName){
+                                    if(tableNames.indexOf(list[i].document._tableName)>-1){
+                                        tableNames.splice(tableNames.indexOf(list[i].document._tableName),1);
+                                    }
                                 }
                             }
+
+
+                            if(tableNames.length===0){
+                                //test passed. 
+                                done();
+                            }else{
+                                throw "Search on both tables with OR failed.";
+                            }
+
+                        }, error: function(error){
+                            console.log(error);
+                            throw "Error while search.";
                         }
+                    });
 
-
-                        if(tableNames.length===0){
-                            //test passed. 
-                            done();
-                        }else{
-                            throw "Search on both tables with OR failed.";
-                        }
-
-                    }, error: function(error){
-                        console.log(error);
-                        throw "Error while search.";
-                    }
-                })
-
+                }, 3000);
 
              }, function(error){
                 throw "Cannot save an object";
@@ -11848,4 +12146,116 @@ describe("Delete App", function() {
 
 
     });
+});
+
+describe("CloudDevice", function () {
+
+    it("Should create new device with all fields", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);       
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "data");
+        obj.set('deviceOS', "windows");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                    done();
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should fail on creating device with same deviceToken twice", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);       
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "hdgdd");        
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var obj = new CB.CloudObject('Device');
+                    obj.set('deviceToken', "hdgdd");        
+                    obj.save({
+                        success : function(savedObj2){
+                            if(savedObj2){
+                               done("created twice with same deviceToken");
+                            }else{
+                                done();
+                            }
+                        },error : function(error){
+                            done();
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+    });
+
+    it("Should update device", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);       
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "token");
+        obj.set('deviceOS', "windows");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    savedObj.set('deviceToken', "toke2");
+                    savedObj.set('deviceOS', "windows2");
+                    savedObj.set('timezone', "chile2");
+                    savedObj.set('channels', ["pirates2","hackers2","stealers2"]);
+                    savedObj.set('metadata', {"appname":"hdhfhfhfhf2"});
+                    savedObj.save({
+                        success : function(savedObj2){
+                            if(savedObj2){
+                                done();
+                            }else{
+                                done("error on updating device object");
+                            }
+                        },error : function(error){
+                            done(error);
+                        }
+                    });
+
+                }else{
+                    done("error on creating device object for the first time");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });
+    });    
+
 });
