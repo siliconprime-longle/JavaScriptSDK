@@ -13,23 +13,20 @@ describe("CloudPush", function (done) {
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
         obj.save({
             success : function(savedObj){
-                if(savedObj){
+               
+                var query = new CB.CloudQuery("Device");
+                query.containedIn('channels', "hackers");
 
-                    var query = new CB.CloudQuery("Device");
-                    query.containedIn('channels', "hackers");
+                CB.Push.send({title:"RT Bathula",message:"check this"},query,{
+                    success:function(data){
+                        done("Sent without notifications.");
+                    },
+                    error:function(error){
+                        done();
+                    }
+                });
 
-                    CB.Push.send({title:"RT Bathula",message:"check this"},query,{
-                        success:function(data){
-                            done("Sent without notifications.");
-                        },
-                        error:function(error){
-                            done();
-                        }
-                    });
-
-                }else{
-                    done("error on creating device object");
-                }
+               
             },error : function(error){
                 done(error);
             }
