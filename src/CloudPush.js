@@ -17,8 +17,8 @@ CB.Push.send = function(data,query,callback) {
     if(!data){
     	throw "data object is null.";
     }
-    if(data && (!data.alert && !data.message)){
-    	throw "message or alert is not set.";
+    if(data && (!data.message)){
+    	throw "message is not set.";
     }
 
 	//Query Set

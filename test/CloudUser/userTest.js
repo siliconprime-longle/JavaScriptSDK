@@ -514,7 +514,7 @@ describe("CloudUser", function () {
           mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
           email:"hello@nawazdhandala.com",
           from:"nawazdhandala",
-          template:"<h3>TEST(with all settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
+          template:'<h3 style="color: black;">Forgot your password? Were there to help.</h3><p style="color: black;">Hi *|NAME|*</p><p style="color: black;">Please click on the button below which will help you reset your password and once youre done, Youre good to go!   </p><p>*|LINK|*</p><p><a href="*|LINK|*" style="background-color: #159cee;color: white;">Reset Password</a></p><p style="color: black;">Thank you and have a great day!</p>'         
         };
 
 
@@ -666,7 +666,7 @@ describe("CloudUser", function () {
     });
 
 
-     it("Should login user", function (done) {
+    it("Should login user", function (done) {
 
         if(CB._isNode){
             done();
@@ -753,11 +753,10 @@ describe("CloudUser", function () {
             throw "user login error";
         });
 
-    });
-     
+    });   
 
 
-     it('should encrypt user password',function (done){
+    it('should encrypt user password',function (done){
         
         this.timeout(300000);
 

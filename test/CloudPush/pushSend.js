@@ -237,14 +237,124 @@ describe("CloudPush", function (done) {
     it("Should send message with data, no callback passed", function (done) {
 
         this.timeout(30000);
-        
-        CB.Push.send({title:"RT Bathula",message:"check this"})
-        .then(function(response){
-            done();
-        },function(error){
-            done();
-        });
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal123");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                   
+                    CB.Push.send({title:"RT Bathula",message:"check this"})
+                    .then(function(response){
+                        done();
+                    },function(error){
+                        done();
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
         
     });
 
-});    
+    it("Should fail to send message without data object", function (done) {
+
+        this.timeout(30000);
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal124");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                try{    
+                    CB.Push.send(query,{
+                        success:function(data){
+                            done("Sent without data");
+                        },
+                        error:function(error){
+                            done("Sent without data");
+                        }
+                    });
+                 }catch(e){
+                    done();
+                 }                        
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
+        
+    });
+
+    it("Should fail to send message without setting data.message property", function (done) {
+
+        this.timeout(30000);
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal126");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                    try{
+
+                        CB.Push.send({title:"Hola"},query,{
+                            success:function(data){
+                                done("Sent,without message");
+                            },
+                            error:function(error){
+                                 done("Sent,without message");
+                            }
+                        });
+
+                    }catch(e){
+                        done();
+                    }                  
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
+        
+    });
+
+    
+
+}); 
+
+  

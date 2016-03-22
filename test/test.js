@@ -10334,17 +10334,127 @@ describe("CloudPush", function (done) {
     it("Should send message with data, no callback passed", function (done) {
 
         this.timeout(30000);
-        
-        CB.Push.send({title:"RT Bathula",message:"check this"})
-        .then(function(response){
-            done();
-        },function(error){
-            done();
-        });
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal123");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+                   
+                    CB.Push.send({title:"RT Bathula",message:"check this"})
+                    .then(function(response){
+                        done();
+                    },function(error){
+                        done();
+                    });
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
         
     });
 
-});    
+    it("Should fail to send message without data object", function (done) {
+
+        this.timeout(30000);
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal124");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                try{    
+                    CB.Push.send(query,{
+                        success:function(data){
+                            done("Sent without data");
+                        },
+                        error:function(error){
+                            done("Sent without data");
+                        }
+                    });
+                 }catch(e){
+                    done();
+                 }                        
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
+        
+    });
+
+    it("Should fail to send message without setting data.message property", function (done) {
+
+        this.timeout(30000);
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Device');
+        obj.set('deviceToken', "jwhdtabal126");
+        obj.set('deviceOS', "andriod");
+        obj.set('timezone', "chile");
+        obj.set('channels', ["pirates","hackers","stealers"]);
+        obj.set('metadata', {"appname":"hdhfhfhfhf"});
+        obj.save({
+            success : function(savedObj){
+                if(savedObj){
+
+                    var query = new CB.CloudQuery("Device");
+                    query.containedIn('channels', "hackers");
+
+                    try{
+
+                        CB.Push.send({title:"Hola"},query,{
+                            success:function(data){
+                                done("Sent,without message");
+                            },
+                            error:function(error){
+                                 done("Sent,without message");
+                            }
+                        });
+
+                    }catch(e){
+                        done();
+                    }                  
+
+                }else{
+                    done("error on creating device object");
+                }
+            },error : function(error){
+                done(error);
+            }
+        });       
+        
+    });
+
+    
+
+}); 
+
+  
 
 describe("CloudSearch", function (done) {
 
@@ -11675,7 +11785,7 @@ describe("CloudUser", function () {
           mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
           email:"hello@nawazdhandala.com",
           from:"nawazdhandala",
-          template:"<h3>TEST(with all settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
+          template:'<h3 style="color: black;">Forgot your password? Were there to help.</h3><p style="color: black;">Hi *|NAME|*</p><p style="color: black;">Please click on the button below which will help you reset your password and once youre done, Youre good to go!   </p><p>*|LINK|*</p><p><a href="*|LINK|*" style="background-color: #159cee;color: white;">Reset Password</a></p><p style="color: black;">Thank you and have a great day!</p>'         
         };
 
 
@@ -11827,7 +11937,7 @@ describe("CloudUser", function () {
     });
 
 
-     it("Should login user", function (done) {
+    it("Should login user", function (done) {
 
         if(CB._isNode){
             done();
@@ -11914,11 +12024,10 @@ describe("CloudUser", function () {
             throw "user login error";
         });
 
-    });
-     
+    });   
 
 
-     it('should encrypt user password',function (done){
+    it('should encrypt user password',function (done){
         
         this.timeout(300000);
 
