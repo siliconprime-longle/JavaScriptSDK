@@ -1,4 +1,4 @@
-var SECURE_KEY = "c9ee5250-a98e-4b17-ae8a-f2f6c94910af";
+var SECURE_KEY = "e04852bc-20e8-492c-b33e-0657e31fb80b";
 var URL = "http://localhost:4730";
 
    var util = {
@@ -27,6 +27,49 @@ var request = require('request');
 var CB = require('../dist/cloudboost');
 describe("Cloud App", function() {
     
+    it("MongoDb,RedisDb & Elastic SearchDb Statuses..", function(done) {
+        this.timeout(100000);
+       
+        var url = URL+'/status'; 
+        var params = {};    
+        params.url = URL;
+
+        if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'GET'			  
+			}, function(error, response, body){
+
+			    if(error || response.statusCode === 500 || response.statusCode === 400 || body === 'Error'){  
+		          	done("Something went wrong..");
+		        }else {  
+		        	done();	          
+			    }
+			});
+
+        }else{
+        	$.ajax({ 
+			    // The URL for the request
+			    url: url,			
+			    // Whether this is a POST or GET request
+			    type: "GET",			   
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( resp ) {
+			       done();
+			    },			 
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Something went wrong..");
+			    },
+			 
+			});
+        }
+
+    });
+
     it("Change the Server URL", function(done) {
         this.timeout(100000);
         var appId = util.makeString();

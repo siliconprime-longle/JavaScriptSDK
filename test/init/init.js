@@ -1,5 +1,48 @@
 describe("Cloud App", function() {
     
+    it("MongoDb,RedisDb & Elastic SearchDb Statuses..", function(done) {
+        this.timeout(100000);
+       
+        var url = URL+'/status'; 
+        var params = {};    
+        params.url = URL;
+
+        if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'GET'			  
+			}, function(error, response, body){
+
+			    if(error || response.statusCode === 500 || response.statusCode === 400 || body === 'Error'){  
+		          	done("Something went wrong..");
+		        }else {  
+		        	done();	          
+			    }
+			});
+
+        }else{
+        	$.ajax({ 
+			    // The URL for the request
+			    url: url,			
+			    // Whether this is a POST or GET request
+			    type: "GET",			   
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( resp ) {
+			       done();
+			    },			 
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Something went wrong..");
+			    },
+			 
+			});
+        }
+
+    });
+
     it("Change the Server URL", function(done) {
         this.timeout(100000);
         var appId = util.makeString();

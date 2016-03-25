@@ -1,2 +1,2 @@
-var SECURE_KEY = "c9ee5250-a98e-4b17-ae8a-f2f6c94910af";
+var SECURE_KEY = "e04852bc-20e8-492c-b33e-0657e31fb80b";
 var URL = "http://localhost:4730";
