@@ -212,13 +212,13 @@ describe("Cloud App", function() {
 	 });
 
 
-	 it("should get sample setting to an app.", function(done) {
+	it("should get sample setting to an app.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId;
         var params = {};
         params.key = CB.masterKey;
         
-          if(!window){
+        if(!window){
         	//Lets configure and request
 			request({
 			    url: url, //URL to hit

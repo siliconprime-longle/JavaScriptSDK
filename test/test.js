@@ -239,13 +239,13 @@ describe("Cloud App", function() {
 	 });
 
 
-	 it("should get sample setting to an app.", function(done) {
+	it("should get sample setting to an app.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId;
         var params = {};
         params.key = CB.masterKey;
         
-          if(!window){
+        if(!window){
         	//Lets configure and request
 			request({
 			    url: url, //URL to hit
@@ -10147,7 +10147,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "helloasgsgdsd");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10184,7 +10184,7 @@ describe("CloudPush", function (done) {
           apple:{
             certificates:[]
           },
-          andriod:{
+          android:{
             credentials:[{senderId:"shdfshd",apiKey:"sdjhsdh"}]
           },
           windows:{
@@ -10237,14 +10237,14 @@ describe("CloudPush", function (done) {
             });
         }
     });
-
+    
     it("Should send message with data,query and callback", function (done) {
 
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "sdjhkasgsgdsd");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10275,38 +10275,39 @@ describe("CloudPush", function (done) {
         
     });
 
+    
     it("Should send message with data and callback", function (done) {
 
-        this.timeout(30000);
+            this.timeout(30000);
 
-        var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "datasdsdszafu");
-        obj.set('deviceOS', "andriod");
-        obj.set('timezone', "chile");
-        obj.set('channels', ["pirates","hackers","stealers"]);
-        obj.set('metadata', {"appname":"hdhfhfhfhf"});
-        obj.save({
-            success : function(savedObj){
-                if(savedObj){
-                   
-                    CB.Push.send({title:"RT Bathula",message:"check this"},{
-                        success:function(data){
-                            done();
-                        },
-                        error:function(error){
-                            done(error);
-                        }
-                    });
+            var obj = new CB.CloudObject('Device');
+            obj.set('deviceToken', "datasdsdszafu");
+            obj.set('deviceOS', "android");
+            obj.set('timezone', "chile");
+            obj.set('channels', ["pirates","hackers","stealers"]);
+            obj.set('metadata', {"appname":"hdhfhfhfhf"});
+            obj.save({
+                success : function(savedObj){
+                    if(savedObj){
+                       
+                        CB.Push.send({title:"RT Bathula",message:"check this"},{
+                            success:function(data){
+                                done();
+                            },
+                            error:function(error){
+                                done(error);
+                            }
+                        });
 
-                }else{
-                    done("error on creating device object");
+                    }else{
+                        done("error on creating device object");
+                    }
+                },error : function(error){
+                    done(error);
                 }
-            },error : function(error){
-                done(error);
-            }
+            });
+            
         });
-        
-    });
 
     it("Should send message with data,channelsArray and callback", function (done) {
 
@@ -10314,7 +10315,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "dddtasdrehf");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10347,7 +10348,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "jwhdtabaltasdrehf");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10382,7 +10383,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "jwhdtabal123");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10394,7 +10395,7 @@ describe("CloudPush", function (done) {
                     .then(function(response){
                         done();
                     },function(error){
-                        done();
+                        done(error);
                     });
 
                 }else{
@@ -10415,7 +10416,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "jwhdtabal124");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10457,7 +10458,7 @@ describe("CloudPush", function (done) {
 
         var obj = new CB.CloudObject('Device');
         obj.set('deviceToken', "jwhdtabal126");
-        obj.set('deviceOS', "andriod");
+        obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
         obj.set('metadata', {"appname":"hdhfhfhfhf"});
@@ -10491,9 +10492,7 @@ describe("CloudPush", function (done) {
             }
         });       
         
-    });
-
-    
+    });    
 
 }); 
 
