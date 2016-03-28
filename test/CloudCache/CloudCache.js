@@ -234,7 +234,8 @@ describe("Cloud Cache", function(){
                                 if(response != null){
                                     if(response.name === "sample2" && response.sex === "male" && response.age === 24){
                                          cache.getAll({
-                                            success: function(response){
+                                            success: function(response){                                                
+
                                                 if(response.length>1){
                                                     if(response instanceof Array){
                                                         response1  = response[0];
@@ -359,7 +360,7 @@ describe("Cloud Cache", function(){
         }, function(error){
             done("Cannot set values in a cache.");
         });
-       }); 
+    }); 
 
     it("Should delete a cache from an app.", function(done){
         this.timeout(30000);
@@ -482,7 +483,7 @@ describe("Cloud Cache", function(){
         });
     });
 
-     it("Should delete the entire caches from an app.", function(done){
+    it("Should delete the entire caches from an app.", function(done){
         this.timeout(300000);
 
         var cache = new CB.CloudCache('student');

@@ -2,7 +2,7 @@
     
    
     
-   it("save a relation.", function (done) {
+    it("save a relation.", function (done) {
         
         this.timeout(30000);
 
@@ -102,6 +102,7 @@
         var obj = new CB.CloudObject('Custom4');
         obj.set('newColumn7', [obj1,obj1]);
         obj.save().then(function(respObj) {
+            console.log(respObj);
             if(respObj.get("newColumn7").length==2){
                 throw "returning duplicate objects";
             }else{
@@ -294,9 +295,7 @@
                 });
             }, function(error){
                 throw "Cannot save an object";
-            });
-
-            
+            });            
     });
 
 });

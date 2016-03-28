@@ -4,7 +4,7 @@ describe("Cloud Queue Tests", function() {
 	// -> Which has columns : 
 	// name : string : required
 
- it("Should return no queue objects when there are no queues inthe database",function(done){
+it("Should return no queue objects when there are no queues inthe database",function(done){
      this.timeout(30000);
      CB.CloudQueue.getAll({
           success : function(response){
@@ -150,20 +150,32 @@ it("Should add current time as expires into the queue.",function(done){
                          queue.addMessage('sample1',{
                               success : function(response){
                                    if(response instanceof CB.QueueMessage && response.id){
-                                        if(response.message === 'sample1'){
+                                        if(response.message === 'sample1'){                                             
                                              queue.getAllMessages({
                                                   success : function(response){
+                                                       
                                                        if(response.length===2){
+
+                                                            var qMessagesList=true;
                                                             for(var i=0;i<response.length;i++){
                                                                  if(response[i] instanceof CB.QueueMessage){
-                                                                      done();
+                                                                      qMessagesList=true;
                                                                  }else{
-                                                                      done("Wrong queue message.");
+                                                                      qMessagesList=false;
+                                                                      break;                                                                      
                                                                  }
                                                             }
+
+                                                            if(qMessagesList){
+                                                                 done();
+                                                            }else{
+                                                                done("Wrong queue message."); 
+                                                            }                                                            
+
                                                        }else{
                                                             done("Wrong queue message");
                                                        }
+
                                                   },error : function(error){
                                                        done(error);
                                                   }

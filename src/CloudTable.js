@@ -252,14 +252,15 @@ CB.CloudTable.prototype.delete = function(callback){
 
     var params=JSON.stringify({
         key: CB.appKey,
-        name: this.name
+        name: this.name,
+        method:"DELETE"
     });
 
     var thisObj = this;
 
     var url = CB.apiUrl + '/app/' + CB.appId + "/" +this.name;
 
-    CB._request('DELETE',url,params,true).then(function(response){
+    CB._request('PUT',url,params,true).then(function(response){
         if (callback) {
             callback.success(thisObj);
         } else {

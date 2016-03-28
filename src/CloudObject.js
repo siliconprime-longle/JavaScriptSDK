@@ -356,11 +356,13 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document: CB.toJSON(thisObj)
+        document: CB.toJSON(thisObj),
+        method:"DELETE"
     });
+    
     var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName;
 
-    CB._request('DELETE',url,params).then(function(response){
+    CB._request('PUT',url,params).then(function(response){
         if (callback) {
             callback.success(response);
         } else {
@@ -452,10 +454,11 @@ CB.CloudObject.deleteAll = function(array,callback){
     var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB.toJSON(array),
-        key: CB.appKey
+        key: CB.appKey,
+        method:"DELETE"
     });
     var url = CB.apiUrl + "/data/" + CB.appId + '/'+array[0]._tableName;
-    CB._request('DELETE',url,params).then(function(response){
+    CB._request('PUT',url,params).then(function(response){
         var thisObj = CB.fromJSON(JSON.parse(response));
         if (callback) {
             callback.success(thisObj);

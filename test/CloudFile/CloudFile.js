@@ -9,7 +9,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            console.log(file);
+            //console.log(file);
             if(file.url) {
                
               if(!window){
@@ -38,6 +38,7 @@ describe("Cloud Files", function(done) {
                         // Code to run if the request fails; the raw request and
                         // status codes are passed to the function
                         error: function( xhr, status, errorThrown ) {
+                            done(errorThrown);
                             done("Error thrown.");
                         },
                     });
@@ -46,6 +47,7 @@ describe("Cloud Files", function(done) {
                 throw 'únable to get the url';
             }
         },function(err){
+            done(err);
             throw "Unable to save file";
         });
     });
@@ -83,7 +85,7 @@ describe("Cloud Files", function(done) {
         });
     });
 
-     it("Should count progress bar",function(done){
+    it("Should count progress bar",function(done){
 
         this.timeout(30000);
 
@@ -217,7 +219,7 @@ describe("Cloud Files", function(done) {
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
             if(file.url) {
-                console.log(file);
+                //console.log(file);
                 console.log("Saved file");
                 done();
             }else{
@@ -239,7 +241,7 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file){
             if(file.url) {
                 file.delete().then(function(file){
-                    console.log(file);
+                    //console.log(file);
                     if(file.url === null)
                         done();
                     else
@@ -253,95 +255,126 @@ describe("Cloud Files", function(done) {
         },function(err){
             throw "Unable to save file";
         });
-    });
+    }); 
+
 
     try {
 
         if (window) {
+
+            //Check Blob availability..
+            var blobAvail=true;
+            try {                    
+                new Blob(['<a id="a"><b id="b">hey!</b></a>'], {type: "text/html"});
+                blobAvail=true;
+            } catch (e) {                   
+                blobAvail=false;
+            }
+
             it("should save a new file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
 
-                file.save().then(function (file) {
-                    if (file.url) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {                    
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {                   
+                        var builder = new WebKitBlobBuilder();                    
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
+
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+
+                    file.save().then(function (file) {                       
+                        if (file.url) {
+                            done();
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }                       
+                    }, function (err) {
+                        done(err);
+                        throw "Error uploading file";
+                    }); 
+                }else{
+                    done();
+                }               
 
             });
             
             it("should delete a file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
 
-                file.save().then(function (file) {
-                    if (file.url) {
-                        //received the blob's url
-                        console.log(file.url);
-                        file.delete().then(function (file) {
-                            if (file.url === null) {
-                                done();
-                            } else {
-                                throw "File deleted, url in SDK not deleted";
-                            }
-                        }, function (err) {
-                            throw "Error deleting file";
-                        })
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {
+                        var builder = new WebKitBlobBuilder();
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+
+                    file.save().then(function (file) {
+                        if (file.url) {
+                            //received the blob's url
+                            console.log(file.url);
+                            file.delete().then(function (file) {
+                                if (file.url === null) {
+                                    done();
+                                } else {
+                                    throw "File deleted, url in SDK not deleted";
+                                }
+                            }, function (err) {
+                                throw "Error deleting file";
+                            })
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }
+                    }, function (err) {
+                        throw "Error uploading file";
+                    });
+                }else{
+                    done();
+                }
             });
+
+
             it("should save a new file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
-                var file1 = new CB.CloudFile(oMyBlob);
 
-                var obj = new CB.CloudObject('Sample');
-                obj.set('fileList', [file, file1]);
-                obj.set('name', 'abcd');
-                obj.save().then(function (file) {
-                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {
+                        var builder = new WebKitBlobBuilder();
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+                    var file1 = new CB.CloudFile(oMyBlob);
+
+                    var obj = new CB.CloudObject('Sample');
+                    obj.set('fileList', [file, file1]);
+                    obj.set('name', 'abcd');
+                    obj.save().then(function (file) {
+                        if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
+                            done();
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }
+                    }, function (err) {
+                        done(err);
+                        throw "Error uploading file";
+                    });
+                }else{
+                    done();
+                }
 
             });
         }
@@ -349,7 +382,7 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
-   it("Should Save a file file data and name then fetch it",function(done){
+    it("Should Save a file file data and name then fetch it",function(done){
 
         this.timeout(30000);
 
@@ -358,11 +391,11 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            console.log(file);
+            //console.log(file);
             if(file.url) {
                 file.fetch().then(function(res){
                     res.getFileContent().then(function(res){
-                        console.log(res);
+                        //console.log(res);
                         done();
                     },function(){
                         throw "Unable to Fetch File";
@@ -391,7 +424,7 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             var id = res.get('id');
             var query = new CB.CloudQuery('Sample');
             query.equalTo('id',id);
@@ -420,10 +453,10 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             var file = res.get('file');
             file.fetch().then(function(res){
-                console.log(res);
+                //console.log(res);
                 if(res.get('url'))
                     done();
                 throw "Unable to fetch the file";
@@ -455,7 +488,7 @@ describe("Cloud Files", function(done) {
                 query.include('Company.File');
                 query.equalTo('id',res.get('id'));
                 query.find().then(function(res){
-                    console.log(res);
+                   // console.log(res);
                     done();
                 },function(err){
                     throw "Unable to query";
@@ -692,3 +725,5 @@ describe("Cloud Files", function(done) {
     //     });
 
 });
+
+

@@ -484,13 +484,14 @@ CB.CloudQueue.prototype.removeSubscriber = function(url,callback) {
 
     var params=JSON.stringify({       
         key: CB.appKey,
-        document : CB.toJSON(thisObj)
+        document : CB.toJSON(thisObj),
+        method: "DELETE"
     });
 
 
    var url = CB.apiUrl + '/queue/' + CB.appId + '/'+thisObj.document.name+'/subscriber/';
 
-   CB._request('DELETE',url,params).then(function(response){
+   CB._request('PUT',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -564,14 +565,15 @@ CB.CloudQueue.prototype.delete = function(callback) {
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document : CB.toJSON(this)
+        document : CB.toJSON(this),
+        method:"DELETE"
     });
 
    var thisObj = this;
 
    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name;
 
-   CB._request('DELETE',url,params).then(function(response){
+   CB._request('PUT',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -600,14 +602,15 @@ CB.CloudQueue.prototype.clear = function(callback) {
 
     var params=JSON.stringify({
         key: CB.appKey,
-        document : CB.toJSON(this)
+        document : CB.toJSON(this),
+        method: "DELETE"
     });
 
    var thisObj = this;
 
    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/clear";
 
-   CB._request('DELETE',url,params).then(function(response){
+   CB._request('PUT',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
         if (callback) {
             callback.success(thisObj);
@@ -695,14 +698,15 @@ CB.CloudQueue.prototype.deleteMessage = function(id,callback) {
     var xmlhttp = CB._loadXml();
 
     var params=JSON.stringify({
-        key: CB.appKey
+        key: CB.appKey,
+        method: "DELETE"
     });
 
    var thisObj = this;
 
    var url = CB.apiUrl + "/queue/" + CB.appId + '/'+thisObj.document.name+"/message/"+id;
 
-   CB._request('DELETE',url,params).then(function(response){
+   CB._request('PUT',url,params).then(function(response){
         if (callback) {
             callback.success(CB.fromJSON(JSON.parse(response)));
         } else {

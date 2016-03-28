@@ -1,11 +1,10 @@
-describe("CloudQuery", function (done) {
-
-    var obj = new CB.CloudObject('student1');
+describe("CloudQuery", function (done) {    
 
     it("Should save data with a particular value.", function (done) {
 
         this.timeout(30000);
 
+        var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.save().then(function(list) {
             if(list.get('name') === 'vipul')
@@ -19,10 +18,11 @@ describe("CloudQuery", function (done) {
     });
 
 
-    it("Should save data with a particular value.", function (done) {
+   it("Should save and query substring.", function (done) {
 
         this.timeout(30000);
 
+        var obj = new CB.CloudObject('student1');
         obj.set('name', 'vipul');
         obj.save().then(function(list) {
             if(list.get('name') === 'vipul'){
@@ -55,6 +55,7 @@ describe("CloudQuery", function (done) {
 
         this.timeout(30000);
 
+        var obj = new CB.CloudObject('student1');
         obj.set('name', 'nawaz');
         obj.save().then(function(list) {
             if(list.get('name') === 'nawaz'){
@@ -79,10 +80,11 @@ describe("CloudQuery", function (done) {
         });
     });
 
-     it("Substring with an array and array.", function (done) {
+    it("Substring with an array and array.", function (done) {
 
         this.timeout(30000);
 
+        var obj = new CB.CloudObject('student1');
         obj.set('name', 'nawaz');
         obj.save().then(function(list) {
             if(list.get('name') === 'nawaz'){
@@ -107,8 +109,11 @@ describe("CloudQuery", function (done) {
         });
     });
 
-   it("select column should work on find",function(done){
+    it("select column should work on find",function(done){
+
             this.timeout(30000);
+
+            var obj = new CB.CloudObject('student1');
             var obj1 = new CB.CloudObject('Custom1');
             obj1.set('newColumn','sample');
             obj1.set('description','sample2');
@@ -253,27 +258,32 @@ describe("CloudQuery", function (done) {
             query.notEqualTo('name',null);
             query.find().then(function(list){
 
-                //check all the objects returned. 
-                for(var i=0;i<list.length;i++){
-                    if(!list[i].get('name')){
-                        throw "Name does not exists";
+                console.log(list);
+                if(list && list.length>0){
+                    //check all the objects returned. 
+                    for(var i=0;i<list.length;i++){
+                        if(!list[i].get('name')){
+                            throw "Name does not exists";
+                        }
                     }
-                }
-                if(list.length>0)
+
                     done();
-                else
-                    throw "object could not queried properly";
+                }else{
+                    throw "object could not queried properly";                
+                }
+                
             },function(err){
-                console.log(err);
+                done(err);                
             });
         }, function(error){
+            done(error);
             throw "object could not saved properly";
         });
 
        
     });
 
-     it("should retrieve items when column name is not null (from notEqualTo function)",function(done){
+    it("should retrieve items when column name is not null (from notEqualTo function)",function(done){
         this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
@@ -455,54 +465,68 @@ describe("CloudQuery", function (done) {
         var query = new CB.CloudQuery('student1');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
-            if(list.length>0)
+            if(list && list.length>0)
                 done();
             else
                 throw "object could not saved properly";
         },function(err){
+            done(err)
             console.log(err);
         });
     });
 
     it("should run a find one query",function(done){
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var query = new CB.CloudQuery('student1');
         query.equalTo('name','vipul');
-        query.findOne().then(function(list){
-            if(list.get('name') === 'vipul')
-                done();
-            else
-                throw "unable to get";
-        }, function (err) {
-            console.log(err);
-            throw "should return object";
-        })
+
+        setTimeout(function(){ 
+
+            query.findOne().then(function(list){
+
+                if(list && list.get('name') === 'vipul')
+                    done();
+                else
+                    throw "unable to get";
+            }, function (err) {
+                done(err);
+                throw "should return object";
+            });
+
+        }, 10000);
+        
     });
 
     it("Should retrieve data with a particular value.", function (done) {
 
-        this.timeout(30000);
+        this.timeout(40000);
 
         var obj = new CB.CloudQuery('student1');
         obj.equalTo('name','vipul');
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    if(list[i].get('name') != 'vipul')
-                        throw "should retrieve saved data with particular value ";
-                }
-            } else{
-                throw "should retrieve saved data with particular value ";
-            }
-            done();
-        }, function () {
-            throw "find data error";
-        });
 
-    });
+        setTimeout(function(){ 
+
+            obj.find().then(function(list) {
+                if(list && list.length>0){
+                    for(var i=0;i<list.length;i++){
+                    
+                        if(list[i].get('name') != 'vipul')
+                            throw "should retrieve saved data with particular value ";
+                    }
+                } else{
+                    throw "should retrieve saved data with particular value ";
+                }
+                done();
+            }, function (err) {
+                done(err);
+                throw "find data error";
+            });
+
+        }, 10000);
+
+    });    
 
     it("Should save list with in column", function (done) {
 
@@ -528,8 +552,8 @@ describe("CloudQuery", function (done) {
             obj.containsAll('subject',['java','python']);
             obj.find().then(function(list) {
                 if(list.length>0){
-                    for(var i=0;i<list.length;i++)
-                    {
+                    for(var i=0;i<list.length;i++){
+                    
                         var subject=list[i].get('subject');
                         for(var j=0;j<subject.length;j++) {
                             if (subject[j] != 'java' && subject[j] != 'python')
@@ -539,11 +563,13 @@ describe("CloudQuery", function (done) {
                 } else{
                     throw "should retrieve data matching a set of values ";
                 }
-            done();
-        }, function () {
-            throw "find data error";
-        });
-        }, function () {
+                done();
+            }, function (err) {
+                done(err);
+                throw "find data error";
+            });
+        }, function (err) {
+            done(err);
             throw "list Save error";
         });        
 
@@ -556,9 +582,10 @@ describe("CloudQuery", function (done) {
         var obj = new CB.CloudQuery('student1');
         obj.startsWith('name','v');
         obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
+
+            if(list && list.length>0){
+                for(var i=0;i<list.length;i++){
+                
                     if(list[i].get('name')[0] != 'v' && list[i].get('name')[0]!='V')
                         throw "should retrieve saved data with particular value ";
                 }
@@ -566,7 +593,8 @@ describe("CloudQuery", function (done) {
                 throw "should retrieve data matching a set of values ";
             }
             done();
-        }, function () {
+        }, function (err) {
+            done(err);
             throw "find data error";
         });
 
@@ -593,17 +621,19 @@ describe("CloudQuery", function (done) {
         var obj = new CB.CloudQuery('student1');
         obj.notEqualTo('name','vipul');
         obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
+
+            if(list || list.length==0){
+                done();
+            } else{                
+                 for(var i=0;i<list.length;i++){
+                
                     if(list[i].get('name') === 'vipul')
                         throw "should not retrieve data with particular value ";
                 }
-            } else{
-                throw "should not retrieve data with particular value ";
-            }
-            done();
-        }, function () {
+            }          
+
+        }, function (err) {
+            done(err);
             throw "find data error";
         });
 
@@ -616,9 +646,8 @@ describe("CloudQuery", function (done) {
         var obj = new CB.CloudQuery('student4');
         obj.notContainedIn('subject',['java','python']);
         obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
+            if(list && list.length>0){
+                for(var i=0;i<list.length;i++){                
                     if(list[i].get('subject')) {
                         var subject = list[i].get('subject');
                         for (var j = 0; j < subject.length; j++) {
@@ -628,8 +657,6 @@ describe("CloudQuery", function (done) {
                         }
                     }
                 }
-            } else{
-                done();
             }
             done();
         }, function () {
@@ -645,9 +672,10 @@ describe("CloudQuery", function (done) {
         var obj = new CB.CloudObject('student4');
         obj.set('age', 15);
         obj.set('subject', ['C#','C']);
-        obj.save().then(function() {
+        obj.save().then(function(data) {           
             done();
-        }, function () {
+        }, function (err) {
+            done(err);
             throw "data Save error";
         });
 
@@ -747,39 +775,47 @@ describe("CloudQuery", function (done) {
 
     it("Should retrieve data with a particular value.", function (done) {
 
-        this.timeout(30000);
+        this.timeout(33000);
 
         var obj1 = new CB.CloudQuery('student4');
         obj1.equalTo('subject',['java','python']);
         var obj2 = new CB.CloudQuery('student4');
         obj2.equalTo('age',12);
         var obj = new CB.CloudQuery.or(obj1,obj2);
-        obj.find().then(function(list) {
-            if(list.length>0) {
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].get('age') === 12) {
-                        continue;
-                    }else {
-                        var subject = list[i].get('subject');
-                        for (var j = 0; j < subject.length; j++) {
-                            if (subject[j] === 'java' || subject[j] === 'python') {
-                                continue;
-                            }
-                            else
-                            {
-                                throw "should retrieve saved data with particular value ";
+
+        setTimeout(function(){ 
+
+            obj.find().then(function(list) {
+                console.log(list);
+                if(list.length>0) {
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].get('age') === 12) {
+                            continue;
+                        }else {
+                            var subject = list[i].get('subject');
+                            for (var j = 0; j < subject.length; j++) {
+                                if (subject[j] === 'java' || subject[j] === 'python') {
+                                    continue;
+                                }
+                                else
+                                {
+                                    throw "should retrieve saved data with particular value ";
+                                }
                             }
                         }
+                        continue;
                     }
-                    continue;
                 }
-            }
-            else
-                throw "should return data";
-            done();
-        }, function () {
-            throw "find data error";
-        });
+                else
+                    throw "should return data";
+
+                done();
+            }, function (err) {
+                done(err);
+                throw "find data error";
+            });
+
+        }, 3000);     
 
     });
 
@@ -1198,11 +1234,12 @@ describe("CloudQuery", function (done) {
 
     });
 
-    var getidobj = new CB.CloudObject('student1');
+    
 
     it("Should save data with a particular value.", function (done) {
 
         this.timeout(30000);
+        var getidobj = new CB.CloudObject('student1');
         getidobj.set('name', 'abcd');
         getidobj.save().then(function() {
             done();
@@ -1217,16 +1254,18 @@ describe("CloudQuery", function (done) {
         this.timeout(30000);
         var obj = new CB.CloudQuery('student1');
         obj.get(getidobj.get('id')).then(function(list) {
+
             if(list.length>0) {
                 throw "received number of items are greater than the required value";
-            }
-            else{
+            }else{
                 if(list.get('name')==='abcd')
                     done();
                 else
                     throw "received wrong data";
             }
-        }, function () {
+
+        }, function (err) {
+            done(err);
             throw "find data error";
         });
 

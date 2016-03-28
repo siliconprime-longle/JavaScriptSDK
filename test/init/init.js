@@ -102,7 +102,7 @@ describe("Cloud App", function() {
         var url = URL+'/app/'+appId;
         var params = {};
         params.secureKey = SECURE_KEY;
-          if(!window){
+        if(!window){        	
         	//Lets configure and request
 			request({
 			    url: url, //URL to hit
@@ -121,7 +121,7 @@ describe("Cloud App", function() {
 			       done();
 			    }
 			});
-        }else{
+       	}else{
 	       $.ajax({
 	 
 			    // The URL for the request
@@ -157,7 +157,7 @@ describe("Cloud App", function() {
 	 });
 
 
-     it("should add a sample setting to an app.", function(done) {
+    it("should add a sample setting to an app.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId+"/settings";
         var params = {};
@@ -194,7 +194,7 @@ describe("Cloud App", function() {
 			    dataType : "json",
 			    // Code to run if the request succeeds;
 			    // the response is passed to the function
-			    success: function( json ) {
+			    success: function( json ) {			    			    	
 			       if(json.category === "settings"){
 			       	 done();
 			       }else{
@@ -267,8 +267,7 @@ describe("Cloud App", function() {
 			 
 			});
 		}
-
-	 });
+	});
 
 	
 });

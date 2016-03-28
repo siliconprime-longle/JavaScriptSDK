@@ -21,7 +21,7 @@ describe("Should Create All Test Tables",function(done){
         password.dataType = 'EncryptedText';
         obj.addColumn(password);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(err){
             throw "Unable to Create Table";
@@ -45,7 +45,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 
-     it("should create a table with two underscore columns",function(done){
+    it("should create a table with two underscore columns",function(done){
 
         this.timeout(50000);
 
@@ -89,7 +89,7 @@ describe("Should Create All Test Tables",function(done){
         obj.addColumn(Name);
         obj.addColumn(File);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(){
             throw "Unable to Create Table";
@@ -108,7 +108,7 @@ describe("Should Create All Test Tables",function(done){
         obj.addColumn(City);
         obj.addColumn(PinCode);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(){
             throw "Unable to Create Table";
@@ -130,7 +130,7 @@ describe("Should Create All Test Tables",function(done){
             Address.relatedTo = 'Address';
             res.addColumn(Address);
             res.save().then(function(res){
-                console.log(res);
+                //console.log(res);
                 done();
             },function(err){
                 throw "Unable to Update schema of the table";
@@ -155,7 +155,7 @@ describe("Should Create All Test Tables",function(done){
             Address.relatedTo = 'Address';
             res.addColumn(Address);
             res.save().then(function(res){
-                console.log(res);
+                //console.log(res);
                 done();
             },function(err){
                 throw "Unable to Update schema of the table";
@@ -591,27 +591,33 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
-   it("should create table and delete table",function(done){
+    it("should create table and delete table",function(done){
 
         this.timeout(50000);
 
         var custom = new CB.CloudTable('CustomDelete');
+
         var newColumn = new CB.Column('description');
         newColumn.dataType = 'Text';
         custom.addColumn(newColumn);
+
         var newColumn1 = new CB.Column('newColumn');
         newColumn1.dataType = 'Text';
         custom.addColumn(newColumn1);
+
         var newColumn2 = new CB.Column('newColumn1');
         newColumn2.dataType = 'Boolean';
         custom.addColumn(newColumn2);
 
         custom.save().then(function(res){
-            res.delete().then(function(res){
+
+            res.delete().then(function(delRes){
                 done();
-            },function(){
-                throw "Unable to delete a table";
+            },function(err){ 
+                done(err);               
+                throw "Unable to delete a table.";
             });
+
         },function(){
             throw "Unable to delete a table.";
         });
@@ -619,7 +625,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
     after(function() {
-        CB.appKey = CB.jsKey;
+       CB.appKey = CB.jsKey;
     });
 
 });

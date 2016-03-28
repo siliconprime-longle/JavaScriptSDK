@@ -82,11 +82,12 @@ CB.CloudCache.prototype.deleteItem = function(key, callback){
 
 
   var params=JSON.stringify({
-      key: CB.appKey
+      key: CB.appKey,
+      method:"DELETE"
   });
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/item/'+key;
-  CB._request('DELETE',url,params,true).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }
@@ -276,8 +277,10 @@ CB.CloudCache.prototype.getAll = function(callback){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }
-    var obj = CB.fromJSON(response);
-    thisObj.items = obj;
+    var obj = CB.fromJSON(response); 
+    
+    thisObj.document.items = obj;
+
     if (callback) {
         callback.success(obj);
     } else {
@@ -306,13 +309,14 @@ CB.CloudCache.prototype.clear = function(callback){
     }
 
   var params=JSON.stringify({
-      key: CB.appKey
+      key: CB.appKey,
+      method:"DELETE"
   });
 
   var thisObj = this;
 
-  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/clear';
-  CB._request('DELETE',url,params,true).then(function(response){
+  var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name+'/clear/items';
+  CB._request('PUT',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }
@@ -344,13 +348,14 @@ CB.CloudCache.prototype.delete = function(callback){
     }
 
   var params=JSON.stringify({
-      key: CB.appKey
+      key: CB.appKey,
+      method:"DELETE"
   });
 
   var thisObj = this;
 
   var url = CB.apiUrl+'/cache/'+CB.appId+'/'+this.document.name;
-  CB._request('DELETE',url,params,true).then(function(response){
+  CB._request('PUT',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }
@@ -388,7 +393,7 @@ CB.CloudCache.getAll = function(callback){
   CB._request('POST',url,params,true).then(function(response){
     if(CB._isJsonString(response)){
       response = JSON.parse(response);
-    }
+    }    
     var obj = CB.fromJSON(response);
     if (callback) {
         callback.success(obj);
@@ -416,11 +421,12 @@ CB.CloudCache.deleteAll = function(callback){
     }
 
     var params=JSON.stringify({
-        key: CB.appKey
+        key: CB.appKey,
+        method:"DELETE"
     });
 
     var url = CB.apiUrl+'/cache/'+CB.appId;
-    CB._request('DELETE',url,params,true).then(function(response){
+    CB._request('PUT',url,params,true).then(function(response){
       if(CB._isJsonString(response)){
       response = JSON.parse(response);
     }

@@ -129,7 +129,7 @@ describe("Cloud App", function() {
         var url = URL+'/app/'+appId;
         var params = {};
         params.secureKey = SECURE_KEY;
-          if(!window){
+        if(!window){        	
         	//Lets configure and request
 			request({
 			    url: url, //URL to hit
@@ -148,7 +148,7 @@ describe("Cloud App", function() {
 			       done();
 			    }
 			});
-        }else{
+       	}else{
 	       $.ajax({
 	 
 			    // The URL for the request
@@ -184,7 +184,7 @@ describe("Cloud App", function() {
 	 });
 
 
-     it("should add a sample setting to an app.", function(done) {
+    it("should add a sample setting to an app.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId+"/settings";
         var params = {};
@@ -221,7 +221,7 @@ describe("Cloud App", function() {
 			    dataType : "json",
 			    // Code to run if the request succeeds;
 			    // the response is passed to the function
-			    success: function( json ) {
+			    success: function( json ) {			    			    	
 			       if(json.category === "settings"){
 			       	 done();
 			       }else{
@@ -294,8 +294,7 @@ describe("Cloud App", function() {
 			 
 			});
 		}
-
-	 });
+	});
 
 	
 });
@@ -536,7 +535,8 @@ describe("Cloud Cache", function(){
                                 if(response != null){
                                     if(response.name === "sample2" && response.sex === "male" && response.age === 24){
                                          cache.getAll({
-                                            success: function(response){
+                                            success: function(response){                                                
+
                                                 if(response.length>1){
                                                     if(response instanceof Array){
                                                         response1  = response[0];
@@ -661,7 +661,7 @@ describe("Cloud Cache", function(){
         }, function(error){
             done("Cannot set values in a cache.");
         });
-       }); 
+    }); 
 
     it("Should delete a cache from an app.", function(done){
         this.timeout(30000);
@@ -784,7 +784,7 @@ describe("Cloud Cache", function(){
         });
     });
 
-     it("Should delete the entire caches from an app.", function(done){
+    it("Should delete the entire caches from an app.", function(done){
         this.timeout(300000);
 
         var cache = new CB.CloudCache('student');
@@ -1250,7 +1250,7 @@ describe("Should Create All Test Tables",function(done){
         password.dataType = 'EncryptedText';
         obj.addColumn(password);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(err){
             throw "Unable to Create Table";
@@ -1274,7 +1274,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
 
-     it("should create a table with two underscore columns",function(done){
+    it("should create a table with two underscore columns",function(done){
 
         this.timeout(50000);
 
@@ -1318,7 +1318,7 @@ describe("Should Create All Test Tables",function(done){
         obj.addColumn(Name);
         obj.addColumn(File);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(){
             throw "Unable to Create Table";
@@ -1337,7 +1337,7 @@ describe("Should Create All Test Tables",function(done){
         obj.addColumn(City);
         obj.addColumn(PinCode);
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             done();
         },function(){
             throw "Unable to Create Table";
@@ -1359,7 +1359,7 @@ describe("Should Create All Test Tables",function(done){
             Address.relatedTo = 'Address';
             res.addColumn(Address);
             res.save().then(function(res){
-                console.log(res);
+                //console.log(res);
                 done();
             },function(err){
                 throw "Unable to Update schema of the table";
@@ -1384,7 +1384,7 @@ describe("Should Create All Test Tables",function(done){
             Address.relatedTo = 'Address';
             res.addColumn(Address);
             res.save().then(function(res){
-                console.log(res);
+                //console.log(res);
                 done();
             },function(err){
                 throw "Unable to Update schema of the table";
@@ -1820,27 +1820,33 @@ describe("Should Create All Test Tables",function(done){
 
     });
 
-   it("should create table and delete table",function(done){
+    it("should create table and delete table",function(done){
 
         this.timeout(50000);
 
         var custom = new CB.CloudTable('CustomDelete');
+
         var newColumn = new CB.Column('description');
         newColumn.dataType = 'Text';
         custom.addColumn(newColumn);
+
         var newColumn1 = new CB.Column('newColumn');
         newColumn1.dataType = 'Text';
         custom.addColumn(newColumn1);
+
         var newColumn2 = new CB.Column('newColumn1');
         newColumn2.dataType = 'Boolean';
         custom.addColumn(newColumn2);
 
         custom.save().then(function(res){
-            res.delete().then(function(res){
+
+            res.delete().then(function(delRes){
                 done();
-            },function(){
-                throw "Unable to delete a table";
+            },function(err){ 
+                done(err);               
+                throw "Unable to delete a table.";
             });
+
         },function(){
             throw "Unable to delete a table.";
         });
@@ -1848,7 +1854,7 @@ describe("Should Create All Test Tables",function(done){
     });
 
     after(function() {
-        CB.appKey = CB.jsKey;
+       CB.appKey = CB.jsKey;
     });
 
 });
@@ -2007,7 +2013,7 @@ describe("Cloud Queue Tests", function() {
 	// -> Which has columns : 
 	// name : string : required
 
- it("Should return no queue objects when there are no queues inthe database",function(done){
+it("Should return no queue objects when there are no queues inthe database",function(done){
      this.timeout(30000);
      CB.CloudQueue.getAll({
           success : function(response){
@@ -2153,20 +2159,32 @@ it("Should add current time as expires into the queue.",function(done){
                          queue.addMessage('sample1',{
                               success : function(response){
                                    if(response instanceof CB.QueueMessage && response.id){
-                                        if(response.message === 'sample1'){
+                                        if(response.message === 'sample1'){                                             
                                              queue.getAllMessages({
                                                   success : function(response){
+                                                       
                                                        if(response.length===2){
+
+                                                            var qMessagesList=true;
                                                             for(var i=0;i<response.length;i++){
                                                                  if(response[i] instanceof CB.QueueMessage){
-                                                                      done();
+                                                                      qMessagesList=true;
                                                                  }else{
-                                                                      done("Wrong queue message.");
+                                                                      qMessagesList=false;
+                                                                      break;                                                                      
                                                                  }
                                                             }
+
+                                                            if(qMessagesList){
+                                                                 done();
+                                                            }else{
+                                                                done("Wrong queue message."); 
+                                                            }                                                            
+
                                                        }else{
                                                             done("Wrong queue message");
                                                        }
+
                                                   },error : function(error){
                                                        done(error);
                                                   }
@@ -6318,7 +6336,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            console.log(file);
+            //console.log(file);
             if(file.url) {
                
               if(!window){
@@ -6347,6 +6365,7 @@ describe("Cloud Files", function(done) {
                         // Code to run if the request fails; the raw request and
                         // status codes are passed to the function
                         error: function( xhr, status, errorThrown ) {
+                            done(errorThrown);
                             done("Error thrown.");
                         },
                     });
@@ -6355,6 +6374,7 @@ describe("Cloud Files", function(done) {
                 throw 'únable to get the url';
             }
         },function(err){
+            done(err);
             throw "Unable to save file";
         });
     });
@@ -6392,7 +6412,7 @@ describe("Cloud Files", function(done) {
         });
     });
 
-     it("Should count progress bar",function(done){
+    it("Should count progress bar",function(done){
 
         this.timeout(30000);
 
@@ -6526,7 +6546,7 @@ describe("Cloud Files", function(done) {
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
             if(file.url) {
-                console.log(file);
+                //console.log(file);
                 console.log("Saved file");
                 done();
             }else{
@@ -6548,7 +6568,7 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file){
             if(file.url) {
                 file.delete().then(function(file){
-                    console.log(file);
+                    //console.log(file);
                     if(file.url === null)
                         done();
                     else
@@ -6562,95 +6582,126 @@ describe("Cloud Files", function(done) {
         },function(err){
             throw "Unable to save file";
         });
-    });
+    }); 
+
 
     try {
 
         if (window) {
+
+            //Check Blob availability..
+            var blobAvail=true;
+            try {                    
+                new Blob(['<a id="a"><b id="b">hey!</b></a>'], {type: "text/html"});
+                blobAvail=true;
+            } catch (e) {                   
+                blobAvail=false;
+            }
+
             it("should save a new file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
 
-                file.save().then(function (file) {
-                    if (file.url) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {                    
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {                   
+                        var builder = new WebKitBlobBuilder();                    
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
+
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+
+                    file.save().then(function (file) {                       
+                        if (file.url) {
+                            done();
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }                       
+                    }, function (err) {
+                        done(err);
+                        throw "Error uploading file";
+                    }); 
+                }else{
+                    done();
+                }               
 
             });
             
             it("should delete a file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
 
-                file.save().then(function (file) {
-                    if (file.url) {
-                        //received the blob's url
-                        console.log(file.url);
-                        file.delete().then(function (file) {
-                            if (file.url === null) {
-                                done();
-                            } else {
-                                throw "File deleted, url in SDK not deleted";
-                            }
-                        }, function (err) {
-                            throw "Error deleting file";
-                        })
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {
+                        var builder = new WebKitBlobBuilder();
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+
+                    file.save().then(function (file) {
+                        if (file.url) {
+                            //received the blob's url
+                            console.log(file.url);
+                            file.delete().then(function (file) {
+                                if (file.url === null) {
+                                    done();
+                                } else {
+                                    throw "File deleted, url in SDK not deleted";
+                                }
+                            }, function (err) {
+                                throw "Error deleting file";
+                            })
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }
+                    }, function (err) {
+                        throw "Error uploading file";
+                    });
+                }else{
+                    done();
+                }
             });
+
+
             it("should save a new file", function (done) {
 
                 this.timeout(30000);
-                var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
-                try {
-                    var oMyBlob = new Blob(aFileParts, {type: "text/html"});
-                } catch (e) {
-                    var builder = new WebKitBlobBuilder();
-                    builder.append(aFileParts);
-                    var oMyBlob = builder.getBlob();
-                }
-                var file = new CB.CloudFile(oMyBlob);
-                var file1 = new CB.CloudFile(oMyBlob);
 
-                var obj = new CB.CloudObject('Sample');
-                obj.set('fileList', [file, file1]);
-                obj.set('name', 'abcd');
-                obj.save().then(function (file) {
-                    if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
-                        done();
-                    } else {
-                        throw "Upload success. But cannot find the URL.";
+                if(blobAvail){
+                    var aFileParts = ['<a id="a"><b id="b">hey!</b></a>'];
+                    try {
+                        var oMyBlob = new Blob(aFileParts, {type: "text/html"});
+                    } catch (e) {
+                        var builder = new WebKitBlobBuilder();
+                        builder.append(aFileParts);
+                        var oMyBlob = builder.getBlob();
                     }
-                }, function (err) {
-                    throw "Error uploading file";
-                });
+                    var file = new CB.CloudFile(oMyBlob);
+                    var file1 = new CB.CloudFile(oMyBlob);
+
+                    var obj = new CB.CloudObject('Sample');
+                    obj.set('fileList', [file, file1]);
+                    obj.set('name', 'abcd');
+                    obj.save().then(function (file) {
+                        if (file.get('fileList')[0].get('id') && file.get('fileList')[1].get('id')) {
+                            done();
+                        } else {
+                            throw "Upload success. But cannot find the URL.";
+                        }
+                    }, function (err) {
+                        done(err);
+                        throw "Error uploading file";
+                    });
+                }else{
+                    done();
+                }
 
             });
         }
@@ -6658,7 +6709,7 @@ describe("Cloud Files", function(done) {
         console.log('In node');
     }
 
-   it("Should Save a file file data and name then fetch it",function(done){
+    it("Should Save a file file data and name then fetch it",function(done){
 
         this.timeout(30000);
 
@@ -6667,11 +6718,11 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            console.log(file);
+            //console.log(file);
             if(file.url) {
                 file.fetch().then(function(res){
                     res.getFileContent().then(function(res){
-                        console.log(res);
+                        //console.log(res);
                         done();
                     },function(){
                         throw "Unable to Fetch File";
@@ -6700,7 +6751,7 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             var id = res.get('id');
             var query = new CB.CloudQuery('Sample');
             query.equalTo('id',id);
@@ -6729,10 +6780,10 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            console.log(res);
+            //console.log(res);
             var file = res.get('file');
             file.fetch().then(function(res){
-                console.log(res);
+                //console.log(res);
                 if(res.get('url'))
                     done();
                 throw "Unable to fetch the file";
@@ -6764,7 +6815,7 @@ describe("Cloud Files", function(done) {
                 query.include('Company.File');
                 query.equalTo('id',res.get('id'));
                 query.find().then(function(res){
-                    console.log(res);
+                   // console.log(res);
                     done();
                 },function(err){
                     throw "Unable to query";
@@ -7001,6 +7052,8 @@ describe("Cloud Files", function(done) {
     //     });
 
 });
+
+
 
 describe("ACL Tests Over Files",function(done){
 

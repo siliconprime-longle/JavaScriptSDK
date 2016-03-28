@@ -199,11 +199,12 @@ CB.CloudFile.prototype.delete = function(callback) {
 
     var params=JSON.stringify({
         fileObj: CB.toJSON(thisObj),
-        key: CB.appKey
+        key: CB.appKey,
+        method:"PUT"
     });
     var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
 
-    CB._request('DELETE',url,params).then(function(response){
+    CB._request('PUT',url,params).then(function(response){
         thisObj.url = null;
         if (callback) {
             callback.success(thisObj);
