@@ -33,14 +33,14 @@ describe("Cloud Objects Files", function() {
 
                     file.save().then(function (file) {
                         if (file.url) {
-                            console.log(file);
+                            
                             //create a new object.
                             var obj = new CB.CloudObject('Sample');
                             obj.set('name', 'sample');
                             obj.set('file', file);
 
                             obj.save().then(function (newobj) {
-                                console.log(newobj);
+                                
                                 if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                     done();
                                 } else {
@@ -82,14 +82,14 @@ describe("Cloud Objects Files", function() {
 
                     file.save().then(function (file) {
                         if (file.url) {
-                            console.log(file);
+                           
                             //create a new object.
                             var obj = new CB.CloudObject('Sample');
                             obj.set('name', 'sample');
                             obj.set('file', file);
 
                             obj.save().then(function (newobj) {
-                                console.log(newobj);
+                                
                                 if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                    
                                     newobj.set('name','sample2');

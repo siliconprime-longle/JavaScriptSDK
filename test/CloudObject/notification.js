@@ -8,8 +8,7 @@ describe("Cloud Objects Notification", function() {
       this.timeout(40000);
 
       CB.CloudObject.on('Student', 'created', function(data){
-       if(data.get('name') === 'sample') {
-           console.log(data);
+       if(data.get('name') === 'sample') {           
            done();
            CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
        }

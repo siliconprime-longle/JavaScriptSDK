@@ -5,8 +5,7 @@ describe("CloudRole", function (done) {
         this.timeout(40000);
         var roleName5 = util.makeString();
         var role5 = new CB.CloudRole(roleName5);
-        role5.save().then(function(list){
-            console.log(list);
+        role5.save().then(function(list){           
             if(!list)
                 throw "Should create a role";
             done();
@@ -27,8 +26,7 @@ describe("CloudRole", function (done) {
                 done();
             }
             query.equalTo('id',role5.get('id'));
-            query.find().then(function(list){
-                console.log(list);
+            query.find().then(function(list){                
                 if(!list)
                     throw "Should retrieve the cloud role";
                 done();

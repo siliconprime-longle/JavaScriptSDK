@@ -228,14 +228,14 @@ describe("CloudQuery", function (done) {
                     }
                 }
 
-                console.log(list);
+                //console.log(list);
 
                 if(list.length>0)
                     done();
                 else
                     throw "object could not queried properly";
             },function(err){
-                console.log(err);
+                done(err);                
             });
         }, function(error){
             throw "object could not saved properly";
@@ -266,7 +266,7 @@ describe("CloudQuery", function (done) {
                 else
                     throw "object could not queried properly";
             },function(err){
-                console.log(err);
+               done(err);
             });
         }, function(error){
             throw "object could not saved properly";
@@ -286,7 +286,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "object could not saved properly";
         },function(err){
-            console.log(err);
+            done(err);            
         });
     });
 
@@ -462,7 +462,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "object could not saved properly";
         },function(err){
-            console.log(err);
+            done(err);            
         });
     });
 
@@ -478,8 +478,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "unable to get";
         }, function (err) {
-            console.log(err);
-            throw "should return object";
+            done(err);
         })
     });
 

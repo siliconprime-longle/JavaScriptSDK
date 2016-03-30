@@ -11,8 +11,7 @@ describe("CloudExpire", function () {
                 done();
             else
                 throw "unable to save expires";
-        }, function (err) {
-            console.log(err);
+        }, function (err) {           
             throw "Relation Expire error";
         });
 
@@ -36,15 +35,14 @@ describe("CloudExpire", function () {
                         throw "Expired Values also shown Up";
                     }
                     }
-                }else{
+            }else{
                 done();
             }
 
         }, function(error){
-
+            done(error);
         })
 
     });
-
 
 });

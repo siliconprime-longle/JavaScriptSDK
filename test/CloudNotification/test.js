@@ -18,15 +18,14 @@ describe("CloudNotification", function() {
     it("should publish data to the channel.", function(done) {
 
         this.timeout(30000);
-        CB.CloudNotification.on('sample',
-      function(data){
-      	if(data === 'data'){
-      		done();
-      	}else{
-      		throw 'Error wrong data received.';
-      	}
-      }, 
-      {
+        CB.CloudNotification.on('sample',  function(data){
+	      	if(data === 'data'){
+	      		done();
+	      	}else{
+	      		throw 'Error wrong data received.';
+	      	}
+	      }, 
+      	{
       	success : function(){
       		//publish to a channel. 
       		CB.CloudNotification.publish('sample', 'data',{

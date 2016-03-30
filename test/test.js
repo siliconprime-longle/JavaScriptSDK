@@ -1,5 +1,5 @@
-var SECURE_KEY = "b8e40eda-3ec2-4e9e-b30c-8195be38fbae";
-var URL = "http://localhost:4730";
+var SECURE_KEY = "c5aeafe6-32fe-4f60-b369-1fe22d5f8f99";
+var URL = "https://beta-api.cloudboost.io";
 
    var util = {
      makeString : function(){
@@ -1156,9 +1156,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            if(file.url) {
-                //console.log(file);
-                console.log("Saved file");
+            if(file.url) {               
                 done();
             }else{
                 throw 'ún able to get the url';
@@ -1257,9 +1255,8 @@ describe("Cloud Files", function(done) {
                     var file = new CB.CloudFile(oMyBlob);
 
                     file.save().then(function (file) {
-                        if (file.url) {
-                            //received the blob's url
-                            console.log(file.url);
+                        if (file.url) {                      
+                          
                             file.delete().then(function (file) {
                                 if (file.url === null) {
                                     done();
@@ -1367,8 +1364,7 @@ describe("Cloud Files", function(done) {
             var query = new CB.CloudQuery('Sample');
             query.equalTo('id',id);
             query.include('file');
-            query.find().then(function(res){
-                console.log(res);
+            query.find().then(function(res){                
                 done();
             },function(){
                 throw "Unable to Find";
@@ -5201,19 +5197,15 @@ it("should not save a string into date column",function(done){
         var obj = new CB.CloudObject('student1');
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',8787);
-        obj1.save().then(function(res){
-            console.log(res);
+        obj1.save().then(function(res){          
             obj1 = res;
             obj.set('name','vipul');
-            obj.save().then(function(res){
-                console.log(res);
+            obj.save().then(function(res){               
                 obj = res;
                 obj.set('newColumn',obj1);
-                obj.save().then(function(res){
-                    console.log(res);
+                obj.save().then(function(res){                  
                     done();
-                },function(err){
-                    console.log(err);
+                },function(err){                   
                     throw "Should save";
                 });
             },function(){
@@ -5713,8 +5705,7 @@ it("should not save a string into date column",function(done){
 
         var obj = new CB.CloudObject('Custom14');
         obj.set('ListNumber',[1,2,3]);
-        obj.save().then(function(list){
-            console.log(list);
+        obj.save().then(function(list){           
            done();
         },function(){
             throw "should save the list of numbers";
@@ -5729,8 +5720,7 @@ it("should not save a string into date column",function(done){
         var GP1 = new CB.CloudGeoPoint(17,89);
         var GP2 = new CB.CloudGeoPoint(66,78);
         obj.set('ListGeoPoint',[GP1,GP2]);
-        obj.save().then(function(list){
-           console.log(list);
+        obj.save().then(function(list){          
             done();
         },function(){
             throw "should save list of geopoint";
@@ -5752,9 +5742,8 @@ it("should not save a string into date column",function(done){
             obj = new CB.CloudObject('student1');
             obj2 = new CB.CloudObject('hostel',obj1.get('id'));
             obj.set('newColumn',obj2);
-            obj.save().then(function(list){
-                console.log(list);
-                    done();
+            obj.save().then(function(list){              
+                done();
             },function(){
                 throw "should save the object";
             });
@@ -5773,8 +5762,7 @@ it("should not save a string into date column",function(done){
         obj.save({
             success : function(newObj){
                 throw 'Wrong datatype in an array saved.';
-            }, error : function(error){
-                console.log(error);
+            }, error : function(error){                
                 done();
             }
         });
@@ -5891,9 +5879,9 @@ it("should not save a string into date column",function(done){
 
                     obj.save({
                         success : function(newObj){
-                            console.log("OLD CreatedAt : "+createdAt);
-                            console.log("NEW CreatedAt : "+Date.parse(newObj.createdAt));
-                            console.log("NEW UpdatedAt : "+Date.parse(newObj.updatedAt));
+                            //console.log("OLD CreatedAt : "+createdAt);
+                            //console.log("NEW CreatedAt : "+Date.parse(newObj.createdAt));
+                            //console.log("NEW UpdatedAt : "+Date.parse(newObj.updatedAt));
 
                             if(Date.parse(newObj.createdAt) === createdAt && Date.parse(newObj.updatedAt) !== createdAt){
                                 done();
@@ -5926,8 +5914,7 @@ describe("Bulk API",function(done){
         var obj1 = new CB.CloudObject('Student');
         obj1.set('name','ABCD');
         var arr = [obj,obj1];
-        CB.CloudObject.saveAll(arr).then(function(res){
-            console.log(res);
+        CB.CloudObject.saveAll(arr).then(function(res){          
             done();
         },function(err){
             throw "Unable to Save CloudObject";
@@ -5945,8 +5932,7 @@ describe("Bulk API",function(done){
         var arr = [obj,obj1];
         CB.CloudObject.saveAll(arr).then(function(res){
             console.log(res);
-            CB.CloudObject.deleteAll(res).then(function(res){
-                console.log(res);
+            CB.CloudObject.deleteAll(res).then(function(res){               
                 done();
             },function(err){
                 throw "Unable to Delete CloudObject";
@@ -6065,14 +6051,14 @@ describe("Cloud Objects Files", function() {
 
                     file.save().then(function (file) {
                         if (file.url) {
-                            console.log(file);
+                            
                             //create a new object.
                             var obj = new CB.CloudObject('Sample');
                             obj.set('name', 'sample');
                             obj.set('file', file);
 
                             obj.save().then(function (newobj) {
-                                console.log(newobj);
+                                
                                 if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                     done();
                                 } else {
@@ -6114,14 +6100,14 @@ describe("Cloud Objects Files", function() {
 
                     file.save().then(function (file) {
                         if (file.url) {
-                            console.log(file);
+                           
                             //create a new object.
                             var obj = new CB.CloudObject('Sample');
                             obj.set('name', 'sample');
                             obj.set('file', file);
 
                             obj.save().then(function (newobj) {
-                                console.log(newobj);
+                                
                                 if (newobj.get('file') instanceof CB.CloudFile && newobj.get('file').document._id) {
                                    
                                     newobj.set('name','sample2');
@@ -6259,8 +6245,7 @@ describe("ACL Tests Over Files",function(done){
         fileObj.save().then(function(res){
             res.getFileContent().then(function(res){
                 throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
+            },function(err){               
                 done();
             });
         },function(){
@@ -6281,8 +6266,7 @@ describe("ACL Tests Over Files",function(done){
         fileObj.save().then(function(res){
             res.delete().then(function(res){
                 throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
+            },function(err){               
                 done();
             });
         },function(){
@@ -6302,8 +6286,7 @@ describe("CloudObjectExpires", function () {
         obj.set('age', 10);
         obj.save().then(function(obj1) {
             done();
-        }, function (err) {
-            console.log(err);
+        }, function (err) {           
             throw "Cannot save an object after expire is set";
         });
 
@@ -6319,35 +6302,35 @@ describe("CloudObjectExpires", function () {
         obj.set('age', 10);
         obj.save().then(function(obj1) {
           //Object saved..
-        }, function (err) {
-            console.log(err);
-            throw "Cannot save an object after expire is set";
-        });
 
-        var curr=new Date().getTime();
-        var query1 = new CB.CloudQuery('student1');
-        query1.equalTo('name','vipul');
-        var query2 = new CB.CloudQuery('student1');
-        query2.lessThan('age',12);
-        var query =  CB.CloudQuery.or(query1,query2);
-        query.find().then(function(list){
-            if(list.length>0){
-                for(var i=0;i<list.length;i++){
-                    if(list[i].expires > curr || !list[i].expires){
+            var curr=new Date().getTime();
+            var query1 = new CB.CloudQuery('student1');
+            query1.equalTo('name','vipul');
+            var query2 = new CB.CloudQuery('student1');
+            query2.lessThan('age',12);
+            var query =  CB.CloudQuery.or(query1,query2);
+
+            query.find().then(function(list){
+                if(list && list.length>0){
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].expires > curr || !list[i].expires){
                             break;
                         }
-                    else{
-                        throw "Expired Object Retrieved";
-                    }
+                        else{
+                            throw "Expired Object Retrieved";
+                        }
+                    }                    
                 }
                 done();
-            }else{
-                done();
-            }
 
-        }, function(error){
-            done(error);
-        })
+            }, function(error){
+                done(error);
+            });
+
+
+        }, function (err) {           
+           done("Cannot save an object after expire is set");
+        });     
 
     });
 
@@ -6400,22 +6383,23 @@ describe("CloudObjectExpires", function () {
         
         query.search({
             success:function(list){
-            if(list.length>0) {
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].expires > curr || !list[i].expires) {
-                        break;
+                if(list && list.length>0) {
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].expires > curr || !list[i].expires) {
+                            break;
+                        }
+                        else {
+                            throw "expired object retrieved in Search";
+                        }
                     }
-                    else {
-                        throw "expired object retrieved in Search";
-                    }
+                    done();
+                }else{ 
+                    done();
                 }
-                done();
-            }else{ done();
-            }
             },error: function(error){
                 throw "should not show expired objects";
             }
-            });
+        });
 
     });
 });
@@ -6429,8 +6413,7 @@ describe("Cloud Objects Notification", function() {
       this.timeout(40000);
 
       CB.CloudObject.on('Student', 'created', function(data){
-       if(data.get('name') === 'sample') {
-           console.log(data);
+       if(data.get('name') === 'sample') {           
            done();
            CB.CloudObject.off('Student','created',{success:function(){},error:function(){}});
        }
@@ -7780,8 +7763,7 @@ describe("CloudExpire", function () {
                 done();
             else
                 throw "unable to save expires";
-        }, function (err) {
-            console.log(err);
+        }, function (err) {           
             throw "Relation Expire error";
         });
 
@@ -7805,16 +7787,15 @@ describe("CloudExpire", function () {
                         throw "Expired Values also shown Up";
                     }
                     }
-                }else{
+            }else{
                 done();
             }
 
         }, function(error){
-
+            done(error);
         })
 
     });
-
 
 });
 describe("CloudQuery Include", function (done) {
@@ -8015,12 +7996,12 @@ describe("CloudQuery Include", function (done) {
                 var temp = list.get('newColumn');
                 query1.equalTo('newColumn',temp);
                 query1.find().then(function(obj){
-                    console.log(obj);
+                    //console.log(obj);
                     done();
                 }, function () {
                     throw "";
                 });
-                console.log(list);
+                //console.log(list);
             },function(){
                 throw "unable to save data";
             })
@@ -8348,14 +8329,14 @@ describe("CloudQuery", function (done) {
                     }
                 }
 
-                console.log(list);
+                //console.log(list);
 
                 if(list.length>0)
                     done();
                 else
                     throw "object could not queried properly";
             },function(err){
-                console.log(err);
+                done(err);                
             });
         }, function(error){
             throw "object could not saved properly";
@@ -8386,7 +8367,7 @@ describe("CloudQuery", function (done) {
                 else
                     throw "object could not queried properly";
             },function(err){
-                console.log(err);
+               done(err);
             });
         }, function(error){
             throw "object could not saved properly";
@@ -8406,7 +8387,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "object could not saved properly";
         },function(err){
-            console.log(err);
+            done(err);            
         });
     });
 
@@ -8582,7 +8563,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "object could not saved properly";
         },function(err){
-            console.log(err);
+            done(err);            
         });
     });
 
@@ -8598,8 +8579,7 @@ describe("CloudQuery", function (done) {
             else
                 throw "unable to get";
         }, function (err) {
-            console.log(err);
-            throw "should return object";
+            done(err);
         })
     });
 
@@ -9608,8 +9588,7 @@ describe("CloudSearch", function (done) {
                             search.searchFilter = new CB.SearchFilter();
                             search.searchFilter.near("location", loc, 1);
                             search.search().then(function(list) {
-                                if(list.length>0){
-                                   console.log(list);
+                                if(list.length>0){                                 
                                     done();
                                 } else{
                                     throw "should retrieve saved data with particular value ";
@@ -9654,8 +9633,7 @@ describe("CloudSearch", function (done) {
                             var cs = new CB.CloudSearch('CustomRelation');
                             cs.searchFilter = new CB.SearchFilter();
                             cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
-                            cs.search().then(function(list){
-                                console.log(list);
+                            cs.search().then(function(list){                              
                                 done();
                             }, function(error){
                                 throw "Unsuccessful join"
@@ -9965,8 +9943,7 @@ describe("CloudSearch", function (done) {
             
 
         }, function(error){
-            console.log(error);
-            done(error);
+            done(error);            
         });
 
         
@@ -10121,7 +10098,7 @@ describe("CloudSearch", function (done) {
                             }
 
                         }, error: function(error){
-                            console.log(error);
+                           done(error);
                             throw "Error while search.";
                         }
                     });
@@ -10185,7 +10162,7 @@ describe("CloudSearch", function (done) {
                         }
 
                     }, error: function(error){
-                        console.log(error);
+                        done(err);
                         throw "Error while search.";
                     }
                 });
@@ -10234,7 +10211,7 @@ describe("CloudSearch", function (done) {
                         }
 
                     }, error: function(error){
-                        console.log(error);
+                        done(error);
                         throw "Error while search.";
                     }
                 });
@@ -10288,7 +10265,7 @@ describe("CloudSearch", function (done) {
                             }
 
                         }, error: function(error){
-                            console.log(error);
+                            done(error);
                             throw "Error while search.";
                         }
                     })
@@ -10347,8 +10324,7 @@ describe("CloudRole", function (done) {
         this.timeout(40000);
         var roleName5 = util.makeString();
         var role5 = new CB.CloudRole(roleName5);
-        role5.save().then(function(list){
-            console.log(list);
+        role5.save().then(function(list){           
             if(!list)
                 throw "Should create a role";
             done();
@@ -10369,8 +10345,7 @@ describe("CloudRole", function (done) {
                 done();
             }
             query.equalTo('id',role5.get('id'));
-            query.find().then(function(list){
-                console.log(list);
+            query.find().then(function(list){                
                 if(!list)
                     throw "Should retrieve the cloud role";
                 done();
@@ -10869,15 +10844,14 @@ describe("CloudNotification", function() {
     it("should publish data to the channel.", function(done) {
 
         this.timeout(30000);
-        CB.CloudNotification.on('sample',
-      function(data){
-      	if(data === 'data'){
-      		done();
-      	}else{
-      		throw 'Error wrong data received.';
-      	}
-      }, 
-      {
+        CB.CloudNotification.on('sample',  function(data){
+	      	if(data === 'data'){
+	      		done();
+	      	}else{
+	      		throw 'Error wrong data received.';
+	      	}
+	      }, 
+      	{
       	success : function(){
       		//publish to a channel. 
       		CB.CloudNotification.publish('sample', 'data',{
@@ -11205,8 +11179,7 @@ describe("Cloud GeoPoint Test", function() {
             success : function(newObj){
                 obj = newObj;
                 obj.get('location').set('latitude',55);
-                obj.save().then(function(obj1){
-                    console.log(obj1);
+                obj.save().then(function(obj1){                  
                     done()
                 },function(){
                     throw "";
@@ -11299,7 +11272,7 @@ describe("Version Test",function(done){
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
-            console.log(list);
+            
             list[0].set('name','abcd');
             list[0].save().then(function(){
                 var query1 = new CB.CloudQuery('Sample');
@@ -11420,7 +11393,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
     it("should include a relation on search.", function (done) {
 
-        this.timeout(30000);
+        this.timeout(35000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
@@ -11436,31 +11409,48 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.searchFilter = new CB.SearchFilter();
                 cs.searchFilter.include('newColumn7');
                 cs.searchFilter.equalTo('id',obj.id);
-                cs.search().then(function(  list){
-                    done();
-                    console.log(list);
-                    if(list.length>0){
-                        for(var i=0;i<list.length;i++){
-                            console.log('LIST');
-                            console.log(list[0]);
-                            var student_obj=list[i].get('newColumn7');
-                            console.log('Student');
-                            console.log(student_obj);
-                            if(Object.keys(student_obj.document).length >3) {
-                                if (!student_obj.get('name'))
-                                    throw "Unsuccessful Join";
-                            } else
-                                done();
-                        }
-                    }else{
-                        throw "Cannot retrieve a saved relation.";
-                    }
-                }, function(error){
-                    throw "Unsuccessful join"
-                });
-            }, error : function(error){
-                throw "Cannot save a CloudObject";
 
+                //Wait for elastic search to index
+                setTimeout(function(){ 
+
+                    cs.search().then(function(list){ 
+
+                        if(list && list.length>0){
+
+                            var isSuccessfullJoin=true;
+
+                            for(var i=0;i<list.length;i++){
+
+                                var student_obj=list[i].get('newColumn7');
+
+                                if(Object.keys(student_obj.document).length >3) {
+                                    if (!student_obj.get('name')){
+                                        isSuccessfullJoin=false;
+                                        break;
+                                    }
+                                } else{
+                                    isSuccessfullJoin=true;
+                                }
+                            }
+
+                            if(isSuccessfullJoin){
+                                done();
+                            }else{
+                                done("Unsuccessful Join");
+                            }
+
+                        }else{
+                            done("Cannot retrieve a saved relation.");
+                        }
+
+                    }, function(error){
+                        done(error);                    
+                    });
+
+                }, 4000);
+
+            }, error : function(error){
+                done(error);
             }
 
         });

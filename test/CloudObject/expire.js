@@ -8,8 +8,7 @@ describe("CloudObjectExpires", function () {
         obj.set('age', 10);
         obj.save().then(function(obj1) {
             done();
-        }, function (err) {
-            console.log(err);
+        }, function (err) {           
             throw "Cannot save an object after expire is set";
         });
 
@@ -25,35 +24,35 @@ describe("CloudObjectExpires", function () {
         obj.set('age', 10);
         obj.save().then(function(obj1) {
           //Object saved..
-        }, function (err) {
-            console.log(err);
-            throw "Cannot save an object after expire is set";
-        });
 
-        var curr=new Date().getTime();
-        var query1 = new CB.CloudQuery('student1');
-        query1.equalTo('name','vipul');
-        var query2 = new CB.CloudQuery('student1');
-        query2.lessThan('age',12);
-        var query =  CB.CloudQuery.or(query1,query2);
-        query.find().then(function(list){
-            if(list.length>0){
-                for(var i=0;i<list.length;i++){
-                    if(list[i].expires > curr || !list[i].expires){
+            var curr=new Date().getTime();
+            var query1 = new CB.CloudQuery('student1');
+            query1.equalTo('name','vipul');
+            var query2 = new CB.CloudQuery('student1');
+            query2.lessThan('age',12);
+            var query =  CB.CloudQuery.or(query1,query2);
+
+            query.find().then(function(list){
+                if(list && list.length>0){
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].expires > curr || !list[i].expires){
                             break;
                         }
-                    else{
-                        throw "Expired Object Retrieved";
-                    }
+                        else{
+                            throw "Expired Object Retrieved";
+                        }
+                    }                    
                 }
                 done();
-            }else{
-                done();
-            }
 
-        }, function(error){
-            done(error);
-        })
+            }, function(error){
+                done(error);
+            });
+
+
+        }, function (err) {           
+           done("Cannot save an object after expire is set");
+        });     
 
     });
 
@@ -106,22 +105,23 @@ describe("CloudObjectExpires", function () {
         
         query.search({
             success:function(list){
-            if(list.length>0) {
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].expires > curr || !list[i].expires) {
-                        break;
+                if(list && list.length>0) {
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].expires > curr || !list[i].expires) {
+                            break;
+                        }
+                        else {
+                            throw "expired object retrieved in Search";
+                        }
                     }
-                    else {
-                        throw "expired object retrieved in Search";
-                    }
+                    done();
+                }else{ 
+                    done();
                 }
-                done();
-            }else{ done();
-            }
             },error: function(error){
                 throw "should not show expired objects";
             }
-            });
+        });
 
     });
 });

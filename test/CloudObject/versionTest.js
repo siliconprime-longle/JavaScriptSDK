@@ -53,7 +53,7 @@ describe("Version Test",function(done){
         var query = new CB.CloudQuery('Sample');
         query.equalTo('id',obj.get('id'));
         query.find().then(function(list){
-            console.log(list);
+            
             list[0].set('name','abcd');
             list[0].save().then(function(){
                 var query1 = new CB.CloudQuery('Sample');

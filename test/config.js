@@ -1,2 +1,2 @@
-var SECURE_KEY = "b8e40eda-3ec2-4e9e-b30c-8195be38fbae";
-var URL = "http://localhost:4730";
+var SECURE_KEY = "c5aeafe6-32fe-4f60-b369-1fe22d5f8f99";
+var URL = "https://beta-api.cloudboost.io";

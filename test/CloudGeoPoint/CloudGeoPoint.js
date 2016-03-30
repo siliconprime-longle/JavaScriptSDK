@@ -184,8 +184,7 @@ describe("Cloud GeoPoint Test", function() {
             success : function(newObj){
                 obj = newObj;
                 obj.get('location').set('latitude',55);
-                obj.save().then(function(obj1){
-                    console.log(obj1);
+                obj.save().then(function(obj1){                  
                     done()
                 },function(){
                     throw "";

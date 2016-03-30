@@ -215,19 +215,15 @@ it("should not save a string into date column",function(done){
         var obj = new CB.CloudObject('student1');
         var obj1 = new CB.CloudObject('hostel');
         obj1.set('room',8787);
-        obj1.save().then(function(res){
-            console.log(res);
+        obj1.save().then(function(res){          
             obj1 = res;
             obj.set('name','vipul');
-            obj.save().then(function(res){
-                console.log(res);
+            obj.save().then(function(res){               
                 obj = res;
                 obj.set('newColumn',obj1);
-                obj.save().then(function(res){
-                    console.log(res);
+                obj.save().then(function(res){                  
                     done();
-                },function(err){
-                    console.log(err);
+                },function(err){                   
                     throw "Should save";
                 });
             },function(){
@@ -727,8 +723,7 @@ it("should not save a string into date column",function(done){
 
         var obj = new CB.CloudObject('Custom14');
         obj.set('ListNumber',[1,2,3]);
-        obj.save().then(function(list){
-            console.log(list);
+        obj.save().then(function(list){           
            done();
         },function(){
             throw "should save the list of numbers";
@@ -743,8 +738,7 @@ it("should not save a string into date column",function(done){
         var GP1 = new CB.CloudGeoPoint(17,89);
         var GP2 = new CB.CloudGeoPoint(66,78);
         obj.set('ListGeoPoint',[GP1,GP2]);
-        obj.save().then(function(list){
-           console.log(list);
+        obj.save().then(function(list){          
             done();
         },function(){
             throw "should save list of geopoint";
@@ -766,9 +760,8 @@ it("should not save a string into date column",function(done){
             obj = new CB.CloudObject('student1');
             obj2 = new CB.CloudObject('hostel',obj1.get('id'));
             obj.set('newColumn',obj2);
-            obj.save().then(function(list){
-                console.log(list);
-                    done();
+            obj.save().then(function(list){              
+                done();
             },function(){
                 throw "should save the object";
             });
@@ -787,8 +780,7 @@ it("should not save a string into date column",function(done){
         obj.save({
             success : function(newObj){
                 throw 'Wrong datatype in an array saved.';
-            }, error : function(error){
-                console.log(error);
+            }, error : function(error){                
                 done();
             }
         });
@@ -905,9 +897,9 @@ it("should not save a string into date column",function(done){
 
                     obj.save({
                         success : function(newObj){
-                            console.log("OLD CreatedAt : "+createdAt);
-                            console.log("NEW CreatedAt : "+Date.parse(newObj.createdAt));
-                            console.log("NEW UpdatedAt : "+Date.parse(newObj.updatedAt));
+                            //console.log("OLD CreatedAt : "+createdAt);
+                            //console.log("NEW CreatedAt : "+Date.parse(newObj.createdAt));
+                            //console.log("NEW UpdatedAt : "+Date.parse(newObj.updatedAt));
 
                             if(Date.parse(newObj.createdAt) === createdAt && Date.parse(newObj.updatedAt) !== createdAt){
                                 done();

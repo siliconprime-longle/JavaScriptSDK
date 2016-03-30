@@ -41,8 +41,7 @@ describe("ACL Tests Over Files",function(done){
         fileObj.save().then(function(res){
             res.getFileContent().then(function(res){
                 throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
+            },function(err){               
                 done();
             });
         },function(){
@@ -63,8 +62,7 @@ describe("ACL Tests Over Files",function(done){
         fileObj.save().then(function(res){
             res.delete().then(function(res){
                 throw "Should not retrieve file";
-            },function(err){
-                console.log(err);
+            },function(err){               
                 done();
             });
         },function(){

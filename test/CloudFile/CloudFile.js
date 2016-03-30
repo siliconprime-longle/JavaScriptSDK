@@ -223,9 +223,7 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
-            if(file.url) {
-                //console.log(file);
-                console.log("Saved file");
+            if(file.url) {               
                 done();
             }else{
                 throw 'ún able to get the url';
@@ -324,9 +322,8 @@ describe("Cloud Files", function(done) {
                     var file = new CB.CloudFile(oMyBlob);
 
                     file.save().then(function (file) {
-                        if (file.url) {
-                            //received the blob's url
-                            console.log(file.url);
+                        if (file.url) {                      
+                          
                             file.delete().then(function (file) {
                                 if (file.url === null) {
                                     done();
@@ -434,8 +431,7 @@ describe("Cloud Files", function(done) {
             var query = new CB.CloudQuery('Sample');
             query.equalTo('id',id);
             query.include('file');
-            query.find().then(function(res){
-                console.log(res);
+            query.find().then(function(res){                
                 done();
             },function(){
                 throw "Unable to Find";

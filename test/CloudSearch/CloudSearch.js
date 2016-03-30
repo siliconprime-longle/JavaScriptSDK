@@ -28,8 +28,7 @@ describe("CloudSearch", function (done) {
                             search.searchFilter = new CB.SearchFilter();
                             search.searchFilter.near("location", loc, 1);
                             search.search().then(function(list) {
-                                if(list.length>0){
-                                   console.log(list);
+                                if(list.length>0){                                 
                                     done();
                                 } else{
                                     throw "should retrieve saved data with particular value ";
@@ -74,8 +73,7 @@ describe("CloudSearch", function (done) {
                             var cs = new CB.CloudSearch('CustomRelation');
                             cs.searchFilter = new CB.SearchFilter();
                             cs.searchFilter.equalTo('newColumn7',obj.get('newColumn7'));
-                            cs.search().then(function(list){
-                                console.log(list);
+                            cs.search().then(function(list){                              
                                 done();
                             }, function(error){
                                 throw "Unsuccessful join"
@@ -385,8 +383,7 @@ describe("CloudSearch", function (done) {
             
 
         }, function(error){
-            console.log(error);
-            done(error);
+            done(error);            
         });
 
         
@@ -541,7 +538,7 @@ describe("CloudSearch", function (done) {
                             }
 
                         }, error: function(error){
-                            console.log(error);
+                           done(error);
                             throw "Error while search.";
                         }
                     });
@@ -605,7 +602,7 @@ describe("CloudSearch", function (done) {
                         }
 
                     }, error: function(error){
-                        console.log(error);
+                        done(err);
                         throw "Error while search.";
                     }
                 });
@@ -654,7 +651,7 @@ describe("CloudSearch", function (done) {
                         }
 
                     }, error: function(error){
-                        console.log(error);
+                        done(error);
                         throw "Error while search.";
                     }
                 });
@@ -708,7 +705,7 @@ describe("CloudSearch", function (done) {
                             }
 
                         }, error: function(error){
-                            console.log(error);
+                            done(error);
                             throw "Error while search.";
                         }
                     })

@@ -9,8 +9,7 @@ describe("Bulk API",function(done){
         var obj1 = new CB.CloudObject('Student');
         obj1.set('name','ABCD');
         var arr = [obj,obj1];
-        CB.CloudObject.saveAll(arr).then(function(res){
-            console.log(res);
+        CB.CloudObject.saveAll(arr).then(function(res){          
             done();
         },function(err){
             throw "Unable to Save CloudObject";
@@ -28,8 +27,7 @@ describe("Bulk API",function(done){
         var arr = [obj,obj1];
         CB.CloudObject.saveAll(arr).then(function(res){
             console.log(res);
-            CB.CloudObject.deleteAll(res).then(function(res){
-                console.log(res);
+            CB.CloudObject.deleteAll(res).then(function(res){               
                 done();
             },function(err){
                 throw "Unable to Delete CloudObject";
