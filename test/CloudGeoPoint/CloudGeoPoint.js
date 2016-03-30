@@ -141,7 +141,7 @@ describe("Cloud GeoPoint Test", function() {
         })
 	});
 	
-	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
+	/*it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin", function(done) {
      	this.timeout(40000);
         var loc = new CB.CloudGeoPoint(17.3, 78.3);
         var query = new CB.CloudQuery('Custom5');
@@ -156,7 +156,7 @@ describe("Cloud GeoPoint Test", function() {
             console.log(error);
             done(error);
         });
-	});
+	});*/
 	
 	it("1. should get list of CloudGeoPoint Object from server for Circle type geoWithin + equal to + limit", function(done) {
      	this.timeout(40000);

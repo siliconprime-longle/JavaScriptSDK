@@ -6,18 +6,18 @@ describe("Cloud Object", function() {
 
  it("Should Save data in Custom date field",function(done){
 
-     this.timeout(30000);
+    this.timeout(30000);
 
-     var obj = new CB.CloudObject('Employee');
-     obj.set('dob',new Date());
-     obj.save().then(function(res){
+    var obj = new CB.CloudObject('Employee');
+    obj.set('dob',new Date());
+    obj.save().then(function(res){
             if(res)
                 done();
             else
-                throw "Unable to Save Object";
-     },function(err){
-         throw "Unable to Save Date TIme";
-     });
+               done("Unable to Save Object");
+    },function(err){
+        done(err);
+    });
  });
 
   it("Should NOT Save data in email field with incorrect email",function(done){
@@ -57,9 +57,9 @@ describe("Cloud Object", function() {
             if(res)
                 done();
             else
-                throw "Unable to Save Object";
+                done("Unable to Save Object");
      },function(err){
-         throw "Unable to Save Date TIme";
+        done(err);
      });
  });
 

@@ -45,7 +45,7 @@ describe("CloudPush", function (done) {
             certificates:[]
           },
           android:{
-            credentials:[{senderId:"shdfshd",apiKey:"sdjhsdh"}]
+            credentials:[{senderId:"612557492786",apiKey:"AIzaSyCrJe7JeAmEULaZbEWBVZ8-t6GkvrkQXvI"}]
           },
           windows:{
             credentials:[{securityId:"sdsd",clientSecret:"sdjhds"}]
@@ -103,7 +103,7 @@ describe("CloudPush", function (done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "sdjhkasgsgdsd");
+        obj.set('deviceToken', "cdZv6YAK9J0:APA91bF_siuFOkAHhfHBr272fmiBwXCnnVtE_Cnxx0E0etCOHfFMBmo3GXvnzbxH0HCr21_zDbSRqZdjms65pIelkygNnxAuaZ62ehrqvt3O0G5RyCQY8pZ8_8WqzbGO5WnKRKaRKteY");
         obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);

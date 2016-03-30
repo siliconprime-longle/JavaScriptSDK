@@ -4,11 +4,11 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/mongo/connect';
+        var url = CB.serverUrl+'/db/mongo/connect';  
         CB._request('POST',url).then(function() {
             done();
-        },function(){
-            throw "Unable to connect back Mongo";
+        },function(err){
+            done(err);            
         });
     });
 

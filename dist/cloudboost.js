@@ -838,12 +838,14 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
     }
 
     if(progressCallback){
-        xmlhttp.upload.addEventListener("progress", function(evt){
-          if (evt.lengthComputable) {  
-            var percentComplete = evt.loaded / evt.total;
-            progressCallback(percentComplete);
-          }
-        }, false); 
+        if(typeof(xmlhttp.upload)!=="undefined"){
+            xmlhttp.upload.addEventListener("progress", function(evt){
+              if (evt.lengthComputable) {  
+                var percentComplete = evt.loaded / evt.total;            
+                progressCallback(percentComplete);
+              }
+            }, false); 
+        }        
     }
 
     if(!isServiceUrl){
@@ -851,10 +853,13 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
         if(ssid != null)
             xmlhttp.setRequestHeader('sessionID', ssid);
     }
-    if(CB._isNode)
-        xmlhttp.setRequestHeader("User-Agent",
-            "CB/" + CB.version +
-            " (NodeJS " + process.versions.node + ")");
+    if(CB._isNode){
+        xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
+
+        if(params && typeof params ==="object"){
+            params=JSON.stringify(params);
+        }
+    }
     if(params)
         xmlhttp.send(params);
     else
@@ -870,8 +875,7 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
                         localStorage.removeItem('sessionID');
                 }
                 def.resolve(xmlhttp.responseText);
-            } else {
-                console.log(xmlhttp.status);
+            } else {                
                 def.reject(xmlhttp.responseText);
             }
         }
@@ -1175,8 +1179,8 @@ CB._getCookie = function(name) {
             CB._deleteCookie(name);
         }
     } else {
-        // Sorry! No Web Storage support..
-        if(document){
+        // Sorry! No Web Storage support..       
+        if(typeof(document) !== 'undefined') {
             var name = name + "=";
             var ca = document.cookie.split(';');
             for(var i=0; i<ca.length; i++) {
@@ -1185,7 +1189,7 @@ CB._getCookie = function(name) {
                 if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
             }
             return "";
-        }
+        }        
     }
     
 }
@@ -1200,7 +1204,7 @@ CB._deleteCookie = function(name){
         localStorage.removeItem(name);
         localStorage.removeItem(name+"_expires");
     } else {
-        if(document){
+        if(typeof(document) !== 'undefined'){
             var d = new Date();
             d.setTime(d.getTime() + (0*0*0*0*0));
             var expires = "expires="+d.toUTCString();
@@ -1222,7 +1226,7 @@ CB._createCookie = function(name, content, expires){
         localStorage.setItem(name,content.toString());
         localStorage.setItem(name+"_expires",d);
     } else {
-        if(document){
+        if(typeof(document) !== 'undefined'){
             
             var expires = "expires="+d.toUTCString();
             document.cookie =  + name+"=" + content.toString() + "; " + expires;

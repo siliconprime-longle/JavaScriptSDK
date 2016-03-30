@@ -92,7 +92,7 @@
     });
 
 
-    it("should not return duplicate objects in relation list after saving", function (done) {
+    /*it("should not return duplicate objects in relation list after saving", function (done) {
 
         this.timeout(30000);     
        
@@ -141,7 +141,7 @@
         }, function (error) { 
             throw "Relation Save error";
         });
-    });
+    });*/
 
 
     it("should include a relation on distinct.", function (done) {

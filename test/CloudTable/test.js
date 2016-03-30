@@ -35,9 +35,9 @@ describe("Table Tests", function (done) {
             if(res){
                 done();
             }else
-                throw "Unable to Get table by name";
-        },function(){
-           throw "unable to get table by name";
+                done("Unable to Get table by name");                
+        },function(err){
+            done(err);           
         });
     });
 
@@ -52,14 +52,14 @@ describe("Table Tests", function (done) {
                 emp.deleteColumn('Test2');
                 emp.save().then(function(){
                     done();
-                },function(){
-                   throw "Unable to drop coumn";
+                },function(err){
+                   done(err);
                 });
-            },function(){
-                throw "Unable to add Column";
+            },function(err){
+                done(err);
             });
         },function(err){
-            throw "Unable to get cloudtable";
+            done(err);
         });
     });
 

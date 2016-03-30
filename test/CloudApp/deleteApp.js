@@ -5,6 +5,7 @@ describe("Delete App", function() {
         var url = URL+'/app/'+CB.appId;
         var params = {};
         params.secureKey = SECURE_KEY;
+        params.method = "DELETE";
 
          if(!window){
         	//Lets configure and request
@@ -33,7 +34,7 @@ describe("Delete App", function() {
 			    data: params,
 			 
 			    // Whether this is a POST or GET request
-			    type: "DELETE",
+			    type: "PUT",
 			 
 			    // The type of data we expect back
 			    dataType : "json",

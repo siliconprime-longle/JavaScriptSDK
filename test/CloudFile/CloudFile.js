@@ -63,6 +63,7 @@ describe("Cloud Files", function(done) {
         var fileObj = new CB.CloudFile(name,data,type);
         fileObj.save().then(function(file){
             if(file.url) {
+
                 var obj = new CB.CloudObject('Company');
                 obj.set('File',file);
                 obj.save({
@@ -78,10 +79,10 @@ describe("Cloud Files", function(done) {
                 });
 
             }else{
-                throw 'ún able to get the url';
+                done('ún able to get the url');
             }
         },function(err){
-            throw "Unable to save file";
+            done(err);            
         });
     });
 
@@ -89,17 +90,21 @@ describe("Cloud Files", function(done) {
 
         this.timeout(30000);
 
-        var data = 'akldaskdhklahdasldhd';
-        var name = 'abc.txt';
-        var type = 'txt';
-        var fileObj = new CB.CloudFile(name,data,type);
-        fileObj.save({uploadProgress : function(progress){
-            done();
-        }, success : function(){
+        if(CB._isNode){
+           done();           
+        }else{
+            var data = 'akldaskdhklahdasldhd';
+            var name = 'abc.txt';
+            var type = 'txt';
+            var fileObj = new CB.CloudFile(name,data,type);
+            fileObj.save({uploadProgress : function(progress){
+                done();
+            }, success : function(){
 
-        }, error : function(){
+            }, error : function(){
 
-        }});
+            }});
+        }
     });
 
 
@@ -491,15 +496,14 @@ describe("Cloud Files", function(done) {
                    // console.log(res);
                     done();
                 },function(err){
-                    throw "Unable to query";
+                    done(err);
                 });
-            },function(){
-                throw "Unable to Save Cloud Object";
+            },function(err){
+                done(err);               
             });
         },function(err){
-           throw "Unable to Save file";
+            done(err);          
         });
-
     });
 
     // it("Should get the image",function(done){
