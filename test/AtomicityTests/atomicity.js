@@ -79,9 +79,7 @@ describe("Atomicity Tests",function(done){
                     CB._request('POST',url).then(function() {
                         var query = new CB.CloudQuery('student1');
                         query.findById(id).then(function(res) {
-                            if(res) {
-                                console.log("Deleted Res")
-                                console.log(res);
+                            if(res) {                               
                                 done();
                             }else{
                                 throw "should get the record back";
