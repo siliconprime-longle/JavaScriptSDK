@@ -2,7 +2,7 @@ describe("Inlcude in CloudSearch", function (done) {
 
     it("should include a relation on search.", function (done) {
 
-        this.timeout(30000);
+        this.timeout(35000);
 
         var obj = new CB.CloudObject('Custom2');
         obj.set('newColumn1', 'text');
@@ -18,38 +18,46 @@ describe("Inlcude in CloudSearch", function (done) {
                 cs.searchFilter = new CB.SearchFilter();
                 cs.searchFilter.include('newColumn7');
                 cs.searchFilter.equalTo('id',obj.id);
-                
-                cs.search().then(function(  list){                  
-                    if(list.length>0){
 
-                        var isSuccessfullJoin=true;
+                //Wait for elastic search to index
+                setTimeout(function(){ 
 
-                        for(var i=0;i<list.length;i++){
+                    cs.search().then(function(list){ 
 
-                            var student_obj=list[i].get('newColumn7');
+                        if(list && list.length>0){
 
-                            if(Object.keys(student_obj.document).length >3) {
-                                if (!student_obj.get('name')){
-                                    isSuccessfullJoin=false;
-                                    break;
+                            var isSuccessfullJoin=true;
+
+                            for(var i=0;i<list.length;i++){
+
+                                var student_obj=list[i].get('newColumn7');
+
+                                if(Object.keys(student_obj.document).length >3) {
+                                    if (!student_obj.get('name')){
+                                        isSuccessfullJoin=false;
+                                        break;
+                                    }
+                                } else{
+                                    isSuccessfullJoin=true;
                                 }
-                            } else{
-                                isSuccessfullJoin=true;
                             }
-                        }
 
-                        if(isSuccessfullJoin){
-                            done();
+                            if(isSuccessfullJoin){
+                                done();
+                            }else{
+                                done("Unsuccessful Join");
+                            }
+
                         }else{
-                            done("Unsuccessful Join");
+                            done("Cannot retrieve a saved relation.");
                         }
 
-                    }else{
-                        done("Cannot retrieve a saved relation.");
-                    }
-                }, function(error){
-                    done(error);                    
-                });
+                    }, function(error){
+                        done(error);                    
+                    });
+
+                }, 4000);
+
             }, error : function(error){
                 done(error);
             }
