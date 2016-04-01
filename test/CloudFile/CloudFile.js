@@ -110,7 +110,7 @@ describe("Cloud Files", function(done) {
 
     it("Should return the fileList with CloudObject",function(done){
 
-        this.timeout(30000);
+        this.timeout(34000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -158,7 +158,7 @@ describe("Cloud Files", function(done) {
 
     it("Should return the fileList with findById",function(done){
 
-        this.timeout(30000);
+        this.timeout(35000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -184,21 +184,27 @@ describe("Cloud Files", function(done) {
                     success : function(obj){
                         var query = new CB.CloudQuery("Sample");
                         query.include('fileList');
-                        query.findById(obj.id,{
-                            success : function(newObj){
-                                if(newObj.get('fileList').length>0){
-                                    if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
-                                        done();
+
+                        setTimeout(function(){ 
+
+                           query.findById(obj.id,{
+                                success : function(newObj){
+                                    if(newObj.get('fileList').length>0){
+                                        if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
+                                            done();
+                                        }else{
+                                            done("Did not get the URL's back");
+                                        }
                                     }else{
-                                        done("Did not get the URL's back");
+                                        done("Didnot get the file object back.");
                                     }
-                                }else{
-                                    done("Didnot get the file object back.");
+                                },error : function(error){
+                                    done(error);
                                 }
-                            },error : function(error){
-                                done(error);
-                            }
-                        });
+                            });
+
+                        }, 4000);
+                       
                         
                     }, error : function(error){
                         done(error);
@@ -396,20 +402,19 @@ describe("Cloud Files", function(done) {
             //console.log(file);
             if(file.url) {
                 file.fetch().then(function(res){
-                    res.getFileContent().then(function(res){
-                        //console.log(res);
+                    res.getFileContent().then(function(res){                        
                         done();
-                    },function(){
-                        throw "Unable to Fetch File";
+                    },function(err){
+                        done(err);                        
                     });
-                },function(){
-                    throw "Unable to Fetch File";
+                },function(err){
+                    done(err);                    
                 });
             }else{
-                throw 'ún able to get the url';
+                done('únable to get the url');
             }
         },function(err){
-            throw "Unable to save file";
+            done(err);            
         });
     });
 
@@ -454,18 +459,20 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            //console.log(res);
+         
             var file = res.get('file');
-            file.fetch().then(function(res){
-                //console.log(res);
-                if(res.get('url'))
+            file.fetch().then(function(res){                
+                if(res.get('url')){
                     done();
-                throw "Unable to fetch the file";
+                }else{
+                    done("No Url found..");
+                }
+                
             },function(err){
-                throw "Unable to fetch file";
+                done(err);                
             });
         },function(err){
-            throw "unable to save object";
+            done(err);            
         });
     });
 

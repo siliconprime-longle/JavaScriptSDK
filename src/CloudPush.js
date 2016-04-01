@@ -57,13 +57,19 @@ CB.Push.send = function(data,query,callback) {
     url = CB.apiUrl + "/push/" + CB.appId + '/send';
 
     CB._request('POST',url,params).then(function(response){
-        var object = CB.fromJSON(JSON.parse(response));
+        var object = JSON.parse(response);
         if (callback) {
             callback.success(object);
         } else {
             def.resolve(object);
         }
     },function(err){
+
+        try{
+            err = JSON.parse(err);
+        }catch(e){
+        }
+        
         if(callback){
             callback.error(err);
         }else {

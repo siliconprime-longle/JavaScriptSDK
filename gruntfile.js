@@ -6,12 +6,12 @@ module.exports = function(grunt) {
         concat: {
             sdk: {
                 // the files to concatenate
-                    src: ['src/Promises.js','src/PrivateMethods.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
-                    ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/CloudQueue.js',
-                    'src/CloudCache.js','src/CloudPush.js'],
-                    // the location of the resulting JS file
-                    dest: 'dist/cloudboost.js'
-                },
+                src: ['src/Promises.js','src/PrivateMethods.js','src/CloudSocketClientLib.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
+                ,'src/CloudUser.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/CloudQueue.js',
+                'src/CloudCache.js','src/CloudPush.js'],
+                // the location of the resulting JS file
+                dest: 'dist/cloudboost.js'
+            },
 
             test:{
               // the files to concatenate

@@ -5,7 +5,7 @@ describe("Should Create All Test Tables",function(done){
         CB.appKey = CB.masterKey;
     });
 
-    it("should create a table",function(done){
+    it("Should create a table",function(done){
         this.timeout(50000);
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';

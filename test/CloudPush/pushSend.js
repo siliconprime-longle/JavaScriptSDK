@@ -1,7 +1,7 @@
 
 describe("CloudPush", function (done) {
 
-    it("Should fail to send notification without push settings", function (done) {
+    /*it("Should fail to send notification without push settings", function (done) {
 
         this.timeout(30000);
 
@@ -33,7 +33,7 @@ describe("CloudPush", function (done) {
         });
 
         
-    });
+    });*/
 
     it("should add a sample setting to an app.", function(done) {
         this.timeout(100000);
@@ -103,7 +103,7 @@ describe("CloudPush", function (done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "cdZv6YAK9J0:APA91bF_siuFOkAHhfHBr272fmiBwXCnnVtE_Cnxx0E0etCOHfFMBmo3GXvnzbxH0HCr21_zDbSRqZdjms65pIelkygNnxAuaZ62ehrqvt3O0G5RyCQY8pZ8_8WqzbGO5WnKRKaRKteY");
+        obj.set('deviceToken', "fOek_RfEqUw:APA91bGGWKZzgM0-s4Z-NK9t7cdDqUBsskidJ09bn_vTruycmRgk_zS2IYE591GMVP1SuaSc3m81spmw8lad23vtkMI8E8dZB-F9lTz44Ij1uw9Zy1m3405dscjnfnOHru0IpJQe3jef");
         obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
@@ -136,7 +136,7 @@ describe("CloudPush", function (done) {
     });
 
     
-    it("Should send message with data and callback", function (done) {
+    /*it("Should send message with data and callback", function (done) {
 
             this.timeout(30000);
 
@@ -352,7 +352,7 @@ describe("CloudPush", function (done) {
             }
         });       
         
-    });    
+    });  */  
 
 }); 
 

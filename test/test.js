@@ -1,5 +1,5 @@
-var SECURE_KEY = "c5aeafe6-32fe-4f60-b369-1fe22d5f8f99";
-var URL = "https://beta-api.cloudboost.io";
+var SECURE_KEY = "a6ccbafc-ede3-4e59-adf5-b80a8703b211";
+var URL = "http://localhost:4730";
 
    var util = {
      makeString : function(){
@@ -306,7 +306,7 @@ describe("Should Create All Test Tables",function(done){
         CB.appKey = CB.masterKey;
     });
 
-    it("should create a table",function(done){
+    it("Should create a table",function(done){
         this.timeout(50000);
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
@@ -1043,7 +1043,7 @@ describe("Cloud Files", function(done) {
 
     it("Should return the fileList with CloudObject",function(done){
 
-        this.timeout(30000);
+        this.timeout(34000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -1091,7 +1091,7 @@ describe("Cloud Files", function(done) {
 
     it("Should return the fileList with findById",function(done){
 
-        this.timeout(30000);
+        this.timeout(35000);
 
         var data = 'akldaskdhklahdasldhd';
         var name = 'abc.txt';
@@ -1117,21 +1117,27 @@ describe("Cloud Files", function(done) {
                     success : function(obj){
                         var query = new CB.CloudQuery("Sample");
                         query.include('fileList');
-                        query.findById(obj.id,{
-                            success : function(newObj){
-                                if(newObj.get('fileList').length>0){
-                                    if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
-                                        done();
+
+                        setTimeout(function(){ 
+
+                           query.findById(obj.id,{
+                                success : function(newObj){
+                                    if(newObj.get('fileList').length>0){
+                                        if(newObj.get('fileList')[0].url && newObj.get('fileList')[1].url){
+                                            done();
+                                        }else{
+                                            done("Did not get the URL's back");
+                                        }
                                     }else{
-                                        done("Did not get the URL's back");
+                                        done("Didnot get the file object back.");
                                     }
-                                }else{
-                                    done("Didnot get the file object back.");
+                                },error : function(error){
+                                    done(error);
                                 }
-                            },error : function(error){
-                                done(error);
-                            }
-                        });
+                            });
+
+                        }, 4000);
+                       
                         
                     }, error : function(error){
                         done(error);
@@ -2627,7 +2633,7 @@ describe("CloudDevice", function () {
 
 describe("CloudPush", function (done) {
 
-    it("Should fail to send notification without push settings", function (done) {
+    /*it("Should fail to send notification without push settings", function (done) {
 
         this.timeout(30000);
 
@@ -2659,7 +2665,7 @@ describe("CloudPush", function (done) {
         });
 
         
-    });
+    });*/
 
     it("should add a sample setting to an app.", function(done) {
         this.timeout(100000);
@@ -2729,7 +2735,7 @@ describe("CloudPush", function (done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "cdZv6YAK9J0:APA91bF_siuFOkAHhfHBr272fmiBwXCnnVtE_Cnxx0E0etCOHfFMBmo3GXvnzbxH0HCr21_zDbSRqZdjms65pIelkygNnxAuaZ62ehrqvt3O0G5RyCQY8pZ8_8WqzbGO5WnKRKaRKteY");
+        obj.set('deviceToken', "fOek_RfEqUw:APA91bGGWKZzgM0-s4Z-NK9t7cdDqUBsskidJ09bn_vTruycmRgk_zS2IYE591GMVP1SuaSc3m81spmw8lad23vtkMI8E8dZB-F9lTz44Ij1uw9Zy1m3405dscjnfnOHru0IpJQe3jef");
         obj.set('deviceOS', "android");
         obj.set('timezone', "chile");
         obj.set('channels', ["pirates","hackers","stealers"]);
@@ -2762,7 +2768,7 @@ describe("CloudPush", function (done) {
     });
 
     
-    it("Should send message with data and callback", function (done) {
+    /*it("Should send message with data and callback", function (done) {
 
             this.timeout(30000);
 
@@ -2978,7 +2984,7 @@ describe("CloudPush", function (done) {
             }
         });       
         
-    });    
+    });  */  
 
 }); 
 
