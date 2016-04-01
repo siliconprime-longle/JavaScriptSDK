@@ -1335,20 +1335,19 @@ describe("Cloud Files", function(done) {
             //console.log(file);
             if(file.url) {
                 file.fetch().then(function(res){
-                    res.getFileContent().then(function(res){
-                        //console.log(res);
+                    res.getFileContent().then(function(res){                        
                         done();
-                    },function(){
-                        throw "Unable to Fetch File";
+                    },function(err){
+                        done(err);                        
                     });
-                },function(){
-                    throw "Unable to Fetch File";
+                },function(err){
+                    done(err);                    
                 });
             }else{
-                throw 'ún able to get the url';
+                done('únable to get the url');
             }
         },function(err){
-            throw "Unable to save file";
+            done(err);            
         });
     });
 
@@ -1393,18 +1392,20 @@ describe("Cloud Files", function(done) {
         obj.set('file',fileObj);
         obj.set('name','abcd');
         obj.save().then(function(res){
-            //console.log(res);
+         
             var file = res.get('file');
-            file.fetch().then(function(res){
-                //console.log(res);
-                if(res.get('url'))
+            file.fetch().then(function(res){                
+                if(res.get('url')){
                     done();
-                throw "Unable to fetch the file";
+                }else{
+                    done("No Url found..");
+                }
+                
             },function(err){
-                throw "Unable to fetch file";
+                done(err);                
             });
         },function(err){
-            throw "unable to save object";
+            done(err);            
         });
     });
 
