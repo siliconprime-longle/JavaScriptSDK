@@ -92,7 +92,7 @@
     });
 
 
-    /*it("should not return duplicate objects in relation list after saving", function (done) {
+    it("should not return duplicate objects in relation list after saving", function (done) {
 
         this.timeout(30000);     
        
@@ -102,14 +102,14 @@
         var obj = new CB.CloudObject('Custom4');
         obj.set('newColumn7', [obj1,obj1]);
         obj.save().then(function(respObj) {
-            console.log(respObj);
+
             if(respObj.get("newColumn7").length==2){
-                throw "returning duplicate objects";
+                done("returning duplicate objects");
             }else{
                 done();
             }            
-        }, function (error) { 
-            throw "Relation Save error";
+        }, function (error) {
+            done(error);            
         });
     });
 
@@ -129,19 +129,19 @@
             obj.findById(respObj.get("id"),{success : function(queriedObj){ 
 
                 if(queriedObj.get("newColumn7").length==2){
-                    throw "returning duplicate objects";
+                    done("returning duplicate objects");
                 }else{
                     done();
                 } 
             }, error : function(error){ 
-              throw "Relation query error";             
+              done(error);             
             }});
 
             
         }, function (error) { 
-            throw "Relation Save error";
+            done(error);
         });
-    });*/
+    });
 
 
     it("should include a relation on distinct.", function (done) {

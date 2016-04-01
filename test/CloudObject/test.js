@@ -678,25 +678,30 @@ it("should not save a string into date column",function(done){
  // Test for error of getting duplicate objects while saving a object after updating
     it("Should not duplicate the values in a list after updating",function(done){
         this.timeout(30000);
+
         var obj = new CB.CloudObject('student1');
         obj.set('age',5);
         obj.set('name','abcd');
+
         var obj1 = new CB.CloudObject('Custom4');
         obj1.set('newColumn7',[obj,obj]);
+
         obj1.save().then(function(list){
+
             nc7=list.get('newColumn7');
             nc7.push(obj);
             obj1.set('newColumn7',nc7);
             obj1.save().then(function(list){
-                if(list.get('newColumn7').length === 3)
+                if(list.get('newColumn7').length === 1)
                     done();
                 else
-                    throw "should not save duplicate objects";
-            },function(){
-                throw "should save cloud object ";
+                    done("should not save duplicate objects");
+            },function(err){
+                done(err);
             });
+
         },function(err){
-            throw "should save cloud object";
+            done(err);
         });
     });
 
