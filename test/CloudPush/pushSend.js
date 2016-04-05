@@ -1,7 +1,7 @@
 
 describe("CloudPush", function (done) {
 
-    /*it("Should fail to send notification without push settings", function (done) {
+    it("Should fail to send notification without push settings", function (done) {
 
         this.timeout(30000);
 
@@ -33,7 +33,7 @@ describe("CloudPush", function (done) {
         });
 
         
-    });*/
+    });
 
     it("should add a sample setting to an app.", function(done) {
         this.timeout(100000);
@@ -136,7 +136,7 @@ describe("CloudPush", function (done) {
     });
 
     
-    /*it("Should send message with data and callback", function (done) {
+    it("Should send message with data and callback", function (done) {
 
             this.timeout(30000);
 
@@ -352,7 +352,7 @@ describe("CloudPush", function (done) {
             }
         });       
         
-    });  */  
+    });  
 
 }); 
 
