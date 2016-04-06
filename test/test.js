@@ -2366,17 +2366,42 @@ describe("CloudUser", function () {
         if(CB._isNode){
             done();
             return;
-         }
+        }
 
-        this.timeout(300000);
+        this.timeout(400000);
 
         var obj = new CB.CloudUser();
         obj.set('username', username);
         obj.set('password',passwd);
-        obj.logIn().then(function(list) {
+        obj.logIn().then(function(loggedUser) {
             role1.save().then(function(role){
-                list.addToRole(role).then(function(list){
-                    done();
+                loggedUser.addToRole(role).then(function(savedUser){
+
+                    var query = new CB.CloudQuery("User");
+                    query.equalTo('username',username);
+                    query.find({
+                      success: function(list) {
+                        list=list[0];
+
+                        if(list && list.get("roles")){
+                            var rolesList=list.get("roles");
+                            var userRoleIds=[];
+                            for(var i=0;i<rolesList.length;++i){
+                                userRoleIds.push(rolesList[i].document._id);
+                            }
+
+                            if(userRoleIds.indexOf(role.document._id)>-1){
+                                done();
+                            }else{
+                                done("addToRole failed");
+                            }
+                        }
+                      },
+                      error: function(error) {
+                        done(error);
+                      }
+                    });
+
                 },function(error){
                     throw error;
                 });
@@ -2397,7 +2422,7 @@ describe("CloudUser", function () {
          }
          
 
-        this.timeout(3000000);
+        this.timeout(4000000);
 
         var obj = new CB.CloudUser();
         var roleName3 = util.makeString();
@@ -2405,25 +2430,106 @@ describe("CloudUser", function () {
         role2.set('name',roleName3);
         obj.set('username', username);
         obj.set('password',passwd);
-        obj.logIn().then(function(list) {
+        obj.logIn().then(function(loggedUser) {
+
             role2.save().then(function(role2){
-                list.addToRole(role2).then(function(list){
+                loggedUser.addToRole(role2).then(function(list){
+
                     CB.CloudUser.current.removeFromRole(role2).then(function(){
-                        done();
-                    },function(){
-                        throw "Should remove the role";
+
+                        var query = new CB.CloudQuery("User");
+                        query.equalTo('username',username);
+                        query.find({
+                          success: function(list) {
+                            list=list[0];
+
+                            if(list && list.get("roles")){
+                                var rolesList=list.get("roles");
+                                var userRoleIds=[];
+                                for(var i=0;i<rolesList.length;++i){
+                                    userRoleIds.push(rolesList[i].document._id);
+                                }
+
+                                if(userRoleIds.indexOf(role2.document._id)<0){
+                                    done();
+                                }else{
+                                    done("removeFromRole failed");
+                                }
+                            }
+                          },
+                          error: function(error) {
+                            done(error);
+                          }
+                        });
+
+                    },function(error){
+                        done(error);                        
                     });
-                },function(){
-                    throw "user role set error";
+                },function(error){
+                   done(error);
                 });
-            }, function () {
-                throw "user role assign error";
+            }, function (error) {
+                done(error);
             });
-        },function(){
-            throw "user login error";
+        },function(error){
+            done(error);
         });
 
-    });   
+    });  
+
+
+    it("Should check isInRole", function (done) {
+
+         if(CB._isNode){
+            done();
+            return;
+         }
+         
+
+        this.timeout(4000000);
+
+        var obj = new CB.CloudUser();
+        var roleName3 = util.makeString();
+        var role2 = new CB.CloudRole(roleName3);
+        role2.set('name',roleName3);
+        obj.set('username', username);
+        obj.set('password',passwd);
+        obj.logIn().then(function(loggedUser) {
+
+            role2.save().then(function(role2){
+                loggedUser.addToRole(role2).then(function(list){
+                   
+                    var query = new CB.CloudQuery("User");
+                    query.equalTo('username',username);
+                    query.find({
+                      success: function(list) { 
+                        list=list[0];
+
+                        obj.set("roles",list.get("roles"));
+
+                        if(CB.CloudUser.current.isInRole(role2)) {
+                          done();
+                        } else {
+                            done("isInRole Failed..");
+                        }
+
+                      },
+                      error: function(error) {
+                        done(error);
+                      }
+                    });                   
+
+                },function(error){
+                   done(error);
+                });
+            }, function (error) {
+                done(error);
+            });
+        },function(error){
+            done(error);
+        });
+
+    }); 
 
 
     it('should encrypt user password',function (done){

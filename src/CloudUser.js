@@ -303,7 +303,8 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     var def;
     if (!callback) {
         def = new CB.Promise();
-    }
+    }   
+
     //Call the addToRole API
     var params=JSON.stringify({
         user: CB.toJSON(thisObj),
@@ -335,7 +336,17 @@ CB.CloudUser.prototype.isInRole = function(role) {
     if (!role) {
         throw "role is null";
     }
-    return (this.get('roles').indexOf(role.document._id) >= 0);
+
+    var roleArray=this.get('roles');
+    var userRoleIds=[];
+
+    if(roleArray && roleArray.length>0){
+        for(var i=0;i<roleArray.length; ++i){
+            userRoleIds.push(roleArray[i].document._id);
+        }
+    }
+    
+    return (userRoleIds.indexOf(role.document._id) >= 0);
 };
 
 CB.CloudUser.prototype.removeFromRole = function(role, callback) {
