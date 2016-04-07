@@ -120,7 +120,7 @@ CB.CloudFile.prototype.save = function(callback) {
         params.append("fileToUpload", this.fileObj);
         params.append("key", CB.appKey);
         params.append("fileObj",JSON.stringify(CB.toJSON(thisObj)));
-        var url = CB.serverUrl + '/file/' + CB.appId;
+        var url = CB.apiUrl + '/file/' + CB.appId;
 
         var uploadProgressCallback = null;
         
@@ -149,7 +149,7 @@ CB.CloudFile.prototype.save = function(callback) {
             fileObj:CB.toJSON(this),
             key: CB.appKey
         });
-        url = CB.serverUrl + '/file/' + CB.appId;
+        url = CB.apiUrl + '/file/' + CB.appId;
         var uploadProgressCallback = null;
 
         if(callback && callback.uploadProgress){
@@ -202,7 +202,7 @@ CB.CloudFile.prototype.delete = function(callback) {
         key: CB.appKey,
         method:"PUT"
     });
-    var url = CB.serverUrl+'/file/' + CB.appId + '/' + this.document._id ;
+    var url = CB.apiUrl+'/file/' + CB.appId + '/' + this.document._id ;
 
     CB._request('PUT',url,params).then(function(response){
         thisObj.url = null;

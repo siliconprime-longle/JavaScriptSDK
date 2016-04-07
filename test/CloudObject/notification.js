@@ -149,7 +149,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should stop listening.", function(done) {
 
-     this.timeout(40000);
+     this.timeout(44000);
       
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
@@ -176,7 +176,7 @@ describe("Cloud Objects Notification", function() {
       		throw 'Listening to events even if its stopped.';
       	}
 
-      }, 5000);
+      }, 6000);
     });
 
 });

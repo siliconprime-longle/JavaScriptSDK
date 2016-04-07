@@ -10,9 +10,7 @@ CB.CloudApp.init = function(serverUrl, applicationId, applicationKey, opts) { //
         applicationKey=applicationId;
         applicationId=serverUrl;
     }else {        
-        CB.serverUrl=serverUrl;
-        CB.apiUrl = serverUrl;
-        CB.socketIoUrl=serverUrl;      
+        CB.apiUrl = serverUrl;             
     }
 
     if(typeof applicationKey === "object"){
@@ -36,7 +34,7 @@ CB.CloudApp.init = function(serverUrl, applicationId, applicationKey, opts) { //
             CB.io = io;
         }
 
-        CB.Socket = CB.io(CB.socketIoUrl);        
+        CB.Socket = CB.io(CB.apiUrl);        
     } 
     CB.CloudApp._isConnected = true;  
 };

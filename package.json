@@ -1,6 +1,6 @@
 {
   "name": "cloudboost",
-  "version": "1.1.356",
+  "version": "1.1.362",
   "description": "Database Service that does Storage, Search, Real-time and a whole lot more.",
   "main": "lib/cloudboost",
   "engines": {
@@ -22,6 +22,12 @@
   "dependencies": {
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
+    "node-localstorage": "^0.5.0",
+    "request": "^2.69.0",
+    "socket.io": "^1.3.5",
+    "xmlhttprequest": "^1.7.0"
+  },
+  "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-bump": "^0.3.1",
     "grunt-bumpup": "^0.6.3",
@@ -29,12 +35,6 @@
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-release": "^0.13.0",
-    "node-localstorage": "^0.5.0",
-    "request": "^2.69.0",
-    "socket.io-client": "^1.3.5",
-    "xmlhttprequest": "^1.7.0"
-  },
-  "devDependencies": {
     "mocha": "^2.4.5",
     "chai": "^3.5.0",
     "chance": "^1.0.1",

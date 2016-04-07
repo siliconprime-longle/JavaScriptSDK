@@ -6671,7 +6671,7 @@ describe("Cloud Objects Notification", function() {
 
     it("should stop listening.", function(done) {
 
-     this.timeout(40000);
+     this.timeout(44000);
       
       var cloudObject = new CB.CloudObject('Student');
       var count = 0;
@@ -6698,7 +6698,7 @@ describe("Cloud Objects Notification", function() {
       		throw 'Listening to events even if its stopped.';
       	}
 
-      }, 5000);
+      }, 6000);
     });
 
 });
@@ -12058,7 +12058,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl+'/db/mongo/connect';  
+        var url = CB.apiUrl+'/db/mongo/connect';  
         CB._request('POST',url).then(function() {
             done();
         },function(err){
@@ -12074,13 +12074,13 @@ describe("Atomicity Tests",function(done){
         obj.set('name','let');
         obj.save().then(function(res){
            var id = res.get('id');
-            var url = CB.serverUrl + '/db/mongo/Disconnect';
+            var url = CB.apiUrl + '/db/mongo/Disconnect';
             CB._request('POST',url).then(function(){
                 res.set('name','what');
                 res.save().then(function(){
                    done("DB disconnected should not save");
                 },function(){
-                    var url = CB.serverUrl + '/db/mongo/connect';
+                    var url = CB.apiUrl + '/db/mongo/connect';
                     CB._request('POST',url).then(function() {
                         var query = new CB.CloudQuery('student1');
                         query.findById(id).then(function(res){
@@ -12108,7 +12108,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/mongo/connect';
+        var url = CB.apiUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
@@ -12123,13 +12123,13 @@ describe("Atomicity Tests",function(done){
         var obj = new CB.CloudObject('student1');
         obj.set('name','abcdef');
         obj.save().then(function(res){
-            var url = CB.serverUrl + '/db/mongo/Disconnect';
+            var url = CB.apiUrl + '/db/mongo/Disconnect';
             CB._request('POST',url).then(function(){
                 var id = res.get('id');
                 res.delete().then(function(){
                     throw "Should Not delete with db disconnected";
                 },function(){
-                    var url = CB.serverUrl + '/db/mongo/connect';
+                    var url = CB.apiUrl + '/db/mongo/connect';
                     CB._request('POST',url).then(function() {
                         var query = new CB.CloudQuery('student1');
                         query.findById(id).then(function(res) {
@@ -12158,7 +12158,7 @@ describe("Atomicity Tests",function(done){
 
         this.timeout(10000);
 
-        var url = CB.serverUrl + '/db/mongo/connect';
+        var url = CB.apiUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
@@ -12174,7 +12174,7 @@ describe("Atomicity Tests",function(done){
 
 
         var tableName = util.makeString();
-        var url = CB.serverUrl + '/db/mongo/Disconnect';
+        var url = CB.apiUrl + '/db/mongo/Disconnect';
         CB._request('POST',url).then(function(){
             var table = new CB.CloudTable(tableName);
             table.save().then(function(){
@@ -12198,7 +12198,7 @@ describe("Atomicity Tests",function(done){
     it("Connect back to MongoDB",function(done) {
         this.timeout(10000);
         CB.appKey = CB.jsKey;
-        var url = CB.serverUrl + '/db/mongo/connect';
+        var url = CB.apiUrl + '/db/mongo/connect';
         CB._request('POST',url).then(function() {
             done();
         },function(){
