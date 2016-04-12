@@ -13281,9 +13281,9 @@ CB.CloudCache.deleteAll = function(callback){
 };
 /*CloudBoost Push Notifications*/
 
-CB.Push={};
+CB.CloudPush={};
 
-CB.Push.send = function(data,query,callback) {
+CB.CloudPush.send = function(data,query,callback) {
 	
 	var tableName="Device";	
 

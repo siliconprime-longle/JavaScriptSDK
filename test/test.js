@@ -2756,7 +2756,7 @@ describe("CloudPush", function (done) {
                 var query = new CB.CloudQuery("Device");
                 query.containedIn('channels', "hackers");
 
-                CB.Push.send({title:"RT Bathula",message:"check this"},query,{
+                CB.CloudPush.send({title:"RT Bathula",message:"check this"},query,{
                     success:function(data){
                         done("Sent without notifications.");
                     },
@@ -2854,7 +2854,7 @@ describe("CloudPush", function (done) {
                     var query = new CB.CloudQuery("Device");
                     query.containedIn('channels', "hackers");
 
-                    CB.Push.send({title:"RT Bathula",message:"check this"},query,{
+                    CB.CloudPush.send({title:"RT Bathula",message:"check this"},query,{
                         success:function(data){
                             done();
                         },
@@ -2889,7 +2889,7 @@ describe("CloudPush", function (done) {
                 success : function(savedObj){
                     if(savedObj){
                        
-                        CB.Push.send({title:"RT Bathula",message:"check this"},{
+                        CB.CloudPush.send({title:"RT Bathula",message:"check this"},{
                             success:function(data){
                                 done();
                             },
@@ -2922,7 +2922,7 @@ describe("CloudPush", function (done) {
             success : function(savedObj){
                 if(savedObj){
                    
-                    CB.Push.send({title:"RT Bathula",message:"check this"},["pirates","hackers"],{
+                    CB.CloudPush.send({title:"RT Bathula",message:"check this"},["pirates","hackers"],{
                         success:function(data){
                             done();
                         },
@@ -2955,7 +2955,7 @@ describe("CloudPush", function (done) {
             success : function(savedObj){
                 if(savedObj){
                    
-                    CB.Push.send({title:"RT Bathula",message:"check this"},"hackers",{
+                    CB.CloudPush.send({title:"RT Bathula",message:"check this"},"hackers",{
                         success:function(data){
                             done();
                         },
@@ -2990,7 +2990,7 @@ describe("CloudPush", function (done) {
             success : function(savedObj){
                 if(savedObj){
                    
-                    CB.Push.send({title:"RT Bathula",message:"check this"})
+                    CB.CloudPush.send({title:"RT Bathula",message:"check this"})
                     .then(function(response){
                         done();
                     },function(error){
@@ -3027,7 +3027,7 @@ describe("CloudPush", function (done) {
                     query.containedIn('channels', "hackers");
 
                 try{    
-                    CB.Push.send(query,{
+                    CB.CloudPush.send(query,{
                         success:function(data){
                             done("Sent without data");
                         },
@@ -3070,12 +3070,12 @@ describe("CloudPush", function (done) {
 
                     try{
 
-                        CB.Push.send({title:"Hola"},query,{
+                        CB.CloudPush.send({title:"Hola"},query,{
                             success:function(data){
                                 done("Sent,without message");
                             },
                             error:function(error){
-                                 done("Sent,without message");
+                                done("Sent,without message");
                             }
                         });
 
