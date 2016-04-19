@@ -22,9 +22,9 @@ var server = app.listen(app.get('port'), function() {
 
 function runTests(){
 
-	CB.CloudApp.init("awvnhhvdjqof","5ec12312-54f3-4cb8-bf7c-aae94ac9b8d6");
+	/*CB.CloudApp.init("awvnhhvdjqof","5ec12312-54f3-4cb8-bf7c-aae94ac9b8d6");
 
-	/*var SECURE_KEY = "b8e40eda-3ec2-4e9e-b30c-8195be38fbae";
+	var SECURE_KEY = "b8e40eda-3ec2-4e9e-b30c-8195be38fbae";
 	var URL = "http://localhost:4730";
 
 	var appId = chance.word();

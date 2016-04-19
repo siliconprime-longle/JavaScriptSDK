@@ -488,7 +488,7 @@ CB._defaultColumns = function(type) {
     }else if (type === "user"){
         var username = new CB.Column('username');
         username.dataType = 'Text';
-        username.required = true;
+        username.required = false;
         username.unique = true;
         username.document.isDeletable = false;
         username.document.isEditable = false;
@@ -501,7 +501,7 @@ CB._defaultColumns = function(type) {
 
         var password = new CB.Column('password');
         password.dataType = 'EncryptedText';
-        password.required = true;
+        password.required = false;
         password.document.isDeletable = false;
         password.document.isEditable = false;
 
