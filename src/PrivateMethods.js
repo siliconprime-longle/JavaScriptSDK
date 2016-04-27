@@ -513,10 +513,18 @@ CB._defaultColumns = function(type) {
         roles.document.isDeletable = false;
         roles.document.isEditable = false;
 
+        var socialAuth = new CB.Column('socialAuth');
+        socialAuth.dataType = 'List';
+        socialAuth.relatedTo = 'Object';
+        socialAuth.required = false;
+        socialAuth.document.isDeletable = false;
+        socialAuth.document.isEditable = false;
+
         col.push(username);
         col.push(roles);
         col.push(password);
         col.push(email);
+        col.push(socialAuth);
         return col;
     }else if(type === "role") {
         var name = new CB.Column('name');
@@ -707,4 +715,22 @@ CB._createCookie = function(name, content, expires){
             document.cookie =  + name+"=" + content.toString() + "; " + expires;
         }
     }
+}
+
+//Description : returns query string. 
+//Params : @key : key         
+//Returns : query string.  
+CB._getQuerystringByKey = function(key){
+    key = key.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + key + "=([^&#]*)"),
+    results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+//Set sessionId if cbtoken is found in url
+if(typeof(location) !== 'undefined' && location.search){   
+    var cbtoken=CB._getQuerystringByKey("cbtoken");
+    if(cbtoken && cbtoken!==""){
+        localStorage.setItem('sessionID', cbtoken);
+    }    
 }

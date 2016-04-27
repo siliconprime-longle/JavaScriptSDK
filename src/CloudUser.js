@@ -12,6 +12,55 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
 
+//Description  : This function gets the current user from the server by taking the sessionId from querystring.
+//Params : 
+//returns : CloudUser object if the current user is still in session or null. 
+CB.CloudUser.getCurrentUser = function(callback){
+    
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    
+    //now call the signup API.
+    var params=JSON.stringify({        
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/user/" + CB.appId + "/currentUser";
+
+    CB._request('POST',url,params).then(function(response){ 
+        var user = response;       
+        if(response){  
+            try{
+                user = new CB.CloudUser();
+                CB.fromJSON(JSON.parse(response),user);
+                CB.CloudUser.current=user;
+                CB.CloudUser._setCurrentUser(user);
+            }catch(e){
+            }            
+        }
+        
+        if (callback) {
+            callback.success(user);
+        } else {
+            def.resolve(user);
+        }
+        
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+
 //Private Static fucntions
 
 //Description  : This function gets the current user from the cookie or from local storage.
@@ -254,13 +303,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
     if(CB._isNode){
         throw "Error : You cannot logOut the user on the server.";
     }
-
-    if (!this.document.username) {
-        throw "Username is not set.";
-    }
-    if (!this.document.password) {
-        throw "Password is not set.";
-    }
+    
     var thisObj = this;
     var def;
     if (!callback) {

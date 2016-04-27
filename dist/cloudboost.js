@@ -844,11 +844,11 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
         }        
     }
 
-    if(!isServiceUrl){
-        var ssid = CB._getSessionId();
-        if(ssid != null)
-            xmlhttp.setRequestHeader('sessionID', ssid);
-    }
+    
+    var ssid = CB._getSessionId();       
+    if(ssid != null){
+        xmlhttp.setRequestHeader('sessionID', ssid);
+    }    
     if(CB._isNode){
         xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
 
@@ -1009,7 +1009,7 @@ CB._defaultColumns = function(type) {
     }else if (type === "user"){
         var username = new CB.Column('username');
         username.dataType = 'Text';
-        username.required = true;
+        username.required = false;
         username.unique = true;
         username.document.isDeletable = false;
         username.document.isEditable = false;
@@ -1022,7 +1022,7 @@ CB._defaultColumns = function(type) {
 
         var password = new CB.Column('password');
         password.dataType = 'EncryptedText';
-        password.required = true;
+        password.required = false;
         password.document.isDeletable = false;
         password.document.isEditable = false;
 
@@ -1034,10 +1034,18 @@ CB._defaultColumns = function(type) {
         roles.document.isDeletable = false;
         roles.document.isEditable = false;
 
+        var socialAuth = new CB.Column('socialAuth');
+        socialAuth.dataType = 'List';
+        socialAuth.relatedTo = 'Object';
+        socialAuth.required = false;
+        socialAuth.document.isDeletable = false;
+        socialAuth.document.isEditable = false;
+
         col.push(username);
         col.push(roles);
         col.push(password);
         col.push(email);
+        col.push(socialAuth);
         return col;
     }else if(type === "role") {
         var name = new CB.Column('name');
@@ -1229,6 +1237,25 @@ CB._createCookie = function(name, content, expires){
         }
     }
 }
+
+//Description : returns query string. 
+//Params : @key : key         
+//Returns : query string.  
+CB._getQuerystringByKey = function(key){
+    key = key.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + key + "=([^&#]*)"),
+    results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+//Set sessionId if cbtoken is found in url
+if(typeof(location) !== 'undefined' && location.search){   
+    var cbtoken=CB._getQuerystringByKey("cbtoken");
+    if(cbtoken && cbtoken!==""){
+        localStorage.setItem('sessionID', cbtoken);
+    }    
+}
+
 if(!CB._isNode) {
 	//Socket.io Client library 
 	(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -13376,6 +13403,55 @@ CB.CloudUser = CB.CloudUser || function() {
     this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
 };
 
+//Description  : This function gets the current user from the server by taking the sessionId from querystring.
+//Params : 
+//returns : CloudUser object if the current user is still in session or null. 
+CB.CloudUser.getCurrentUser = function(callback){
+    
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+    
+    //now call the signup API.
+    var params=JSON.stringify({        
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/user/" + CB.appId + "/currentUser";
+
+    CB._request('POST',url,params).then(function(response){ 
+        var user = response;       
+        if(response){  
+            try{
+                user = new CB.CloudUser();
+                CB.fromJSON(JSON.parse(response),user);
+                CB.CloudUser.current=user;
+                CB.CloudUser._setCurrentUser(user);
+            }catch(e){
+            }            
+        }
+        
+        if (callback) {
+            callback.success(user);
+        } else {
+            def.resolve(user);
+        }
+        
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+
 //Private Static fucntions
 
 //Description  : This function gets the current user from the cookie or from local storage.
@@ -13618,13 +13694,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
     if(CB._isNode){
         throw "Error : You cannot logOut the user on the server.";
     }
-
-    if (!this.document.username) {
-        throw "Username is not set.";
-    }
-    if (!this.document.password) {
-        throw "Password is not set.";
-    }
+    
     var thisObj = this;
     var def;
     if (!callback) {
