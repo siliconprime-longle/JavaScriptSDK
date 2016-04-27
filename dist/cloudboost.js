@@ -844,11 +844,11 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
         }        
     }
 
-    
-    var ssid = CB._getSessionId();       
-    if(ssid != null){
-        xmlhttp.setRequestHeader('sessionID', ssid);
-    }    
+    if(!isServiceUrl){
+        var ssid = CB._getSessionId();
+        if(ssid != null)
+            xmlhttp.setRequestHeader('sessionID', ssid);
+    }
     if(CB._isNode){
         xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
 
