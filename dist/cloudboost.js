@@ -13689,6 +13689,74 @@ CB.CloudUser.prototype.logIn = function(callback) {
         return def;
     }
 };
+
+CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
+
+    if(CB._isNode){
+        throw "Error : You cannot login the user on the server.";
+    }
+
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    if(!dataJson){
+        throw "data object is null.";
+    }
+
+    if(dataJson && (!dataJson.provider)){
+        throw "provider is not set.";
+    }
+
+    if(dataJson && (!dataJson.accessToken)) {
+        throw "accessToken is not set.";
+    }
+
+    if(dataJson.provider.toLowerCase()==="twiter" && !dataJson.accessSecret) {
+        throw "accessSecret is required for provider twitter.";
+    }         
+  
+    var params=JSON.stringify({ 
+        provider: dataJson.provider,
+        accessToken: dataJson.accessToken, 
+        accessSecret: dataJson.accessSecret,           
+        key: CB.appKey
+    });
+
+    url = CB.apiUrl + "/user/" + CB.appId + "/loginwithprovider" ;
+
+    CB._request('POST',url,params).then(function(response){
+        var user = response;       
+        if(response){  
+            try{
+                user = new CB.CloudUser();
+                CB.fromJSON(JSON.parse(response),user);
+                CB.CloudUser.current=user;
+                CB.CloudUser._setCurrentUser(user);
+            }catch(e){
+            }            
+        }
+
+        if (callback) {
+            callback.success(user);
+        } else {
+            def.resolve(user);
+        }
+        
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
 CB.CloudUser.prototype.logOut = function(callback) {
 
     if(CB._isNode){
