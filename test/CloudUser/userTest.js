@@ -955,4 +955,40 @@ describe("CloudUser", function () {
         });
     });
 
+
+    it('Should get current user from server',function (done){
+        
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', "cloudboost99");
+        obj.set('password',"cbpwd99");
+        obj.set('email',util.makeEmail());
+
+        obj.signUp().then(function(list) {
+            
+            CB.CloudUser.getCurrentUser({
+              success: function(user) {
+                if(user){
+                    done();
+                }else{
+                    done("failed to get user");
+                }
+              },
+              error: function(error) {
+               done(error);
+              }
+            });  
+
+        }, function (error) {
+            done(error);
+        });           
+
+    });
+
 });
