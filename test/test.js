@@ -1844,7 +1844,7 @@ describe("CloudUser", function () {
         });
     });
 
-    it("should send a Reset Email with Email Settings with default Template.", function(done) {
+    /*it("should send a Reset Email with Email Settings with default Template.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId+"/email";
 
@@ -1924,7 +1924,7 @@ describe("CloudUser", function () {
              
             });
         }
-    });
+    });*/
    
 
     it("should send a Reset Email with email Template with no Email Settings.", function(done) {
@@ -2093,7 +2093,7 @@ describe("CloudUser", function () {
         }
     });
 
-    it("should send a Reset Email with Email Settings with no from", function(done) {
+    /*it("should send a Reset Email with Email Settings with no from", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId+"/email";
 
@@ -2257,7 +2257,7 @@ describe("CloudUser", function () {
              
             });
         }
-    });
+    });*/
 
 
     it("Should create a user and get version",function(done){
@@ -2623,42 +2623,6 @@ describe("CloudUser", function () {
         },function(err){
             throw "Unable to Create User";
         });
-    });
-
-
-    it('Should get current user from server',function (done){
-        
-        if(CB._isNode){
-           done();
-           return;
-        }
-
-        this.timeout(300000);
-
-        var obj = new CB.CloudUser();
-        obj.set('username', "cloudboost99");
-        obj.set('password',"cbpwd99");
-        obj.set('email',util.makeEmail());
-
-        obj.signUp().then(function(list) {
-            
-            CB.CloudUser.getCurrentUser({
-              success: function(user) {
-                if(user){
-                    done();
-                }else{
-                    done("failed to get user");
-                }
-              },
-              error: function(error) {
-               done(error);
-              }
-            });  
-
-        }, function (error) {
-            done(error);
-        });           
-
     });
 
 });
