@@ -94,7 +94,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
     //Check document
     if(typeof(document) !== 'undefined'){
 
-        _requestBrowserNotifications().then(function(response){
+        CB._requestBrowserNotifications().then(function(response){
 
             if('serviceWorker' in navigator) {
                 return navigator.serviceWorker.register('serviceWorker.js',{scope: './'});
@@ -111,7 +111,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
                 noServerDef.reject('Notifications aren\'t supported on service workers.');  
                 return noServerDef;                   
             }else{
-                return _subscribe();
+                return CB._subscribe();
             }
 
         }).then(function(subscription){
@@ -167,7 +167,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
     //Check document
     if(typeof(document) !== 'undefined'){
 
-        _getSubscription().then(function(subscription){   
+        CB._getSubscription().then(function(subscription){   
 
             //No subscription 
             if(!subscription){
@@ -236,7 +236,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
 };
 
 
-function _subscribe(){
+CB._subscribe = function (){
 
     var def = new CB.Promise();
 
@@ -268,10 +268,10 @@ function _subscribe(){
     });
 
     return def;
-}
+};
 
 
-function _getSubscription(){
+CB._getSubscription = function(){
 
     var def = new CB.Promise();
     
@@ -294,10 +294,10 @@ function _getSubscription(){
     });
 
     return def;
-}
+};
  
 
-function _requestBrowserNotifications() {
+CB._requestBrowserNotifications = function() {
 
     var def = new CB.Promise();
 
@@ -323,4 +323,4 @@ function _requestBrowserNotifications() {
     }
 
     return def;
-}
+};
