@@ -108,17 +108,17 @@ CB.CloudPush.enableWebNotifications = function(callback) {
 
             if (!(registration.showNotification)) { 
                 var noServerDef = new CB.Promise(); 
-                noServerDef.reject('Service workers aren\'t supported in this browser.');  
+                noServerDef.reject('Notifications aren\'t supported on service workers.');  
                 return noServerDef;                   
             }else{
                 return _subscribe();
             }
 
-        }).then(function(endpoint){
+        }).then(function(subscription){
 
             var obj = new CB.CloudObject('Device');
             obj.set('deviceOS',"web");
-            obj.set('deviceToken',endpoint);            
+            obj.set('deviceToken',subscription.endpoint);            
             obj.save({
                 success : function(obj){
                     if (callback) {
@@ -157,6 +157,85 @@ CB.CloudPush.enableWebNotifications = function(callback) {
 };
 
 
+CB.CloudPush.disableWebNotifications = function(callback) {
+
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    //Check document
+    if(typeof(document) !== 'undefined'){
+
+        _getSubscription().then(function(subscription){   
+
+            //No subscription 
+            if(!subscription){
+                if (callback) {
+                    callback.success();
+                } else {
+                    def.resolve();
+                } 
+            }
+
+            if(subscription){
+                // We have a subcription, so call unsubscribe on it
+                subscription.unsubscribe().then(function(successful) {
+                    if (callback) {
+                        callback.success();
+                    } else {
+                        def.resolve();
+                    }
+                }).catch(function(e) {    
+
+                    console.log('Unsubscription error: ', e);
+                    if (callback) {
+                        callback.success();
+                    } else {
+                        def.resolve();
+                    }                  
+                });
+
+                //Remove Device Objects
+                var query = new CB.CloudQuery("Device");
+                query.equalTo('deviceOS','web');
+                query.equalTo('deviceToken',subscription.endpoint);
+                query.find({
+                  success: function(list) {
+                    if(list && list.length>0){
+                        for(var i=0;i<list.length;++i){
+                            list[i].delete();
+                        }
+                    }
+                  },
+                  error: function(error) {
+                  }
+                });
+                //Remove Device Objects
+            }
+
+        },function(error){
+            if(callback){
+                callback.error(error);
+            }else {
+                def.reject(error);
+            }
+        });
+
+    }else{
+        if(callback){
+            callback.error(error);
+        }else {
+            def.reject(error);
+        }
+    } 
+
+    if (!callback) {
+        return def;
+    }   
+};
+
+
 function _subscribe(){
 
     var def = new CB.Promise();
@@ -172,18 +251,20 @@ function _subscribe(){
 
             if (!subscription) {  
                 reg.pushManager.subscribe({userVisibleOnly: true}).then(function(subscription) {                
-                    def.resolve(subscription.endpoint);
+                    def.resolve(subscription);
                 }).catch(function(err) {                                
                     def.reject(err);               
                 });
             }else{
-                def.resolve(subscription.endpoint);
+                def.resolve(subscription);
             }     
       
         }).catch(function(err) {  
             def.reject(err);  
         });   
 
+    },function(error){
+        def.reject(error);
     });
 
     return def;
@@ -201,13 +282,15 @@ function _getSubscription(){
             if (!subscription) {  
                 def.resolve(null);
             }else{
-                def.resolve(subscription.endpoint);
+                def.resolve(subscription);
             }     
       
         }).catch(function(err) {  
             def.reject(err);  
         });   
 
+    },function(error){
+        def.reject(error);
     });
 
     return def;
