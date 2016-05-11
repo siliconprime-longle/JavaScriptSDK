@@ -8269,6 +8269,52 @@ describe("CloudQuery", function (done) {
         });
     });
 
+    it("Should query with substring and case insensitive.", function (done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'VIPUL');
+        obj.save().then(function(list) {
+            if(list.get('name') === 'VIPUL'){
+
+               var query  = new CB.CloudQuery('student1');
+               query.substring("name", "pu", true);
+               query.find({
+                success : function(list){
+
+                    if(list.length>0){
+
+                        var foundObj=false;
+                        for(var i=0;i<list.length;++i){
+                            if(list[i].get("name") === "VIPUL"){
+                                foundObj=true;
+                            }
+                        }
+
+                        if(foundObj){
+                            done();
+                        }else{
+                            done("Got the list but got incorrect name");
+                        }
+
+                        
+                    }else{
+                        done("Failed to get the list");
+                    }
+
+                }, error : function(error){
+                    done("Failed to save the object");
+                }
+               });
+
+            }
+            else
+                done("object could not saved properly");
+        }, function () {
+            throw "data Save error";
+        });
+    });
+
     it("Substring with an array.", function (done) {
 
         this.timeout(30000);
@@ -8667,9 +8713,142 @@ describe("CloudQuery", function (done) {
             throw "Unable to Create Table";            
         });                  
 
-    });    
+    });  
 
-    it("should find item by id",function(done){
+    it("Should count with OR query", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('countorquery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('countorquery');
+            obj1.set('name','pqrs');        
+            
+            var obj2 = new CB.CloudObject('countorquery');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('countorquery');
+            obj3.set('name','sjdhsjd');
+
+            var obj4 = new CB.CloudObject('countorquery');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){
+
+                    var totalObjectsInDB=res.length;
+                 
+                    var query1 = new CB.CloudQuery('countorquery');
+                    var query2 = new CB.CloudQuery('countorquery');
+
+                    query1.equalTo('name', "sjdhsjd");
+                    query2.equalTo('name', "pqrs");
+
+                    var query = CB.CloudQuery.or(query1,query2);
+
+                    query.count({
+                        success : function(number){                          
+                           done();
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });
+                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    }); 
+
+
+    it("Should count with Multi level OR query", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('countmultiorquery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('countmultiorquery');
+            obj1.set('name','pqrs');        
+            
+            var obj2 = new CB.CloudObject('countmultiorquery');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('countmultiorquery');
+            obj3.set('name','sjdhsjd');
+
+            var obj4 = new CB.CloudObject('countmultiorquery');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){
+
+                    var totalObjectsInDB=res.length;                 
+                    
+
+                    var multiquery1 = new CB.CloudQuery('countmultiorquery');
+                    var multiquery2 = new CB.CloudQuery('countmultiorquery');
+
+                    multiquery1.equalTo('name', "pqrs");
+                    multiquery2.equalTo('name', "sjdhsjd");
+
+                    var query1=CB.CloudQuery.or(multiquery1,multiquery2);
+
+                    var query2 = new CB.CloudQuery('countmultiorquery');
+                    query2.equalTo('name', "pqrs");
+
+                    var query = CB.CloudQuery.or(query1,query2);
+
+                    query.count({
+                        success : function(number){                          
+                           done();
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });
+                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+  it("should find item by id",function(done){
         this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');

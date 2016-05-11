@@ -22,7 +22,9 @@ var server = app.listen(app.get('port'), function() {
 
 function runTests(){
 
-	/*CB.CloudApp.init("awvnhhvdjqof","5ec12312-54f3-4cb8-bf7c-aae94ac9b8d6");
+	/*CB.CloudApp.init("nrddmqjisjeh","0b80afe7-24ad-4019-a0ae-43e4b2259c1c");
+
+	CB.CloudNotification.publish('ChannelName','hola mi amigo');
 
 	var SECURE_KEY = "b8e40eda-3ec2-4e9e-b30c-8195be38fbae";
 	var URL = "http://localhost:4730";

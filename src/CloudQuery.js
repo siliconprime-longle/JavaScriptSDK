@@ -601,7 +601,7 @@ CB.CloudQuery.prototype.startsWith = function(columnName, value) {
 }
 
 
-CB.CloudQuery.prototype.regex = function(columnName, value) {
+CB.CloudQuery.prototype.regex = function(columnName, value, isCaseInsensitive) {
     if (columnName === 'id' )
         columnName = '_' + columnName;
 
@@ -610,11 +610,15 @@ CB.CloudQuery.prototype.regex = function(columnName, value) {
     } 
 
     this.query[columnName]["$regex"] = value;
+
+    if(isCaseInsensitive){
+        this.query[columnName]["$options"] = "i";
+    }
     
     return this;
 }
 
-CB.CloudQuery.prototype.substring = function(columnName, value) {
+CB.CloudQuery.prototype.substring = function(columnName, value, isCaseInsensitive) {
 
       if(typeof columnName === "string"){
         columnName = [columnName];
@@ -628,17 +632,27 @@ CB.CloudQuery.prototype.substring = function(columnName, value) {
                 var obj = {};
                 obj[columnName[j]] = {};
                 obj[columnName[j]]["$regex"] = ".*"+value[i]+".*";
+
+                if(isCaseInsensitive){
+                    obj[columnName[j]]["$options"] = "i";                   
+                }
+
                 this.query["$or"].push(obj);
             }
           }else{
-             if(columnName.length===1){
-                this.regex(columnName[j],".*"+value+".*");
+            if(columnName.length===1){
+                this.regex(columnName[j],".*"+value+".*",isCaseInsensitive);
             }else{
                 if(!this.query["$or"])
                     this.query["$or"] = [];
                 var obj = {};
                 obj[columnName[j]] = {};
                 obj[columnName[j]]["$regex"] = ".*"+value+".*";
+
+                if(isCaseInsensitive){                    
+                    obj[columnName[j]]["$options"] = "i";
+                }
+
                 this.query["$or"].push(obj);
             }
           }
