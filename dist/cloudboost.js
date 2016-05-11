@@ -13449,9 +13449,9 @@ CB.CloudPush.enableWebNotifications = function(callback) {
             obj.save({
                 success : function(obj){
                     if (callback) {
-                        callback.success("Successfully enabled.");
+                        callback.success();
                     } else {
-                        def.resolve("Successfully enabled.");
+                        def.resolve();
                     }
                 },error : function(error){
                     if(callback){
