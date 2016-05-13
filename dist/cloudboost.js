@@ -13416,7 +13416,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
     //Check document
     if(typeof(document) !== 'undefined'){
 
-        CB._requestBrowserNotifications().then(function(response){
+        CB.CloudPush._requestBrowserNotifications().then(function(response){
 
             if('serviceWorker' in navigator) {
                 return navigator.serviceWorker.register('serviceWorker.js',{scope: './'});
@@ -13433,7 +13433,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
                 noServerDef.reject('Notifications aren\'t supported on service workers.');  
                 return noServerDef;                   
             }else{
-                return CB._subscribe();
+                return CB.CloudPush._subscribe();
             }
 
         }).then(function(subscription){
@@ -13442,11 +13442,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
             var browserKey = subscription.getKey ? subscription.getKey('p256dh') : '';
             browserKey=browserKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(browserKey))) : '';            
 
-            var obj = new CB.CloudObject('Device');
-            obj.set('deviceOS',"browser");
-            obj.set('deviceToken',subscription.endpoint);
-            obj.set('metadata',{browserKey:browserKey});           
-            obj.save({
+            CB.CloudPush._addDevice("browser", subscription.endpoint, browserKey,{
                 success : function(obj){
                     if (callback) {
                         callback.success();
@@ -13460,7 +13456,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
                         def.reject(error);
                     }
                 }
-            });
+            });        
 
         },function(error){
             if(callback){
@@ -13494,7 +13490,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
     //Check document
     if(typeof(document) !== 'undefined'){
 
-        CB._getSubscription().then(function(subscription){   
+        CB.CloudPush._getSubscription().then(function(subscription){   
 
             //No subscription 
             if(!subscription){
@@ -13506,37 +13502,26 @@ CB.CloudPush.disableWebNotifications = function(callback) {
             }
 
             if(subscription){
-                // We have a subcription, so call unsubscribe on it
-                subscription.unsubscribe().then(function(successful) {
+                var promises=[];
+
+                //We have a subcription, so call unsubscribe on it
+                promises.push(subscription.unsubscribe());
+                //Remove Device Objects
+                promises.push(CB.CloudPush._deleteDevice("browser", subscription.endpoint));        
+
+                CB.Promise.all(promises).then(function(successful) {
                     if (callback) {
                         callback.success();
                     } else {
                         def.resolve();
                     }
-                }).catch(function(e) {                     
+                },function(error) {                     
                     if (callback) {
-                        callback.error(e);
+                        callback.error(error);
                     } else {
-                        def.reject(e);
+                        def.reject(error);
                     }                  
                 });
-
-                //Remove Device Objects
-                var query = new CB.CloudQuery("Device");
-                query.equalTo('deviceOS','browser');
-                query.equalTo('deviceToken',subscription.endpoint);
-                query.find({
-                  success: function(list) {
-                    if(list && list.length>0){
-                        for(var i=0;i<list.length;++i){
-                            list[i].delete();
-                        }
-                    }
-                  },
-                  error: function(error) {
-                  }
-                });
-                //Remove Device Objects
             }
 
         },function(error){
@@ -13561,7 +13546,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
 };
 
 
-CB._subscribe = function (){
+CB.CloudPush._subscribe = function (){
 
     var def = new CB.Promise();
 
@@ -13596,7 +13581,7 @@ CB._subscribe = function (){
 };
 
 
-CB._getSubscription = function(){
+CB.CloudPush._getSubscription = function(){
 
     var def = new CB.Promise();
     
@@ -13622,7 +13607,7 @@ CB._getSubscription = function(){
 };
  
 
-CB._requestBrowserNotifications = function() {
+CB.CloudPush._requestBrowserNotifications = function() {
 
     var def = new CB.Promise();
 
@@ -13649,6 +13634,95 @@ CB._requestBrowserNotifications = function() {
 
     return def;
 };
+
+//save the device document to the db
+CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, callback) { 
+    
+    var def;
+    CB._validate();
+
+    //Set Fields
+    var thisObj = new CB.CloudObject('Device');
+    thisObj.set('deviceOS', deviceOS);
+    thisObj.set('deviceToken', endPoint);
+    thisObj.set('metadata', {browserKey:browserKey});
+    
+    if (!callback) {
+        def = new CB.Promise();
+    }    
+   
+    var xmlhttp = CB._loadXml();
+    var params=JSON.stringify({
+        document: CB.toJSON(thisObj),
+        key: CB.appKey
+    });
+
+    var url = CB.apiUrl + "/push/" + CB.appId;
+    CB._request('PUT',url,params).then(function(response){
+        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+        if (callback) {
+            callback.success(thisObj);
+        } else {
+            def.resolve(thisObj);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+  
+    if (!callback) {
+        return def;
+    }
+};
+
+
+CB.CloudPush._deleteDevice = function(deviceOS, endPoint, callback) { //delete an object matching the objectId
+    if (!CB.appId) {
+        throw "CB.appId is null.";
+    }     
+   
+    var def;
+    if (!callback) {
+        def = new CB.Promise();
+    }
+
+    var data={
+        deviceOS:deviceOS,
+        deviceToken:endPoint
+    };
+
+    var params=JSON.stringify({
+        key: CB.appKey,
+        document: data,
+        method:"DELETE"
+    });
+    
+    var url = CB.apiUrl + "/push/" + CB.appId;
+
+    CB._request('PUT',url,params).then(function(response){
+        if (callback) {
+            callback.success(response);
+        } else {
+            def.resolve(response);
+        }
+    },function(err){
+        if(callback){
+            callback.error(err);
+        }else {
+            def.reject(err);
+        }
+    });
+
+    if (!callback) {
+        return def;
+    }
+};
+
+
+
 /*
  CloudUser
  */
