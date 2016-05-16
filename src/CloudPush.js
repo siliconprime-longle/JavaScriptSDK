@@ -151,9 +151,9 @@ CB.CloudPush.enableWebNotifications = function(callback) {
 
     }else{
         if(callback){
-            callback.error(error);
+            callback.error("Browser document not found");
         }else {
-            def.reject(error);
+            def.reject("Browser document not found");
         }
     } 
 
@@ -217,9 +217,9 @@ CB.CloudPush.disableWebNotifications = function(callback) {
 
     }else{
         if(callback){
-            callback.error(error);
+            callback.error("Browser document not found");
         }else {
-            def.reject(error);
+            def.reject("Browser document not found");
         }
     } 
 
