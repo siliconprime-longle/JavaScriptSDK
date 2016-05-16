@@ -13440,9 +13440,14 @@ CB.CloudPush.enableWebNotifications = function(callback) {
 
             //PublicKey for secure connection with server
             var browserKey = subscription.getKey ? subscription.getKey('p256dh') : '';
-            browserKey=browserKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(browserKey))) : '';            
+            browserKey=browserKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(browserKey))) : '';  
 
-            CB.CloudPush._addDevice("browser", subscription.endpoint, browserKey,{
+            //AuthKey for secure connection with server
+            var authKey = subscription.getKey ? subscription.getKey('auth') : '';
+            authKey=authKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(authKey))) : '';
+                     
+
+            CB.CloudPush._addDevice("browser", subscription.endpoint, browserKey, authKey, {
                 success : function(obj){
                     if (callback) {
                         callback.success();
@@ -13636,7 +13641,7 @@ CB.CloudPush._requestBrowserNotifications = function() {
 };
 
 //save the device document to the db
-CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, callback) { 
+CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, authKey, callback) { 
     
     var def;
     CB._validate();
@@ -13645,7 +13650,7 @@ CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, callback) {
     var thisObj = new CB.CloudObject('Device');
     thisObj.set('deviceOS', deviceOS);
     thisObj.set('deviceToken', endPoint);
-    thisObj.set('metadata', {browserKey:browserKey});
+    thisObj.set('metadata', {browserKey:browserKey,authKey:authKey});
     
     if (!callback) {
         def = new CB.Promise();
