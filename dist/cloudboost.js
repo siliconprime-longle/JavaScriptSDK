@@ -1256,6 +1256,88 @@ if(typeof(location) !== 'undefined' && location.search){
     }    
 }
 
+//Description : returns browser name 
+//Params : null       
+//Returns : browser name. 
+CB._getThisBrowserName= function(){
+
+  // check if library is used as a Node.js module
+  if(typeof window !== 'undefined') {
+
+      // store navigator properties to use later
+      var userAgent = 'navigator' in window && 'userAgent' in navigator && navigator.userAgent.toLowerCase() || '';
+      var vendor = 'navigator' in window && 'vendor' in navigator && navigator.vendor.toLowerCase() || '';
+      var appVersion = 'navigator' in window && 'appVersion' in navigator && navigator.appVersion.toLowerCase() || '';
+
+      var is={};
+
+      // is current browser chrome?
+      is.chrome = function() {
+          return /chrome|chromium/i.test(userAgent) && /google inc/.test(vendor);
+      };
+     
+      // is current browser firefox?
+      is.firefox = function() {
+          return /firefox/i.test(userAgent);
+      };
+     
+      // is current browser edge?
+      is.edge = function() {
+          return /edge/i.test(userAgent);
+      };
+      
+      // is current browser internet explorer?
+      // parameter is optional
+      is.ie = function(version) {
+          if(!version) {
+              return /msie/i.test(userAgent) || "ActiveXObject" in window;
+          }
+          if(version >= 11) {
+              return "ActiveXObject" in window;
+          }
+          return new RegExp('msie ' + version).test(userAgent);
+      };
+      
+      // is current browser opera?
+      is.opera = function() {
+          return /^Opera\//.test(userAgent) || // Opera 12 and older versions
+              /\x20OPR\//.test(userAgent); // Opera 15+
+      };
+     
+      // is current browser safari?
+      is.safari = function() {
+          return /safari/i.test(userAgent) && /apple computer/i.test(vendor);
+      };
+
+      if(is.chrome()){
+        return "chrome";
+      }
+
+      if(is.firefox()){
+        return "firefox";
+      }
+
+      if(is.edge()){
+        return "edge";
+      }
+
+      if(is.ie()){
+        return "ie";
+      }
+
+      if(is.opera()){
+        return "opera";
+      }
+
+      if(is.safari()){
+        return "safari";
+      }
+
+      return "unidentified";
+
+  } 
+}
+
 if(!CB._isNode) {
 	//Socket.io Client library 
 	(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -13447,7 +13529,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
             authKey=authKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(authKey))) : '';
                      
 
-            CB.CloudPush._addDevice("browser", subscription.endpoint, browserKey, authKey, {
+            CB.CloudPush._addDevice(CB._getThisBrowserName(), subscription.endpoint, browserKey, authKey, {
                 success : function(obj){
                     if (callback) {
                         callback.success();
@@ -13512,7 +13594,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
                 //We have a subcription, so call unsubscribe on it
                 promises.push(subscription.unsubscribe());
                 //Remove Device Objects
-                promises.push(CB.CloudPush._deleteDevice("browser", subscription.endpoint));        
+                promises.push(CB.CloudPush._deleteDevice(CB._getThisBrowserName(), subscription.endpoint));        
 
                 CB.Promise.all(promises).then(function(successful) {
                     if (callback) {

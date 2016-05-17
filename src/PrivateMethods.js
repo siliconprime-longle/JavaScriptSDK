@@ -734,3 +734,85 @@ if(typeof(location) !== 'undefined' && location.search){
         localStorage.setItem('sessionID', cbtoken);
     }    
 }
+
+//Description : returns browser name 
+//Params : null       
+//Returns : browser name. 
+CB._getThisBrowserName= function(){
+
+  // check if library is used as a Node.js module
+  if(typeof window !== 'undefined') {
+
+      // store navigator properties to use later
+      var userAgent = 'navigator' in window && 'userAgent' in navigator && navigator.userAgent.toLowerCase() || '';
+      var vendor = 'navigator' in window && 'vendor' in navigator && navigator.vendor.toLowerCase() || '';
+      var appVersion = 'navigator' in window && 'appVersion' in navigator && navigator.appVersion.toLowerCase() || '';
+
+      var is={};
+
+      // is current browser chrome?
+      is.chrome = function() {
+          return /chrome|chromium/i.test(userAgent) && /google inc/.test(vendor);
+      };
+     
+      // is current browser firefox?
+      is.firefox = function() {
+          return /firefox/i.test(userAgent);
+      };
+     
+      // is current browser edge?
+      is.edge = function() {
+          return /edge/i.test(userAgent);
+      };
+      
+      // is current browser internet explorer?
+      // parameter is optional
+      is.ie = function(version) {
+          if(!version) {
+              return /msie/i.test(userAgent) || "ActiveXObject" in window;
+          }
+          if(version >= 11) {
+              return "ActiveXObject" in window;
+          }
+          return new RegExp('msie ' + version).test(userAgent);
+      };
+      
+      // is current browser opera?
+      is.opera = function() {
+          return /^Opera\//.test(userAgent) || // Opera 12 and older versions
+              /\x20OPR\//.test(userAgent); // Opera 15+
+      };
+     
+      // is current browser safari?
+      is.safari = function() {
+          return /safari/i.test(userAgent) && /apple computer/i.test(vendor);
+      };
+
+      if(is.chrome()){
+        return "chrome";
+      }
+
+      if(is.firefox()){
+        return "firefox";
+      }
+
+      if(is.edge()){
+        return "edge";
+      }
+
+      if(is.ie()){
+        return "ie";
+      }
+
+      if(is.opera()){
+        return "opera";
+      }
+
+      if(is.safari()){
+        return "safari";
+      }
+
+      return "unidentified";
+
+  } 
+}

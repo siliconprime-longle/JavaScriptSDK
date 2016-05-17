@@ -125,7 +125,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
             authKey=authKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(authKey))) : '';
                      
 
-            CB.CloudPush._addDevice("browser", subscription.endpoint, browserKey, authKey, {
+            CB.CloudPush._addDevice(CB._getThisBrowserName(), subscription.endpoint, browserKey, authKey, {
                 success : function(obj){
                     if (callback) {
                         callback.success();
@@ -190,7 +190,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
                 //We have a subcription, so call unsubscribe on it
                 promises.push(subscription.unsubscribe());
                 //Remove Device Objects
-                promises.push(CB.CloudPush._deleteDevice("browser", subscription.endpoint));        
+                promises.push(CB.CloudPush._deleteDevice(CB._getThisBrowserName(), subscription.endpoint));        
 
                 CB.Promise.all(promises).then(function(successful) {
                     if (callback) {
