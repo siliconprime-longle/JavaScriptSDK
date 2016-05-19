@@ -520,11 +520,18 @@ CB._defaultColumns = function(type) {
         socialAuth.document.isDeletable = false;
         socialAuth.document.isEditable = false;
 
+        var verified = new CB.Column('verified');
+        verified.dataType = 'Boolean';        
+        verified.required = false;
+        verified.document.isDeletable = false;
+        verified.document.isEditable = false;         
+
         col.push(username);
         col.push(roles);
         col.push(password);
         col.push(email);
         col.push(socialAuth);
+        col.push(verified);
         return col;
     }else if(type === "role") {
         var name = new CB.Column('name');
