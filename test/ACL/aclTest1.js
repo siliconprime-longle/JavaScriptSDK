@@ -158,9 +158,9 @@ describe("ACL", function () {
             if(list.get('username') === username)
                 done();
             else
-                throw "create user error"
-        }, function () {
-            throw "user create error";
+                done('User unable to log in');
+        }, function (err) {
+            done(err);
         });
 
     });

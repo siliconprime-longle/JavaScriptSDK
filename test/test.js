@@ -1686,10 +1686,12 @@ describe("CloudUser", function () {
         obj.set('password',passwd);
         obj.set('email',util.makeEmail());
         obj.signUp().then(function(list) {
-            if(list.get('username') === username)
+            if(list.get('username') === username){
                 done();
-            else
+            }
+            else{
                 throw "create user error"
+            }
         }, function (error) {
             throw error;
         });
@@ -1720,6 +1722,41 @@ describe("CloudUser", function () {
                 });
             else
                done("create user error");
+        }, function (error) {
+            throw error;
+        });
+
+    });
+
+    it("Should create new user and should fail to login without verified.", function (done) {
+        if(CB._isNode){
+           done();
+           return;
+        }
+
+        this.timeout(300000);
+
+        var oldPassword = passwd;
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username+"1");
+        obj.set('password',oldPassword);
+        obj.set('email',util.makeEmail());
+        obj.signUp().then(function(list) {
+            if(list.get('username')){
+
+                var obj = new CB.CloudUser();
+                obj.set('username', username+"1");
+                obj.set('password',oldPassword);
+                obj.logIn().then(function(user) {                    
+                    done("User logged in without verification");
+                }, function (error) {
+                    done();
+                });
+            }    
+            else{
+               done("create user error");
+            }
         }, function (error) {
             throw error;
         });
@@ -1844,16 +1881,24 @@ describe("CloudUser", function () {
         });
     });
 
-    /*it("should send a Reset Email with Email Settings with default Template.", function(done) {
+    it("should send a Reset Email with Email Settings with default Template.", function(done) {
         this.timeout(100000);
         var url = URL+'/settings/'+CB.appId+"/email";
 
-        var emailSettings={          
-          mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
-          email:"hello@nawazdhandala.com",
-          from:"Nawaz Dhandala",
-          template:""            
+        var emailSettings={ 
+            mandrill:{
+                apiKey:null,
+                enabled:true
+            },         
+            mailgun:{
+            apiKey:"key-f66ed97c75c75cf864990730517d0445",
+            domain:"cloudboost.io",
+            enabled:true
+            },
+            fromEmail:"hello@cloudboost.io",
+            fromName:"CloudBoost.io"           
         };
+
 
         var params = {};
         params.key = CB.masterKey;
@@ -1924,24 +1969,37 @@ describe("CloudUser", function () {
              
             });
         }
-    });*/
+    });
    
 
     it("should send a Reset Email with email Template with no Email Settings.", function(done) {
         this.timeout(100000);
-        var url = URL+'/settings/'+CB.appId+"/email";
+        var url = URL+'/settings/'+CB.appId+"/auth";      
 
-        var emailSettings={          
-          mandrillApiKey:null,
-          email:null,
-          from:null,
-          template:"<h3>TEST(No email Setting only template):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
+        var authSettings={
+          general:{
+            enabled:true,
+            callbackURL: null,
+            primaryColor: "#549afc"        
+          },
+          custom:{
+            enabled:true
+          },
+          signupEmail:{
+            enabled:false,
+            allowNotVerifiedLogins:false,        
+            template:""        
+          },
+          resetPasswordEmail:{
+            enabled:false,       
+            template:"<h3>TEST(No email Setting only template):Forgot your password? We're there to help.</h3><p>Hi <span class='username></span></p><p>ease click on the button below which will help you reset your password and once you're done, You're good to go!</p><a class='link'></a><p>If you need any help, Just reply to this email and we'll be there to help.</p><p>Thanks, have a great day.</p><p>CloudBoost.io Team</p>"                    
+          }            
         };
-
+        
 
         var params = {};
         params.key = CB.masterKey;
-        params.settings = emailSettings;
+        params.settings = authSettings;
 
         function createUserAndSendResetPassword(){
             //Create cloudUser
@@ -1994,7 +2052,7 @@ describe("CloudUser", function () {
                 // Code to run if the request succeeds;
                 // the response is passed to the function
                 success: function( json ) {
-                   if(json.category === "email"){
+                   if(json.category === "auth"){
                      createUserAndSendResetPassword();
                    }else{
                      done("Wrong json.");
@@ -2009,256 +2067,6 @@ describe("CloudUser", function () {
             });
         }
     });
-
-    it("should send a Reset Email with Email Settings with no email", function(done) {
-        this.timeout(100000);
-        var url = URL+'/settings/'+CB.appId+"/email";
-
-        var emailSettings={          
-          mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
-          email:null,
-          from:"nawazdhandala",
-          template:"<h3>TEST(No email, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
-        };
-
-
-        var params = {};
-        params.key = CB.masterKey;
-        params.settings = emailSettings;
-
-        function createUserAndSendResetPassword(){
-            //Create cloudUser
-            var obj = new CB.CloudUser();
-            obj.set('username', "TreeFlower");
-            obj.set('password',passwd);
-            obj.set('email',"hello@cloudboost.io");
-
-            obj.save({ success: function(newObj){ 
-                  CB.CloudUser.resetPassword("hello@cloudboost.io",{
-                        success : function(resp){                                    
-                            done();
-                        }, error : function(error){
-                            done(error);
-                        }
-                   }); 
-              },error: function(err) {
-                done(err);
-              }
-            });
-        }        
-
-        if(!window){
-            //Lets configure and request
-            request({
-                url: url, //URL to hit
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                json: params //Set the body as a string
-            }, function(error, response, json){
-                if(error) {
-                    done(error);
-                } else {
-                    createUserAndSendResetPassword();                    
-                }
-            });
-        }else{
-           $.ajax({
-     
-                // The URL for the request
-                url: url,
-                // The data to send (will be converted to a query string)
-                data: params,
-                // Whether this is a POST or GET request
-                type: "PUT",
-                // The type of data we expect back
-                dataType : "json",
-                // Code to run if the request succeeds;
-                // the response is passed to the function
-                success: function( json ) {
-                   if(json.category === "email"){
-                     createUserAndSendResetPassword();
-                   }else{
-                     done("Wrong json.");
-                   }
-                },
-                // Code to run if the request fails; the raw request and
-                // status codes are passed to the function
-                error: function( xhr, status, errorThrown ) {
-                    done("Error thrown.");
-                },
-             
-            });
-        }
-    });
-
-    /*it("should send a Reset Email with Email Settings with no from", function(done) {
-        this.timeout(100000);
-        var url = URL+'/settings/'+CB.appId+"/email";
-
-        var emailSettings={          
-          mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
-          email:"hello@nawazdhandala.com",
-          from:null,
-          template:"<h3>TEST(No from Name, having other settings):Forgot your password? We're there to help.</h3><p>Hi *|NAME|*</p><p>  Please click on the button below which will help you reset your password and once you're done, You're good to go!</p><a href='*|LINK|*' style='padding:5px;border-radius:2px;text-decoration:none;display:inline-block;background-color: #159CEE;color:white;'>Reset Password</a><p>Thank you and have a great day!</p>"            
-        };
-
-
-        var params = {};
-        params.key = CB.masterKey;
-        params.settings = emailSettings;
-
-        function createUserAndSendResetPassword(){
-            //Create cloudUser
-            var obj = new CB.CloudUser();
-            obj.set('username', "SunFolwer");
-            obj.set('password',passwd);
-            obj.set('email',"admin@cloudboost.io");
-
-            obj.save({ success: function(newObj){ 
-                  CB.CloudUser.resetPassword("admin@cloudboost.io",{
-                        success : function(resp){                                    
-                            done();
-                        }, error : function(error){
-                            done(error);
-                        }
-                   }); 
-              },error: function(err) {
-                done(err);
-              }
-            });
-        }        
-
-        if(!window){
-            //Lets configure and request
-            request({
-                url: url, //URL to hit
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                json: params //Set the body as a string
-            }, function(error, response, json){
-                if(error) {
-                    done(error);
-                } else {
-                    createUserAndSendResetPassword();                    
-                }
-            });
-        }else{
-           $.ajax({
-     
-                // The URL for the request
-                url: url,
-                // The data to send (will be converted to a query string)
-                data: params,
-                // Whether this is a POST or GET request
-                type: "PUT",
-                // The type of data we expect back
-                dataType : "json",
-                // Code to run if the request succeeds;
-                // the response is passed to the function
-                success: function( json ) {
-                   if(json.category === "email"){
-                     createUserAndSendResetPassword();
-                   }else{
-                     done("Wrong json.");
-                   }
-                },
-                // Code to run if the request fails; the raw request and
-                // status codes are passed to the function
-                error: function( xhr, status, errorThrown ) {
-                    done("Error thrown.");
-                },
-             
-            });
-        }
-    });
-
-    it("should send a Reset Email with all Email Settings", function(done) {
-        this.timeout(100000);
-        var url = URL+'/settings/'+CB.appId+"/email";
-
-        var emailSettings={          
-          mandrillApiKey:"ZhfzNe3SBLa6ASrPjY1F9w",
-          email:"hello@nawazdhandala.com",
-          from:"nawazdhandala",
-          template:'<h3 style="color: black;">Forgot your password? Were there to help.</h3><p style="color: black;">Hi *|NAME|*</p><p style="color: black;">Please click on the button below which will help you reset your password and once youre done, Youre good to go!   </p><p>*|LINK|*</p><p><a href="*|LINK|*" style="background-color: #159cee;color: white;">Reset Password</a></p><p style="color: black;">Thank you and have a great day!</p>'         
-        };
-
-
-        var params = {};
-        params.key = CB.masterKey;
-        params.settings = emailSettings;
-
-        function createUserAndSendResetPassword(){
-            //Create cloudUser
-            var obj = new CB.CloudUser();
-            obj.set('username', "WaterFalls");
-            obj.set('password',passwd);
-            obj.set('email',"sauravtejanth99@gmail.com");
-
-            obj.save({ success: function(newObj){ 
-                  CB.CloudUser.resetPassword("sauravtejanth99@gmail.com",{
-                        success : function(resp){                                    
-                            done();
-                        }, error : function(error){
-                            done(error);
-                        }
-                   }); 
-              },error: function(err) {
-                done(err);
-              }
-            });
-        }        
-
-        if(!window){
-            //Lets configure and request
-            request({
-                url: url, //URL to hit
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                json: params //Set the body as a string
-            }, function(error, response, json){
-                if(error) {
-                    done(error);
-                } else {
-                    createUserAndSendResetPassword();                    
-                }
-            });
-        }else{
-           $.ajax({
-     
-                // The URL for the request
-                url: url,
-                // The data to send (will be converted to a query string)
-                data: params,
-                // Whether this is a POST or GET request
-                type: "PUT",
-                // The type of data we expect back
-                dataType : "json",
-                // Code to run if the request succeeds;
-                // the response is passed to the function
-                success: function( json ) {
-                   if(json.category === "email"){
-                     createUserAndSendResetPassword();
-                   }else{
-                     done("Wrong json.");
-                   }
-                },
-                // Code to run if the request fails; the raw request and
-                // status codes are passed to the function
-                error: function( xhr, status, errorThrown ) {
-                    done("Error thrown.");
-                },
-             
-            });
-        }
-    });*/
-
 
     it("Should create a user and get version",function(done){
 
