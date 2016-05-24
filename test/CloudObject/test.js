@@ -925,4 +925,74 @@ it("should not save a string into date column",function(done){
     
     });
 
+    it("should only save data of column with master key.",function(done){
+        this.timeout('40000');
+           
+        //MasterKey   
+        CB.appKey = CB.masterKey;        
+
+        var table = new CB.CloudTable('ColByMaster');  
+            var Name = new CB.Column('Name');
+            Name.dataType = 'Text';
+            Name.editableByMasterKey=true;     
+        table.addColumn(Name);
+      
+        table.save().then(function(res){
+            
+            //Switched to ClientKey
+            CB.appKey = CB.jsKey; 
+
+            var obj = new CB.CloudObject('ColByMaster');
+            obj.set('Name', "doNotAllowMe");
+            obj.save({
+                success : function(obj){
+                    done("Column saved with Client Key");
+                },error : function(error){
+                    done();
+                }
+            });
+            
+        },function(err){
+            done(err);
+        }); 
+        
+    });
+
+    it("should save data of columns other than editableByMasterKey.",function(done){
+        this.timeout('40000');
+           
+        //MasterKey   
+        CB.appKey = CB.masterKey;        
+
+        var table = new CB.CloudTable('ColByMaster2');  
+            var Name = new CB.Column('Name');
+            Name.dataType = 'Text';
+            Name.editableByMasterKey=true;     
+        table.addColumn(Name);
+
+        var Surname = new CB.Column('Surname');
+            Surname.dataType = 'Text';               
+        table.addColumn(Surname);
+      
+        table.save().then(function(res){
+            
+            //Switched to ClientKey
+            CB.appKey = CB.jsKey; 
+
+            var obj = new CB.CloudObject('ColByMaster2');
+            obj.set('Surname', "AllowMe");
+            obj.save({
+                success : function(obj){
+                    done();
+                },error : function(error){
+                    done(error);
+                }
+            });
+            
+        },function(err){
+            done(err);
+        }); 
+        
+    });    
+
 });
