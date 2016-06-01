@@ -630,7 +630,8 @@ describe("CloudQuery", function (done) {
 
     });
 
-  it("should find item by id",function(done){
+   
+    it("should find item by id",function(done){
         this.timeout(30000);
 
         var query = new CB.CloudQuery('student1');
@@ -643,44 +644,251 @@ describe("CloudQuery", function (done) {
         },function(err){
             done(err);            
         });
-    });
+    });   
 
-    it("should run a find one query",function(done){
+    it("should run a find one query", function (done) {
 
-        this.timeout(30000);
+        this.timeout(40000); 
 
-        var query = new CB.CloudQuery('student1');
-        query.equalTo('name','vipul');
-        query.findOne().then(function(list){
-            if(list.get('name') === 'vipul')
-                done();
-            else
-                throw "unable to get";
-        }, function (err) {
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('findonequery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey; 
+
+            var obj1 = new CB.CloudObject('findonequery');
+            obj1.set('name','vipul');      
+        
+
+            CB.CloudObject.saveAll([obj1],{
+                success: function(res){      
+
+                    var query = new CB.CloudQuery('findonequery');
+                    query.equalTo('name','vipul');
+                    query.findOne().then(function(list){
+                        if(list.get('name') === 'vipul')
+                            done();
+                        else{
+                           done("unable to get");
+                        }
+                    }, function (err) {
+                        done(err);
+                    });                               
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
             done(err);
-        })
+            throw "Unable to Create Table";            
+        });                  
+
     });
+    
 
     it("Should retrieve data with a particular value.", function (done) {
 
-        this.timeout(30000);
+        this.timeout(40000); 
 
-        var obj = new CB.CloudQuery('student1');
-        obj.equalTo('name','vipul');
-        obj.find().then(function(list) {
-            if(list.length>0){
-                for(var i=0;i<list.length;i++)
-                {
-                    if(list[i].get('name') != 'vipul')
-                        throw "should retrieve saved data with particular value ";
-                }
-            } else{
-                throw "should retrieve saved data with particular value ";
-            }
-            done();
-        }, function () {
-            throw "find data error";
-        });
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('particularquery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey; 
+
+            var obj1 = new CB.CloudObject('particularquery');
+            obj1.set('name','vipul');      
+        
+
+            CB.CloudObject.saveAll([obj1],{
+                success: function(res){      
+
+                    var obj = new CB.CloudQuery('particularquery');
+                    obj.equalTo('name','vipul');
+                    obj.find().then(function(list) {
+                        if(list.length>0){
+                            var found=false;
+                            for(var i=0;i<list.length;i++)
+                            {
+                                if(list[i].get('name') == 'vipul'){
+                                  found=true;
+                                   break;
+                                }
+                            }
+                        } else{
+                            done("failed to retrieve saved data with particular value ");
+                        }
+                        if(found){
+                            done();
+                        }else{
+                            done("failed to retrieve saved data with particular value ");
+                        }
+
+                    }, function (error) {
+                        done(error);
+                    });                               
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+     it("Should perform OR query with 2 Query Objects", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('ortwoquery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('ortwoquery');
+            obj1.set('name','pqrs');        
+            
+            var obj2 = new CB.CloudObject('ortwoquery');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('ortwoquery');
+            obj3.set('name','sjdhsjd');
+
+            var obj4 = new CB.CloudObject('ortwoquery');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){            
+                    
+
+                    var query1 = new CB.CloudQuery('ortwoquery');
+                    var query2 = new CB.CloudQuery('ortwoquery');
+
+                    query1.equalTo('name', "pqrs");
+                    query2.equalTo('name', "sjdhsjd");                   
+
+                    var query=CB.CloudQuery.or(query1,query2);                  
+
+                    query.find({
+                        success : function(data){ 
+                            if(data){
+                                done();
+                            }else{
+                                done("Failed to retrieve data with OR query");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform OR query with Array of Queries", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('orarrayquery');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('orarrayquery');
+            obj1.set('name','pqrs');        
+            
+            var obj2 = new CB.CloudObject('orarrayquery');
+            obj2.set('name','pqrs');
+
+            var obj3 = new CB.CloudObject('orarrayquery');
+            obj3.set('name','sjdhsjd');
+
+            var obj4 = new CB.CloudObject('orarrayquery');
+            obj4.set('name','sjdhsjd');
+
+            CB.CloudObject.saveAll([obj1,obj2,obj3,obj4],{
+                success: function(res){            
+                    
+
+                    var query1 = new CB.CloudQuery('orarrayquery');
+                    var query2 = new CB.CloudQuery('orarrayquery');
+
+                    query1.equalTo('name', "pqrs");
+                    query2.equalTo('name', "sjdhsjd");
+
+                    var queryArray=[];
+                    queryArray.push(query1);
+                    queryArray.push(query2);
+
+                    var query=CB.CloudQuery.or(queryArray);                  
+
+                    query.find({
+                        success : function(data){ 
+                            if(data){
+                                done();
+                            }else{
+                                done("Failed to retrieve data with OR query");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
 
     });
 

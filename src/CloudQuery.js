@@ -40,7 +40,7 @@ CB.CloudQuery.or = function(obj1, obj2) {
     if(typeof obj2 !== 'undefined' && typeof obj1 !== 'undefined' && Object.prototype.toString.call(obj1)!=="[object Array]"){
 
         if(Object.prototype.toString.call(obj2)==="[object Array]"){
-            throw "Passed two params should be instanceof of CloudQuery";
+            throw "First and second parameter should be an instance of CloudQuery object";
         }
         if (!obj1.tableName === obj2.tableName) {
             throw "Table names are not same";

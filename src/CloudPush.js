@@ -57,7 +57,11 @@ CB.CloudPush.send = function(data,query,callback) {
     var url = CB.apiUrl + "/push/" + CB.appId + '/send';
 
     CB._request('POST',url,params).then(function(response){
-        var object = JSON.parse(response);
+        var object=response;
+        if(CB._isJsonString(response)){
+            object = JSON.parse(response);
+        }
+        
         if (callback) {
             callback.success(object);
         } else {
@@ -65,10 +69,9 @@ CB.CloudPush.send = function(data,query,callback) {
         }
     },function(err){
 
-        try{
+        if(CB._isJsonString(err)){
             err = JSON.parse(err);
-        }catch(e){
-        }
+        }    
         
         if(callback){
             callback.error(err);

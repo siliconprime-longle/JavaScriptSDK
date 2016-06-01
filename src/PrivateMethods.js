@@ -655,7 +655,7 @@ CB._isJsonString = function(str) {
         return false;
     }
     return true;
-}
+};
 
 //Description : This fucntion get the content of the cookie .
 //Params : @name : Name of the cookie.
