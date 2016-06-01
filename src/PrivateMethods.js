@@ -657,6 +657,15 @@ CB._isJsonString = function(str) {
     return true;
 };
 
+CB._isJsonObject= function(obj) {
+    try {
+        JSON.stringify(obj);
+    } catch (e) {
+        return false;
+    }
+    return true;
+};
+
 //Description : This fucntion get the content of the cookie .
 //Params : @name : Name of the cookie.
 //Returns : content as string.  
