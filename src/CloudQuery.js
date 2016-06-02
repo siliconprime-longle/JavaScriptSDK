@@ -16,6 +16,47 @@ CB.CloudQuery = function(tableName) { //constructor for the class CloudQuery
     this.limit = 10; //default limit is 10
 };
 
+CB.CloudQuery.prototype.search = function(search, language, caseSensitive, diacriticSensitive) {
+
+    this.query["$text"]={};
+
+    //Validations
+    if(Object.prototype.toString.call(search)!=="[object String]"){
+        throw "Invalid string, first param should be of string";
+    }
+
+    if(language && (typeof language !="undefined") && Object.prototype.toString.call(language)!=="[object String]"){
+        throw "Invalid string, second param should be of string";
+    }
+
+    if((typeof caseSensitive !="undefined") && Object.prototype.toString.call(caseSensitive)!=="[object Boolean]"){
+        throw "Invalid boolean, third param should be of boolean";
+    }
+
+    if((typeof diacriticSensitive !="undefined") && Object.prototype.toString.call(diacriticSensitive)!=="[object Boolean]"){
+        throw "Invalid boolean, third param should be of boolean";
+    }
+
+    //Set the fields
+    if(Object.prototype.toString.call(search)==="[object String]"){
+        this.query["$text"]["$search"]=search; 
+    }
+
+    if(language && (typeof language !="undefined") && Object.prototype.toString.call(search)==="[object String]"){
+        this.query["$text"]["$language"]=language;
+    }
+
+    if((typeof caseSensitive !="undefined") && Object.prototype.toString.call(caseSensitive)==="[object Boolean]"){
+        this.query["$text"]["$caseSensitive"]=caseSensitive; 
+    }
+
+    if((typeof diacriticSensitive !="undefined") && Object.prototype.toString.call(diacriticSensitive)==="[object Boolean]"){
+        this.query["$text"]["$diacriticSensitive"]=diacriticSensitive;
+    }
+    
+    return this;
+};
+
 // Logical operations
 CB.CloudQuery.or = function(obj1, obj2) {
 
