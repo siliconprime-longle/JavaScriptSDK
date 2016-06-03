@@ -10005,6 +10005,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('stemsearch');  
         table.addColumn(Name);       
@@ -10059,6 +10060,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('phrasesearch');  
         table.addColumn(Name);       
@@ -10113,6 +10115,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('andsearch');  
         table.addColumn(Name);       
@@ -10167,6 +10170,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('negsearch');  
         table.addColumn(Name);       
@@ -10221,6 +10225,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('casesearch');  
         table.addColumn(Name);       
@@ -10275,6 +10280,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('diacriticsearch');  
         table.addColumn(Name);       
@@ -10329,6 +10335,7 @@ describe("CloudQuery", function (done) {
 
         var Name = new CB.Column('name');
         Name.dataType = 'Text';
+        Name.isSearchable = true;
 
         var table = new CB.CloudTable('stopsearch');  
         table.addColumn(Name);       
