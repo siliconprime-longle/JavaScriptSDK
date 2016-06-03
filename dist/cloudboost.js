@@ -9459,19 +9459,19 @@ CB.CloudQuery.prototype.search = function(search, language, caseSensitive, diacr
 
     //Validations
     if(Object.prototype.toString.call(search)!=="[object String]"){
-        throw "Invalid string, first param should be of string";
+        throw "First parameter is required and it should be a string.";
     }
 
     if(language && (typeof language !="undefined") && Object.prototype.toString.call(language)!=="[object String]"){
-        throw "Invalid string, second param should be of string";
+        throw "Second parameter should be a string.";
     }
 
-    if((typeof caseSensitive !="undefined") && Object.prototype.toString.call(caseSensitive)!=="[object Boolean]"){
-        throw "Invalid boolean, third param should be of boolean";
+    if(Object.prototype.toString.call(caseSensitive)!=="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!=="[object Null]" && Object.prototype.toString.call(caseSensitive)!=="[object Boolean]"){
+        throw "Third parameter should be a boolean.";
     }
 
-    if((typeof diacriticSensitive !="undefined") && Object.prototype.toString.call(diacriticSensitive)!=="[object Boolean]"){
-        throw "Invalid boolean, third param should be of boolean";
+    if(Object.prototype.toString.call(diacriticSensitive)!=="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Null]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Boolean]"){
+        throw "Fourth parameter should be a boolean.";
     }
 
     //Set the fields
@@ -9483,11 +9483,11 @@ CB.CloudQuery.prototype.search = function(search, language, caseSensitive, diacr
         this.query["$text"]["$language"]=language;
     }
 
-    if((typeof caseSensitive !="undefined") && Object.prototype.toString.call(caseSensitive)==="[object Boolean]"){
+    if(Object.prototype.toString.call(caseSensitive)!=="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!=="[object Null]" && Object.prototype.toString.call(caseSensitive)==="[object Boolean]"){
         this.query["$text"]["$caseSensitive"]=caseSensitive; 
     }
 
-    if((typeof diacriticSensitive !="undefined") && Object.prototype.toString.call(diacriticSensitive)==="[object Boolean]"){
+    if(Object.prototype.toString.call(diacriticSensitive)!=="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Null]" && Object.prototype.toString.call(diacriticSensitive)==="[object Boolean]"){
         this.query["$text"]["$diacriticSensitive"]=diacriticSensitive;
     }
     
@@ -12089,6 +12089,10 @@ CB.Column = function(columnName, dataType, required, unique){
    }
    else{
      this.document.unique = false;
+   }
+
+   if(dataType==="Text"){
+     this.document.isSearchable = true;
    }  
 
    this.document.relatedTo = null;
@@ -12097,8 +12101,7 @@ CB.Column = function(columnName, dataType, required, unique){
    this.document.isDeletable = true;
    this.document.isEditable = true;
    this.document.isRenamable = false;
-   this.document.editableByMasterKey = false;
-
+   this.document.editableByMasterKey = false; 
 };
 
 Object.defineProperty(CB.Column.prototype,'name',{
@@ -12154,6 +12157,15 @@ Object.defineProperty(CB.Column.prototype,'editableByMasterKey',{
     },
     set: function(editableByMasterKey) {
         this.document.editableByMasterKey = editableByMasterKey;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'isSearchable',{
+    get: function() {
+        return this.document.isSearchable;
+    },
+    set: function(isSearchable) {
+        this.document.isSearchable = isSearchable;
     }
 });
 

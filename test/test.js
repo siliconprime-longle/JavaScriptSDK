@@ -1,4 +1,4 @@
-var SECURE_KEY = "2a936d71-4ab6-467d-82df-44817103c9dd";
+var SECURE_KEY = "2db15530-3afa-4bc8-836f-49a3467980f6";
 var URL = "http://localhost:4730";
 
    var util = {
@@ -5315,7 +5315,7 @@ it("should not save a string into date column",function(done){
 
    it("should delete an object after save.", function(done) {
 
-    	this.timeout('40000');
+    	this.timeout('50000');
         
         var obj = new CB.CloudObject('Sample');
      	obj.set('name', 'sample');
@@ -9028,7 +9028,7 @@ describe("CloudQuery", function (done) {
 
     });
 
-     it("Should perform OR query with 2 Query Objects", function (done) {
+    it("Should perform OR query with 2 Query Objects", function (done) {
 
         this.timeout(40000); 
 
@@ -9994,6 +9994,386 @@ describe("CloudQuery", function (done) {
         },function(){
            throw "should save the object";
         });
+    });
+
+    //Search Tests
+    it("Should perform Stemming search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('stemsearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('stemsearch');
+            obj1.set('name','Joe owns a dog');        
+            
+            var obj2 = new CB.CloudObject('stemsearch');
+            obj2.set('name','Dogs eat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('stemsearch');                                    
+                    query.search("dog");
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==2){
+                                done();
+                            }else{
+                                done("Failed to stemmer search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform Phrase search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('phrasesearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('phrasesearch');
+            obj1.set('name','Joe owns a dog');        
+            
+            var obj2 = new CB.CloudObject('phrasesearch');
+            obj2.set('name','Dogs eat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('phrasesearch');                                    
+                    query.search("dog cat");
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==2){
+                                done();
+                            }else{
+                                done("Failed to phrase search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform AND search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('andsearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('andsearch');
+            obj1.set('name','Joe owns a dog');        
+            
+            var obj2 = new CB.CloudObject('andsearch');
+            obj2.set('name','Dogs eat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('andsearch');                                    
+                    query.search("\"Dogs eat\"");
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==1){
+                                done();
+                            }else{
+                                done("Failed  AND search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform Negation search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('negsearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('negsearch');
+            obj1.set('name','Joe owns a dog');        
+            
+            var obj2 = new CB.CloudObject('negsearch');
+            obj2.set('name','Dogs eat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('negsearch');                                    
+                    query.search("dog -cats");
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==1){
+                                done();
+                            }else{
+                                done("Failed  Negation search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform Case sensitive search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('casesearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('casesearch');
+            obj1.set('name','Joe owns a dog');        
+            
+            var obj2 = new CB.CloudObject('casesearch');
+            obj2.set('name','Dogs eat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('casesearch');                                    
+                    query.search("Dog",null,true);
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==1){
+                                done();
+                            }else{
+                                done("Failed  Case senstive search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform Diacritic Sensitive  search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('diacriticsearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('diacriticsearch');
+            obj1.set('name','Joe eats fish');        
+            
+            var obj2 = new CB.CloudObject('diacriticsearch');
+            obj2.set('name','Dogs êat cats');           
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){            
+                    
+
+                    var query = new CB.CloudQuery('diacriticsearch');                                    
+                    query.search("êat",null,null,true);
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==1){
+                                done();
+                            }else{
+                                done("Failed  Diacritic Sensitive search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
+    });
+
+    it("Should perform language Stop words  search ", function (done) {
+
+        this.timeout(40000); 
+
+        CB.appKey = CB.masterKey;        
+
+        var Name = new CB.Column('name');
+        Name.dataType = 'Text';
+
+        var table = new CB.CloudTable('stopsearch');  
+        table.addColumn(Name);       
+
+        table.save().then(function(res){
+
+            CB.appKey = CB.jsKey;
+
+            var obj1 = new CB.CloudObject('stopsearch');
+            obj1.set('name','algunas comidas');        
+            
+            var obj2 = new CB.CloudObject('stopsearch');
+            obj2.set('name','antes de dormir');  
+
+            //algunas and antes are stop words in spanish        
+
+            CB.CloudObject.saveAll([obj1,obj2],{
+                success: function(res){                    
+
+                    var query = new CB.CloudQuery('stopsearch');                                    
+                    query.search("algunas","es");
+                    query.find({
+                        success : function(list){ 
+                            if(list.length==0){
+                                done();
+                            }else{
+                                done("Failed  Language Stop words search");
+                            }                       
+                         
+                        }, error : function(error){
+                          done(error);                          
+                        }
+                    });                 
+                    
+                },error: function(err){
+                    done(err);                    
+                }    
+            });  
+
+        },function(err){
+            CB.appKey = CB.jsKey;
+            done(err);
+            throw "Unable to Create Table";            
+        });                  
+
     });
 
 });

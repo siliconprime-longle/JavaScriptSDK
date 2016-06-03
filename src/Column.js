@@ -29,6 +29,10 @@ CB.Column = function(columnName, dataType, required, unique){
    }
    else{
      this.document.unique = false;
+   }
+
+   if(dataType==="Text"){
+     this.document.isSearchable = true;
    }  
 
    this.document.relatedTo = null;
@@ -37,8 +41,7 @@ CB.Column = function(columnName, dataType, required, unique){
    this.document.isDeletable = true;
    this.document.isEditable = true;
    this.document.isRenamable = false;
-   this.document.editableByMasterKey = false;
-
+   this.document.editableByMasterKey = false; 
 };
 
 Object.defineProperty(CB.Column.prototype,'name',{
@@ -94,5 +97,14 @@ Object.defineProperty(CB.Column.prototype,'editableByMasterKey',{
     },
     set: function(editableByMasterKey) {
         this.document.editableByMasterKey = editableByMasterKey;
+    }
+});
+
+Object.defineProperty(CB.Column.prototype,'isSearchable',{
+    get: function() {
+        return this.document.isSearchable;
+    },
+    set: function(isSearchable) {
+        this.document.isSearchable = isSearchable;
     }
 });
