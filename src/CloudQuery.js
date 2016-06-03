@@ -25,32 +25,32 @@ CB.CloudQuery.prototype.search = function(search, language, caseSensitive, diacr
         throw "First parameter is required and it should be a string.";
     }
 
-    if(language && (typeof language !="undefined") && Object.prototype.toString.call(language)!=="[object String]"){
+    if(language && (typeof language !="undefined") && Object.prototype.toString.call(language)!="[object String]"){
         throw "Second parameter should be a string.";
     }
 
-    if(Object.prototype.toString.call(caseSensitive)!=="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!=="[object Null]" && Object.prototype.toString.call(caseSensitive)!=="[object Boolean]"){
+    if(Object.prototype.toString.call(caseSensitive)!="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!="[object Null]" && Object.prototype.toString.call(caseSensitive)!="[object Boolean]"){
         throw "Third parameter should be a boolean.";
     }
 
-    if(Object.prototype.toString.call(diacriticSensitive)!=="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Null]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Boolean]"){
+    if(Object.prototype.toString.call(diacriticSensitive)!="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!="[object Null]" && Object.prototype.toString.call(diacriticSensitive)!="[object Boolean]"){
         throw "Fourth parameter should be a boolean.";
     }
 
     //Set the fields
-    if(Object.prototype.toString.call(search)==="[object String]"){
+    if(Object.prototype.toString.call(search)=="[object String]"){
         this.query["$text"]["$search"]=search; 
     }
 
-    if(language && (typeof language !="undefined") && Object.prototype.toString.call(search)==="[object String]"){
+    if(language && (typeof language !="undefined") && Object.prototype.toString.call(search)=="[object String]"){
         this.query["$text"]["$language"]=language;
     }
 
-    if(Object.prototype.toString.call(caseSensitive)!=="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!=="[object Null]" && Object.prototype.toString.call(caseSensitive)==="[object Boolean]"){
+    if(Object.prototype.toString.call(caseSensitive)!="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!="[object Null]" && Object.prototype.toString.call(caseSensitive)=="[object Boolean]"){
         this.query["$text"]["$caseSensitive"]=caseSensitive; 
     }
 
-    if(Object.prototype.toString.call(diacriticSensitive)!=="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!=="[object Null]" && Object.prototype.toString.call(diacriticSensitive)==="[object Boolean]"){
+    if(Object.prototype.toString.call(diacriticSensitive)!="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!="[object Null]" && Object.prototype.toString.call(diacriticSensitive)=="[object Boolean]"){
         this.query["$text"]["$diacriticSensitive"]=diacriticSensitive;
     }
     
