@@ -9470,7 +9470,7 @@ CB.CloudQuery.prototype.search = function(search, language, caseSensitive, diacr
     console.log(caseSensitive);
     console.log(Object.prototype.toString.call(caseSensitive));
     if(Object.prototype.toString.call(caseSensitive)!="[object Undefined]" && Object.prototype.toString.call(caseSensitive)!="[object Null]" && Object.prototype.toString.call(caseSensitive)!="[object Boolean]"){
-        throw "Third parameter should be a boolean.";
+        throw "Third parameter should be a boolean."+Object.prototype.toString.call(caseSensitive);
     }
 
     if(Object.prototype.toString.call(diacriticSensitive)!="[object Undefined]" && Object.prototype.toString.call(diacriticSensitive)!="[object Null]" && Object.prototype.toString.call(diacriticSensitive)!="[object Boolean]"){
