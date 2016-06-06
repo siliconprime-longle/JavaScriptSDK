@@ -34,7 +34,7 @@ CB.toJSON = function(thisObj) {
      if(thisObj instanceof CB.CloudCache)
         tableName=thisObj.document.name;
 
-    var obj= CB._clone(thisObj,id,latitude,longitude,tableName,columnName);
+    var obj= CB._clone(thisObj,id,longitude,latitude,tableName,columnName);
 
     if (!obj instanceof CB.CloudObject || !obj instanceof CB.CloudFile || !obj instanceof CB.CloudGeoPoint
         || !obj instanceof CB.CloudTable || !obj instanceof CB.Column || !obj instanceof CB.QueueMessage || !obj instanceof CB.CloudQueue || !obj instanceof CB.CloudCache) {
@@ -152,7 +152,7 @@ CB.fromJSON = function(data, thisObj) {
             if(document._type === "cache"){
                 name = document.name;
             }
-            var obj = CB._getObjectByType(document._type,id,latitude,longitude,name);
+            var obj = CB._getObjectByType(document._type,id,longitude,latitude,name);
             obj.document = document;
 
             thisObj = obj;
@@ -174,7 +174,7 @@ CB.fromJSON = function(data, thisObj) {
     }
 };
 
-CB._getObjectByType = function(type,id,latitude,longitude,name){
+CB._getObjectByType = function(type,id,longitude,latitude,name){
 
     var obj = null;
 
@@ -208,7 +208,9 @@ CB._getObjectByType = function(type,id,latitude,longitude,name){
     }
 
     if(type === 'point'){
-        obj = new CB.CloudGeoPoint(latitude,longitude);
+        obj = new CB.CloudGeoPoint(0,0);
+        obj.document.latitude=Number(latitude);
+        obj.document.longitude=Number(longitude);
     }
 
     if(type === 'table'){
@@ -255,10 +257,10 @@ if(CB._isNode){
 }
 
 
-CB._clone=function(obj,id,latitude,longitude,tableName,columnName){
+CB._clone=function(obj,id,longitude,latitude,tableName,columnName){
     var n_obj = {};
     if(obj.document._type && obj.document._type != 'point') {
-        n_obj = CB._getObjectByType(obj.document._type,id,latitude,longitude,tableName,columnName);
+        n_obj = CB._getObjectByType(obj.document._type,id,longitude,latitude,tableName,columnName);
         var doc=obj.document;
         var doc2={};
         for (var key in doc) {
