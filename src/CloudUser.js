@@ -27,7 +27,7 @@ CB.CloudUser.getCurrentUser = function(callback){
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/user/" + CB.appId + "/currentUser";
+    var url = CB.apiUrl + "/user/" + CB.appId + "/currentUser";
 
     CB._request('POST',url,params).then(function(response){ 
         var user = response;       
@@ -113,7 +113,7 @@ CB.CloudUser.resetPassword = function(email,callback){
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/user/" + CB.appId + "/resetPassword";
+    var url = CB.apiUrl + "/user/" + CB.appId + "/resetPassword";
 
     CB._request('POST',url,params).then(function(response){
         if (callback) {
@@ -191,7 +191,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/user/" + CB.appId + "/signup" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/signup" ;
 
     CB._request('POST',url,params).then(function(user){
 
@@ -238,7 +238,7 @@ CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callb
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/user/" + CB.appId + "/changePassword" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/changePassword" ;
 
     CB._request('PUT',url,params).then(function(response){
         if (callback) {
@@ -282,7 +282,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/user/" + CB.appId + "/login" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/login" ;
 
     CB._request('POST',url,params).then(function(response){
         thisObj = CB.fromJSON(JSON.parse(response),thisObj);
@@ -340,7 +340,7 @@ CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/user/" + CB.appId + "/loginwithprovider" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/loginwithprovider" ;
 
     CB._request('POST',url,params).then(function(response){
         var user = response;       
@@ -389,7 +389,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
         document: CB.toJSON(thisObj),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/user/" + CB.appId + "/logout" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/logout" ;
 
     CB._request('POST',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -429,7 +429,7 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/user/" + CB.appId + "/addToRole" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/addToRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);
@@ -482,7 +482,7 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
         role: CB.toJSON(role),
         key: CB.appKey
     });
-    url = CB.apiUrl + "/user/" + CB.appId + "/removeFromRole" ;
+    var url = CB.apiUrl + "/user/" + CB.appId + "/removeFromRole" ;
 
     CB._request('PUT',url,params).then(function(response){
         CB.fromJSON(JSON.parse(response),thisObj);

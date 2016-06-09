@@ -861,7 +861,7 @@ CB.CloudQuery.prototype.distinct = function(keys, callback) {
         skip: thisObj.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/distinct';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/distinct';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -907,7 +907,7 @@ CB.CloudQuery.prototype.find = function(callback) { //find the document(s) match
         key: CB.appKey
     });
 
-    url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + thisObj.tableName + '/find';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));
@@ -1015,7 +1015,7 @@ CB.CloudQuery.prototype.findOne = function(callback) { //find a single document 
         skip: this.skip,
         key: CB.appKey
     });
-    url = CB.apiUrl + "/data/" + CB.appId + "/" + this.tableName + '/findOne';
+    var url = CB.apiUrl + "/data/" + CB.appId + "/" + this.tableName + '/findOne';
 
     CB._request('POST',url,params).then(function(response){
         var object = CB.fromJSON(JSON.parse(response));

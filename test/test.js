@@ -3733,7 +3733,7 @@ it("Should return no queue objects when there are no queues inthe database",func
 
 
 it("Should add current time as expires into the queue.",function(done){
-     this.timeout(30000);
+     this.timeout(40000);
      var queue = new CB.CloudQueue(util.makeString());
      var queueMessage = new CB.QueueMessage();
      queueMessage.expires = new Date(); 

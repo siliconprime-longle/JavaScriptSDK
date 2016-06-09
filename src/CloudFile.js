@@ -149,7 +149,7 @@ CB.CloudFile.prototype.save = function(callback) {
             fileObj:CB.toJSON(this),
             key: CB.appKey
         });
-        url = CB.apiUrl + '/file/' + CB.appId;
+        var url = CB.apiUrl + '/file/' + CB.appId;
         var uploadProgressCallback = null;
 
         if(callback && callback.uploadProgress){
