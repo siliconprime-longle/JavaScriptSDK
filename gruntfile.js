@@ -6,8 +6,7 @@ module.exports = function(grunt) {
         concat: {
             sdk: {
                 // the files to concatenate
-                src: ['src/Promises.js','src/PrivateMethods.js','src/CloudSocketClientLib.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudSearch.js'
-                ,'src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/CloudQueue.js',
+                src: ['src/Promises.js','src/PrivateMethods.js','src/CloudSocketClientLib.js','src/CloudApp.js','src/ACL.js','src/CloudNotifications.js','src/CloudObject.js','src/CloudQuery.js','src/CloudRole.js','src/CloudFile.js','src/CloudGeoPoint.js', 'src/CloudTable.js', 'src/Column.js','src/CloudQueue.js',
                 'src/CloudCache.js','src/CloudPush.js','src/CloudUser.js'],
                 // the location of the resulting JS file
                 dest: 'dist/cloudboost.js'
@@ -38,8 +37,7 @@ module.exports = function(grunt) {
                         'test/CloudExpire/test.js', 
                         'test/CloudQuery/includeList.js',
                         'test/CloudQuery/queryTest.js',
-                        'test/CloudQuery/encryption.js',
-                        'test/CloudSearch/CloudSearch.js',
+                        'test/CloudQuery/encryption.js',                      
                         'test/CloudRole/role.js',
                         'test/ACL/aclTest1.js',
                         'test/ACL/queryAcl.js',
@@ -47,8 +45,7 @@ module.exports = function(grunt) {
                         'test/CloudNotification/test.js',
                         'test/ACL/masterKeyACL.js',                        
                         'test/CloudGeoPoint/CloudGeoPoint.js',
-                        'test/CloudObject/versionTest.js',
-                        'test/CloudSearch/include.js', 
+                        'test/CloudObject/versionTest.js',                       
                         'test/CloudTable/test.js',
                         'test/CloudTable/cloudtable.js',
                         'test/AtomicityTests/atomicity.js',

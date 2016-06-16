@@ -84,44 +84,4 @@ describe("CloudObjectExpires", function () {
 
     });
 
-
-    it("objects expired should not show up in Search", function (done) {
-
-        this.timeout(20000);
-        var curr=new Date().getTime();
-        var query = new CB.CloudSearch('student1');
-        
-        var searchFilter1 = new CB.SearchFilter();
-        searchFilter1.equalTo('name','vipul');
-
-        var searchFilter2 = new CB.SearchFilter();
-        searchFilter2.lessThan('age',12);
-
-        var searchFilter = new CB.SearchFilter();
-        searchFilter.or(searchFilter1);
-        searchFilter.or(searchFilter2);
-
-        query.searchFilter = searchFilter;
-        
-        query.search({
-            success:function(list){
-                if(list && list.length>0) {
-                    for (var i = 0; i < list.length; i++) {
-                        if (list[i].expires > curr || !list[i].expires) {
-                            break;
-                        }
-                        else {
-                            throw "expired object retrieved in Search";
-                        }
-                    }
-                    done();
-                }else{ 
-                    done();
-                }
-            },error: function(error){
-                throw "should not show expired objects";
-            }
-        });
-
-    });
 });

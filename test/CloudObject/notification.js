@@ -161,11 +161,11 @@ describe("Cloud Objects Notification", function() {
 		      	success : function(){
 		      		cloudObject.save();
 		      	}, error : function(error){
-		      		throw 'Error on stopping listening to an event.';
+		      		done(error);
 		      	}
 		      });
       	}, error : function(error){
-      		throw 'Error listening to an event.';
+      		done(error);
       	}
       });
 
@@ -173,7 +173,7 @@ describe("Cloud Objects Notification", function() {
       	if(count ===  0){
       		done();
       	}else{
-      		throw 'Listening to events even if its stopped.';
+      		done('Listening to events even if its stopped.');
       	}
 
       }, 6000);
