@@ -13,7 +13,7 @@ node_js:
 before_install:
 - mkdir javascriptsdk
 - mv *.* javascriptsdk
-- mv javascriptsdk/credentials.tar.ec javascriptcredentials.tar.ec
+- mv javascriptsdk/javascriptcredentials.tar.enc javascriptcredentials.tar.enc
 - openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in javascriptcredentials.tar.enc -out javascriptcredentials.tar -d
 - git clone https://github.com/cloudboost/cloudboost
 - tar -xvf javascriptcredentials.tar
