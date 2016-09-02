@@ -18,7 +18,6 @@ before_install:
 - git clone https://github.com/cloudboost/cloudboost
 - tar -xvf javascriptcredentials.tar
 - rm javascriptcredentials.tar
-- rm credentials.tar.enc
 - rm gc_cred.json
 - mkdir cloudboost/config
 - mv smtp.json cloudboost/config/smtp.json
