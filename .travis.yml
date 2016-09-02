@@ -11,21 +11,25 @@ language: node_js
 node_js:
 - '6'
 before_install:
-- mkdir CloudBoost
-- openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in credentials.tar.enc -out credentials.tar -d
-- tar -xvf credentials.tar
-- rm credentials.tar
+- mkdir javascriptsdk
+- mv *.* javascriptsdk
+- mv javascriptsdk/credentials.tar.ec javascriptcredentials.tar.ec
+- openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in javascriptcredentials.tar.enc -out javascriptcredentials.tar -d
+- git clone https://github.com/cloudboost/cloudboost
+- tar -xvf javascriptcredentials.tar
+- rm javascriptcredentials.tar
+- rm credentials.tar.enc
 - rm gc_cred.json
-- mkdir config
-- mv smtp.json config/smtp.json
+- mkdir cloudboost/config
+- mv smtp.json cloudboost/config/smtp.json
 - docker run --name mongo -p 27017:27017 -d mongo:3.2 
 - docker run --name redis -p 6379:6379 -d redis:3.0 
 - sleep 30s
 - docker exec $(docker ps -aqf "name=mongo") mongo _GLOBAL --eval "db.getCollection('_Settings').insertOne({secureKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',clusterKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',myURL:'http://localhost:4730'});"
-- git clone https://github.com/cloudboost/javascriptsdk
 - npm install grunt-cli -g
+- mv javascriptsdk cloudboost/javascriptsdk
 install:
-- cd javascriptsdk
+- cd cloudboost/javascriptsdk
 - npm install
 - grunt
 - cd ..
@@ -39,8 +43,9 @@ install:
 after_success:
 #Deploy. 
 #Docker Login
-- openssl aes-256-cbc -K $encrypted_7b0fcf26d23d_key -iv $encrypted_7b0fcf26d23d_iv -in credentials.tar.enc -out credentials.tar -d
-- tar -xvf credentials.tar
+- cd ..
+- openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in javascriptcredentials.tar.enc -out javascriptcredentials.tar -d
+- tar -xvf javascriptcredentials.tar
 - docker login --username $DOCKERUSERNAME --password $DOCKERPASSWORD --email $DOCKEREMAIL
 # Make sure SDK is downloaded - cache once it's working
 - curl https://sdk.cloud.google.com | bash;
@@ -57,8 +62,7 @@ after_success:
 - gcloud components install kubectl
 - gcloud container clusters get-credentials $GOOGLECLUSTERNAME --zone $GOOGLEZONE --project $GOOGLEPROJECT
 #Push docker images. 
-- docker push cloudboost/cloudboost:2.0.$TRAVIS_BUILD_NUMBER
 - docker push cloudboost/cloudboost:latest
 #Upload to Kubernetes for deployment.
-- kubectl rolling-update cloudboost-engine --image=cloudboost/cloudboost:2.0.$TRAVIS_BUILD_NUMBER 
+- kubectl rolling-update cloudboost-engine --image=cloudboost/cloudboost:latest
 
