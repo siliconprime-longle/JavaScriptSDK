@@ -13,7 +13,7 @@ node_js:
 before_install:
 - mkdir javascriptsdk
 - mv *.* javascriptsdk
-- cd jaavscriptsdk/test
+- cd javascriptsdk/test
 - ls
 - mv javascriptsdk/javascriptcredentials.tar.enc javascriptcredentials.tar.enc
 - openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in javascriptcredentials.tar.enc -out javascriptcredentials.tar -d
