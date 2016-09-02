@@ -12,7 +12,7 @@ node_js:
 - '6'
 before_install:
 - mkdir javascriptsdk
-- mv * javascriptsdk
+- mv *.* javascriptsdk
 - cd jaavscriptsdk/test
 - ls
 - mv javascriptsdk/javascriptcredentials.tar.enc javascriptcredentials.tar.enc
