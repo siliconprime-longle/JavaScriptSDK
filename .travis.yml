@@ -64,6 +64,7 @@ after_success:
 - docker push cloudboost/cloudboost:latest
 #Upload to Kubernetes for deployment.
 - kubectl rolling-update cloudboost-engine --image=cloudboost/cloudboost:latest
+- rm javascriptcredentials.tar
 - mv cloudboost/javascriptsdk javascriptsdk
 - rm -rf cloudboost
 - cd javascriptsdk
