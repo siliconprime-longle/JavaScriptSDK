@@ -64,4 +64,13 @@ after_success:
 - docker push cloudboost/cloudboost:latest
 #Upload to Kubernetes for deployment.
 - kubectl rolling-update cloudboost-engine --image=cloudboost/cloudboost:latest
+- mv cloudboost/javascriptsdk javascriptsdk
+- rm -rf cloudboost
+- cd javascriptsdk
+- mv * ../
+- cd ..
+- rm javascriptsdk
+deploy:
+  provider: npm
+  api_key: $NPMKey
 
