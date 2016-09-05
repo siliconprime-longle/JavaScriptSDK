@@ -74,4 +74,5 @@ after_success:
 deploy:
   provider: npm
   api_key: $NPMKey
+  email: $NPMEmail
 
