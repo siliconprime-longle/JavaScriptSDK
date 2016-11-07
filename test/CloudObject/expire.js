@@ -71,9 +71,9 @@ describe("CloudObjectExpires", function () {
             var query = new CB.CloudQuery('student1');
             query.findById(obj1.id).then(function(obj){
                if(obj){
-                done("Object found");
-               }else{
                 done();
+               }else{
+                done("Object not found");
                }
             }, function(error){
                 done(error);
