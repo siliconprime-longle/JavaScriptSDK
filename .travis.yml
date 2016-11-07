@@ -75,4 +75,7 @@ deploy:
   provider: npm
   api_key: $NPMKey
   email: $NPMEmail
+#Notify Team on Slack
+notifications:
+  slack: cloudboost:gm7nWJDLDtBRyF75VKLKOoMW
 
