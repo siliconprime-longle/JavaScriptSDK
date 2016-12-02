@@ -1,20 +1,18 @@
-class CB {
-	constructor(){
-		this.CB = {}
-		this._isNode = false;
-		this.Socket = null;
-		this.io = null; //socket.io library is saved here.
-		this.apiUrl = 'https://api.cloudboost.io'
-		if (typeof(process) !== "undefined" &&
-		    process.versions &&
-		    process.versions.node) {
-		    this._isNode = true;
-		} else {
-		    this._isNode = false;
-		}
-	}
-}
+import CB from './CB'
+import PrivateMethods from './PrivateMethods'
+import CloudApp from './CloudApp'
+import Column from './Column'
+import CloudTable from './CloudTable'
+import ACL from './ACL'
+import CloudGeoPoint from './CloudGeoPoint'
+import CloudObject from './CloudObject'
+import CloudFile from './CloudFile'
+import CloudQueue from './CloudQueue'
+import CloudRole from './CloudRole'
+import CloudUser from './CloudUser'
+import CloudCache from './CloudCache'
 
-const global_CB = window.CB = Object.assign({},new CB())
+console.log(CB)
 
-export default global_CB
+window.CB = CB
+export default CB

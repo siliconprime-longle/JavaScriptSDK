@@ -5,9 +5,13 @@ var config = {
    output: {
       path:'./dist',
       filename: 'cloudboost.js',
+      library: "cloudboost",
+      libraryTarget: 'umd',
+      umdNamedDefine: true
    },
    module: {
       loaders: [
+         { test: /\.json$/, loader: 'json' },
          {
             test: /\.js?$/,
             exclude: /node_modules/,
@@ -19,11 +23,15 @@ var config = {
          }
       ]
    },
+  node: {
+    fs: "empty"
+  },
    plugins: [
         // new webpack.optimize.UglifyJsPlugin({
         //     compress: {
         //         warnings: false,
         //     },
+        //     mangle: false,
         //     output: {
         //         comments: false,
         //     },
