@@ -155,7 +155,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
     }
 
     if (!done) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -199,7 +199,7 @@ CB.CloudObject.off = function(tableName, eventType, done) {
     }
 
     if (!done) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -301,7 +301,7 @@ CB.CloudObject.prototype.save = function(callback) { //save the document to the 
         }
     });
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -338,7 +338,7 @@ CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from 
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 
 };
@@ -380,7 +380,7 @@ CB.CloudObject.prototype.delete = function(callback) { //delete an object matchi
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -432,7 +432,7 @@ CB.CloudObject.saveAll = function(array,callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 
 };
@@ -477,7 +477,7 @@ CB.CloudObject.deleteAll = function(array,callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 
 };

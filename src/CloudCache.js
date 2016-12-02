@@ -69,7 +69,7 @@ CB.CloudCache.prototype.set = function(key, value, callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -107,7 +107,7 @@ CB.CloudCache.prototype.deleteItem = function(key, callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -145,7 +145,7 @@ CB.CloudCache.prototype.create = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -182,7 +182,7 @@ CB.CloudCache.prototype.get = function(key, callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 
 };
@@ -221,7 +221,7 @@ CB.CloudCache.prototype.getInfo = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -256,7 +256,7 @@ CB.CloudCache.prototype.getItemsCount = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -295,7 +295,7 @@ CB.CloudCache.prototype.getAll = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 
 };
@@ -335,7 +335,7 @@ CB.CloudCache.prototype.clear = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -374,7 +374,7 @@ CB.CloudCache.prototype.delete = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -409,7 +409,7 @@ CB.CloudCache.getAll = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 };
 
@@ -445,7 +445,7 @@ CB.CloudCache.deleteAll = function(callback){
         }
     });
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 

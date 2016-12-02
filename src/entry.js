@@ -11,6 +11,9 @@ import CloudQueue from './CloudQueue'
 import CloudRole from './CloudRole'
 import CloudUser from './CloudUser'
 import CloudCache from './CloudCache'
+import CloudNotification from './CloudNotification'
+import CloudPush from './CloudPush'
+import CloudQuery from './CloudQuery'
 
 console.log(CB)
 

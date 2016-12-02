@@ -4,7 +4,7 @@ var config = {
 	
    output: {
       path:'./dist',
-      filename: 'cloudboost.js',
+      filename: 'cloudboost1.js',
       library: "cloudboost",
       libraryTarget: 'umd',
       umdNamedDefine: true

@@ -3,41 +3,208 @@ import CB from './CB'
 /*
   CloudTable
  */
+class CloudTable {
+    constructor(tableName){
+      CB._tableValidation(tableName);
+      this.document = {};
+      this.document.name = tableName;
+      this.document.appId = CB.appId;
+      this.document._type = 'table';
 
-CB.CloudTable = function(tableName){  //new table constructor
+      if(tableName.toLowerCase() === "user") {
+          this.document.type = "user";
+          this.document.maxCount = 1;
+      }
+      else if(tableName.toLowerCase() === "role") {
+          this.document.type = "role";
+          this.document.maxCount = 1;
+      }
+      else if(tableName.toLowerCase() === "device") {
+          this.document.type = "device";
+          this.document.maxCount = 1;
+      }
+      else {
+          this.document.type = "custom";
+          this.document.maxCount = 9999;
+      }
+      this.document.columns = CB._defaultColumns(this.document.type);
+    }
 
-  CB._tableValidation(tableName);
-  this.document = {};
-  this.document.name = tableName;
-  this.document.appId = CB.appId;
-  this.document._type = 'table';
+    addColumn(column){
+      if(Object.prototype.toString.call(column) === '[object String]') {
+            var obj = new CB.Column(column);
+            column = obj;
+        }
+      if (Object.prototype.toString.call(column) === '[object Object]') {
+        if(CB._columnValidation(column, this))
+          this.document.columns.push(column);
 
-  if(tableName.toLowerCase() === "user") {
-      this.document.type = "user";
-      this.document.maxCount = 1;
-  }
-  else if(tableName.toLowerCase() === "role") {
-      this.document.type = "role";
-      this.document.maxCount = 1;
-  }
-  else if(tableName.toLowerCase() === "device") {
-      this.document.type = "device";
-      this.document.maxCount = 1;
-  }
-  else {
-      this.document.type = "custom";
-      this.document.maxCount = 9999;
-  }
-  this.document.columns = CB._defaultColumns(this.document.type);
-};
+      } else if (Object.prototype.toString.call(column) === '[object Array]') {
+          for(var i=0; i<column.length; i++){
+            if(CB._columnValidation(column[i], this))
+              this.document.columns.push(column[i]);
+          }
+      }
+    };
 
-Object.defineProperty(CB.CloudTable.prototype,'columns',{
+    getColumn(columnName){
+        if(Object.prototype.toString.call(columnName) !== '[object String]') {
+            throw "Should enter a columnName";
+        }
+        var columns = this.document.columns;
+        for(var i=0;i<columns.length;i++){
+            if(columns[i].name === columnName)
+                return columns[i];
+        }
+        throw "Column Does Not Exists";
+    };
+
+    updateColumn(column){
+        if (Object.prototype.toString.call(column) === '[object Object]') {
+            if (CB._columnValidation(column, this)){
+                var columns = this.document.columns;
+                for(var i=0;i<columns.length;i++){
+                    if(columns[i].name === column.name){
+                        columns[i] = column;
+                        this.document.columns = columns;
+                        break;
+                    }
+                }
+            }else{
+                throw "Invalid Column";
+            }
+        }else{
+            throw "Invalid Column";
+        }
+
+    };
+
+
+    deleteColumn(column){
+      if(Object.prototype.toString.call(column) === '[object String]') {
+            var obj = new CB.Column(column);
+            column = obj;
+        }
+      if (Object.prototype.toString.call(column) === '[object Object]') {
+            if(CB._columnValidation(column, this)){
+                var arr = [];
+                for(var i=0;i<this.columns.length;i++){
+                    if(this.columns[i].name !== column.name)
+                        arr.push(this.columns[i]);
+                }
+              this.document.columns = arr;
+            }
+
+      } else if (Object.prototype.toString.call(column) === '[object Array]') {
+          var arr = [];
+          for(var i=0; i<column.length; i++){
+            if(CB._columnValidation(column[i], this)){
+                for(var i=0;i<this.columns.length;i++){
+                    if(this.columns[i].name !== column[i].name)
+                        arr.push(this.columns[i]);
+                }
+                this.document.columns = arr;
+            }
+          }
+      }
+    };
+    /**
+     * Deletes a table from database.
+     *
+     * @param table
+     * @param callback
+     * @returns {*}
+     */
+
+    delete(callback){
+        CB._validate();
+
+        var def;
+        if (!callback) {
+            def = new CB.Promise();
+        }
+
+        var params=JSON.stringify({
+            key: CB.appKey,
+            name: this.name,
+            method:"DELETE"
+        });
+
+        var thisObj = this;
+
+        var url = CB.apiUrl + '/app/' + CB.appId + "/" +this.name;
+
+        CB._request('PUT',url,params,true).then(function(response){
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+        if (!callback) {
+            return def.promise;
+        }
+    }
+
+    /**
+     * Saves a table
+     *
+     * @param callback
+     * @returns {*}
+     */
+
+    save(callback){
+      var def;
+      if (!callback) {
+          def = new CB.Promise();
+      }
+      CB._validate();
+      var thisObj = this;
+      var params=JSON.stringify({
+          key:CB.appKey,
+          data:CB.toJSON(thisObj)
+      });
+
+      var thisObj = this;
+
+      var url = CB.apiUrl +'/app/' + CB.appId + "/" + thisObj.document.name;
+
+        CB._request('PUT',url,params,true).then(function(response){
+          response = JSON.parse(response);
+          thisObj = CB.fromJSON(response);
+          if (callback) {
+              callback.success(thisObj);
+          } else {
+              def.resolve(thisObj);
+          }
+      },function(err){
+          if(callback){
+              callback.error(err);
+          }else {
+              def.reject(err);
+          }
+      });
+
+      if (!callback) {
+          return def.promise;
+      }
+    }
+}
+
+Object.defineProperty(CloudTable.prototype,'columns',{
     get: function(){
         return this.document.columns;
     }
 });
 
-Object.defineProperty(CB.CloudTable.prototype,'name',{
+Object.defineProperty(CloudTable.prototype,'name',{
     get: function(){
         return this.document.name;
     },
@@ -46,91 +213,13 @@ Object.defineProperty(CB.CloudTable.prototype,'name',{
     }
 });
 
-Object.defineProperty(CB.CloudTable.prototype,'id',{
+Object.defineProperty(CloudTable.prototype,'id',{
     get: function(){
         return this.document._id;
     }
 });
 
-
-CB.CloudTable.prototype.addColumn = function(column){
-    if(Object.prototype.toString.call(column) === '[object String]') {
-        var obj = new CB.Column(column);
-        column = obj;
-    }
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-    if(CB._columnValidation(column, this))
-      this.document.columns.push(column);
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this))
-          this.document.columns.push(column[i]);
-      }
-  }
-};
-
-CB.CloudTable.prototype.getColumn = function(columnName){
-    if(Object.prototype.toString.call(columnName) !== '[object String]') {
-        throw "Should enter a columnName";
-    }
-    var columns = this.document.columns;
-    for(var i=0;i<columns.length;i++){
-        if(columns[i].name === columnName)
-            return columns[i];
-    }
-    throw "Column Does Not Exists";
-};
-
-CB.CloudTable.prototype.updateColumn = function(column){
-    if (Object.prototype.toString.call(column) === '[object Object]') {
-        if (CB._columnValidation(column, this)){
-            var columns = this.document.columns;
-            for(var i=0;i<columns.length;i++){
-                if(columns[i].name === column.name){
-                    columns[i] = column;
-                    this.document.columns = columns;
-                    break;
-                }
-            }
-        }else{
-            throw "Invalid Column";
-        }
-    }else{
-        throw "Invalid Column";
-    }
-
-};
-
-
-CB.CloudTable.prototype.deleteColumn = function(column){
-    if(Object.prototype.toString.call(column) === '[object String]') {
-        var obj = new CB.Column(column);
-        column = obj;
-    }
-  if (Object.prototype.toString.call(column) === '[object Object]') {
-        if(CB._columnValidation(column, this)){
-            var arr = [];
-            for(var i=0;i<this.columns.length;i++){
-                if(this.columns[i].name !== column.name)
-                    arr.push(this.columns[i]);
-            }
-          this.document.columns = arr;
-        }
-
-  } else if (Object.prototype.toString.call(column) === '[object Array]') {
-      var arr = [];
-      for(var i=0; i<column.length; i++){
-        if(CB._columnValidation(column[i], this)){
-            for(var i=0;i<this.columns.length;i++){
-                if(this.columns[i].name !== column[i].name)
-                    arr.push(this.columns[i]);
-            }
-            this.document.columns = arr;
-        }
-      }
-  }
-};
+CB.CloudTable = CloudTable
 
 /**
  * Gets All the Tables from an App
@@ -170,7 +259,7 @@ CB.CloudTable.getAll = function(callback){
       }
   });
   if (!callback) {
-      return def;
+      return def.promise;
   }
 }
 
@@ -186,7 +275,7 @@ CB.CloudTable.getAll = function(callback){
 
 CB.CloudTable.get = function(table, callback){
   if(Object.prototype.toString.call(table) === '[object String]') {
-      var obj = new CB.CloudTable(table);
+      var obj = new this(table);
       table = obj;
   }
   if (Object.prototype.toString.call(table) === '[object Object]') {
@@ -226,7 +315,7 @@ CB.CloudTable.get = function(table, callback){
           }
       });
       if (!callback) {
-          return def;
+          return def.promise;
       }
 
     }
@@ -234,100 +323,5 @@ CB.CloudTable.get = function(table, callback){
     throw "cannot fetch array of tables";
   }
 }
-
-
-/**
- * Deletes a table from database.
- *
- * @param table
- * @param callback
- * @returns {*}
- */
-
-CB.CloudTable.prototype.delete = function(callback){
-    CB._validate();
-
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
-    }
-
-    var params=JSON.stringify({
-        key: CB.appKey,
-        name: this.name,
-        method:"DELETE"
-    });
-
-    var thisObj = this;
-
-    var url = CB.apiUrl + '/app/' + CB.appId + "/" +this.name;
-
-    CB._request('PUT',url,params,true).then(function(response){
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-
-    if (!callback) {
-        return def;
-    }
-}
-
-/**
- * Saves a table
- *
- * @param callback
- * @returns {*}
- */
-
-CB.CloudTable.prototype.save = function(callback){
-  var def;
-  if (!callback) {
-      def = new CB.Promise();
-  }
-  CB._validate();
-  var thisObj = this;
-  var params=JSON.stringify({
-      key:CB.appKey,
-      data:CB.toJSON(thisObj)
-  });
-
-  var thisObj = this;
-
-  var url = CB.apiUrl +'/app/' + CB.appId + "/" + thisObj.document.name;
-
-    CB._request('PUT',url,params,true).then(function(response){
-      response = JSON.parse(response);
-      thisObj = CB.fromJSON(response);
-      if (callback) {
-          callback.success(thisObj);
-      } else {
-          def.resolve(thisObj);
-      }
-  },function(err){
-      if(callback){
-          callback.error(err);
-      }else {
-          def.reject(err);
-      }
-  });
-
-  if (!callback) {
-      return def;
-  }
-};
-
-
-
-
-
 
 export default true

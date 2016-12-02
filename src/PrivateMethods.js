@@ -349,7 +349,7 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
             }
         }
     };
-    return def;
+    return def.promise;
 };
 
 CB._getSessionId = function() {
@@ -608,7 +608,7 @@ CB._fileCheck = function(obj){
     }else{
         deferred.resolve(obj);
     }
-    return deferred;
+    return deferred.promise;
 };
 
 CB._bulkObjFileCheck = function(array){
@@ -622,13 +622,13 @@ CB._bulkObjFileCheck = function(array){
     },function(err){
         deferred.reject(err);
     });
-    return deferred;
+    return deferred.promise;
 };
 
 CB._generateHash = function(){
     var hash="";
     var possible="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for(i=0;i<8;i++)
+    for(var i=0;i<8;i++)
     {
         hash=hash+possible.charAt(Math.floor(Math.random()*possible.length));
     }

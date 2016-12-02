@@ -57,7 +57,7 @@ CB.CloudUser.getCurrentUser = function(callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -131,7 +131,7 @@ CB.CloudUser.resetPassword = function(email,callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -220,7 +220,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -256,7 +256,7 @@ CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callb
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -303,7 +303,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -370,7 +370,7 @@ CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -411,7 +411,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 CB.CloudUser.prototype.addToRole = function(role, callback) {
@@ -448,7 +448,7 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 CB.CloudUser.prototype.isInRole = function(role) {
@@ -501,7 +501,7 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 

@@ -175,7 +175,7 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -222,7 +222,7 @@ CB.CloudFile.prototype.delete = function(callback) {
 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -258,7 +258,7 @@ CB.CloudFile.prototype.getFileContent = function(callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
