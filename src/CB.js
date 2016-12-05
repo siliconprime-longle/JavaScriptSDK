@@ -1,4 +1,5 @@
 import Promise_BlueBird from 'bluebird'
+
 class CloudBoost {
 	constructor(){
 		this._isNode = false
@@ -44,14 +45,11 @@ class CloudBoost {
         return promise;
     }
     _loadXml(){
-        var xmlhttp;
-        var req = typeof(require) === 'function' ? require : null;
-        // Load references to other dependencies
+        var xmlhttp
         if (typeof(XMLHttpRequest) !== 'undefined') {
             xmlhttp = XMLHttpRequest;
-        } else if (typeof(require) === 'function' &&
-            typeof(require.ensure) === 'undefined') {
-            xmlhttp = req('xmlhttprequest').XMLHttpRequest;
+        } else {
+            xmlhttp = require('xmlhttprequest').XMLHttpRequest;
         }
         xmlhttp = new xmlhttp();
         return xmlhttp; 

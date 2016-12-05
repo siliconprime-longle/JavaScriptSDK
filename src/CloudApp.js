@@ -1,6 +1,4 @@
 import CB from './CB'
-import Socket from 'socket.io-client'
-
 /*
  CloudApp
  */
@@ -28,8 +26,15 @@ class CloudApp {
 
         if(opts && opts.disableRealtime === true){
             CB._isRealtimeDisabled = true;
-        }else{
-            CB.io = Socket
+        } else {
+            if(CB._isNode)
+            {
+                CB.io = require('IO')
+            }
+            else {
+                CB.io = require('./socketlib')
+            }
+           
             CB.Socket = CB.io(CB.apiUrl);        
         } 
         this._isConnected = true;  
@@ -79,4 +84,4 @@ class CloudApp {
 
 CB.CloudApp = new CloudApp()
 
-export default true
+export default CloudApp

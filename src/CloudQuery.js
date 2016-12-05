@@ -706,7 +706,7 @@ CB.CloudQuery.prototype.substring = function(columnName, value, isCaseInsensitiv
           if(Object.prototype.toString.call(value) === '[object Array]' && value.length>0) {
             if(!this.query["$or"])
                 this.query["$or"] = [];
-            for(i=0; i < value.length; i++){
+            for(var i=0; i < value.length; i++){
                 var obj = {};
                 obj[columnName[j]] = {};
                 obj[columnName[j]]["$regex"] = ".*"+value[i]+".*";

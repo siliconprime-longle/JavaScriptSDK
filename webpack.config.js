@@ -4,28 +4,30 @@ var config = {
 	
    output: {
       path:'./dist',
-      filename: 'cloudboost1.js',
+      filename: 'cloudboost.js',
       library: "cloudboost",
       libraryTarget: 'umd',
-      umdNamedDefine: true
+      umdNamedDefine: true,
+   },
+   externals:{
+    xmlhttprequest: 'xmlhttprequest',
+    IO:"socket.io-client",
+    LocalStorage:'node-localstorage'
    },
    module: {
+      // noParse: [ /.*(LocalStorage\.js).*/ ],
       loaders: [
-         { test: /\.json$/, loader: 'json' },
          {
             test: /\.js?$/,
             exclude: /node_modules/,
             loader: 'babel',
-				
             query: {
-               presets: ['es2015']
+               presets: ['es2015'],
+               compact: false
             }
          }
       ]
    },
-  node: {
-    fs: "empty"
-  },
    plugins: [
         // new webpack.optimize.UglifyJsPlugin({
         //     compress: {

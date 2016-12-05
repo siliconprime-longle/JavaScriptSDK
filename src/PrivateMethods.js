@@ -244,11 +244,6 @@ function _all(arrayOfPromises) {
     });
 };
 
-if(CB._isNode){
-    module.exports = {};
-    module.exports = CB;
-}
-
 
 CB._clone=function(obj,id,longitude,latitude,tableName,columnName){
     var n_obj = {};
@@ -298,7 +293,7 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
     if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
+        var LocalStorage = require('LocalStorage').LocalStorage
         localStorage = new LocalStorage('./scratch');
     }
     xmlhttp.open(method,url,true);

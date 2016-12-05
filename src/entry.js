@@ -1,21 +1,28 @@
 import CB from './CB'
-import PrivateMethods from './PrivateMethods'
-import CloudApp from './CloudApp'
-import Column from './Column'
-import CloudTable from './CloudTable'
-import ACL from './ACL'
-import CloudGeoPoint from './CloudGeoPoint'
-import CloudObject from './CloudObject'
-import CloudFile from './CloudFile'
-import CloudQueue from './CloudQueue'
-import CloudRole from './CloudRole'
-import CloudUser from './CloudUser'
-import CloudCache from './CloudCache'
-import CloudNotification from './CloudNotification'
-import CloudPush from './CloudPush'
-import CloudQuery from './CloudQuery'
+import './PrivateMethods'
+import './CloudApp'
+import './Column'
+import './CloudTable'
+import './ACL'
+import './CloudGeoPoint'
+import './CloudObject'
+import './CloudFile'
+import './CloudQueue'
+import './CloudRole'
+import './CloudUser'
+import './CloudCache'
+import './CloudNotification'
+import './CloudPush'
+import './CloudQuery'
 
-console.log(CB)
-
-window.CB = CB
+try {
+ window.CB = CB
+} catch(e){
+	console.log('window object not found')
+}
 export default CB
+
+// import CB from '../dist/cloudboost.js'
+// window.CB = CB
+
+
