@@ -1,4 +1,4 @@
-import CB from '../CB'
+import CB from './CB'
 /*
  CloudApp
  */
@@ -27,8 +27,13 @@ class CloudApp {
         if(opts && opts.disableRealtime === true){
             CB._isRealtimeDisabled = true;
         } else {
-            CB.io = require('IO')
-            CB.Socket = CB.io(CB.apiUrl)     
+            if(CB._isNode){
+                CB.io = require('IO')
+                CB.Socket = CB.io(CB.apiUrl)
+            } else {
+                CB.io = require('./socketlib')
+                CB.Socket = CB.io(CB.apiUrl);
+            }        
         } 
         this._isConnected = true;  
     }

@@ -1,5 +1,5 @@
-import CB from '../CB'
-var localStorage
+import CB from './CB'
+
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
@@ -283,20 +283,25 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
 
     CB._validate();
 
-    if(!params)
-        params = {};
-
-    // params.sdk = "JavaScript";
+    if(!params){
+        var params = {};
+    } else {
+        if(typeof params != "object"){
+            params = JSON.parse(params);
+        }
+    }
+    var newParams = Object.assign({},params,{sdk:"JavaScript"})
+    newParams = JSON.stringify(newParams)
 
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
 
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-    
-    // var LocalStorage = require('node-localstorage').LocalStorage
-    // localStorage = new LocalStorage('./scratch');
-    localStorage = require('localStorage')
+
+    if(CB._isNode){
+        localStorage = require('localStorage')
+    }
     
     xmlhttp.open(method,url,true);
     if(!isFile) {
@@ -322,12 +327,12 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     if(CB._isNode){
         xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
 
-        if(params && typeof params ==="object"){
-            params=JSON.stringify(params);
+        if(newParams && typeof newParams ==="object"){
+            newParams=JSON.stringify(newParams);
         }
     }
-    if(params)
-        xmlhttp.send(params);
+    if(newParams)
+        xmlhttp.send(newParams);
     else
         xmlhttp.send();
     xmlhttp.onreadystatechange = function() {

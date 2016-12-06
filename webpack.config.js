@@ -21,16 +21,13 @@ var config = {
             exclude: /node_modules/,
             loader: 'babel',
             query: {
-               presets: ['es2015'],
+               presets: ["es2015-without-strict"],
                compact: false
             }
          }
       ]
    },
    plugins: [
-        // new webpack.DefinePlugin({
-        //   ISNODE: typeof(process) !== "undefined"
-        // })
         // new webpack.optimize.UglifyJsPlugin({
         //     compress: {
         //         warnings: false,
