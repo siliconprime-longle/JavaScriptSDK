@@ -44,6 +44,5 @@ require( './CloudQuery')
 try {
  window.CB = CB
 } catch(e){
-	// console.log(e)
 }
 module.exports = CB

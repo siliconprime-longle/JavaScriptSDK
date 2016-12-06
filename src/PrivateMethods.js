@@ -285,13 +285,13 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
 
     if(!params){
         var params = {};
-    } else {
-        if(typeof params != "object"){
-            params = JSON.parse(params);
-        }
     }
-    var newParams = Object.assign({},params,{sdk:"JavaScript"})
-    newParams = JSON.stringify(newParams)
+    if(typeof params != "object"){
+        params = JSON.parse(params);
+    }
+    
+    params.sdk = "JavaScript"
+    params = JSON.stringify(params)
 
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
@@ -327,12 +327,12 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     if(CB._isNode){
         xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
 
-        if(newParams && typeof newParams ==="object"){
-            newParams=JSON.stringify(newParams);
+        if(params && typeof params ==="object"){
+            params=JSON.stringify(params);
         }
     }
-    if(newParams)
-        xmlhttp.send(newParams);
+    if(params)
+        xmlhttp.send(params);
     else
         xmlhttp.send();
     xmlhttp.onreadystatechange = function() {
