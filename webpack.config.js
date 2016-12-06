@@ -1,22 +1,21 @@
 var webpack = require('webpack')
 var config = {
    entry: './src/entry.js',
-	
    output: {
       path:'./dist',
       filename: 'cloudboost.js',
       library: "cloudboost",
       libraryTarget: 'umd',
       umdNamedDefine: true,
+
    },
    externals:{
-    xmlhttprequest: 'xmlhttprequest',
     IO:"socket.io-client",
-    LocalStorage:'node-localstorage'
+    xmlhttprequest:"w3c-xmlhttprequest",
    },
    module: {
-      // noParse: [ /.*(LocalStorage\.js).*/ ],
       loaders: [
+         { test: /\.json$/, loader: 'json' },
          {
             test: /\.js?$/,
             exclude: /node_modules/,
@@ -29,6 +28,9 @@ var config = {
       ]
    },
    plugins: [
+        // new webpack.DefinePlugin({
+        //   ISNODE: typeof(process) !== "undefined"
+        // })
         // new webpack.optimize.UglifyJsPlugin({
         //     compress: {
         //         warnings: false,

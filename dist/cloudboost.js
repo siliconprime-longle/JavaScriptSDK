@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("xmlhttprequest"), require("node-localstorage"), require("socket.io-client"));
+		module.exports = factory(require("w3c-xmlhttprequest"), require("socket.io-client"));
 	else if(typeof define === 'function' && define.amd)
-		define("cloudboost", ["xmlhttprequest", "node-localstorage", "socket.io-client"], factory);
+		define("cloudboost", ["w3c-xmlhttprequest", "socket.io-client"], factory);
 	else if(typeof exports === 'object')
-		exports["cloudboost"] = factory(require("xmlhttprequest"), require("node-localstorage"), require("socket.io-client"));
+		exports["cloudboost"] = factory(require("w3c-xmlhttprequest"), require("socket.io-client"));
 	else
-		root["cloudboost"] = factory(root["xmlhttprequest"], root["node-localstorage"], root["socket.io-client"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_7__, __WEBPACK_EXTERNAL_MODULE_9__) {
+		root["cloudboost"] = factory(root["w3c-xmlhttprequest"], root["socket.io-client"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_9__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -64,47 +64,57 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _CB2 = _interopRequireDefault(_CB);
 
-	__webpack_require__(6);
-
-	__webpack_require__(8);
-
-	__webpack_require__(10);
-
-	__webpack_require__(11);
-
-	__webpack_require__(12);
-
-	__webpack_require__(13);
-
-	__webpack_require__(14);
-
-	__webpack_require__(15);
-
-	__webpack_require__(16);
-
-	__webpack_require__(17);
-
-	__webpack_require__(18);
-
-	__webpack_require__(19);
-
-	__webpack_require__(20);
-
-	__webpack_require__(21);
-
-	__webpack_require__(22);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	try {
+	  console.log('is window object Available ? ', !!window);
+	  _CB2.default._isNode = false;
+	} catch (e) {
+	  console.log('now running on node platform');
+	  _CB2.default._isNode = true;
+	}
+	console.log("Running on browser based pltform ? ", !_CB2.default._isNode);
+
+	if (_CB2.default._isNode) {
+	  _CB2.default._loadXml = function () {
+	    var xmlhttp;
+	    xmlhttp = __webpack_require__(5).XMLHttpRequest;
+	    xmlhttp = new xmlhttp();
+	    return xmlhttp;
+	  };
+	  __webpack_require__(6);
+	  __webpack_require__(8);
+	} else {
+	  _CB2.default._loadXml = function () {
+	    var xmlhttp;
+	    xmlhttp = XMLHttpRequest;
+	    xmlhttp = new xmlhttp();
+	    return xmlhttp;
+	  };
+	  __webpack_require__(10);
+	  __webpack_require__(11);
+	}
+
+	__webpack_require__(66);
+	__webpack_require__(67);
+	__webpack_require__(68);
+	__webpack_require__(69);
+	__webpack_require__(70);
+	__webpack_require__(71);
+	__webpack_require__(72);
+	__webpack_require__(73);
+	__webpack_require__(74);
+	__webpack_require__(75);
+	__webpack_require__(76);
+	__webpack_require__(77);
+	__webpack_require__(78);
 
 	try {
 	  window.CB = _CB2.default;
 	} catch (e) {
-	  console.log('window object not found');
+	  console.log(e);
 	}
 	exports.default = _CB2.default;
-
-	// import CB from '../dist/cloudboost.js'
-	// window.CB = CB
 
 /***/ },
 /* 1 */
@@ -172,18 +182,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            xdr.open(method, url);
 	            xdr.send(data);
 	            return promise;
-	        }
-	    }, {
-	        key: '_loadXml',
-	        value: function _loadXml() {
-	            var xmlhttp;
-	            if (typeof XMLHttpRequest !== 'undefined') {
-	                xmlhttp = XMLHttpRequest;
-	            } else {
-	                xmlhttp = __webpack_require__(5).XMLHttpRequest;
-	            }
-	            xmlhttp = new xmlhttp();
-	            return xmlhttp;
 	        }
 	    }, {
 	        key: 'trigger',
@@ -6143,6 +6141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	var localStorage;
 	/* PRIVATE METHODS */
 	_CB2.default.toJSON = function (thisObj) {
 
@@ -6407,10 +6406,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var def = new _CB2.default.Promise();
 	    var xmlhttp = _CB2.default._loadXml();
-	    if (_CB2.default._isNode) {
-	        var LocalStorage = __webpack_require__(7).LocalStorage;
-	        localStorage = new LocalStorage('./scratch');
-	    }
+
+	    // var LocalStorage = require('node-localstorage').LocalStorage
+	    // localStorage = new LocalStorage('./scratch');
+	    localStorage = __webpack_require__(7);
+
 	    xmlhttp.open(method, url, true);
 	    if (!isFile) {
 	        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
@@ -6918,7 +6918,62 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 7 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+	/* WEBPACK VAR INJECTION */(function(global) {// http://www.rajdeepd.com/articles/chrome/localstrg/LocalStorageSample.htm
+
+	// NOTE:
+	// this varies from actual localStorage in some subtle ways
+
+	// also, there is no persistence
+	// TODO persist
+	(function () {
+	  "use strict";
+
+	  var db;
+
+	  function LocalStorage() {
+	  }
+	  db = LocalStorage;
+
+	  db.prototype.getItem = function (key) {
+	    if (this.hasOwnProperty(key)) {
+	      return String(this[key]);
+	    }
+	    return null;
+	  };
+
+	  db.prototype.setItem = function (key, val) {
+	    this[key] = String(val);
+	  };
+
+	  db.prototype.removeItem = function (key) {
+	    delete this[key];
+	  };
+
+	  db.prototype.clear = function () {
+	    var self = this;
+	    Object.keys(self).forEach(function (key) {
+	      self[key] = undefined;
+	      delete self[key];
+	    });
+	  };
+
+	  db.prototype.key = function (i) {
+	    i = i || 0;
+	    return Object.keys(this)[i];
+	  };
+
+	  db.prototype.__defineGetter__('length', function () {
+	    return Object.keys(this).length;
+	  });
+
+	  if (global.localStorage) {
+	    module.exports = localStorage;
+	  } else {
+	    module.exports = new LocalStorage();
+	  }
+	}());
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 8 */
@@ -6975,12 +7030,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (opts && opts.disableRealtime === true) {
 	                _CB2.default._isRealtimeDisabled = true;
 	            } else {
-	                if (_CB2.default._isNode) {
-	                    _CB2.default.io = __webpack_require__(9);
-	                } else {
-	                    _CB2.default.io = __webpack_require__(23);
-	                }
-
+	                _CB2.default.io = __webpack_require__(9);
 	                _CB2.default.Socket = _CB2.default.io(_CB2.default.apiUrl);
 	            }
 	            this._isConnected = true;
@@ -7050,6 +7100,963 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _CB = __webpack_require__(1);
+
+	var _CB2 = _interopRequireDefault(_CB);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/* PRIVATE METHODS */
+	_CB2.default.toJSON = function (thisObj) {
+
+	    if (thisObj.constructor === Array) {
+	        for (var i = 0; i < thisObj.length; i++) {
+	            thisObj[i] = _CB2.default.toJSON(thisObj[i]);
+	        }
+	        return thisObj;
+	    }
+
+	    var id = null;
+	    var columnName = null;
+	    var tableName = null;
+	    var latitude = null;
+	    var longitude = null;
+
+	    if (thisObj instanceof _CB2.default.CloudGeoPoint) {
+	        latitude = thisObj.document.latitude;
+	        longitude = thisObj.document.longitude;
+	    }
+
+	    if (thisObj instanceof _CB2.default.CloudFile) id = thisObj.document._id;
+
+	    if (thisObj instanceof _CB2.default.Column) columnName = thisObj.document.name;
+
+	    if (thisObj instanceof _CB2.default.CloudQueue) tableName = thisObj.document.name;
+
+	    if (thisObj instanceof _CB2.default.CloudTable) tableName = thisObj.document.name;
+
+	    if (thisObj instanceof _CB2.default.CloudCache) tableName = thisObj.document.name;
+
+	    var obj = _CB2.default._clone(thisObj, id, longitude, latitude, tableName, columnName);
+
+	    if (!obj instanceof _CB2.default.CloudObject || !obj instanceof _CB2.default.CloudFile || !obj instanceof _CB2.default.CloudGeoPoint || !obj instanceof _CB2.default.CloudTable || !obj instanceof _CB2.default.Column || !obj instanceof _CB2.default.QueueMessage || !obj instanceof _CB2.default.CloudQueue || !obj instanceof _CB2.default.CloudCache) {
+	        throw "Data passed is not an instance of CloudObject or CloudFile or CloudGeoPoint";
+	    }
+
+	    if (obj instanceof _CB2.default.Column) return obj.document;
+
+	    if (obj instanceof _CB2.default.CloudGeoPoint) return obj.document;
+
+	    var doc = obj.document;
+
+	    for (var key in doc) {
+	        if (doc[key] instanceof _CB2.default.CloudObject || doc[key] instanceof _CB2.default.CloudFile || doc[key] instanceof _CB2.default.CloudGeoPoint || doc[key] instanceof _CB2.default.Column || doc[key] instanceof _CB2.default.QueueMessage || doc[key] instanceof _CB2.default.CloudQueue || doc[key] instanceof _CB2.default.CloudCache) {
+	            //if something is a relation.
+	            doc[key] = _CB2.default.toJSON(doc[key]); //serialize this object.
+	        } else if (key === 'ACL') {
+	            //if this is an ACL, then. Convert this from CB.ACL object to JSON - to strip all the ACL Methods.
+	            var acl = doc[key].document;
+	            doc[key] = acl;
+	        } else if (doc[key] instanceof Array) {
+	            //if this is an array.
+	            //then check if this is an array of CloudObjects, if yes, then serialize every CloudObject.
+	            if (doc[key][0] && (doc[key][0] instanceof _CB2.default.CloudObject || doc[key][0] instanceof _CB2.default.CloudFile || doc[key][0] instanceof _CB2.default.CloudGeoPoint || doc[key][0] instanceof _CB2.default.Column || doc[key][0] instanceof _CB2.default.QueueMessage || doc[key][0] instanceof _CB2.default.CloudQueue || doc[key][0] instanceof _CB2.default.CloudCache)) {
+	                var arr = [];
+	                for (var i = 0; i < doc[key].length; i++) {
+	                    arr.push(_CB2.default.toJSON(doc[key][i]));
+	                }
+	                doc[key] = arr;
+	            }
+	        }
+	    }
+
+	    return doc;
+	};
+
+	_CB2.default.fromJSON = function (data, thisObj) {
+
+	    //prevObj : is a copy of object before update.
+	    //this is to deserialize JSON to a document which can be shoved into CloudObject. :)
+	    //if data is a list it will return a list of Cl oudObjects.
+	    if (!data || data === "") return null;
+
+	    if (data instanceof Array) {
+
+	        if (data[0] && data[0] instanceof Object) {
+
+	            var arr = [];
+
+	            for (var i = 0; i < data.length; i++) {
+	                obj = _CB2.default.fromJSON(data[i]);
+	                arr.push(obj);
+	            }
+
+	            return arr;
+	        } else {
+	            //this is just a normal array, not an array of CloudObjects.
+	            return data;
+	        }
+	    } else if (data instanceof Object && data._type) {
+
+	        //if this is a CloudObject.
+	        var document = {};
+	        //different types of classes.
+
+	        for (var key in data) {
+	            if (data[key] instanceof Array) {
+	                document[key] = _CB2.default.fromJSON(data[key]);
+	            } else if (data[key] instanceof Object) {
+	                if (key === 'ACL') {
+	                    //this is an ACL.
+	                    document[key] = new _CB2.default.ACL();
+	                    document[key].document = data[key];
+	                } else if (data[key]._type) {
+	                    if (thisObj) document[key] = _CB2.default.fromJSON(data[key], thisObj.get(key));else document[key] = _CB2.default.fromJSON(data[key]);
+	                } else {
+	                    document[key] = data[key];
+	                }
+	            } else {
+	                document[key] = data[key];
+	            }
+	        }
+
+	        if (!thisObj) {
+	            var id = null;
+	            var latitude = null;
+	            var longitude = null;
+	            var name = null;
+	            if (document._type === "file") id = document._id;
+	            if (document._type === "point") {
+	                latitude = document.latitude;
+	                longitude = document.longitude;
+	            }
+	            if (document._type === "table") {
+	                name = document.name;
+	            }
+	            if (document._type === "column") {
+	                name = document.name;
+	            }
+	            if (document._type === "queue") {
+	                name = document.name;
+	            }
+	            if (document._type === "cache") {
+	                name = document.name;
+	            }
+	            var obj = _CB2.default._getObjectByType(document._type, id, longitude, latitude, name);
+	            obj.document = document;
+
+	            thisObj = obj;
+	        } else {
+	            thisObj.document = document;
+	        }
+
+	        if (thisObj instanceof _CB2.default.CloudObject || thisObj instanceof _CB2.default.CloudUser || thisObj instanceof _CB2.default.CloudRole || thisObj instanceof _CB2.default.CloudQueue || thisObj instanceof _CB2.default.QueueMessage || thisObj instanceof _CB2.default.CloudFile || thisObj instanceof _CB2.default.CloudCache) {
+	            //activate ACL.
+	            if (thisObj.document["ACL"]) thisObj.document["ACL"].parent = thisObj;
+	        }
+
+	        return thisObj;
+	    } else {
+	        //if this is plain json.
+	        return data;
+	    }
+	};
+
+	_CB2.default._getObjectByType = function (type, id, longitude, latitude, name) {
+
+	    var obj = null;
+
+	    if (type === 'custom') {
+	        obj = new _CB2.default.CloudObject();
+	    }
+
+	    if (type === 'queue') {
+	        //tablename is queue name in this instance.
+	        obj = new _CB2.default.CloudQueue(name);
+	    }
+
+	    if (type === 'queue-message') {
+	        obj = new _CB2.default.QueueMessage();
+	    }
+
+	    if (type === 'cache') {
+	        obj = new _CB2.default.CloudCache(name);
+	    }
+
+	    if (type === 'role') {
+	        obj = new _CB2.default.CloudRole();
+	    }
+
+	    if (type === 'user') {
+	        obj = new _CB2.default.CloudUser();
+	    }
+
+	    if (type === 'file') {
+	        obj = new _CB2.default.CloudFile(id);
+	    }
+
+	    if (type === 'point') {
+	        obj = new _CB2.default.CloudGeoPoint(0, 0);
+	        obj.document.latitude = Number(latitude);
+	        obj.document.longitude = Number(longitude);
+	    }
+
+	    if (type === 'table') {
+	        obj = new _CB2.default.CloudTable(name);
+	    }
+
+	    if (type === 'column') {
+	        obj = new _CB2.default.Column(name);
+	    }
+
+	    return obj;
+	};
+
+	_CB2.default._validate = function () {
+	    if (!_CB2.default.appId) {
+	        throw "AppID is null. Please use CB.CloudApp.init to initialize your app.";
+	    }
+
+	    if (!_CB2.default.appKey) {
+	        throw "AppKey is null. Please use CB.CloudApp.init to initialize your app.";
+	    }
+	};
+
+	function _all(arrayOfPromises) {
+	    //this is simplilar to Q.all for jQuery promises.
+	    return jQuery.when.apply(jQuery, arrayOfPromises).then(function () {
+	        return Array.prototype.slice.call(arguments, 0);
+	    });
+	};
+
+	_CB2.default._clone = function (obj, id, longitude, latitude, tableName, columnName) {
+	    var n_obj = {};
+	    if (obj.document._type && obj.document._type != 'point') {
+	        n_obj = _CB2.default._getObjectByType(obj.document._type, id, longitude, latitude, tableName, columnName);
+	        var doc = obj.document;
+	        var doc2 = {};
+	        for (var key in doc) {
+	            if (doc[key] instanceof _CB2.default.CloudFile) doc2[key] = _CB2.default._clone(doc[key], doc[key].document._id);else if (doc[key] instanceof _CB2.default.CloudObject) {
+	                doc2[key] = _CB2.default._clone(doc[key], null);
+	            } else if (doc[key] instanceof _CB2.default.CloudQueue) {
+	                doc2[key] = _CB2.default._clone(doc[key], null);
+	            } else if (doc[key] instanceof _CB2.default.QueueMessage) {
+	                doc2[key] = _CB2.default._clone(doc[key], null);
+	            } else if (doc[key] instanceof _CB2.default.CloudGeoPoint) {
+	                doc2[key] = _CB2.default._clone(doc[key], null);
+	            } else if (doc[key] instanceof _CB2.default.CloudCache) {
+	                doc2[key] = _CB2.default._clone(doc[key], null);
+	            } else doc2[key] = doc[key];
+	        }
+	    } else if (obj instanceof _CB2.default.CloudGeoPoint) {
+	        n_obj = new _CB2.default.CloudGeoPoint(obj.get('longitude'), obj.get('latitude'));
+	        return n_obj;
+	    }
+
+	    n_obj.document = doc2;
+
+	    return n_obj;
+	};
+
+	_CB2.default._request = function (method, url, params, isServiceUrl, isFile, progressCallback) {
+
+	    _CB2.default._validate();
+
+	    if (!params) params = {};
+
+	    // params.sdk = "JavaScript";
+
+	    if (!_CB2.default.CloudApp._isConnected) throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
+
+	    var def = new _CB2.default.Promise();
+	    var xmlhttp = _CB2.default._loadXml();
+
+	    xmlhttp.open(method, url, true);
+	    if (!isFile) {
+	        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
+	    }
+
+	    if (progressCallback) {
+	        if (typeof xmlhttp.upload !== "undefined") {
+	            xmlhttp.upload.addEventListener("progress", function (evt) {
+	                if (evt.lengthComputable) {
+	                    var percentComplete = evt.loaded / evt.total;
+	                    progressCallback(percentComplete);
+	                }
+	            }, false);
+	        }
+	    }
+
+	    if (!isServiceUrl) {
+	        var ssid = _CB2.default._getSessionId();
+	        if (ssid != null) xmlhttp.setRequestHeader('sessionID', ssid);
+	    }
+	    if (_CB2.default._isNode) {
+	        xmlhttp.setRequestHeader("User-Agent", "CB/" + _CB2.default.version + " (NodeJS " + process.versions.node + ")");
+
+	        if (params && (typeof params === 'undefined' ? 'undefined' : _typeof(params)) === "object") {
+	            params = JSON.stringify(params);
+	        }
+	    }
+	    if (params) xmlhttp.send(params);else xmlhttp.send();
+	    xmlhttp.onreadystatechange = function () {
+	        if (xmlhttp.readyState == xmlhttp.DONE) {
+	            if (xmlhttp.status == 200) {
+	                if (!isServiceUrl) {
+	                    var sessionID = xmlhttp.getResponseHeader('sessionID');
+	                    if (sessionID) localStorage.setItem('sessionID', sessionID);else localStorage.removeItem('sessionID');
+	                }
+	                def.resolve(xmlhttp.responseText);
+	            } else {
+	                def.reject(xmlhttp.responseText);
+	            }
+	        }
+	    };
+	    return def.promise;
+	};
+
+	_CB2.default._getSessionId = function () {
+	    return localStorage.getItem('sessionID');
+	};
+
+	_CB2.default._columnValidation = function (column, cloudtable) {
+	    var defaultColumn = ['id', 'createdAt', 'updatedAt', 'ACL'];
+	    if (cloudtable.document.type == 'user') {
+	        defaultColumn.concat(['username', 'email', 'password', 'roles']);
+	    } else if (cloudtable.document.type == 'role') {
+	        defaultColumn.push('name');
+	    }
+
+	    var index = defaultColumn.indexOf(column.name.toLowerCase());
+	    if (index === -1) return true;else return false;
+	};
+
+	_CB2.default._tableValidation = function (tableName) {
+
+	    if (!tableName) //if table name is empty
+	        throw "table name cannot be empty";
+
+	    if (!isNaN(tableName[0])) throw "table name should not start with a number";
+
+	    if (!tableName.match(/^\S+$/)) throw "table name should not contain spaces";
+
+	    var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+	    if (pattern.test(tableName)) throw "table not shoul not contain special characters";
+	};
+
+	_CB2.default._modified = function (thisObj, columnName) {
+	    thisObj.document._isModified = true;
+	    if (thisObj.document._modifiedColumns) {
+	        if (thisObj.document._modifiedColumns.indexOf(columnName) === -1) {
+	            thisObj.document._modifiedColumns.push(columnName);
+	        }
+	    } else {
+	        thisObj.document._modifiedColumns = [];
+	        thisObj.document._modifiedColumns.push(columnName);
+	    }
+	};
+
+	function trimStart(character, string) {
+	    var startIndex = 0;
+
+	    while (string[startIndex] === character) {
+	        startIndex++;
+	    }
+
+	    return string.substr(startIndex);
+	}
+
+	_CB2.default._columnNameValidation = function (columnName) {
+	    if (!columnName) //if table name is empty
+	        throw "table name cannot be empty";
+
+	    if (!isNaN(columnName[0])) throw "column name should not start with a number";
+
+	    if (!columnName.match(/^\S+$/)) throw "column name should not contain spaces";
+
+	    var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
+	    if (pattern.test(columnName)) throw "column name not should not contain special characters";
+	};
+
+	_CB2.default._columnDataTypeValidation = function (dataType) {
+
+	    if (!dataType) throw "data type cannot be empty";
+
+	    var dataTypeList = ['Text', 'Email', 'URL', 'Number', 'Boolean', 'DateTime', 'GeoPoint', 'File', 'List', 'Relation', 'Object', 'EncryptedText'];
+	    var index = dataTypeList.indexOf(dataType);
+	    if (index < 0) throw "invalid data type";
+	};
+
+	_CB2.default._defaultColumns = function (type) {
+	    var id = new _CB2.default.Column('id');
+	    id.dataType = 'Id';
+	    id.required = true;
+	    id.unique = true;
+	    id.document.isDeletable = false;
+	    id.document.isEditable = false;
+
+	    var expires = new _CB2.default.Column('expires');
+	    expires.dataType = 'DateTime';
+	    expires.document.isDeletable = false;
+	    expires.document.isEditable = false;
+
+	    var createdAt = new _CB2.default.Column('createdAt');
+	    createdAt.dataType = 'DateTime';
+	    createdAt.required = true;
+	    createdAt.document.isDeletable = false;
+	    createdAt.document.isEditable = false;
+
+	    var updatedAt = new _CB2.default.Column('updatedAt');
+	    updatedAt.dataType = 'DateTime';
+	    updatedAt.required = true;
+	    updatedAt.document.isDeletable = false;
+	    updatedAt.document.isEditable = false;
+
+	    var ACL = new _CB2.default.Column('ACL');
+	    ACL.dataType = 'ACL';
+	    ACL.required = true;
+	    ACL.document.isDeletable = false;
+	    ACL.document.isEditable = false;
+
+	    var col = [id, expires, updatedAt, createdAt, ACL];
+	    if (type === "custom") {
+	        return col;
+	    } else if (type === "user") {
+	        var username = new _CB2.default.Column('username');
+	        username.dataType = 'Text';
+	        username.required = false;
+	        username.unique = true;
+	        username.document.isDeletable = false;
+	        username.document.isEditable = false;
+
+	        var email = new _CB2.default.Column('email');
+	        email.dataType = 'Email';
+	        email.unique = true;
+	        email.document.isDeletable = false;
+	        email.document.isEditable = false;
+
+	        var password = new _CB2.default.Column('password');
+	        password.dataType = 'EncryptedText';
+	        password.required = false;
+	        password.document.isDeletable = false;
+	        password.document.isEditable = false;
+
+	        var roles = new _CB2.default.Column('roles');
+	        roles.dataType = 'List';
+	        roles.relatedTo = 'Role';
+	        roles.relatedToType = 'role';
+	        roles.document.relationType = 'table';
+	        roles.document.isDeletable = false;
+	        roles.document.isEditable = false;
+
+	        var socialAuth = new _CB2.default.Column('socialAuth');
+	        socialAuth.dataType = 'List';
+	        socialAuth.relatedTo = 'Object';
+	        socialAuth.required = false;
+	        socialAuth.document.isDeletable = false;
+	        socialAuth.document.isEditable = false;
+
+	        var verified = new _CB2.default.Column('verified');
+	        verified.dataType = 'Boolean';
+	        verified.required = false;
+	        verified.document.isDeletable = false;
+	        verified.document.isEditable = false;
+
+	        col.push(username);
+	        col.push(roles);
+	        col.push(password);
+	        col.push(email);
+	        col.push(socialAuth);
+	        col.push(verified);
+	        return col;
+	    } else if (type === "role") {
+	        var name = new _CB2.default.Column('name');
+	        name.dataType = 'Text';
+	        name.unique = true;
+	        name.required = true;
+	        name.document.isDeletable = false;
+	        name.document.isEditable = false;
+	        col.push(name);
+	        return col;
+	    } else if (type === "device") {
+	        var channels = new _CB2.default.Column('channels');
+	        channels.dataType = 'List';
+	        channels.relatedTo = 'Text';
+	        channels.document.isDeletable = false;
+	        channels.document.isEditable = false;
+
+	        var deviceToken = new _CB2.default.Column('deviceToken');
+	        deviceToken.dataType = 'Text';
+	        deviceToken.unique = true;
+	        deviceToken.document.isDeletable = false;
+	        deviceToken.document.isEditable = false;
+
+	        var deviceOS = new _CB2.default.Column('deviceOS');
+	        deviceOS.dataType = 'Text';
+	        deviceOS.document.isDeletable = false;
+	        deviceOS.document.isEditable = false;
+
+	        var timezone = new _CB2.default.Column('timezone');
+	        timezone.dataType = 'Text';
+	        timezone.document.isDeletable = false;
+	        timezone.document.isEditable = false;
+
+	        var metadata = new _CB2.default.Column('metadata');
+	        metadata.dataType = 'Object';
+	        metadata.document.isDeletable = false;
+	        metadata.document.isEditable = false;
+
+	        col.push(channels);
+	        col.push(deviceToken);
+	        col.push(deviceOS);
+	        col.push(timezone);
+	        col.push(metadata);
+	        return col;
+	    }
+	};
+
+	_CB2.default._fileCheck = function (obj) {
+
+	    //obj is an instance of CloudObject.
+	    var deferred = new _CB2.default.Promise();
+	    var promises = [];
+	    for (var key in obj.document) {
+	        if (obj.document[key] instanceof Array && obj.document[key][0] instanceof _CB2.default.CloudFile) {
+	            for (var i = 0; i < obj.document[key].length; i++) {
+	                if (!obj.document[key][i].id) promises.push(obj.document[key][i].save());
+	            }
+	        } else if (obj.document[key] instanceof Object && obj.document[key] instanceof _CB2.default.CloudFile) {
+	            if (!obj.document[key].id) promises.push(obj.document[key].save());
+	        }
+	    }
+	    if (promises.length > 0) {
+	        _CB2.default.Promise.all(promises).then(function () {
+	            var res = arguments;
+	            var j = 0;
+	            for (var key in obj.document) {
+	                if (obj.document[key] instanceof Array && obj.document[key][0] instanceof _CB2.default.CloudFile) {
+	                    for (var i = 0; i < obj.document[key].length; i++) {
+	                        if (!obj.document[key][i].id) {
+	                            obj.document[key][i] = res[j];
+	                            j = j + 1;
+	                        }
+	                    }
+	                } else if (obj.document[key] instanceof Object && obj.document[key] instanceof _CB2.default.CloudFile) {
+	                    if (!obj.document[key].id) {
+	                        obj.document[key] = res[j];
+	                        j = j + 1;
+	                    }
+	                }
+	            }
+	            deferred.resolve(obj);
+	        }, function (err) {
+	            deferred.reject(err);
+	        });
+	    } else {
+	        deferred.resolve(obj);
+	    }
+	    return deferred.promise;
+	};
+
+	_CB2.default._bulkObjFileCheck = function (array) {
+	    var deferred = new _CB2.default.Promise();
+	    var promises = [];
+	    for (var i = 0; i < array.length; i++) {
+	        promises.push(_CB2.default._fileCheck(array[i]));
+	    }
+	    _CB2.default.Promise.all(promises).then(function () {
+	        deferred.resolve(arguments);
+	    }, function (err) {
+	        deferred.reject(err);
+	    });
+	    return deferred.promise;
+	};
+
+	_CB2.default._generateHash = function () {
+	    var hash = "";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    for (var i = 0; i < 8; i++) {
+	        hash = hash + possible.charAt(Math.floor(Math.random() * possible.length));
+	    }
+	    return hash;
+	};
+
+	_CB2.default._isJsonString = function (str) {
+	    try {
+	        JSON.parse(str);
+	    } catch (e) {
+	        return false;
+	    }
+	    return true;
+	};
+
+	_CB2.default._isJsonObject = function (obj) {
+	    try {
+	        JSON.stringify(obj);
+	    } catch (e) {
+	        return false;
+	    }
+	    return true;
+	};
+
+	//Description : This fucntion get the content of the cookie .
+	//Params : @name : Name of the cookie.
+	//Returns : content as string.  
+	_CB2.default._getCookie = function (name) {
+	    if (typeof Storage !== "undefined") {
+	        // Code for localStorage/sessionStorage.
+	        if (new Date(localStorage.getItem(name + "_expires")) > new Date()) {
+	            return localStorage.getItem(name);
+	        } else {
+	            _CB2.default._deleteCookie(name);
+	        }
+	    } else {
+	        // Sorry! No Web Storage support..       
+	        if (typeof document !== 'undefined') {
+	            var name = name + "=";
+	            var ca = document.cookie.split(';');
+	            for (var i = 0; i < ca.length; i++) {
+	                var c = ca[i];
+	                while (c.charAt(0) == ' ') {
+	                    c = c.substring(1);
+	                }if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+	            }
+	            return "";
+	        }
+	    }
+	};
+
+	//Description : Deletes the cookie
+	//Params : @name : Name of the cookie.
+	//Returns : void
+	_CB2.default._deleteCookie = function (name) {
+	    //save the user to the cookie. 
+	    if (typeof Storage !== "undefined") {
+	        // Code for localStorage/sessionStorage.
+	        localStorage.removeItem(name);
+	        localStorage.removeItem(name + "_expires");
+	    } else {
+	        if (typeof document !== 'undefined') {
+	            var d = new Date();
+	            d.setTime(d.getTime() + 0 * 0 * 0 * 0 * 0);
+	            var expires = "expires=" + d.toUTCString();
+	            document.cookie = name + "=" + +"; " + expires;
+	        }
+	    }
+	};
+
+	//Description : Creates cookie. 
+	//Params : @name : Name of the cookie.
+	//         @content : Content as string / JSON / int / etc. 
+	//         @expires : Expiration time in millisecinds.
+	//Returns : content as string.  
+	_CB2.default._createCookie = function (name, content, expires) {
+	    var d = new Date();
+	    d.setTime(d.getTime() + expires);
+	    if (typeof Storage !== "undefined") {
+	        // Code for localStorage/sessionStorage.
+	        localStorage.setItem(name, content.toString());
+	        localStorage.setItem(name + "_expires", d);
+	    } else {
+	        if (typeof document !== 'undefined') {
+
+	            var expires = "expires=" + d.toUTCString();
+	            document.cookie = +name + "=" + content.toString() + "; " + expires;
+	        }
+	    }
+	};
+
+	//Description : returns query string. 
+	//Params : @key : key         
+	//Returns : query string.  
+	_CB2.default._getQuerystringByKey = function (key) {
+	    key = key.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	    var regex = new RegExp("[\\?&]" + key + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	};
+
+	//Set sessionId if cbtoken is found in url
+	if (typeof location !== 'undefined' && location.search) {
+	    var cbtoken = _CB2.default._getQuerystringByKey("cbtoken");
+	    if (cbtoken && cbtoken !== "") {
+	        localStorage.setItem('sessionID', cbtoken);
+	    }
+	}
+
+	//Description : returns browser name 
+	//Params : null       
+	//Returns : browser name. 
+	_CB2.default._getThisBrowserName = function () {
+
+	    // check if library is used as a Node.js module
+	    if (typeof window !== 'undefined') {
+
+	        // store navigator properties to use later
+	        var userAgent = 'navigator' in window && 'userAgent' in navigator && navigator.userAgent.toLowerCase() || '';
+	        var vendor = 'navigator' in window && 'vendor' in navigator && navigator.vendor.toLowerCase() || '';
+	        var appVersion = 'navigator' in window && 'appVersion' in navigator && navigator.appVersion.toLowerCase() || '';
+
+	        var is = {};
+
+	        // is current browser chrome?
+	        is.chrome = function () {
+	            return (/chrome|chromium/i.test(userAgent) && /google inc/.test(vendor)
+	            );
+	        };
+
+	        // is current browser firefox?
+	        is.firefox = function () {
+	            return (/firefox/i.test(userAgent)
+	            );
+	        };
+
+	        // is current browser edge?
+	        is.edge = function () {
+	            return (/edge/i.test(userAgent)
+	            );
+	        };
+
+	        // is current browser internet explorer?
+	        // parameter is optional
+	        is.ie = function (version) {
+	            if (!version) {
+	                return (/msie/i.test(userAgent) || "ActiveXObject" in window
+	                );
+	            }
+	            if (version >= 11) {
+	                return "ActiveXObject" in window;
+	            }
+	            return new RegExp('msie ' + version).test(userAgent);
+	        };
+
+	        // is current browser opera?
+	        is.opera = function () {
+	            return (/^Opera\//.test(userAgent) || // Opera 12 and older versions
+	                /\x20OPR\//.test(userAgent)
+	            ); // Opera 15+
+	        };
+
+	        // is current browser safari?
+	        is.safari = function () {
+	            return (/safari/i.test(userAgent) && /apple computer/i.test(vendor)
+	            );
+	        };
+
+	        if (is.chrome()) {
+	            return "chrome";
+	        }
+
+	        if (is.firefox()) {
+	            return "firefox";
+	        }
+
+	        if (is.edge()) {
+	            return "edge";
+	        }
+
+	        if (is.ie()) {
+	            return "ie";
+	        }
+
+	        if (is.opera()) {
+	            return "opera";
+	        }
+
+	        if (is.safari()) {
+	            return "safari";
+	        }
+
+	        return "unidentified";
+	    }
+	};
+
+	exports.default = true;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _CB = __webpack_require__(1);
+
+	var _CB2 = _interopRequireDefault(_CB);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/*
+	 CloudApp
+	 */
+	var CloudApp = function () {
+	    function CloudApp() {
+	        _classCallCheck(this, CloudApp);
+
+	        this._isConnected = false;
+	    }
+
+	    _createClass(CloudApp, [{
+	        key: 'init',
+	        value: function init(serverUrl, applicationId, applicationKey, opts) {
+	            //static function for initialisation of the app
+	            if (!applicationKey) {
+	                applicationKey = applicationId;
+	                applicationId = serverUrl;
+	            } else {
+	                _CB2.default.apiUrl = serverUrl;
+	            }
+
+	            if ((typeof applicationKey === 'undefined' ? 'undefined' : _typeof(applicationKey)) === "object") {
+	                opts = applicationKey;
+	                applicationKey = applicationId;
+	                applicationId = serverUrl;
+	            }
+
+	            _CB2.default.appId = applicationId;
+	            _CB2.default.appKey = applicationKey;
+
+	            if (opts && opts.disableRealtime === true) {
+	                _CB2.default._isRealtimeDisabled = true;
+	            } else {
+	                _CB2.default.io = __webpack_require__(79);
+	                _CB2.default.Socket = _CB2.default.io(_CB2.default.apiUrl);
+	            }
+	            this._isConnected = true;
+	        }
+	    }, {
+	        key: 'onConnect',
+	        value: function onConnect(functionToFire) {
+	            //static function for initialisation of the app
+	            _CB2.default._validate();
+	            if (!_CB2.default.Socket) {
+	                throw "Socket couldn't be found. Init app first.";
+	            }
+	            _CB2.default.Socket.on('connect', functionToFire);
+	        }
+	    }, {
+	        key: 'onDisconnect',
+	        value: function onDisconnect(functionToFire) {
+	            //static function for initialisation of the app
+	            _CB2.default._validate();
+
+	            if (!_CB2.default.Socket) {
+	                throw "Socket couldn't be found. Init app first.";
+	            }
+
+	            _CB2.default.Socket.on('disconnect', functionToFire);
+	        }
+	    }, {
+	        key: 'connect',
+	        value: function connect() {
+	            //static function for initialisation of the app
+	            _CB2.default._validate();
+
+	            if (!_CB2.default.Socket) {
+	                throw "Socket couldn't be found. Init app first.";
+	            }
+
+	            _CB2.default.Socket.connect();
+	            this._isConnected = true;
+	        }
+	    }, {
+	        key: 'disconnect',
+	        value: function disconnect() {
+	            //static function for initialisation of the app
+	            _CB2.default._validate();
+
+	            if (!_CB2.default.Socket) {
+	                throw "Socket couldn't be found. Init app first.";
+	            }
+
+	            _CB2.default.Socket.emit('socket-disconnect', _CB2.default.appId);
+	            this._isConnected = false;
+	        }
+	    }]);
+
+	    return CloudApp;
+	}();
+
+	_CB2.default.CloudApp = new CloudApp();
+
+	exports.default = CloudApp;
+
+/***/ },
+/* 12 */,
+/* 13 */,
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */,
+/* 18 */,
+/* 19 */,
+/* 20 */,
+/* 21 */,
+/* 22 */,
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */,
+/* 28 */,
+/* 29 */,
+/* 30 */,
+/* 31 */,
+/* 32 */,
+/* 33 */,
+/* 34 */,
+/* 35 */,
+/* 36 */,
+/* 37 */,
+/* 38 */,
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */,
+/* 43 */,
+/* 44 */,
+/* 45 */,
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */,
+/* 59 */,
+/* 60 */,
+/* 61 */,
+/* 62 */,
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7176,10 +8183,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_CB2.default.Column = Column;
 
-	exports.default = true;
+	exports.default = _CB2.default.Column;
 
 /***/ },
-/* 11 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7526,7 +8533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = true;
 
 /***/ },
-/* 12 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7690,7 +8697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = true;
 
 /***/ },
-/* 13 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7699,37 +8706,95 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 *CloudGeoPoint
 	 */
 
-	_CB2.default.CloudGeoPoint = _CB2.default.CloudGeoPoint || function (longitude, latitude) {
-	    if (!latitude && latitude !== 0 || !longitude && longitude !== 0) throw "Latitude or Longitude is empty.";
+	var CloudGeoPoint = function () {
+	    function CloudGeoPoint(longitude, latitude) {
+	        _classCallCheck(this, CloudGeoPoint);
 
-	    if (isNaN(latitude)) throw "Latitude " + latitude + " is not a number type.";
+	        if (!latitude && latitude !== 0 || !longitude && longitude !== 0) throw "Latitude or Longitude is empty.";
 
-	    if (isNaN(longitude)) throw "Longitude " + longitude + " is not a number type.";
+	        if (isNaN(latitude)) throw "Latitude " + latitude + " is not a number type.";
 
-	    this.document = {};
-	    this.document._type = "point";
-	    this.document._isModified = true;
-	    //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
-	    if (Number(latitude) >= -90 && Number(latitude) <= 90 && Number(longitude) >= -180 && Number(longitude) <= 180) {
-	        this.document.coordinates = [Number(longitude), Number(latitude)];
-	        this.document.latitude = Number(latitude);
-	        this.document.longitude = Number(longitude);
-	    } else {
-	        throw "latitude and longitudes are not in range";
+	        if (isNaN(longitude)) throw "Longitude " + longitude + " is not a number type.";
+
+	        this.document = {};
+	        this.document._type = "point";
+	        this.document._isModified = true;
+	        //The default datum for an earth-like sphere is WGS84. Coordinate-axis order is longitude, latitude.
+	        if (Number(latitude) >= -90 && Number(latitude) <= 90 && Number(longitude) >= -180 && Number(longitude) <= 180) {
+	            this.document.coordinates = [Number(longitude), Number(latitude)];
+	            this.document.latitude = Number(latitude);
+	            this.document.longitude = Number(longitude);
+	        } else {
+	            throw "latitude and longitudes are not in range";
+	        }
 	    }
-	};
 
-	Object.defineProperty(_CB2.default.CloudGeoPoint.prototype, 'latitude', {
+	    _createClass(CloudGeoPoint, [{
+	        key: "get",
+	        value: function get(name) {
+	            //for getting data of a particular column
+
+	            return this.document[name];
+	        }
+	    }, {
+	        key: "set",
+	        value: function set(name, value) {
+	            //for getting data of a particular column
+
+	            if (name === 'latitude') {
+	                if (Number(value) >= -90 && Number(value) <= 90) {
+	                    this.document.latitude = Number(value);
+	                    this.document.coordinates[1] = Number(value);
+	                    this.document._isModified = true;
+	                } else throw "Latitude is not in Range";
+	            } else {
+	                if (Number(value) >= -180 && Number(value) <= 180) {
+	                    this.document.longitude = Number(value);
+	                    this.document.coordinates[0] = Number(value);
+	                    this.document._isModified = true;
+	                } else throw "Latitude is not in Range";
+	            }
+	        }
+	    }, {
+	        key: "distanceInKMs",
+	        value: function distanceInKMs(point) {
+
+	            var earthRedius = 6371; //in Kilometer
+	            return earthRedius * greatCircleFormula(this, point);
+	        }
+	    }, {
+	        key: "distanceInMiles",
+	        value: function distanceInMiles(point) {
+
+	            var earthRedius = 3959; // in Miles
+	            return earthRedius * greatCircleFormula(this, point);
+	        }
+	    }, {
+	        key: "distanceInRadians",
+	        value: function distanceInRadians(point) {
+
+	            return greatCircleFormula(this, point);
+	        }
+	    }]);
+
+	    return CloudGeoPoint;
+	}();
+
+	Object.defineProperty(CloudGeoPoint.prototype, 'latitude', {
 	    get: function get() {
 	        return this.document.coordinates[1];
 	    },
@@ -7742,7 +8807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudGeoPoint.prototype, 'longitude', {
+	Object.defineProperty(CloudGeoPoint.prototype, 'longitude', {
 	    get: function get() {
 	        return this.document.coordinates[0];
 	    },
@@ -7754,46 +8819,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else throw "Longitude is not in Range";
 	    }
 	});
-
-	_CB2.default.CloudGeoPoint.prototype.get = function (name) {
-	    //for getting data of a particular column
-
-	    return this.document[name];
-	};
-
-	_CB2.default.CloudGeoPoint.prototype.set = function (name, value) {
-	    //for getting data of a particular column
-
-	    if (name === 'latitude') {
-	        if (Number(value) >= -90 && Number(value) <= 90) {
-	            this.document.latitude = Number(value);
-	            this.document.coordinates[1] = Number(value);
-	            this.document._isModified = true;
-	        } else throw "Latitude is not in Range";
-	    } else {
-	        if (Number(value) >= -180 && Number(value) <= 180) {
-	            this.document.longitude = Number(value);
-	            this.document.coordinates[0] = Number(value);
-	            this.document._isModified = true;
-	        } else throw "Latitude is not in Range";
-	    }
-	};
-	_CB2.default.CloudGeoPoint.prototype.distanceInKMs = function (point) {
-
-	    var earthRedius = 6371; //in Kilometer
-	    return earthRedius * greatCircleFormula(this, point);
-	};
-
-	_CB2.default.CloudGeoPoint.prototype.distanceInMiles = function (point) {
-
-	    var earthRedius = 3959; // in Miles
-	    return earthRedius * greatCircleFormula(this, point);
-	};
-
-	_CB2.default.CloudGeoPoint.prototype.distanceInRadians = function (point) {
-
-	    return greatCircleFormula(this, point);
-	};
 
 	function greatCircleFormula(thisObj, point) {
 
@@ -7812,10 +8837,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	exports.default = true;
+	_CB2.default.CloudGeoPoint = _CB2.default.CloudGeoPoint || CloudGeoPoint;
+
+	exports.default = _CB2.default.CloudGeoPoint;
 
 /***/ },
-/* 14 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7826,37 +8853,235 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 CloudObject
 	 */
+	var CloudObject = function () {
+	    function CloudObject(tableName, id) {
+	        _classCallCheck(this, CloudObject);
 
-	_CB2.default.CloudObject = function (tableName, id) {
-	    //object for documents
+	        //object for documents
+	        this.document = {};
+	        this.document._tableName = tableName; //the document object
+	        this.document.ACL = new _CB2.default.ACL(); //ACL(s) of the document
+	        this.document._type = 'custom';
+	        this.document.expires = null;
+	        this.document._hash = _CB2.default._generateHash();
 
-	    this.document = {};
-	    this.document._tableName = tableName; //the document object
-	    this.document.ACL = new _CB2.default.ACL(); //ACL(s) of the document
-	    this.document._type = 'custom';
-	    this.document.expires = null;
-	    this.document._hash = _CB2.default._generateHash();
-
-	    if (!id) {
-	        this.document._modifiedColumns = ['createdAt', 'updatedAt', 'ACL', 'expires'];
-	        this.document._isModified = true;
-	    } else {
-	        this.document._modifiedColumns = [];
-	        this.document._isModified = false;
-	        this.document._id = id;
+	        if (!id) {
+	            this.document._modifiedColumns = ['createdAt', 'updatedAt', 'ACL', 'expires'];
+	            this.document._isModified = true;
+	        } else {
+	            this.document._modifiedColumns = [];
+	            this.document._isModified = false;
+	            this.document._id = id;
+	        }
 	    }
-	};
 
-	Object.defineProperty(_CB2.default.CloudObject.prototype, 'ACL', {
+	    _createClass(CloudObject, [{
+	        key: 'set',
+
+	        /* RealTime implementation ends here.  */
+
+	        value: function set(columnName, data) {
+	            //for setting data for a particular column
+
+	            var keywords = ['_tableName', '_type', 'operator'];
+
+	            if (columnName === 'id' || columnName === '_id') throw "You cannot set the id of a CloudObject";
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (keywords.indexOf(columnName) > -1) {
+	                throw columnName + " is a keyword. Please choose a different column name.";
+	            }
+	            this.document[columnName] = data;
+	            _CB2.default._modified(this, columnName);
+	        }
+	    }, {
+	        key: 'relate',
+	        value: function relate(columnName, objectTableName, objectId) {
+	            //for setting data for a particular column
+
+	            var keywords = ['_tableName', '_type', 'operator'];
+
+	            if (columnName === 'id' || columnName === '_id') throw "You cannot set the id of a CloudObject";
+
+	            if (columnName === 'id') throw "You cannot link an object to this column";
+
+	            if (keywords.indexOf(columnName) > -1) {
+	                throw columnName + " is a keyword. Please choose a different column name.";
+	            }
+
+	            this.document[columnName] = new _CB2.default.CloudObject(objectTableName, objectId);
+	            _CB2.default._modified(this, columnName);
+	        }
+	    }, {
+	        key: 'get',
+	        value: function get(columnName) {
+	            //for getting data of a particular column
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            return this.document[columnName];
+	        }
+	    }, {
+	        key: 'unset',
+	        value: function unset(columnName) {
+	            //to unset the data of the column
+	            this.document[columnName] = null;
+	            _CB2.default._modified(this, columnName);
+	        }
+	    }, {
+	        key: 'save',
+
+
+	        /**
+	         * Saved CloudObject in Database.
+	         * @param callback
+	         * @returns {*}
+	         */
+
+	        value: function save(callback) {
+	            //save the document to the db
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+	            var thisObj = this;
+	            _CB2.default._fileCheck(this).then(function (thisObj) {
+
+	                var xmlhttp = _CB2.default._loadXml();
+	                var params = JSON.stringify({
+	                    document: _CB2.default.toJSON(thisObj),
+	                    key: _CB2.default.appKey
+	                });
+	                var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + '/' + thisObj.document._tableName;
+	                _CB2.default._request('PUT', url, params).then(function (response) {
+	                    thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                    if (callback) {
+	                        callback.success(thisObj);
+	                    } else {
+	                        def.resolve(thisObj);
+	                    }
+	                }, function (err) {
+	                    if (callback) {
+	                        callback.error(err);
+	                    } else {
+	                        def.reject(err);
+	                    }
+	                });
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'fetch',
+	        value: function fetch(callback) {
+	            //fetch the document from the db
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.document._id) {
+	                throw "Can't fetch an object which is not saved.";
+	            }
+	            var thisObj = this;
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+	            var query = null;
+	            if (thisObj.document._type === 'file') {
+	                query = new _CB2.default.CloudQuery('_File');
+	            } else {
+	                query = new _CB2.default.CloudQuery(thisObj.document._tableName);
+	            }
+	            query.findById(thisObj.get('id')).then(function (res) {
+	                if (!callback) {
+	                    def.resolve(res);
+	                } else {
+	                    callback.success(res);
+	                }
+	            }, function (err) {
+	                if (!callback) {
+	                    def.reject(err);
+	                } else {
+	                    callback.error(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'delete',
+	        value: function _delete(callback) {
+	            //delete an object matching the objectId
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.document._id) {
+	                throw "You cannot delete an object which is not saved.";
+	            }
+	            var thisObj = this;
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(thisObj),
+	                method: "DELETE"
+	            });
+
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + '/' + thisObj.document._tableName;
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                if (callback) {
+	                    callback.success(thisObj);
+	                } else {
+	                    def.resolve(thisObj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }]);
+
+	    return CloudObject;
+	}();
+
+	Object.defineProperty(CloudObject.prototype, 'ACL', {
 	    get: function get() {
 	        return this.document.ACL;
 	    },
@@ -7867,13 +9092,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudObject.prototype, 'id', {
+	Object.defineProperty(CloudObject.prototype, 'id', {
 	    get: function get() {
 	        return this.document._id;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudObject.prototype, 'createdAt', {
+	Object.defineProperty(CloudObject.prototype, 'createdAt', {
 	    get: function get() {
 	        return this.document.createdAt;
 	    },
@@ -7883,7 +9108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudObject.prototype, 'updatedAt', {
+	Object.defineProperty(CloudObject.prototype, 'updatedAt', {
 	    get: function get() {
 	        return this.document.updatedAt;
 	    },
@@ -7894,7 +9119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	/* For Expire of objects */
-	Object.defineProperty(_CB2.default.CloudObject.prototype, 'expires', {
+	Object.defineProperty(CloudObject.prototype, 'expires', {
 	    get: function get() {
 	        return this.document.expires;
 	    },
@@ -7905,7 +9130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	/* This is Real time implementation of CloudObjects */
-	_CB2.default.CloudObject.on = function (tableName, eventType, cloudQuery, callback, done) {
+	CloudObject.on = function (tableName, eventType, cloudQuery, callback, done) {
 
 	    if (_CB2.default._isRealtimeDisabled) {
 	        throw "Realtime is disbaled for this app.";
@@ -7982,7 +9207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	_CB2.default.CloudObject.off = function (tableName, eventType, done) {
+	CloudObject.off = function (tableName, eventType, done) {
 
 	    if (_CB2.default._isRealtimeDisabled) {
 	        throw "Realtime is disbaled for this app.";
@@ -8020,185 +9245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	/* RealTime implementation ends here.  */
-
-	_CB2.default.CloudObject.prototype.set = function (columnName, data) {
-	    //for setting data for a particular column
-
-	    var keywords = ['_tableName', '_type', 'operator'];
-
-	    if (columnName === 'id' || columnName === '_id') throw "You cannot set the id of a CloudObject";
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (keywords.indexOf(columnName) > -1) {
-	        throw columnName + " is a keyword. Please choose a different column name.";
-	    }
-	    this.document[columnName] = data;
-	    _CB2.default._modified(this, columnName);
-	};
-
-	_CB2.default.CloudObject.prototype.relate = function (columnName, objectTableName, objectId) {
-	    //for setting data for a particular column
-
-	    var keywords = ['_tableName', '_type', 'operator'];
-
-	    if (columnName === 'id' || columnName === '_id') throw "You cannot set the id of a CloudObject";
-
-	    if (columnName === 'id') throw "You cannot link an object to this column";
-
-	    if (keywords.indexOf(columnName) > -1) {
-	        throw columnName + " is a keyword. Please choose a different column name.";
-	    }
-
-	    this.document[columnName] = new _CB2.default.CloudObject(objectTableName, objectId);
-	    _CB2.default._modified(this, columnName);
-	};
-
-	_CB2.default.CloudObject.prototype.get = function (columnName) {
-	    //for getting data of a particular column
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    return this.document[columnName];
-	};
-
-	_CB2.default.CloudObject.prototype.unset = function (columnName) {
-	    //to unset the data of the column
-	    this.document[columnName] = null;
-	    _CB2.default._modified(this, columnName);
-	};
-
-	/**
-	 * Saved CloudObject in Database.
-	 * @param callback
-	 * @returns {*}
-	 */
-
-	_CB2.default.CloudObject.prototype.save = function (callback) {
-	    //save the document to the db
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-	    var thisObj = this;
-	    _CB2.default._fileCheck(this).then(function (thisObj) {
-
-	        var xmlhttp = _CB2.default._loadXml();
-	        var params = JSON.stringify({
-	            document: _CB2.default.toJSON(thisObj),
-	            key: _CB2.default.appKey
-	        });
-	        var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + '/' + thisObj.document._tableName;
-	        _CB2.default._request('PUT', url, params).then(function (response) {
-	            thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	            if (callback) {
-	                callback.success(thisObj);
-	            } else {
-	                def.resolve(thisObj);
-	            }
-	        }, function (err) {
-	            if (callback) {
-	                callback.error(err);
-	            } else {
-	                def.reject(err);
-	            }
-	        });
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudObject.prototype.fetch = function (callback) {
-	    //fetch the document from the db
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.document._id) {
-	        throw "Can't fetch an object which is not saved.";
-	    }
-	    var thisObj = this;
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-	    var query = null;
-	    if (thisObj.document._type === 'file') {
-	        query = new _CB2.default.CloudQuery('_File');
-	    } else {
-	        query = new _CB2.default.CloudQuery(thisObj.document._tableName);
-	    }
-	    query.findById(thisObj.get('id')).then(function (res) {
-	        if (!callback) {
-	            def.resolve(res);
-	        } else {
-	            callback.success(res);
-	        }
-	    }, function (err) {
-	        if (!callback) {
-	            def.reject(err);
-	        } else {
-	            callback.error(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudObject.prototype.delete = function (callback) {
-	    //delete an object matching the objectId
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.document._id) {
-	        throw "You cannot delete an object which is not saved.";
-	    }
-	    var thisObj = this;
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(thisObj),
-	        method: "DELETE"
-	    });
-
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + '/' + thisObj.document._tableName;
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	        if (callback) {
-	            callback.success(thisObj);
-	        } else {
-	            def.resolve(thisObj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudObject.saveAll = function (array, callback) {
+	CloudObject.saveAll = function (array, callback) {
 
 	    if (!array || array.constructor !== Array) {
 	        throw "Array of CloudObjects is Null";
@@ -8249,7 +9296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	_CB2.default.CloudObject.deleteAll = function (array, callback) {
+	CloudObject.deleteAll = function (array, callback) {
 
 	    if (!array && array.constructor !== Array) {
 	        throw "Array of CloudObjects is Null";
@@ -8294,7 +9341,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/* Private Methods */
-	_CB2.default.CloudObject._validateNotificationQuery = function (cloudObject, cloudQuery) {
+	CloudObject._validateNotificationQuery = function (cloudObject, cloudQuery) {
 	    //delete an object matching the objectId
 
 	    if (!cloudQuery) throw "CloudQuery is null";
@@ -8323,10 +9370,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	exports.default = true;
+	_CB2.default.CloudObject = CloudObject;
+
+	exports.default = _CB2.default.CloudObject;
 
 /***/ },
-/* 15 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8602,7 +9651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = true;
 
 /***/ },
-/* 16 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8613,42 +9662,699 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	CloudQueue
 	 */
 
-	_CB2.default.CloudQueue = function (queueName, queueType) {
+	var CloudQueue = function () {
+	    function CloudQueue(queueName, queueType) {
+	        _classCallCheck(this, CloudQueue);
 
-	    if (typeof queueName === 'undefined' || queueName == null) {
-	        throw "Cannot create a queue with empty name";
+	        if (typeof queueName === 'undefined' || queueName == null) {
+	            throw "Cannot create a queue with empty name";
+	        }
+
+	        this.document = {};
+	        this.document.ACL = new _CB2.default.ACL(); //ACL(s) of the document
+	        this.document._type = 'queue';
+	        this.document.expires = null;
+	        this.document.name = queueName;
+	        this.document.retry = null;
+	        this.document.subscribers = [];
+	        this.document.messages = [];
+
+	        if (queueType && queueType !== "push" && queueType !== "pull") {
+	            throw "Type can be push or pull";
+	        }
+	        if (queueType) {
+	            this.document.queueType = queueType;
+	        } else {
+	            this.document.queueType = "pull";
+	        }
 	    }
 
-	    this.document = {};
-	    this.document.ACL = new _CB2.default.ACL(); //ACL(s) of the document
-	    this.document._type = 'queue';
-	    this.document.expires = null;
-	    this.document.name = queueName;
-	    this.document.retry = null;
-	    this.document.subscribers = [];
-	    this.document.messages = [];
+	    _createClass(CloudQueue, [{
+	        key: 'addMessage',
+	        value: function addMessage(queueMessage, callback) {
 
-	    if (queueType && queueType !== "push" && queueType !== "pull") {
-	        throw "Type can be push or pull";
-	    }
-	    if (queueType) {
-	        this.document.queueType = queueType;
-	    } else {
-	        this.document.queueType = "pull";
-	    }
-	};
+	            if (queueMessage == null) throw "Message cannot be null";
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'retry', {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var messages = [];
+
+	            if (queueMessage.constructor !== Array) {
+	                messages.push(queueMessage);
+	            } else {
+	                messages = queueMessage;
+	            }
+
+	            for (var i = 0; i < messages.length; i++) {
+	                if (!(messages[i] instanceof _CB2.default.QueueMessage)) {
+	                    messages[i] = new _CB2.default.QueueMessage(messages[i]);
+	                }
+	            }
+
+	            this.document.messages = messages;
+
+	            //PUT TO SERVER.
+	            var thisObj = this;
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                document: _CB2.default.toJSON(thisObj),
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/message';
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                var messages = _CB2.default.fromJSON(JSON.parse(response));
+	                if (callback) {
+	                    callback.success(messages);
+	                } else {
+	                    def.resolve(messages);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'updateMessage',
+	        value: function updateMessage(queueMessage, callback) {
+
+	            if (queueMessage == null) throw "Message cannot be null";
+
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var messages = [];
+
+	            if (queueMessage.constructor !== Array) {
+	                if (!queueMessage.id) {
+	                    throw "Message cannot be updated because it has never been saved.";
+	                } else {
+	                    messages.push(queueMessage);
+	                }
+	            } else {
+	                messages = queueMessage;
+	                for (var i = 0; i < messages.length; i++) {
+	                    if (!(messages[i] instanceof _CB2.default.QueueMessage)) {
+	                        throw "Message is not an instance of QueueMessage.";
+	                    }
+
+	                    if (!message[i].id) {
+	                        throw "Message cannot be updated because it has never been saved.";
+	                    }
+	                }
+	            }
+
+	            return this.addMessage(queueMessage, callback);
+	        }
+	    }, {
+	        key: 'getMessage',
+	        value: function getMessage(count, callback) {
+
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
+	                callback = count;
+	                count = null;
+	            }
+
+	            if (!count) count = 1;
+
+	            var thisObj = this;
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                count: count,
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/getMessage';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+
+	                if (!response || response === "") {
+	                    response = null;
+	                }
+
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'getAllMessages',
+	        value: function getAllMessages(callback) {
+
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
+	                callback = count;
+	                count = null;
+	            }
+
+	            var thisObj = this;
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/messages';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+
+	                if (!response || response === "") {
+	                    response = null;
+	                }
+
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'getMessageById',
+	        value: function getMessageById(id, callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + this.document.name + '/message/' + id;
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+
+	                if (!response || response === "") {
+	                    response = null;
+	                }
+
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'get',
+	        value: function get(callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'create',
+	        value: function create(callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(thisObj)
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/create';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'addSubscriber',
+	        value: function addSubscriber(url, callback) {
+
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var tempSubscribers = this.document.subscribers;
+
+	            this.document.subscribers = [];
+
+	            if (url.constructor === Array) {
+	                for (var i = 0; i < url.length; i++) {
+	                    this.document.subscribers.push(url[i]);
+	                }
+	            } else {
+	                this.document.subscribers.push(url);
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(this)
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + '/queue/' + _CB2.default.appId + '/' + thisObj.document.name + '/subscriber/';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                if (callback) {
+	                    callback.success(thisObj);
+	                } else {
+	                    def.resolve(thisObj);
+	                }
+	            }, function (err) {
+	                thisObj.document.subscribers = tempSubscribers;
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'removeSubscriber',
+	        value: function removeSubscriber(url, callback) {
+
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var tempSubscribers = this.document.subscribers;
+
+	            this.document.subscribers = [];
+
+	            if (url.constructor === Array) {
+	                for (var i = 0; i < url.length; i++) {
+	                    this.document.subscribers.push(url[i]);
+	                }
+	            } else {
+	                this.document.subscribers.push(url);
+	            }
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(thisObj),
+	                method: "DELETE"
+	            });
+
+	            var url = _CB2.default.apiUrl + '/queue/' + _CB2.default.appId + '/' + thisObj.document.name + '/subscriber/';
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                if (callback) {
+	                    callback.success(thisObj);
+	                } else {
+	                    def.resolve(thisObj);
+	                }
+	            }, function (err) {
+	                this.document.subscribers = tempSubscribers;
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'peekMessage',
+	        value: function peekMessage(count, callback) {
+
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
+	                callback = count;
+	                count = null;
+	            }
+
+	            if (!count) count = 1;
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                count: count
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + this.document.name + '/peekMessage';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'delete',
+	        value: function _delete(callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(this),
+	                method: "DELETE"
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name;
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                if (callback) {
+	                    callback.success(thisObj);
+	                } else {
+	                    def.resolve(thisObj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'clear',
+	        value: function clear(callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(this),
+	                method: "DELETE"
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/clear";
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
+	                if (callback) {
+	                    callback.success(thisObj);
+	                } else {
+	                    def.resolve(thisObj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'refreshMessageTimeout',
+	        value: function refreshMessageTimeout(id, timeout, callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if (!id) throw "Message Id cannot be null";
+
+	            if (id instanceof _CB2.default.QueueMessage) {
+	                if (!id.id) {
+	                    throw "Queue Message should have an id.";
+	                } else {
+	                    id = id.id;
+	                }
+	            }
+
+	            if (!callback && (timeout.success || timeout.error)) {
+	                callback = timeout;
+	                timeout = null;
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                timeout: timeout
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/" + id + "/refresh-message-timeout";
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'deleteMessage',
+	        value: function deleteMessage(id, callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!id || !(id instanceof _CB2.default.QueueMessage) && typeof id !== 'string') {
+	                throw "Delete Message function should have id of the message or insance of QueueMessage as the first parameter. ";
+	            }
+
+	            if (id instanceof _CB2.default.QueueMessage) {
+	                id = id.id;
+	            }
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                method: "DELETE"
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/message/" + id;
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response)));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update(callback) {
+	            var def;
+
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var xmlhttp = _CB2.default._loadXml();
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                document: _CB2.default.toJSON(thisObj)
+	            });
+
+	            var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name;
+
+	            _CB2.default._request('PUT', url, params).then(function (response) {
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	        }
+	    }]);
+
+	    return CloudQueue;
+	}();
+
+	Object.defineProperty(CloudQueue.prototype, 'retry', {
 	    get: function get() {
 	        return this.document.retry;
 	    },
@@ -8663,25 +10369,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'size', {
+	Object.defineProperty(CloudQueue.prototype, 'size', {
 	    get: function get() {
 	        if (this.document.size) return this.document.size;else return 0;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'name', {
+	Object.defineProperty(CloudQueue.prototype, 'name', {
 	    get: function get() {
 	        return this.document.name;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'subscribers', {
+	Object.defineProperty(CloudQueue.prototype, 'subscribers', {
 	    get: function get() {
 	        return this.document.subscribers;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'type', {
+	Object.defineProperty(CloudQueue.prototype, 'type', {
 	    get: function get() {
 	        return this.document.queueType;
 	    },
@@ -8691,7 +10397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'ACL', {
+	Object.defineProperty(CloudQueue.prototype, 'ACL', {
 	    get: function get() {
 	        return this.document.ACL;
 	    },
@@ -8701,25 +10407,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'id', {
+	Object.defineProperty(CloudQueue.prototype, 'id', {
 	    get: function get() {
 	        return this.document._id;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'createdAt', {
+	Object.defineProperty(CloudQueue.prototype, 'createdAt', {
 	    get: function get() {
 	        return this.document.createdAt;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'updatedAt', {
+	Object.defineProperty(CloudQueue.prototype, 'updatedAt', {
 	    get: function get() {
 	        return this.document.updatedAt;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudQueue.prototype, 'expires', {
+	Object.defineProperty(CloudQueue.prototype, 'expires', {
 	    get: function get() {
 	        return this.document.expires;
 	    },
@@ -8729,638 +10435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	_CB2.default.CloudQueue.prototype.addMessage = function (queueMessage, callback) {
-
-	    if (queueMessage == null) throw "Message cannot be null";
-
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var messages = [];
-
-	    if (queueMessage.constructor !== Array) {
-	        messages.push(queueMessage);
-	    } else {
-	        messages = queueMessage;
-	    }
-
-	    for (var i = 0; i < messages.length; i++) {
-	        if (!(messages[i] instanceof _CB2.default.QueueMessage)) {
-	            messages[i] = new _CB2.default.QueueMessage(messages[i]);
-	        }
-	    }
-
-	    this.document.messages = messages;
-
-	    //PUT TO SERVER.
-	    var thisObj = this;
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        document: _CB2.default.toJSON(thisObj),
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/message';
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        var messages = _CB2.default.fromJSON(JSON.parse(response));
-	        if (callback) {
-	            callback.success(messages);
-	        } else {
-	            def.resolve(messages);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.updateMessage = function (queueMessage, callback) {
-
-	    if (queueMessage == null) throw "Message cannot be null";
-
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var messages = [];
-
-	    if (queueMessage.constructor !== Array) {
-	        if (!queueMessage.id) {
-	            throw "Message cannot be updated because it has never been saved.";
-	        } else {
-	            messages.push(queueMessage);
-	        }
-	    } else {
-	        messages = queueMessage;
-	        for (var i = 0; i < messages.length; i++) {
-	            if (!(messages[i] instanceof _CB2.default.QueueMessage)) {
-	                throw "Message is not an instance of QueueMessage.";
-	            }
-
-	            if (!message[i].id) {
-	                throw "Message cannot be updated because it has never been saved.";
-	            }
-	        }
-	    }
-
-	    return this.addMessage(queueMessage, callback);
-	};
-
-	_CB2.default.CloudQueue.prototype.getMessage = function (count, callback) {
-
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
-	        callback = count;
-	        count = null;
-	    }
-
-	    if (!count) count = 1;
-
-	    var thisObj = this;
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        count: count,
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/getMessage';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-
-	        if (!response || response === "") {
-	            response = null;
-	        }
-
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.getAllMessages = function (callback) {
-
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
-	        callback = count;
-	        count = null;
-	    }
-
-	    var thisObj = this;
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/messages';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-
-	        if (!response || response === "") {
-	            response = null;
-	        }
-
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.getMessageById = function (id, callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + this.document.name + '/message/' + id;
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-
-	        if (!response || response === "") {
-	            response = null;
-	        }
-
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.get = function (callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.create = function (callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(thisObj)
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + '/create';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.addSubscriber = function (url, callback) {
-
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var tempSubscribers = this.document.subscribers;
-
-	    this.document.subscribers = [];
-
-	    if (url.constructor === Array) {
-	        for (var i = 0; i < url.length; i++) {
-	            this.document.subscribers.push(url[i]);
-	        }
-	    } else {
-	        this.document.subscribers.push(url);
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(this)
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + '/queue/' + _CB2.default.appId + '/' + thisObj.document.name + '/subscriber/';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	        if (callback) {
-	            callback.success(thisObj);
-	        } else {
-	            def.resolve(thisObj);
-	        }
-	    }, function (err) {
-	        thisObj.document.subscribers = tempSubscribers;
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.removeSubscriber = function (url, callback) {
-
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var tempSubscribers = this.document.subscribers;
-
-	    this.document.subscribers = [];
-
-	    if (url.constructor === Array) {
-	        for (var i = 0; i < url.length; i++) {
-	            this.document.subscribers.push(url[i]);
-	        }
-	    } else {
-	        this.document.subscribers.push(url);
-	    }
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(thisObj),
-	        method: "DELETE"
-	    });
-
-	    var url = _CB2.default.apiUrl + '/queue/' + _CB2.default.appId + '/' + thisObj.document.name + '/subscriber/';
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	        if (callback) {
-	            callback.success(thisObj);
-	        } else {
-	            def.resolve(thisObj);
-	        }
-	    }, function (err) {
-	        this.document.subscribers = tempSubscribers;
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.peekMessage = function (count, callback) {
-
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if ((typeof count === 'undefined' ? 'undefined' : _typeof(count)) === 'object' && !callback) {
-	        callback = count;
-	        count = null;
-	    }
-
-	    if (!count) count = 1;
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        count: count
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + this.document.name + '/peekMessage';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.delete = function (callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(this),
-	        method: "DELETE"
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name;
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	        if (callback) {
-	            callback.success(thisObj);
-	        } else {
-	            def.resolve(thisObj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.clear = function (callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(this),
-	        method: "DELETE"
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/clear";
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        thisObj = _CB2.default.fromJSON(JSON.parse(response), thisObj);
-	        if (callback) {
-	            callback.success(thisObj);
-	        } else {
-	            def.resolve(thisObj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.refreshMessageTimeout = function (id, timeout, callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if (!id) throw "Message Id cannot be null";
-
-	    if (id instanceof _CB2.default.QueueMessage) {
-	        if (!id.id) {
-	            throw "Queue Message should have an id.";
-	        } else {
-	            id = id.id;
-	        }
-	    }
-
-	    if (!callback && (timeout.success || timeout.error)) {
-	        callback = timeout;
-	        timeout = null;
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        timeout: timeout
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/" + id + "/refresh-message-timeout";
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.deleteMessage = function (id, callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!id || !(id instanceof _CB2.default.QueueMessage) && typeof id !== 'string') {
-	        throw "Delete Message function should have id of the message or insance of QueueMessage as the first parameter. ";
-	    }
-
-	    if (id instanceof _CB2.default.QueueMessage) {
-	        id = id.id;
-	    }
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name + "/message/" + id;
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response)));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response)));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.prototype.update = function (callback) {
-	    var def;
-
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var xmlhttp = _CB2.default._loadXml();
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        document: _CB2.default.toJSON(thisObj)
-	    });
-
-	    var url = _CB2.default.apiUrl + "/queue/" + _CB2.default.appId + '/' + thisObj.document.name;
-
-	    _CB2.default._request('PUT', url, params).then(function (response) {
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(JSON.parse(response), thisObj));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	};
-
-	_CB2.default.CloudQueue.getAll = function (callback) {
+	CloudQueue.getAll = function (callback) {
 
 	    var def;
 
@@ -9400,15 +10475,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	};
 
-	_CB2.default.CloudQueue.get = function (queueName, callback) {
+	CloudQueue.get = function (queueName, callback) {
 	    var queue = new _CB2.default.CloudQueue(queueName);
 	    return queue.get(callback);
 	};
 
-	_CB2.default.CloudQueue.delete = function (queueName, callback) {
+	CloudQueue.delete = function (queueName, callback) {
 	    var queue = new _CB2.default.CloudQueue(queueName);
 	    return queue.delete(callback);
 	};
+
+	_CB2.default.CloudQueue = CloudQueue;
 
 	_CB2.default.QueueMessage = function (data) {
 
@@ -9501,10 +10578,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	exports.default = true;
+	exports.default = _CB2.default.CloudQueue;
 
 /***/ },
-/* 17 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9519,10 +10596,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 CloudRole
 	 */
-	_CB2.default.CloudRole = _CB2.default.CloudRole || function (roleName) {
+
+	var CloudRole = function CloudRole(roleName) {
+	    _classCallCheck(this, CloudRole);
+
 	    //calling the constructor.
 	    if (!this.document) this.document = {};
 	    this.document._tableName = 'Role';
@@ -9535,9 +10617,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.document._modifiedColumns = ['createdAt', 'updatedAt', 'ACL', 'name', 'expires'];
 	};
 
-	_CB2.default.CloudRole.prototype = Object.create(_CB2.default.CloudObject.prototype);
+	CloudRole.prototype = Object.create(_CB2.default.CloudObject.prototype);
 
-	Object.defineProperty(_CB2.default.CloudRole.prototype, 'name', {
+	Object.defineProperty(CloudRole.prototype, 'name', {
 	    get: function get() {
 	        return this.document.name;
 	    },
@@ -9547,10 +10629,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	exports.default = true;
+	_CB2.default.CloudRole = _CB2.default.CloudRole || CloudRole;
+
+	exports.default = _CB2.default.CloudRole;
 
 /***/ },
-/* 18 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9565,10 +10649,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 CloudUser
 	 */
-	_CB2.default.CloudUser = _CB2.default.CloudUser || function () {
+
+	var CloudUser = function CloudUser() {
+	    _classCallCheck(this, CloudUser);
+
 	    if (!this.document) this.document = {};
 	    this.document._tableName = 'User';
 	    this.document.expires = null;
@@ -9578,6 +10667,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.document._isModified = true;
 	    this.document._modifiedColumns = ['createdAt', 'updatedAt', 'ACL', 'expires'];
 	};
+
+	_CB2.default.CloudUser = _CB2.default.CloudUser || CloudUser;
 
 	//Description  : This function gets the current user from the server by taking the sessionId from querystring.
 	//Params : 
@@ -10061,10 +11152,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	exports.default = true;
+	exports.default = _CB2.default.CloudUser;
 
 /***/ },
-/* 19 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10073,458 +11164,481 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 CloudCache
 	 */
 
-	_CB2.default.CloudCache = function (cacheName) {
-	    if (typeof cacheName === 'undefined' || cacheName === null || cacheName === '') {
-	        throw "Cannot create a cache with empty name";
+	var CloudCache = function () {
+	    function CloudCache(cacheName) {
+	        _classCallCheck(this, CloudCache);
+
+	        if (typeof cacheName === 'undefined' || cacheName === null || cacheName === '') {
+	            throw "Cannot create a cache with empty name";
+	        }
+	        this.document = {};
+	        this.document._tableName = "cache";
+	        this.document.name = cacheName;
+	        this.document.size = "";
+	        this.document.items = [];
 	    }
-	    this.document = {};
-	    this.document._tableName = "cache";
-	    this.document.name = cacheName;
-	    this.document.size = "";
-	    this.document.items = [];
+
+	    _createClass(CloudCache, [{
+	        key: 'set',
+	        value: function set(key, value, callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if (typeof value === 'undefined') {
+	                throw "Value cannot be undefined.";
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                item: value
+	            });
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key;
+	            _CB2.default._request('PUT', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+
+	                var obj = _CB2.default.fromJSON(response);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'deleteItem',
+	        value: function deleteItem(key, callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                method: "DELETE"
+	            });
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/item/' + key;
+	            _CB2.default._request('PUT', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+
+	                var obj = _CB2.default.fromJSON(response);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'create',
+	        value: function create(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/create';
+	            _CB2.default._request('POST', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response, thisObj);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'get',
+	        value: function get(key, callback) {
+
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key + '/item';
+	            _CB2.default._request('POST', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'getInfo',
+	        value: function getInfo(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name;
+	            _CB2.default._request('POST', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response, thisObj);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'getItemsCount',
+	        value: function getItemsCount(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items/count';
+	            _CB2.default._request('POST', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'getAll',
+	        value: function getAll(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey
+	            });
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items';
+	            _CB2.default._request('POST', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response);
+
+	                thisObj.document.items = obj;
+
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'clear',
+	        value: function clear(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                method: "DELETE"
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/clear/items';
+	            _CB2.default._request('PUT', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response, thisObj);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: 'delete',
+	        value: function _delete(callback) {
+	            var def;
+	            _CB2.default._validate();
+
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var params = JSON.stringify({
+	                key: _CB2.default.appKey,
+	                method: "DELETE"
+	            });
+
+	            var thisObj = this;
+
+	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name;
+	            _CB2.default._request('PUT', url, params, true).then(function (response) {
+	                if (_CB2.default._isJsonString(response)) {
+	                    response = JSON.parse(response);
+	                }
+	                var obj = _CB2.default.fromJSON(response, thisObj);
+	                if (callback) {
+	                    callback.success(obj);
+	                } else {
+	                    def.resolve(obj);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }]);
+
+	    return CloudCache;
+	}();
+
+	CloudCache.getAll = function (callback) {
+	    var def;
+	    _CB2.default._validate();
+
+	    if (!callback) {
+	        def = new _CB2.default.Promise();
+	    }
+
+	    var params = JSON.stringify({
+	        key: _CB2.default.appKey
+	    });
+
+	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
+	    _CB2.default._request('POST', url, params, true).then(function (response) {
+	        if (_CB2.default._isJsonString(response)) {
+	            response = JSON.parse(response);
+	        }
+	        var obj = _CB2.default.fromJSON(response);
+	        if (callback) {
+	            callback.success(obj);
+	        } else {
+	            def.resolve(obj);
+	        }
+	    }, function (err) {
+	        if (callback) {
+	            callback.error(err);
+	        } else {
+	            def.reject(err);
+	        }
+	    });
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
-	Object.defineProperty(_CB2.default.CloudCache.prototype, 'name', {
+	CloudCache.deleteAll = function (callback) {
+	    var def;
+	    _CB2.default._validate();
+
+	    if (!callback) {
+	        def = new _CB2.default.Promise();
+	    }
+
+	    var params = JSON.stringify({
+	        key: _CB2.default.appKey,
+	        method: "DELETE"
+	    });
+
+	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
+	    _CB2.default._request('PUT', url, params, true).then(function (response) {
+	        if (_CB2.default._isJsonString(response)) {
+	            response = JSON.parse(response);
+	        }
+	        var obj = _CB2.default.fromJSON(response);
+	        if (callback) {
+	            callback.success(obj);
+	        } else {
+	            def.resolve(obj);
+	        }
+	    }, function (err) {
+	        if (callback) {
+	            callback.error(err);
+	        } else {
+	            def.reject(err);
+	        }
+	    });
+	    if (!callback) {
+	        return def.promise;
+	    }
+	};
+
+	Object.defineProperty(CloudCache.prototype, 'name', {
 	    get: function get() {
 	        return this.document.name;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudCache.prototype, 'size', {
+	Object.defineProperty(CloudCache.prototype, 'size', {
 	    get: function get() {
 	        return this.document.size;
 	    }
 	});
 
-	Object.defineProperty(_CB2.default.CloudCache.prototype, 'items', {
+	Object.defineProperty(CloudCache.prototype, 'items', {
 	    get: function get() {
 	        return this.document.items;
 	    }
 	});
 
-	_CB2.default.CloudCache.prototype.set = function (key, value, callback) {
-	    var def;
-	    _CB2.default._validate();
+	_CB2.default.CloudCache = CloudCache;
 
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if (typeof value === 'undefined') {
-	        throw "Value cannot be undefined.";
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        item: value
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key;
-	    _CB2.default._request('PUT', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.deleteItem = function (key, callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/item/' + key;
-	    _CB2.default._request('PUT', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.create = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/create';
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response, thisObj);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.get = function (key, callback) {
-
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key + '/item';
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.getInfo = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name;
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response, thisObj);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.getItemsCount = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items/count';
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.getAll = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items';
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response);
-
-	        thisObj.document.items = obj;
-
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.clear = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/clear/items';
-	    _CB2.default._request('PUT', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response, thisObj);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.prototype.delete = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
-
-	    var thisObj = this;
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name;
-	    _CB2.default._request('PUT', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response, thisObj);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.getAll = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
-	    _CB2.default._request('POST', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudCache.deleteAll = function (callback) {
-	    var def;
-	    _CB2.default._validate();
-
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
-
-	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
-	    _CB2.default._request('PUT', url, params, true).then(function (response) {
-	        if (_CB2.default._isJsonString(response)) {
-	            response = JSON.parse(response);
-	        }
-	        var obj = _CB2.default.fromJSON(response);
-	        if (callback) {
-	            callback.success(obj);
-	        } else {
-	            def.resolve(obj);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	exports.default = true;
+	exports.default = _CB2.default.CloudCache;
 
 /***/ },
-/* 20 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10615,10 +11729,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	exports.default = true;
+	exports.default = _CB2.default.CloudNotification;
 
 /***/ },
-/* 21 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -11023,10 +12137,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	exports.default = true;
+	exports.default = _CB2.default.CloudPush;
 
 /***/ },
-/* 22 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -11037,72 +12151,1039 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	/*
 	 CloudQuery
 	 */
-	_CB2.default.CloudQuery = function (tableName) {
-	    //constructor for the class CloudQuery
 
-	    if (!tableName) throw "Table Name cannot be null";
+	var CloudQuery = function () {
+	    function CloudQuery(tableName) {
+	        _classCallCheck(this, CloudQuery);
 
-	    this.tableName = tableName;
-	    this.query = {};
-	    this.query.$include = [];
-	    this.query.$includeList = [];
-	    this.select = {};
-	    this.sort = {};
-	    this.skip = 0;
-	    this.limit = 10; //default limit is 10
-	};
+	        //constructor for the class CloudQuery
+	        if (!tableName) throw "Table Name cannot be null";
 
-	_CB2.default.CloudQuery.prototype.search = function (search, language, caseSensitive, diacriticSensitive) {
-
-	    //Validations
-	    if (typeof search !== "string") {
-	        throw "First parameter is required and it should be a string.";
+	        this.tableName = tableName;
+	        this.query = {};
+	        this.query.$include = [];
+	        this.query.$includeList = [];
+	        this.select = {};
+	        this.sort = {};
+	        this.skip = 0;
+	        this.limit = 10; //default limit is 10
 	    }
 
-	    if (language !== null && typeof language !== "undefined" && typeof language !== "string") {
-	        throw "Second parameter should be a string.";
-	    }
+	    _createClass(CloudQuery, [{
+	        key: "search",
+	        value: function search(_search, language, caseSensitive, diacriticSensitive) {
 
-	    if (caseSensitive !== null && typeof caseSensitive !== "undefined" && typeof caseSensitive !== "boolean") {
-	        throw "Third parameter should be a boolean.";
-	    }
+	            //Validations
+	            if (typeof _search !== "string") {
+	                throw "First parameter is required and it should be a string.";
+	            }
 
-	    if (diacriticSensitive !== null && typeof diacriticSensitive !== "undefined" && typeof diacriticSensitive !== "boolean") {
-	        throw "Fourth parameter should be a boolean.";
-	    }
+	            if (language !== null && typeof language !== "undefined" && typeof language !== "string") {
+	                throw "Second parameter should be a string.";
+	            }
 
-	    //Set the fields
-	    this.query["$text"] = {};
-	    if (typeof search === "string") {
-	        this.query["$text"]["$search"] = search;
-	    }
+	            if (caseSensitive !== null && typeof caseSensitive !== "undefined" && typeof caseSensitive !== "boolean") {
+	                throw "Third parameter should be a boolean.";
+	            }
 
-	    if (language !== null && typeof language !== "undefined" && typeof language === "string") {
-	        this.query["$text"]["$language"] = language;
-	    }
+	            if (diacriticSensitive !== null && typeof diacriticSensitive !== "undefined" && typeof diacriticSensitive !== "boolean") {
+	                throw "Fourth parameter should be a boolean.";
+	            }
 
-	    if (caseSensitive !== null && typeof caseSensitive !== "undefined" && typeof caseSensitive === "boolean") {
-	        this.query["$text"]["$caseSensitive"] = caseSensitive;
-	    }
+	            //Set the fields
+	            this.query["$text"] = {};
+	            if (typeof _search === "string") {
+	                this.query["$text"]["$search"] = _search;
+	            }
 
-	    if (diacriticSensitive !== null && typeof diacriticSensitive !== "undefined" && typeof diacriticSensitive === "boolean") {
-	        this.query["$text"]["$diacriticSensitive"] = diacriticSensitive;
-	    }
+	            if (language !== null && typeof language !== "undefined" && typeof language === "string") {
+	                this.query["$text"]["$language"] = language;
+	            }
 
-	    return this;
-	};
+	            if (caseSensitive !== null && typeof caseSensitive !== "undefined" && typeof caseSensitive === "boolean") {
+	                this.query["$text"]["$caseSensitive"] = caseSensitive;
+	            }
+
+	            if (diacriticSensitive !== null && typeof diacriticSensitive !== "undefined" && typeof diacriticSensitive === "boolean") {
+	                this.query["$text"]["$diacriticSensitive"] = diacriticSensitive;
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "equalTo",
+	        value: function equalTo(columnName, data) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (data !== null) {
+	                if (data.constructor === _CB2.default.CloudObject) {
+	                    columnName = columnName + '._id';
+	                    data = data.get('id');
+	                }
+
+	                this.query[columnName] = data;
+	            } else {
+
+	                //This is for people who code : obj.equalTo('column', null);
+	                this.doesNotExists(columnName);
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "includeList",
+	        value: function includeList(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.query.$includeList.push(columnName);
+
+	            return this;
+	        }
+	    }, {
+	        key: "include",
+	        value: function include(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.query.$include.push(columnName);
+
+	            return this;
+	        }
+	    }, {
+	        key: "all",
+	        value: function all(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.query.$all = columnName;
+
+	            return this;
+	        }
+	    }, {
+	        key: "any",
+	        value: function any(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.query.$any = columnName;
+
+	            return this;
+	        }
+	    }, {
+	        key: "first",
+	        value: function first(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.query.$first = columnName;
+
+	            return this;
+	        }
+	    }, {
+	        key: "notEqualTo",
+	        value: function notEqualTo(columnName, data) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (data !== null) {
+
+	                if (data.constructor === _CB2.default.CloudObject) {
+	                    columnName = columnName + '._id';
+	                    data = data.get('id');
+	                }
+
+	                this.query[columnName] = {
+	                    $ne: data
+	                };
+	            } else {
+	                //This is for people who code : obj.notEqualTo('column', null);
+	                this.exists(columnName);
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "greaterThan",
+	        value: function greaterThan(columnName, data) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$gt"] = data;
+
+	            return this;
+	        }
+	    }, {
+	        key: "greaterThanEqualTo",
+	        value: function greaterThanEqualTo(columnName, data) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$gte"] = data;
+
+	            return this;
+	        }
+	    }, {
+	        key: "lessThan",
+	        value: function lessThan(columnName, data) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$lt"] = data;
+
+	            return this;
+	        }
+	    }, {
+	        key: "lessThanEqualTo",
+	        value: function lessThanEqualTo(columnName, data) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$lte"] = data;
+
+	            return this;
+	        }
+	    }, {
+	        key: "orderByAsc",
+
+
+	        //Sorting
+	        value: function orderByAsc(columnName) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.sort[columnName] = 1;
+
+	            return this;
+	        }
+	    }, {
+	        key: "orderByDesc",
+	        value: function orderByDesc(columnName) {
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            this.sort[columnName] = -1;
+
+	            return this;
+	        }
+	    }, {
+	        key: "setLimit",
+
+
+	        //Limit and skip
+	        value: function setLimit(data) {
+
+	            this.limit = data;
+	            return this;
+	        }
+	    }, {
+	        key: "setSkip",
+	        value: function setSkip(data) {
+	            this.skip = data;
+	            return this;
+	        }
+	    }, {
+	        key: "paginate",
+	        value: function paginate(pageNo, totalItemsInPage, callback) {
+
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            var def;
+	            var callback;
+	            if ((typeof callback === "undefined" ? "undefined" : _typeof(callback)) === 'object' && typeof callback.success === 'function') {
+	                callback = callback;
+	            }
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if (pageNo && (typeof pageNo === "undefined" ? "undefined" : _typeof(pageNo)) === 'object' && typeof pageNo.success === 'function') {
+	                callback = pageNo;
+	                pageNo = null;
+	            }
+	            if (totalItemsInPage && (typeof totalItemsInPage === "undefined" ? "undefined" : _typeof(totalItemsInPage)) === 'object' && typeof totalItemsInPage.success === 'function') {
+	                callback = totalItemsInPage;
+	                totalItemsInPage = null;
+	            }
+
+	            if (pageNo && typeof pageNo === 'number' && pageNo > 0) {
+	                if (typeof totalItemsInPage === 'number' && totalItemsInPage > 0) {
+	                    var skip = pageNo * totalItemsInPage - totalItemsInPage;
+	                    this.setSkip(skip);
+	                    this.setLimit(totalItemsInPage);
+	                }
+	            }
+
+	            if (totalItemsInPage && typeof totalItemsInPage === 'number' && totalItemsInPage > 0) {
+	                this.setLimit(totalItemsInPage);
+	            }
+	            var thisObj = this;
+
+	            var promises = [];
+	            promises.push(this.find());
+
+	            var countQuery = Object.create(this);
+	            countQuery.setSkip(0);
+	            countQuery.setLimit(99999999);
+
+	            promises.push(countQuery.count());
+
+	            _CB2.default.Promise.all(promises).then(function (list) {
+	                var objectsList = null;
+	                var count = null;
+	                var totalPages = 0;
+
+	                if (list && list.length > 0) {
+	                    objectsList = list[0];
+	                    count = list[1];
+	                    if (!count) {
+	                        count = 0;
+	                        totalPages = 0;
+	                    } else {
+	                        totalPages = Math.ceil(count / thisObj.limit);
+	                    }
+	                    if (totalPages && totalPages < 0) {
+	                        totalPages = 0;
+	                    }
+	                }
+	                if (callback) {
+	                    callback.success(objectsList, count, totalPages);
+	                } else {
+	                    def.resolve(objectsList, count, totalPages);
+	                }
+	            }, function (error) {
+	                if (callback) {
+	                    callback.error(error);
+	                } else {
+	                    def.reject(error);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: "selectColumn",
+
+
+	        //select/deselect columns to show
+	        value: function selectColumn(columnNames) {
+
+	            if (Object.keys(this.select).length === 0) {
+	                this.select = {
+	                    _id: 1,
+	                    createdAt: 1,
+	                    updatedAt: 1,
+	                    ACL: 1,
+	                    _type: 1,
+	                    _tableName: 1
+	                };
+	            }
+
+	            if (Object.prototype.toString.call(columnNames) === '[object Object]') {
+	                this.select = columnNames;
+	            } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
+	                for (var i = 0; i < columnNames.length; i++) {
+	                    this.select[columnNames[i]] = 1;
+	                }
+	            } else {
+	                this.select[columnNames] = 1;
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "doNotSelectColumn",
+	        value: function doNotSelectColumn(columnNames) {
+	            if (Object.prototype.toString.call(columnNames) === '[object Object]') {
+	                this.select = columnNames;
+	            } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
+	                for (var i = 0; i < columnNames.length; i++) {
+	                    this.select[columnNames[i]] = 0;
+	                }
+	            } else {
+	                this.select[columnNames] = 0;
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "containedIn",
+	        value: function containedIn(columnName, data) {
+
+	            var isCloudObject = false;
+
+	            var CbData = [];
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
+	                //if object is passed as an argument
+	                throw 'Array / value / CloudObject expected as an argument';
+	            }
+
+	            if (Object.prototype.toString.call(data) === '[object Array]') {
+	                //if array is passed, then replace the whole
+
+	                for (var i = 0; i < data.length; i++) {
+	                    if (data[i] instanceof _CB2.default.CloudObject) {
+	                        isCloudObject = true;
+	                        if (!data[i].id) {
+	                            throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+	                        }
+	                        CbData.push(data[i].id);
+	                    }
+	                }
+	                if (CbData.length === 0) {
+	                    CbData = data;
+	                }
+
+	                if (isCloudObject) {
+	                    columnName = columnName + '._id';
+	                }
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                this.query[columnName]["$in"] = CbData;
+	                var thisObj = this;
+	                if (typeof this.query[columnName]["$nin"] !== 'undefined') {
+	                    //for removing dublicates
+	                    CbData.forEach(function (val) {
+	                        if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
+	                            thisObj.query[columnName]["$nin"].splice(index, 1);
+	                        }
+	                    });
+	                }
+	            } else {
+	                //if the argument is a string then push if it is not present already
+
+
+	                if (data instanceof _CB2.default.CloudObject) {
+
+	                    if (!data.id) {
+	                        throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
+	                    }
+
+	                    columnName = columnName + '._id';
+	                    CbData = data.id;
+	                } else CbData = data;
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                if (!this.query[columnName]["$in"]) {
+	                    this.query[columnName]["$in"] = [];
+	                }
+	                if (this.query[columnName]["$in"].indexOf(CbData) === -1) {
+	                    this.query[columnName]["$in"].push(CbData);
+	                }
+	                if (typeof this.query[columnName]["$nin"] !== 'undefined') {
+	                    if ((index = this.query[columnName]["$nin"].indexOf(CbData)) >= 0) {
+	                        this.query[columnName]["$nin"].splice(index, 1);
+	                    }
+	                }
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "notContainedIn",
+	        value: function notContainedIn(columnName, data) {
+
+	            var isCloudObject = false;
+
+	            var CbData = [];
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
+	                //if object is passed as an argument
+	                throw 'Array or string expected as an argument';
+	            }
+
+	            if (Object.prototype.toString.call(data) === '[object Array]') {
+	                //if array is passed, then replace the whole
+
+	                for (var i = 0; i < data.length; i++) {
+	                    if (data[i] instanceof _CB2.default.CloudObject) {
+	                        isCloudObject = true;
+	                        if (!data[i].id) {
+	                            throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
+	                        }
+
+	                        CbData.push(data[i].id);
+	                    }
+	                }
+	                if (CbData.length === 0) {
+	                    CbData = data;
+	                }
+
+	                if (isCloudObject) {
+	                    columnName = columnName + '._id';
+	                }
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                this.query[columnName]["$nin"] = CbData;
+	                if (typeof this.query[columnName]["$in"] !== 'undefined') {
+	                    //for removing duplicates
+	                    thisObj = this;
+	                    CbData.forEach(function (val) {
+	                        if ((index = thisObj.query[columnName]["$in"].indexOf(val)) >= 0) {
+	                            thisObj.query[columnName]["$in"].splice(index, 1);
+	                        }
+	                    });
+	                }
+	            } else {
+	                //if the argument is a string then push if it is not present already
+
+	                if (data instanceof _CB2.default.CloudObject) {
+
+	                    if (!data.id) {
+	                        throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
+	                    }
+
+	                    columnName = columnName + '._id';
+	                    CbData = data.id;
+	                } else CbData = data;
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                if (!this.query[columnName]["$nin"]) {
+	                    this.query[columnName]["$nin"] = [];
+	                }
+	                if (this.query[columnName]["$nin"].indexOf(CbData) === -1) {
+	                    this.query[columnName]["$nin"].push(CbData);
+	                }
+	                if (typeof this.query[columnName]["$in"] !== 'undefined') {
+	                    if ((index = this.query[columnName]["$in"].indexOf(CbData)) >= 0) {
+	                        this.query[columnName]["$in"].splice(index, 1);
+	                    }
+	                }
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "exists",
+	        value: function exists(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$exists"] = true;
+
+	            return this;
+	        }
+	    }, {
+	        key: "doesNotExists",
+	        value: function doesNotExists(columnName) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+	            this.query[columnName]["$exists"] = false;
+
+	            return this;
+	        }
+	    }, {
+	        key: "containsAll",
+	        value: function containsAll(columnName, data) {
+
+	            var isCloudObject = false;
+
+	            var CbData = [];
+
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
+	                //if object is passed as an argument
+	                throw 'Array or string expected as an argument';
+	            }
+
+	            if (Object.prototype.toString.call(data) === '[object Array]') {
+	                //if array is passed, then replace the whole
+
+
+	                for (var i = 0; i < data.length; i++) {
+	                    if (data[i] instanceof _CB2.default.CloudObject) {
+
+	                        isCloudObject = true;
+
+	                        if (!data[i].id) {
+	                            throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+	                        }
+
+	                        CbData.push(data[i].id);
+	                    }
+	                }
+
+	                if (CbData.length === 0) {
+	                    CbData = data;
+	                }
+
+	                if (isCloudObject) {
+	                    columnName = columnName + '._id';
+	                }
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                this.query[columnName]["$all"] = CbData;
+	            } else {
+	                //if the argument is a string then push if it is not present already
+
+	                if (data instanceof _CB2.default.CloudObject) {
+
+	                    if (!data.id) {
+	                        throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
+	                    }
+
+	                    columnName = columnName + '._id';
+	                    CbData = data.id;
+	                } else CbData = data;
+
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                }
+
+	                if (!this.query[columnName]["$all"]) {
+	                    this.query[columnName]["$all"] = [];
+	                }
+	                if (this.query[columnName]["$all"].indexOf(CbData) === -1) {
+	                    this.query[columnName]["$all"].push(CbData);
+	                }
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "startsWith",
+	        value: function startsWith(columnName, value) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            var regex = '^' + value;
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+
+	            this.query[columnName]["$regex"] = regex;
+	            this.query[columnName]["$options"] = 'im';
+
+	            return this;
+	        }
+	    }, {
+	        key: "regex",
+	        value: function regex(columnName, value, isCaseInsensitive) {
+	            if (columnName === 'id') columnName = '_' + columnName;
+
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	            }
+
+	            this.query[columnName]["$regex"] = value;
+
+	            if (isCaseInsensitive) {
+	                this.query[columnName]["$options"] = "i";
+	            }
+
+	            return this;
+	        }
+	    }, {
+	        key: "substring",
+	        value: function substring(columnName, value, isCaseInsensitive) {
+
+	            if (typeof columnName === "string") {
+	                columnName = [columnName];
+	            }
+
+	            for (var j = 0; j < columnName.length; j++) {
+	                if (Object.prototype.toString.call(value) === '[object Array]' && value.length > 0) {
+	                    if (!this.query["$or"]) this.query["$or"] = [];
+	                    for (var i = 0; i < value.length; i++) {
+	                        var obj = {};
+	                        obj[columnName[j]] = {};
+	                        obj[columnName[j]]["$regex"] = ".*" + value[i] + ".*";
+
+	                        if (isCaseInsensitive) {
+	                            obj[columnName[j]]["$options"] = "i";
+	                        }
+
+	                        this.query["$or"].push(obj);
+	                    }
+	                } else {
+	                    if (columnName.length === 1) {
+	                        this.regex(columnName[j], ".*" + value + ".*", isCaseInsensitive);
+	                    } else {
+	                        if (!this.query["$or"]) this.query["$or"] = [];
+	                        var obj = {};
+	                        obj[columnName[j]] = {};
+	                        obj[columnName[j]]["$regex"] = ".*" + value + ".*";
+
+	                        if (isCaseInsensitive) {
+	                            obj[columnName[j]]["$options"] = "i";
+	                        }
+
+	                        this.query["$or"].push(obj);
+	                    }
+	                }
+	            }
+
+	            return this;
+	        }
+
+	        //GeoPoint near query
+
+	    }, {
+	        key: "near",
+	        value: function near(columnName, geoPoint, maxDistance, minDistance) {
+	            if (!this.query[columnName]) {
+	                this.query[columnName] = {};
+	                this.query[columnName]['$near'] = {
+	                    '$geometry': { coordinates: geoPoint['document'].coordinates, type: 'Point' },
+	                    '$maxDistance': maxDistance,
+	                    '$minDistance': minDistance
+	                };
+	            }
+	        }
+	    }, {
+	        key: "geoWithin",
+
+
+	        //GeoPoint geoWithin query
+	        value: function geoWithin(columnName, geoPoint, radius) {
+
+	            if (!radius) {
+	                var coordinates = [];
+	                //extracting coordinates from each CloudGeoPoint Object
+	                if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
+	                    for (var i = 0; i < geoPoint.length; i++) {
+	                        if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
+	                            coordinates[i] = geoPoint[i]['document']['coordinates'];
+	                        }
+	                    }
+	                } else {
+	                    throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
+	                }
+	                //2dSphere needs first and last coordinates to be same for polygon type
+	                //eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one
+	                coordinates[coordinates.length] = coordinates[0];
+	                var type = 'Polygon';
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                    this.query[columnName]['$geoWithin'] = {};
+	                    this.query[columnName]['$geoWithin']['$geometry'] = {
+	                        'type': type,
+	                        'coordinates': [coordinates]
+	                    };
+	                }
+	            } else {
+	                if (!this.query[columnName]) {
+	                    this.query[columnName] = {};
+	                    this.query[columnName]['$geoWithin'] = {
+	                        '$centerSphere': [geoPoint['document']['coordinates'], radius / 3963.2]
+	                    };
+	                }
+	            }
+	        }
+	    }, {
+	        key: "count",
+	        value: function count(callback) {
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+	            var thisObj = this;
+	            var params = JSON.stringify({
+	                query: thisObj.query,
+	                limit: thisObj.limit,
+	                skip: thisObj.skip,
+	                key: _CB2.default.appKey
+	            });
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/count';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                response = parseInt(response);
+	                if (callback) {
+	                    callback.success(response);
+	                } else {
+	                    def.resolve(response);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: "distinct",
+	        value: function distinct(keys, callback) {
+
+	            if (keys === 'id') {
+	                keys = '_id';
+	            }
+
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            if (Object.prototype.toString.call(keys) !== '[object Array]' && keys.length <= 0) {
+	                throw "keys should be array";
+	            }
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var thisObj = this;
+
+	            var params = JSON.stringify({
+	                onKey: keys,
+	                query: thisObj.query,
+	                select: thisObj.select,
+	                sort: thisObj.sort,
+	                limit: thisObj.limit,
+	                skip: thisObj.skip,
+	                key: _CB2.default.appKey
+	            });
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/distinct';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                var object = _CB2.default.fromJSON(JSON.parse(response));
+	                if (callback) {
+	                    callback.success(object);
+	                } else {
+	                    def.resolve(object);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: "find",
+	        value: function find(callback) {
+	            //find the document(s) matching the given query
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            var thisObj = this;
+
+	            var xmlhttp = _CB2.default._loadXml();
+	            var params = JSON.stringify({
+	                query: thisObj.query,
+	                select: thisObj.select,
+	                sort: thisObj.sort,
+	                limit: thisObj.limit,
+	                skip: thisObj.skip,
+	                key: _CB2.default.appKey
+	            });
+
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/find';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                var object = _CB2.default.fromJSON(JSON.parse(response));
+	                if (callback) {
+	                    callback.success(object);
+	                } else {
+	                    def.resolve(object);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: "get",
+	        value: function get(objectId, callback) {
+	            var query = new _CB2.default.CloudQuery(this.tableName);
+	            return query.findById(objectId, callback);
+	        }
+	    }, {
+	        key: "findById",
+	        value: function findById(objectId, callback) {
+	            //find the document(s) matching the given query
+
+	            var thisObj = this;
+
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+
+	            if (thisObj.skip && !thisObj.skip !== 0) {
+	                throw "You cannot use skip and find object by Id in the same query";
+	            }
+
+	            if (thisObj.limit && thisObj.limit === 0) {
+	                throw "You cannot use limit and find object by Id in the same query";
+	            }
+
+	            if (thisObj.sort && Object.getOwnPropertyNames(thisObj.sort).length > 0) {
+	                throw "You cannot use sort and find object by Id in the same query";
+	            }
+
+	            thisObj.equalTo('id', objectId);
+
+	            var params = JSON.stringify({
+	                query: thisObj.query,
+	                select: thisObj.select,
+	                key: _CB2.default.appKey,
+	                limit: 1,
+	                skip: 0,
+	                sort: {}
+	            });
+
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/find';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                response = JSON.parse(response);
+	                if (Object.prototype.toString.call(response) === '[object Array]') {
+	                    response = response[0];
+	                }
+	                if (callback) {
+	                    callback.success(_CB2.default.fromJSON(response));
+	                } else {
+	                    def.resolve(_CB2.default.fromJSON(response));
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }, {
+	        key: "findOne",
+	        value: function findOne(callback) {
+	            //find a single document matching the given query
+	            if (!_CB2.default.appId) {
+	                throw "CB.appId is null.";
+	            }
+	            if (!this.tableName) {
+	                throw "TableName is null.";
+	            }
+	            var def;
+	            if (!callback) {
+	                def = new _CB2.default.Promise();
+	            }
+	            var params = JSON.stringify({
+	                query: this.query,
+	                select: this.select,
+	                sort: this.sort,
+	                skip: this.skip,
+	                key: _CB2.default.appKey
+	            });
+	            var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + this.tableName + '/findOne';
+
+	            _CB2.default._request('POST', url, params).then(function (response) {
+	                var object = _CB2.default.fromJSON(JSON.parse(response));
+	                if (callback) {
+	                    callback.success(object);
+	                } else {
+	                    def.resolve(object);
+	                }
+	            }, function (err) {
+	                if (callback) {
+	                    callback.error(err);
+	                } else {
+	                    def.reject(err);
+	                }
+	            });
+
+	            if (!callback) {
+	                return def.promise;
+	            }
+	        }
+	    }]);
+
+	    return CloudQuery;
+	}();
 
 	// Logical operations
-	_CB2.default.CloudQuery.or = function (obj1, obj2) {
+
+
+	CloudQuery.or = function (obj1, obj2) {
 
 	    var tableName;
 	    var queryArray = [];
@@ -11147,910 +13228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    obj.query["$or"] = queryArray;
 	    return obj;
 	};
-
-	_CB2.default.CloudQuery.prototype.equalTo = function (columnName, data) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (data !== null) {
-	        if (data.constructor === _CB2.default.CloudObject) {
-	            columnName = columnName + '._id';
-	            data = data.get('id');
-	        }
-
-	        this.query[columnName] = data;
-	    } else {
-
-	        //This is for people who code : obj.equalTo('column', null);
-	        this.doesNotExists(columnName);
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.includeList = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.query.$includeList.push(columnName);
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.include = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.query.$include.push(columnName);
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.all = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.query.$all = columnName;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.any = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.query.$any = columnName;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.first = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.query.$first = columnName;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.notEqualTo = function (columnName, data) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (data !== null) {
-
-	        if (data.constructor === _CB2.default.CloudObject) {
-	            columnName = columnName + '._id';
-	            data = data.get('id');
-	        }
-
-	        this.query[columnName] = {
-	            $ne: data
-	        };
-	    } else {
-	        //This is for people who code : obj.notEqualTo('column', null);
-	        this.exists(columnName);
-	    }
-
-	    return this;
-	};
-	_CB2.default.CloudQuery.prototype.greaterThan = function (columnName, data) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$gt"] = data;
-
-	    return this;
-	};
-	_CB2.default.CloudQuery.prototype.greaterThanEqualTo = function (columnName, data) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$gte"] = data;
-
-	    return this;
-	};
-	_CB2.default.CloudQuery.prototype.lessThan = function (columnName, data) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$lt"] = data;
-
-	    return this;
-	};
-	_CB2.default.CloudQuery.prototype.lessThanEqualTo = function (columnName, data) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$lte"] = data;
-
-	    return this;
-	};
-
-	//Sorting
-	_CB2.default.CloudQuery.prototype.orderByAsc = function (columnName) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.sort[columnName] = 1;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.orderByDesc = function (columnName) {
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    this.sort[columnName] = -1;
-
-	    return this;
-	};
-
-	//Limit and skip
-	_CB2.default.CloudQuery.prototype.setLimit = function (data) {
-
-	    this.limit = data;
-	    return this;
-	};
-	_CB2.default.CloudQuery.prototype.setSkip = function (data) {
-	    this.skip = data;
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.paginate = function (pageNo, totalItemsInPage, callback) {
-
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    var def;
-	    var callback;
-	    if ((typeof callback === "undefined" ? "undefined" : _typeof(callback)) === 'object' && typeof callback.success === 'function') {
-	        callback = callback;
-	    }
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if (pageNo && (typeof pageNo === "undefined" ? "undefined" : _typeof(pageNo)) === 'object' && typeof pageNo.success === 'function') {
-	        callback = pageNo;
-	        pageNo = null;
-	    }
-	    if (totalItemsInPage && (typeof totalItemsInPage === "undefined" ? "undefined" : _typeof(totalItemsInPage)) === 'object' && typeof totalItemsInPage.success === 'function') {
-	        callback = totalItemsInPage;
-	        totalItemsInPage = null;
-	    }
-
-	    if (pageNo && typeof pageNo === 'number' && pageNo > 0) {
-	        if (typeof totalItemsInPage === 'number' && totalItemsInPage > 0) {
-	            var skip = pageNo * totalItemsInPage - totalItemsInPage;
-	            this.setSkip(skip);
-	            this.setLimit(totalItemsInPage);
-	        }
-	    }
-
-	    if (totalItemsInPage && typeof totalItemsInPage === 'number' && totalItemsInPage > 0) {
-	        this.setLimit(totalItemsInPage);
-	    }
-	    var thisObj = this;
-
-	    var promises = [];
-	    promises.push(this.find());
-
-	    var countQuery = Object.create(this);
-	    countQuery.setSkip(0);
-	    countQuery.setLimit(99999999);
-
-	    promises.push(countQuery.count());
-
-	    _CB2.default.Promise.all(promises).then(function (list) {
-	        var objectsList = null;
-	        var count = null;
-	        var totalPages = 0;
-
-	        if (list && list.length > 0) {
-	            objectsList = list[0];
-	            count = list[1];
-	            if (!count) {
-	                count = 0;
-	                totalPages = 0;
-	            } else {
-	                totalPages = Math.ceil(count / thisObj.limit);
-	            }
-	            if (totalPages && totalPages < 0) {
-	                totalPages = 0;
-	            }
-	        }
-	        if (callback) {
-	            callback.success(objectsList, count, totalPages);
-	        } else {
-	            def.resolve(objectsList, count, totalPages);
-	        }
-	    }, function (error) {
-	        if (callback) {
-	            callback.error(error);
-	        } else {
-	            def.reject(error);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	//select/deselect columns to show
-	_CB2.default.CloudQuery.prototype.selectColumn = function (columnNames) {
-
-	    if (Object.keys(this.select).length === 0) {
-	        this.select = {
-	            _id: 1,
-	            createdAt: 1,
-	            updatedAt: 1,
-	            ACL: 1,
-	            _type: 1,
-	            _tableName: 1
-	        };
-	    }
-
-	    if (Object.prototype.toString.call(columnNames) === '[object Object]') {
-	        this.select = columnNames;
-	    } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
-	        for (var i = 0; i < columnNames.length; i++) {
-	            this.select[columnNames[i]] = 1;
-	        }
-	    } else {
-	        this.select[columnNames] = 1;
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.doNotSelectColumn = function (columnNames) {
-	    if (Object.prototype.toString.call(columnNames) === '[object Object]') {
-	        this.select = columnNames;
-	    } else if (Object.prototype.toString.call(columnNames) === '[object Array]') {
-	        for (var i = 0; i < columnNames.length; i++) {
-	            this.select[columnNames[i]] = 0;
-	        }
-	    } else {
-	        this.select[columnNames] = 0;
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.containedIn = function (columnName, data) {
-
-	    var isCloudObject = false;
-
-	    var CbData = [];
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
-	        //if object is passed as an argument
-	        throw 'Array / value / CloudObject expected as an argument';
-	    }
-
-	    if (Object.prototype.toString.call(data) === '[object Array]') {
-	        //if array is passed, then replace the whole
-
-	        for (var i = 0; i < data.length; i++) {
-	            if (data[i] instanceof _CB2.default.CloudObject) {
-	                isCloudObject = true;
-	                if (!data[i].id) {
-	                    throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
-	                }
-	                CbData.push(data[i].id);
-	            }
-	        }
-	        if (CbData.length === 0) {
-	            CbData = data;
-	        }
-
-	        if (isCloudObject) {
-	            columnName = columnName + '._id';
-	        }
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        this.query[columnName]["$in"] = CbData;
-	        var thisObj = this;
-	        if (typeof this.query[columnName]["$nin"] !== 'undefined') {
-	            //for removing dublicates
-	            CbData.forEach(function (val) {
-	                if ((index = thisObj.query[columnName]["$nin"].indexOf(val)) >= 0) {
-	                    thisObj.query[columnName]["$nin"].splice(index, 1);
-	                }
-	            });
-	        }
-	    } else {
-	        //if the argument is a string then push if it is not present already
-
-
-	        if (data instanceof _CB2.default.CloudObject) {
-
-	            if (!data.id) {
-	                throw "CloudObject passed should be saved and should have an id before being passed to containedIn";
-	            }
-
-	            columnName = columnName + '._id';
-	            CbData = data.id;
-	        } else CbData = data;
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        if (!this.query[columnName]["$in"]) {
-	            this.query[columnName]["$in"] = [];
-	        }
-	        if (this.query[columnName]["$in"].indexOf(CbData) === -1) {
-	            this.query[columnName]["$in"].push(CbData);
-	        }
-	        if (typeof this.query[columnName]["$nin"] !== 'undefined') {
-	            if ((index = this.query[columnName]["$nin"].indexOf(CbData)) >= 0) {
-	                this.query[columnName]["$nin"].splice(index, 1);
-	            }
-	        }
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.notContainedIn = function (columnName, data) {
-
-	    var isCloudObject = false;
-
-	    var CbData = [];
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
-	        //if object is passed as an argument
-	        throw 'Array or string expected as an argument';
-	    }
-
-	    if (Object.prototype.toString.call(data) === '[object Array]') {
-	        //if array is passed, then replace the whole
-
-	        for (var i = 0; i < data.length; i++) {
-	            if (data[i] instanceof _CB2.default.CloudObject) {
-	                isCloudObject = true;
-	                if (!data[i].id) {
-	                    throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
-	                }
-
-	                CbData.push(data[i].id);
-	            }
-	        }
-	        if (CbData.length === 0) {
-	            CbData = data;
-	        }
-
-	        if (isCloudObject) {
-	            columnName = columnName + '._id';
-	        }
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        this.query[columnName]["$nin"] = CbData;
-	        if (typeof this.query[columnName]["$in"] !== 'undefined') {
-	            //for removing duplicates
-	            thisObj = this;
-	            CbData.forEach(function (val) {
-	                if ((index = thisObj.query[columnName]["$in"].indexOf(val)) >= 0) {
-	                    thisObj.query[columnName]["$in"].splice(index, 1);
-	                }
-	            });
-	        }
-	    } else {
-	        //if the argument is a string then push if it is not present already
-
-	        if (data instanceof _CB2.default.CloudObject) {
-
-	            if (!data.id) {
-	                throw "CloudObject passed should be saved and should have an id before being passed to notContainedIn";
-	            }
-
-	            columnName = columnName + '._id';
-	            CbData = data.id;
-	        } else CbData = data;
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        if (!this.query[columnName]["$nin"]) {
-	            this.query[columnName]["$nin"] = [];
-	        }
-	        if (this.query[columnName]["$nin"].indexOf(CbData) === -1) {
-	            this.query[columnName]["$nin"].push(CbData);
-	        }
-	        if (typeof this.query[columnName]["$in"] !== 'undefined') {
-	            if ((index = this.query[columnName]["$in"].indexOf(CbData)) >= 0) {
-	                this.query[columnName]["$in"].splice(index, 1);
-	            }
-	        }
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.exists = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$exists"] = true;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.doesNotExists = function (columnName) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-	    this.query[columnName]["$exists"] = false;
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.containsAll = function (columnName, data) {
-
-	    var isCloudObject = false;
-
-	    var CbData = [];
-
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (Object.prototype.toString.call(data) === '[object Object]' && !data instanceof _CB2.default.CloudObject) {
-	        //if object is passed as an argument
-	        throw 'Array or string expected as an argument';
-	    }
-
-	    if (Object.prototype.toString.call(data) === '[object Array]') {
-	        //if array is passed, then replace the whole
-
-
-	        for (var i = 0; i < data.length; i++) {
-	            if (data[i] instanceof _CB2.default.CloudObject) {
-
-	                isCloudObject = true;
-
-	                if (!data[i].id) {
-	                    throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
-	                }
-
-	                CbData.push(data[i].id);
-	            }
-	        }
-
-	        if (CbData.length === 0) {
-	            CbData = data;
-	        }
-
-	        if (isCloudObject) {
-	            columnName = columnName + '._id';
-	        }
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        this.query[columnName]["$all"] = CbData;
-	    } else {
-	        //if the argument is a string then push if it is not present already
-
-	        if (data instanceof _CB2.default.CloudObject) {
-
-	            if (!data.id) {
-	                throw "CloudObject passed should be saved and should have an id before being passed to containsAll";
-	            }
-
-	            columnName = columnName + '._id';
-	            CbData = data.id;
-	        } else CbData = data;
-
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	        }
-
-	        if (!this.query[columnName]["$all"]) {
-	            this.query[columnName]["$all"] = [];
-	        }
-	        if (this.query[columnName]["$all"].indexOf(CbData) === -1) {
-	            this.query[columnName]["$all"].push(CbData);
-	        }
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.startsWith = function (columnName, value) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    var regex = '^' + value;
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-
-	    this.query[columnName]["$regex"] = regex;
-	    this.query[columnName]["$options"] = 'im';
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.regex = function (columnName, value, isCaseInsensitive) {
-	    if (columnName === 'id') columnName = '_' + columnName;
-
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	    }
-
-	    this.query[columnName]["$regex"] = value;
-
-	    if (isCaseInsensitive) {
-	        this.query[columnName]["$options"] = "i";
-	    }
-
-	    return this;
-	};
-
-	_CB2.default.CloudQuery.prototype.substring = function (columnName, value, isCaseInsensitive) {
-
-	    if (typeof columnName === "string") {
-	        columnName = [columnName];
-	    }
-
-	    for (var j = 0; j < columnName.length; j++) {
-	        if (Object.prototype.toString.call(value) === '[object Array]' && value.length > 0) {
-	            if (!this.query["$or"]) this.query["$or"] = [];
-	            for (var i = 0; i < value.length; i++) {
-	                var obj = {};
-	                obj[columnName[j]] = {};
-	                obj[columnName[j]]["$regex"] = ".*" + value[i] + ".*";
-
-	                if (isCaseInsensitive) {
-	                    obj[columnName[j]]["$options"] = "i";
-	                }
-
-	                this.query["$or"].push(obj);
-	            }
-	        } else {
-	            if (columnName.length === 1) {
-	                this.regex(columnName[j], ".*" + value + ".*", isCaseInsensitive);
-	            } else {
-	                if (!this.query["$or"]) this.query["$or"] = [];
-	                var obj = {};
-	                obj[columnName[j]] = {};
-	                obj[columnName[j]]["$regex"] = ".*" + value + ".*";
-
-	                if (isCaseInsensitive) {
-	                    obj[columnName[j]]["$options"] = "i";
-	                }
-
-	                this.query["$or"].push(obj);
-	            }
-	        }
-	    }
-
-	    return this;
-	};
-
-	//GeoPoint near query
-	_CB2.default.CloudQuery.prototype.near = function (columnName, geoPoint, maxDistance, minDistance) {
-	    if (!this.query[columnName]) {
-	        this.query[columnName] = {};
-	        this.query[columnName]['$near'] = {
-	            '$geometry': { coordinates: geoPoint['document'].coordinates, type: 'Point' },
-	            '$maxDistance': maxDistance,
-	            '$minDistance': minDistance
-	        };
-	    }
-	};
-
-	//GeoPoint geoWithin query
-	_CB2.default.CloudQuery.prototype.geoWithin = function (columnName, geoPoint, radius) {
-
-	    if (!radius) {
-	        var coordinates = [];
-	        //extracting coordinates from each CloudGeoPoint Object
-	        if (Object.prototype.toString.call(geoPoint) === '[object Array]') {
-	            for (var i = 0; i < geoPoint.length; i++) {
-	                if (geoPoint[i]['document'].hasOwnProperty('coordinates')) {
-	                    coordinates[i] = geoPoint[i]['document']['coordinates'];
-	                }
-	            }
-	        } else {
-	            throw 'Invalid Parameter, coordinates should be an array of CloudGeoPoint Object';
-	        }
-	        //2dSphere needs first and last coordinates to be same for polygon type
-	        //eg. for Triangle four coordinates need to pass, three points of triangle and fourth one should be same as first one
-	        coordinates[coordinates.length] = coordinates[0];
-	        var type = 'Polygon';
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	            this.query[columnName]['$geoWithin'] = {};
-	            this.query[columnName]['$geoWithin']['$geometry'] = {
-	                'type': type,
-	                'coordinates': [coordinates]
-	            };
-	        }
-	    } else {
-	        if (!this.query[columnName]) {
-	            this.query[columnName] = {};
-	            this.query[columnName]['$geoWithin'] = {
-	                '$centerSphere': [geoPoint['document']['coordinates'], radius / 3963.2]
-	            };
-	        }
-	    }
-	};
-
-	_CB2.default.CloudQuery.prototype.count = function (callback) {
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-	    var thisObj = this;
-	    var params = JSON.stringify({
-	        query: thisObj.query,
-	        limit: thisObj.limit,
-	        skip: thisObj.skip,
-	        key: _CB2.default.appKey
-	    });
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/count';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        response = parseInt(response);
-	        if (callback) {
-	            callback.success(response);
-	        } else {
-	            def.resolve(response);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudQuery.prototype.distinct = function (keys, callback) {
-
-	    if (keys === 'id') {
-	        keys = '_id';
-	    }
-
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    if (Object.prototype.toString.call(keys) !== '[object Array]' && keys.length <= 0) {
-	        throw "keys should be array";
-	    }
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var thisObj = this;
-
-	    var params = JSON.stringify({
-	        onKey: keys,
-	        query: thisObj.query,
-	        select: thisObj.select,
-	        sort: thisObj.sort,
-	        limit: thisObj.limit,
-	        skip: thisObj.skip,
-	        key: _CB2.default.appKey
-	    });
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/distinct';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        var object = _CB2.default.fromJSON(JSON.parse(response));
-	        if (callback) {
-	            callback.success(object);
-	        } else {
-	            def.resolve(object);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudQuery.prototype.find = function (callback) {
-	    //find the document(s) matching the given query
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    var thisObj = this;
-
-	    var xmlhttp = _CB2.default._loadXml();
-	    var params = JSON.stringify({
-	        query: thisObj.query,
-	        select: thisObj.select,
-	        sort: thisObj.sort,
-	        limit: thisObj.limit,
-	        skip: thisObj.skip,
-	        key: _CB2.default.appKey
-	    });
-
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/find';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        var object = _CB2.default.fromJSON(JSON.parse(response));
-	        if (callback) {
-	            callback.success(object);
-	        } else {
-	            def.resolve(object);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudQuery.prototype.get = function (objectId, callback) {
-	    var query = new _CB2.default.CloudQuery(this.tableName);
-	    return query.findById(objectId, callback);
-	};
-
-	_CB2.default.CloudQuery.prototype.findById = function (objectId, callback) {
-	    //find the document(s) matching the given query
-
-	    var thisObj = this;
-
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-
-	    if (thisObj.skip && !thisObj.skip !== 0) {
-	        throw "You cannot use skip and find object by Id in the same query";
-	    }
-
-	    if (thisObj.limit && thisObj.limit === 0) {
-	        throw "You cannot use limit and find object by Id in the same query";
-	    }
-
-	    if (thisObj.sort && Object.getOwnPropertyNames(thisObj.sort).length > 0) {
-	        throw "You cannot use sort and find object by Id in the same query";
-	    }
-
-	    thisObj.equalTo('id', objectId);
-
-	    var params = JSON.stringify({
-	        query: thisObj.query,
-	        select: thisObj.select,
-	        key: _CB2.default.appKey,
-	        limit: 1,
-	        skip: 0,
-	        sort: {}
-	    });
-
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + thisObj.tableName + '/find';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        response = JSON.parse(response);
-	        if (Object.prototype.toString.call(response) === '[object Array]') {
-	            response = response[0];
-	        }
-	        if (callback) {
-	            callback.success(_CB2.default.fromJSON(response));
-	        } else {
-	            def.resolve(_CB2.default.fromJSON(response));
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-	_CB2.default.CloudQuery.prototype.findOne = function (callback) {
-	    //find a single document matching the given query
-	    if (!_CB2.default.appId) {
-	        throw "CB.appId is null.";
-	    }
-	    if (!this.tableName) {
-	        throw "TableName is null.";
-	    }
-	    var def;
-	    if (!callback) {
-	        def = new _CB2.default.Promise();
-	    }
-	    var params = JSON.stringify({
-	        query: this.query,
-	        select: this.select,
-	        sort: this.sort,
-	        skip: this.skip,
-	        key: _CB2.default.appKey
-	    });
-	    var url = _CB2.default.apiUrl + "/data/" + _CB2.default.appId + "/" + this.tableName + '/findOne';
-
-	    _CB2.default._request('POST', url, params).then(function (response) {
-	        var object = _CB2.default.fromJSON(JSON.parse(response));
-	        if (callback) {
-	            callback.success(object);
-	        } else {
-	            def.resolve(object);
-	        }
-	    }, function (err) {
-	        if (callback) {
-	            callback.error(err);
-	        } else {
-	            def.reject(err);
-	        }
-	    });
-
-	    if (!callback) {
-	        return def.promise;
-	    }
-	};
-
-	_CB2.default.CloudQuery._validateQuery = function (cloudObject, query) {
+	CloudQuery._validateQuery = function (cloudObject, query) {
 	    //validate query. 
 	    for (var key in query) {
 
@@ -12277,13 +13455,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return true;
 	};
 
-	exports.default = true;
+	_CB2.default.CloudQuery = CloudQuery;
+
+	exports.default = _CB2.default.CloudQuery;
 
 /***/ },
-/* 23 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var require;var require;/* WEBPACK VAR INJECTION */(function(global) {"use strict";
+	var require;var require;var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {"use strict";
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 

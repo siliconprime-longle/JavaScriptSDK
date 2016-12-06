@@ -86,5 +86,4 @@ CB.CloudNotification.publish = function(channelName, data, done) {
 
 };
 
-
-export default true
+export default CB.CloudNotification

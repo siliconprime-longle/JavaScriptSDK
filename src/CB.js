@@ -44,16 +44,6 @@ class CloudBoost {
         xdr.send(data);
         return promise;
     }
-    _loadXml(){
-        var xmlhttp
-        if (typeof(XMLHttpRequest) !== 'undefined') {
-            xmlhttp = XMLHttpRequest;
-        } else {
-            xmlhttp = require('xmlhttprequest').XMLHttpRequest;
-        }
-        xmlhttp = new xmlhttp();
-        return xmlhttp; 
-    }
     trigger(events) {
         var event, node, calls, tail, args, all, rest;
         if (!(calls = this._callbacks)) {

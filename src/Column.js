@@ -114,4 +114,4 @@ Object.defineProperty(Column.prototype,'isSearchable',{
 CB.Column = Column
 
 
-export default true
+export default CB.Column

@@ -1,4 +1,5 @@
-import CB from './CB'
+import CB from '../CB'
+var localStorage
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
@@ -292,10 +293,11 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
 
     var def = new CB.Promise();
     var xmlhttp= CB._loadXml();
-    if (CB._isNode) {
-        var LocalStorage = require('LocalStorage').LocalStorage
-        localStorage = new LocalStorage('./scratch');
-    }
+    
+    // var LocalStorage = require('node-localstorage').LocalStorage
+    // localStorage = new LocalStorage('./scratch');
+    localStorage = require('localStorage')
+    
     xmlhttp.open(method,url,true);
     if(!isFile) {
         xmlhttp.setRequestHeader('Content-Type', 'text/plain');

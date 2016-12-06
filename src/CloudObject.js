@@ -1,30 +1,209 @@
 import CB from './CB'
-
 /*
  CloudObject
  */
+class CloudObject {
+    constructor(tableName, id) { //object for documents
+        this.document = {};
+        this.document._tableName = tableName; //the document object
+        this.document.ACL = new CB.ACL(); //ACL(s) of the document
+        this.document._type = 'custom';
+        this.document.expires = null;
+        this.document._hash = CB._generateHash();
 
-CB.CloudObject = function(tableName, id) { //object for documents
+        if(!id){
+            this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
+            this.document._isModified = true;
+        }
+        else{
+            this.document._modifiedColumns = [];
+            this.document._isModified = false;
+            this.document._id = id;
+        }   
+    };
+    /* RealTime implementation ends here.  */
 
-    this.document = {};
-    this.document._tableName = tableName; //the document object
-    this.document.ACL = new CB.ACL(); //ACL(s) of the document
-    this.document._type = 'custom';
-    this.document.expires = null;
-    this.document._hash = CB._generateHash();
+    set(columnName, data) { //for setting data for a particular column
 
-    if(!id){
-        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
-        this.document._isModified = true;
-    }
-    else{
-        this.document._modifiedColumns = [];
-        this.document._isModified = false;
-        this.document._id = id;
-    }   
-};
+        var keywords = ['_tableName', '_type', 'operator'];
 
-Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
+        if(columnName=== 'id' || columnName === '_id')
+            throw "You cannot set the id of a CloudObject";
+
+        if (columnName === 'id')
+            columnName = '_' + columnName;
+
+        if (keywords.indexOf(columnName) > -1) {
+            throw columnName + " is a keyword. Please choose a different column name.";
+        }
+        this.document[columnName] = data;
+        CB._modified(this,columnName);
+    };
+
+
+    relate(columnName, objectTableName, objectId) { //for setting data for a particular column
+
+        var keywords = ['_tableName', '_type', 'operator'];
+
+        if(columnName=== 'id' || columnName === '_id')
+            throw "You cannot set the id of a CloudObject";
+
+        if (columnName === 'id')
+            throw "You cannot link an object to this column";
+
+        if (keywords.indexOf(columnName) > -1) {
+            throw columnName + " is a keyword. Please choose a different column name.";
+        }
+
+        this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
+        CB._modified(this,columnName);
+    };
+
+
+    get(columnName) { //for getting data of a particular column
+
+        if (columnName === 'id')
+            columnName = '_' + columnName;
+
+        return this.document[columnName];
+
+    };
+
+    unset(columnName) { //to unset the data of the column
+        this.document[columnName] = null;
+        CB._modified(this,columnName);
+    };
+
+    /**
+     * Saved CloudObject in Database.
+     * @param callback
+     * @returns {*}
+     */
+
+    save(callback) { //save the document to the db
+        var def;
+        CB._validate();
+
+        if (!callback) {
+            def = new CB.Promise();
+        }
+        var thisObj = this;
+        CB._fileCheck(this).then(function(thisObj){
+
+            var xmlhttp = CB._loadXml();
+            var params=JSON.stringify({
+                document: CB.toJSON(thisObj),
+                key: CB.appKey
+            });
+            var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
+            CB._request('PUT',url,params).then(function(response){
+                thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+                if (callback) {
+                    callback.success(thisObj);
+                } else {
+                    def.resolve(thisObj);
+                }
+            },function(err){
+                if(callback){
+                    callback.error(err);
+                }else {
+                    def.reject(err);
+                }
+            });
+
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+        if (!callback) {
+            return def.promise;
+        }
+    };
+
+    fetch(callback) { //fetch the document from the db
+        if (!CB.appId) {
+            throw "CB.appId is null.";
+        }
+        if (!this.document._id) {
+            throw "Can't fetch an object which is not saved."
+        }
+        var thisObj = this;
+        var def;
+        if (!callback) {
+            def = new CB.Promise();
+        }
+        var query = null;
+        if(thisObj.document._type === 'file'){
+            query = new CB.CloudQuery('_File');
+        }else{
+            query = new CB.CloudQuery(thisObj.document._tableName);
+        }
+        query.findById(thisObj.get('id')).then(function(res){
+            if(!callback){
+                def.resolve(res);
+            }else{
+                callback.success(res);
+            }
+        },function(err){
+            if(!callback){
+                def.reject(err);
+            }else{
+                callback.error(err);
+            }
+        });
+
+        if (!callback) {
+            return def.promise;
+        }
+
+    };
+
+    delete(callback) { //delete an object matching the objectId
+        if (!CB.appId) {
+            throw "CB.appId is null.";
+        }
+        if (!this.document._id) {
+            throw "You cannot delete an object which is not saved."
+        }
+        var thisObj = this;
+        var def;
+        if (!callback) {
+            def = new CB.Promise();
+        }
+
+        var params=JSON.stringify({
+            key: CB.appKey,
+            document: CB.toJSON(thisObj),
+            method:"DELETE"
+        });
+        
+        var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName;
+
+        CB._request('PUT',url,params).then(function(response){
+            thisObj = CB.fromJSON(JSON.parse(response),thisObj);
+            if (callback) {
+                callback.success(thisObj);
+            } else {
+                def.resolve(thisObj);
+            }
+        },function(err){
+            if(callback){
+                callback.error(err);
+            }else {
+                def.reject(err);
+            }
+        });
+
+        if (!callback) {
+            return def.promise;
+        }
+    };
+}
+
+Object.defineProperty(CloudObject.prototype, 'ACL', {
     get: function() {
         return this.document.ACL;
     },
@@ -35,13 +214,13 @@ Object.defineProperty(CB.CloudObject.prototype, 'ACL', {
     }
 });
 
-Object.defineProperty(CB.CloudObject.prototype, 'id', {
+Object.defineProperty(CloudObject.prototype, 'id', {
     get: function() {
         return this.document._id;
     }
 });
 
-Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
+Object.defineProperty(CloudObject.prototype, 'createdAt', {
     get: function() {
         return this.document.createdAt;
     },
@@ -51,7 +230,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'createdAt', {
     }
 });
 
-Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
+Object.defineProperty(CloudObject.prototype, 'updatedAt', {
     get: function() {
         return this.document.updatedAt;
     },
@@ -63,7 +242,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'updatedAt', {
 
 
 /* For Expire of objects */
-Object.defineProperty(CB.CloudObject.prototype, 'expires', {
+Object.defineProperty(CloudObject.prototype, 'expires', {
     get: function() {
         return this.document.expires;
     },
@@ -74,7 +253,7 @@ Object.defineProperty(CB.CloudObject.prototype, 'expires', {
 });
 
 /* This is Real time implementation of CloudObjects */
-CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
+CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
 
     if(CB._isRealtimeDisabled){
         throw "Realtime is disbaled for this app.";
@@ -159,7 +338,7 @@ CB.CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
     }
 };
 
-CB.CloudObject.off = function(tableName, eventType, done) {
+CloudObject.off = function(tableName, eventType, done) {
 
     if(CB._isRealtimeDisabled){
         throw "Realtime is disbaled for this app.";
@@ -203,188 +382,7 @@ CB.CloudObject.off = function(tableName, eventType, done) {
     }
 };
 
-/* RealTime implementation ends here.  */
-
-CB.CloudObject.prototype.set = function(columnName, data) { //for setting data for a particular column
-
-    var keywords = ['_tableName', '_type', 'operator'];
-
-    if(columnName=== 'id' || columnName === '_id')
-        throw "You cannot set the id of a CloudObject";
-
-    if (columnName === 'id')
-        columnName = '_' + columnName;
-
-    if (keywords.indexOf(columnName) > -1) {
-        throw columnName + " is a keyword. Please choose a different column name.";
-    }
-    this.document[columnName] = data;
-    CB._modified(this,columnName);
-};
-
-
-CB.CloudObject.prototype.relate = function(columnName, objectTableName, objectId) { //for setting data for a particular column
-
-    var keywords = ['_tableName', '_type', 'operator'];
-
-    if(columnName=== 'id' || columnName === '_id')
-        throw "You cannot set the id of a CloudObject";
-
-    if (columnName === 'id')
-        throw "You cannot link an object to this column";
-
-    if (keywords.indexOf(columnName) > -1) {
-        throw columnName + " is a keyword. Please choose a different column name.";
-    }
-
-    this.document[columnName] = new CB.CloudObject(objectTableName,objectId);
-    CB._modified(this,columnName);
-};
-
-
-CB.CloudObject.prototype.get = function(columnName) { //for getting data of a particular column
-
-    if (columnName === 'id')
-        columnName = '_' + columnName;
-
-    return this.document[columnName];
-
-};
-
-CB.CloudObject.prototype.unset = function(columnName) { //to unset the data of the column
-    this.document[columnName] = null;
-    CB._modified(this,columnName);
-};
-
-/**
- * Saved CloudObject in Database.
- * @param callback
- * @returns {*}
- */
-
-CB.CloudObject.prototype.save = function(callback) { //save the document to the db
-    var def;
-    CB._validate();
-
-    if (!callback) {
-        def = new CB.Promise();
-    }
-    var thisObj = this;
-    CB._fileCheck(this).then(function(thisObj){
-
-        var xmlhttp = CB._loadXml();
-        var params=JSON.stringify({
-            document: CB.toJSON(thisObj),
-            key: CB.appKey
-        });
-        var url = CB.apiUrl + "/data/" + CB.appId + '/'+thisObj.document._tableName;
-        CB._request('PUT',url,params).then(function(response){
-            thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-            if (callback) {
-                callback.success(thisObj);
-            } else {
-                def.resolve(thisObj);
-            }
-        },function(err){
-            if(callback){
-                callback.error(err);
-            }else {
-                def.reject(err);
-            }
-        });
-
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-    if (!callback) {
-        return def.promise;
-    }
-};
-
-CB.CloudObject.prototype.fetch = function(callback) { //fetch the document from the db
-    if (!CB.appId) {
-        throw "CB.appId is null.";
-    }
-    if (!this.document._id) {
-        throw "Can't fetch an object which is not saved."
-    }
-    var thisObj = this;
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
-    }
-    var query = null;
-    if(thisObj.document._type === 'file'){
-        query = new CB.CloudQuery('_File');
-    }else{
-        query = new CB.CloudQuery(thisObj.document._tableName);
-    }
-    query.findById(thisObj.get('id')).then(function(res){
-        if(!callback){
-            def.resolve(res);
-        }else{
-            callback.success(res);
-        }
-    },function(err){
-        if(!callback){
-            def.reject(err);
-        }else{
-            callback.error(err);
-        }
-    });
-
-    if (!callback) {
-        return def.promise;
-    }
-
-};
-
-CB.CloudObject.prototype.delete = function(callback) { //delete an object matching the objectId
-    if (!CB.appId) {
-        throw "CB.appId is null.";
-    }
-    if (!this.document._id) {
-        throw "You cannot delete an object which is not saved."
-    }
-    var thisObj = this;
-    var def;
-    if (!callback) {
-        def = new CB.Promise();
-    }
-
-    var params=JSON.stringify({
-        key: CB.appKey,
-        document: CB.toJSON(thisObj),
-        method:"DELETE"
-    });
-    
-    var url = CB.apiUrl + "/data/" + CB.appId +'/'+thisObj.document._tableName;
-
-    CB._request('PUT',url,params).then(function(response){
-        thisObj = CB.fromJSON(JSON.parse(response),thisObj);
-        if (callback) {
-            callback.success(thisObj);
-        } else {
-            def.resolve(thisObj);
-        }
-    },function(err){
-        if(callback){
-            callback.error(err);
-        }else {
-            def.reject(err);
-        }
-    });
-
-    if (!callback) {
-        return def.promise;
-    }
-};
-
-CB.CloudObject.saveAll = function(array,callback){
+CloudObject.saveAll = function(array,callback){
 
     if(!array || array.constructor !== Array){
         throw "Array of CloudObjects is Null";
@@ -437,7 +435,7 @@ CB.CloudObject.saveAll = function(array,callback){
 
 };
 
-CB.CloudObject.deleteAll = function(array,callback){
+CloudObject.deleteAll = function(array,callback){
 
     if(!array && array.constructor !== Array){
         throw "Array of CloudObjects is Null";
@@ -483,7 +481,7 @@ CB.CloudObject.deleteAll = function(array,callback){
 };
 
 /* Private Methods */
-CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
+CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
 
    if(!cloudQuery)
         throw "CloudQuery is null";
@@ -515,6 +513,6 @@ CB.CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { 
    }
 };
 
+CB.CloudObject = CloudObject
 
-
-export default true
+export default CB.CloudObject

@@ -411,4 +411,4 @@ CB.CloudPush._deleteDevice = function(deviceOS, endPoint, callback) { //delete a
 
 
 
-export default true
+export default CB.CloudPush
