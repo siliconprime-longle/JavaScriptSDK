@@ -264,4 +264,4 @@ CB.CloudFile.prototype.getFileContent = function(callback){
 
 
 
-export default true
+export default CB.CloudFile
