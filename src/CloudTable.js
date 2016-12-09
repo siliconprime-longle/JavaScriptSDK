@@ -324,4 +324,4 @@ CB.CloudTable.get = function(table, callback){
   }
 }
 
-export default true
+export default CB.CloudTable

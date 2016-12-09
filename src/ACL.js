@@ -138,4 +138,4 @@ CB.ACL.prototype.setRoleReadAccess = function(roleId, value) {
 };
 
 
-export default true
+export default CB.ACL
