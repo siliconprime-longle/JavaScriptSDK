@@ -742,58 +742,58 @@ describe("Query on Cloud Object Notifications ", function() {
 
     });
 
-    it("startsWith : 1",function(done){
+    // it("startsWith : 1",function(done){
 
-        var isDone = false;
+    //     var isDone = false;
         
-        this.timeout(30000);
-        //create the query. 
-        var query = new CB.CloudQuery('Student');
-        query.startsWith('name','N');       
+    //     this.timeout(30000);
+    //     //create the query. 
+    //     var query = new CB.CloudQuery('Student');
+    //     query.startsWith('name','N');       
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
-        });
+    //     CB.CloudObject.on('Student', 'created', query, function(){
+    //        if(!isDone){
+    //                 isDone=true;
+    //                 done();
+    //             };
+    //     });
 
-        //attach it to the event. 
-        var obj = new CB.CloudObject('Student');
-        obj.set('name','Nawaz');
-        obj.save();
-    });       
+    //     //attach it to the event. 
+    //     var obj = new CB.CloudObject('Student');
+    //     obj.set('name','Nawaz');
+    //     obj.save();
+    // });       
 
-    it("startsWith : 2",function(done){
+    // it("startsWith : 2",function(done){
 
-        var isDone = false;
+    //     var isDone = false;
         
-        this.timeout(30000);
+    //     this.timeout(30000);
       
-        var query = new CB.CloudQuery('Student');
-        query.startsWith('name','N');
+    //     var query = new CB.CloudQuery('Student');
+    //     query.startsWith('name','N');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
-        });
+    //     CB.CloudObject.on('Student', 'created', query, function(){
+    //         CB.CloudObject.off('Student','created');
+    //         if(!isDone){
+    //                 isDone=true;
+    //                 done("Fired a wrong event");
+    //             }
+    //     });
 
-        //attach it to the event. 
-        var obj = new CB.CloudObject('Student');
-        obj.set('name','x');
-        obj.save();
+    //     //attach it to the event. 
+    //     var obj = new CB.CloudObject('Student');
+    //     obj.set('name','x');
+    //     obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
-        }, 10000);
+    //     setTimeout(function(){
+    //         if(!isDone){
+    //                 isDone=true;
+    //                 done();
+    //             };
+    //     }, 10000);
 
-    });
+    // });
 
 
     it("EqualTo over CloudObjects : 1",function(done){
