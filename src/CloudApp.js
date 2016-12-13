@@ -31,7 +31,7 @@ class CloudApp {
                 CB.io = require('IO')
                 CB.Socket = CB.io(CB.apiUrl)
             } else {
-                CB.io = require('../node_modules/socket.io-client/lib/socket.js')
+                CB.io = require('./CloudSocketClientLib.js')
                 CB.Socket = CB.io(CB.apiUrl);
             }        
         } 

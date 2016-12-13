@@ -5,9 +5,6 @@ import CB from './CB'
 try {
  	if(window){
  		CB._isNode = false
-        window.Blob = undefined;
-        window.BlobBuilder = undefined;
-        window.WebKitBlobBuilder = undefined;
  	}
 } catch(e){
 	CB._isNode = true
