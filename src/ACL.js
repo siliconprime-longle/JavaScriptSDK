@@ -1,3 +1,5 @@
+import CB from './CB'
+
 CB.ACL = function() { //constructor for ACL class
     this.document = {};
     this.document['read'] = {"allow":{"user":['all'],"role":[]},"deny":{"user":[],"role":[]}}; //by default allow read access to "all"
@@ -134,3 +136,6 @@ CB.ACL.prototype.setRoleReadAccess = function(roleId, value) {
         CB._modified(this.parent,'ACL');
     }
 };
+
+
+export default CB.ACL

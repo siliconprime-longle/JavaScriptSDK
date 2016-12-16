@@ -1,3 +1,5 @@
+import CB from './CB'
+
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
 
@@ -236,25 +238,12 @@ CB._validate = function() {
 };
 
 
-//to check if its running under node, If yes - then export CB.
-(function () {
-    // Establish the root object, `window` in the browser, or `global` on the server.
-    var root = this;
-    // Create a reference to this
-    var _ = new Object();
-})();
-
 function _all(arrayOfPromises) {
     //this is simplilar to Q.all for jQuery promises.
     return jQuery.when.apply(jQuery, arrayOfPromises).then(function() {
         return Array.prototype.slice.call(arguments, 0);
     });
 };
-
-if(CB._isNode){
-    module.exports = {};
-    module.exports = CB;
-}
 
 
 CB._clone=function(obj,id,longitude,latitude,tableName,columnName){
@@ -290,74 +279,68 @@ CB._clone=function(obj,id,longitude,latitude,tableName,columnName){
     return n_obj;
 };
 
-CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback)
-{
+CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
 
     CB._validate();
 
-    if(!params)
-        params = {};
-
-    params.sdk = "JavaScript";
+    // if(!params){
+    //     var params = {};
+    // }
+    // if(typeof params != "object"){
+    //     params = JSON.parse(params);
+    // }
+    
+    // params.sdk = "JavaScript"
+    // params = JSON.stringify(params)
 
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
 
     var def = new CB.Promise();
-    var xmlhttp= CB._loadXml();
-    if (CB._isNode) {
-        var LocalStorage = require('node-localstorage').LocalStorage;
-        localStorage = new LocalStorage('./scratch');
-    }
-    xmlhttp.open(method,url,true);
-    if(!isFile) {
-        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
-    }
+    var Axios
+    var headers = {}
 
-    if(progressCallback){
-        if(typeof(xmlhttp.upload)!=="undefined"){
-            xmlhttp.upload.addEventListener("progress", function(evt){
-              if (evt.lengthComputable) {  
-                var percentComplete = evt.loaded / evt.total;            
-                progressCallback(percentComplete);
-              }
-            }, false); 
-        }        
+    if(CB._isNode){
+        localStorage = require('localStorage')
+        Axios = require('Axios')
+    } else {
+        Axios = require('axios')
     }
-
+        
     if(!isServiceUrl){
         var ssid = CB._getSessionId();
-        if(ssid != null)
-            xmlhttp.setRequestHeader('sessionID', ssid);
+        if(ssid != null) headers.sessionID = ssid
     }
-    if(CB._isNode){
-        xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
+    
+    if(params && typeof params != "object"){
+        params=JSON.parse(params);
+    }
 
-        if(params && typeof params ==="object"){
-            params=JSON.stringify(params);
-        }
-    }
-    if(params)
-        xmlhttp.send(params);
-    else
-        xmlhttp.send();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                if(!isServiceUrl){
-                    var sessionID = xmlhttp.getResponseHeader('sessionID');
-                    if(sessionID)
-                        localStorage.setItem('sessionID', sessionID);
-                    else
-                        localStorage.removeItem('sessionID');
-                }
-                def.resolve(xmlhttp.responseText);
-            } else {                
-                def.reject(xmlhttp.responseText);
+    Axios({
+        method: method,
+        url: url,
+        data: params,
+        headers:headers,
+        onUploadProgress:function(event){
+            if (event.lengthComputable) {  
+                var percentComplete = event.loaded / event.total;            
+                if(progressCallback) progressCallback(percentComplete)
             }
+        },
+    }).then(function(res){
+        if(!isServiceUrl){
+            var sessionID = res.headers.sessionid
+            if(sessionID)
+                localStorage.setItem('sessionID', sessionID);
+            else
+                localStorage.removeItem('sessionID');
         }
-    };
-    return def;
+        def.resolve(JSON.stringify(res.data));
+    },function(err){
+        def.reject(err)
+    })
+
+    return def.promise;
 };
 
 CB._getSessionId = function() {
@@ -420,16 +403,9 @@ function trimStart(character, string) {
 }
 
 CB._columnNameValidation = function(columnName){
-
-///  var defaultColumn = ['id','createdAt', 'updatedAt', 'ACL'];
-
   if(!columnName) //if table name is empty
     throw "table name cannot be empty";
 
-  /*var index = defaultColumn.indexOf(columnName.toLowerCase());
-  if(index >= 0)
-    throw "this column name is already in use";
-*/
   if(!isNaN(columnName[0]))
     throw "column name should not start with a number";
 
@@ -623,7 +599,7 @@ CB._fileCheck = function(obj){
     }else{
         deferred.resolve(obj);
     }
-    return deferred;
+    return deferred.promise;
 };
 
 CB._bulkObjFileCheck = function(array){
@@ -637,13 +613,13 @@ CB._bulkObjFileCheck = function(array){
     },function(err){
         deferred.reject(err);
     });
-    return deferred;
+    return deferred.promise;
 };
 
 CB._generateHash = function(){
     var hash="";
     var possible="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for(i=0;i<8;i++)
+    for(var i=0;i<8;i++)
     {
         hash=hash+possible.charAt(Math.floor(Math.random()*possible.length));
     }
@@ -834,3 +810,5 @@ CB._getThisBrowserName= function(){
 
   } 
 }
+
+export default true

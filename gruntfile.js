@@ -94,7 +94,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bumpup');
 
-    grunt.registerTask('default',['concat:sdk','concat:test','bumpup','uglify:uglifyDev']);
+    grunt.registerTask('default',['concat:test']);
     grunt.registerTask('release',['concat:sdkRelease','uglify:uglifyRelease']);
 
 };

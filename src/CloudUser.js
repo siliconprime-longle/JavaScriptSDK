@@ -1,16 +1,22 @@
+import CB from './CB'
 /*
  CloudUser
  */
-CB.CloudUser = CB.CloudUser || function() {
-    if (!this.document) this.document = {};
-    this.document._tableName = 'User';
-    this.document.expires = null;
-    this.document._type = 'user';
-    this.document.expires = null;
-    this.document.ACL = new CB.ACL();
-    this.document._isModified = true;
-    this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
-};
+
+class CloudUser {
+    constructor() {
+        if (!this.document) this.document = {};
+        this.document._tableName = 'User';
+        this.document.expires = null;
+        this.document._type = 'user';
+        this.document.expires = null;
+        this.document.ACL = new CB.ACL();
+        this.document._isModified = true;
+        this.document._modifiedColumns = ['createdAt','updatedAt','ACL','expires'];
+    };
+}
+
+CB.CloudUser = CB.CloudUser || CloudUser
 
 //Description  : This function gets the current user from the server by taking the sessionId from querystring.
 //Params : 
@@ -56,7 +62,7 @@ CB.CloudUser.getCurrentUser = function(callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -130,7 +136,7 @@ CB.CloudUser.resetPassword = function(email,callback){
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -219,7 +225,7 @@ CB.CloudUser.prototype.signUp = function(callback) {
 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -255,7 +261,7 @@ CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callb
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -302,7 +308,7 @@ CB.CloudUser.prototype.logIn = function(callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -369,7 +375,7 @@ CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -410,7 +416,7 @@ CB.CloudUser.prototype.logOut = function(callback) {
 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 CB.CloudUser.prototype.addToRole = function(role, callback) {
@@ -447,7 +453,7 @@ CB.CloudUser.prototype.addToRole = function(role, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 CB.CloudUser.prototype.isInRole = function(role) {
@@ -500,7 +506,10 @@ CB.CloudUser.prototype.removeFromRole = function(role, callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
+
+
+export default CB.CloudUser

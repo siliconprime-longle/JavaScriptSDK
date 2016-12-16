@@ -1,85 +1,85 @@
+import CB from './CB'
 /*
  CloudApp
  */
-CB.CloudApp = CB.CloudApp || {};
-CB.CloudApp._isConnected = false;
-
-CB.CloudApp.init = function(serverUrl, applicationId, applicationKey, opts) { //static function for initialisation of the app
-    if(!applicationKey)
-    {
-        applicationKey=applicationId;
-        applicationId=serverUrl;
-    }else {        
-        CB.apiUrl = serverUrl;             
+class CloudApp {
+    constructor(){
+        this._isConnected = false;
     }
-
-    if(typeof applicationKey === "object"){
-        opts = applicationKey;
-        applicationKey=applicationId;
-        applicationId=serverUrl;
-    }
-
-    CB.appId = applicationId;
-    CB.appKey = applicationKey;
-
-    if(opts && opts.disableRealtime === true){
-        CB._isRealtimeDisabled = true;
-    }else{
-        //load socket.io.
-        if(CB._isNode)
+    init(serverUrl, applicationId, applicationKey, opts) { //static function for initialisation of the app
+        if(!applicationKey)
         {
-            CB.io = require('socket.io-client');
+            applicationKey=applicationId;
+            applicationId=serverUrl;
+        }else {        
+            CB.apiUrl = serverUrl;             
         }
-        else {
-            CB.io = io;
+
+        if(typeof applicationKey === "object"){
+            opts = applicationKey;
+            applicationKey=applicationId;
+            applicationId=serverUrl;
         }
 
-        CB.Socket = CB.io(CB.apiUrl);        
-    } 
-    CB.CloudApp._isConnected = true;  
-};
+        CB.appId = applicationId;
+        CB.appKey = applicationKey;
 
-CB.CloudApp.onConnect = function(functionToFire) { //static function for initialisation of the app
-    CB._validate();
-
-    if(!CB.Socket){
-        throw "Socket couldn't be found. Init app first.";
+        if(opts && opts.disableRealtime === true){
+            CB._isRealtimeDisabled = true;
+        } else {
+            if(CB._isNode){
+                CB.io = require('IO')
+                CB.Socket = CB.io(CB.apiUrl)
+            } else {
+                CB.io = require('./CloudSocketClientLib.js')
+                CB.Socket = CB.io(CB.apiUrl);
+            }        
+        } 
+        this._isConnected = true;  
     }
 
-    CB.Socket.on('connect', functionToFire);
-    
-
-};
-
-CB.CloudApp.onDisconnect = function(functionToFire) { //static function for initialisation of the app
-    CB._validate();
-
-    if(!CB.Socket){
-        throw "Socket couldn't be found. Init app first.";
+    onConnect(functionToFire) { //static function for initialisation of the app
+        CB._validate();
+        if(!CB.Socket){
+            throw "Socket couldn't be found. Init app first.";
+        }
+        CB.Socket.on('connect', functionToFire);
     }
 
-    CB.Socket.on('disconnect', functionToFire);
+    onDisconnect(functionToFire) { //static function for initialisation of the app
+        CB._validate();
 
-};
+        if(!CB.Socket){
+            throw "Socket couldn't be found. Init app first.";
+        }
 
-CB.CloudApp.connect = function() { //static function for initialisation of the app
-    CB._validate();
+        CB.Socket.on('disconnect', functionToFire);
 
-    if(!CB.Socket){
-        throw "Socket couldn't be found. Init app first.";
     }
 
-    CB.Socket.connect();
-    CB.CloudApp._isConnected = true;
-};
+    connect() { //static function for initialisation of the app
+        CB._validate();
 
-CB.CloudApp.disconnect = function() { //static function for initialisation of the app
-    CB._validate();
+        if(!CB.Socket){
+            throw "Socket couldn't be found. Init app first.";
+        }
 
-    if(!CB.Socket){
-        throw "Socket couldn't be found. Init app first.";
+        CB.Socket.connect();
+        this._isConnected = true;
     }
 
-    CB.Socket.emit('socket-disconnect',CB.appId);
-    CB.CloudApp._isConnected = false;
-};
+    disconnect() { //static function for initialisation of the app
+        CB._validate();
+
+        if(!CB.Socket){
+            throw "Socket couldn't be found. Init app first.";
+        }
+
+        CB.Socket.emit('socket-disconnect',CB.appId);
+        this._isConnected = false;
+    }
+}
+
+CB.CloudApp = new CloudApp()
+
+export default CloudApp

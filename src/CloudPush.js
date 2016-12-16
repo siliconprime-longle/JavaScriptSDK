@@ -1,12 +1,13 @@
+import CB from './CB'
 /*CloudBoost Push Notifications*/
 
 CB.CloudPush={};
 
 CB.CloudPush.send = function(data,query,callback) {
-	
-	var tableName="Device";	
+    
+    var tableName="Device"; 
 
-	if (!CB.appId) {
+    if (!CB.appId) {
         throw "CB.appId is null.";
     }    
     var def;
@@ -15,29 +16,29 @@ CB.CloudPush.send = function(data,query,callback) {
     }
 
     if(!data){
-    	throw "data object is null.";
+        throw "data object is null.";
     }
     if(data && (!data.message)){
-    	throw "message is not set.";
+        throw "message is not set.";
     }
 
-	//Query Set
-	if(query && Object.prototype.toString.call(query)=="[object Object]" && typeof query.success !== 'function'){
-		var pushQuery=query;
-	}
-	//Channels List
-	if(query && Object.prototype.toString.call(query)=="[object Array]" && typeof query.success !== 'function'){
-		var pushQuery = new CB.CloudQuery(tableName);
-		pushQuery.containedIn('channels', query);		
-	}
-	//Single Channel	
-	if(query && Object.prototype.toString.call(query)=="[object String]" && typeof query.success !== 'function'){
-		var pushQuery = new CB.CloudQuery(tableName);
-		pushQuery.containedIn('channels', [query]);		
-	}
+    //Query Set
+    if(query && Object.prototype.toString.call(query)=="[object Object]" && typeof query.success !== 'function'){
+        var pushQuery=query;
+    }
+    //Channels List
+    if(query && Object.prototype.toString.call(query)=="[object Array]" && typeof query.success !== 'function'){
+        var pushQuery = new CB.CloudQuery(tableName);
+        pushQuery.containedIn('channels', query);       
+    }
+    //Single Channel    
+    if(query && Object.prototype.toString.call(query)=="[object String]" && typeof query.success !== 'function'){
+        var pushQuery = new CB.CloudQuery(tableName);
+        pushQuery.containedIn('channels', [query]);     
+    }
     //when query param is callback
-	if(query && Object.prototype.toString.call(query)=="[object Object]" && typeof query.success === 'function'){
-		callback=query;
+    if(query && Object.prototype.toString.call(query)=="[object Object]" && typeof query.success === 'function'){
+        callback=query;
         var pushQuery = new CB.CloudQuery(tableName);
     } 
     //No query param
@@ -81,7 +82,7 @@ CB.CloudPush.send = function(data,query,callback) {
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };    
 
@@ -161,7 +162,7 @@ CB.CloudPush.enableWebNotifications = function(callback) {
     } 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }   
 };
 
@@ -227,7 +228,7 @@ CB.CloudPush.disableWebNotifications = function(callback) {
     } 
 
     if (!callback) {
-        return def;
+        return def.promise;
     }   
 };
 
@@ -263,7 +264,7 @@ CB.CloudPush._subscribe = function (){
         def.reject(error);
     });
 
-    return def;
+    return def.promise;
 };
 
 
@@ -289,7 +290,7 @@ CB.CloudPush._getSubscription = function(){
         def.reject(error);
     });
 
-    return def;
+    return def.promise;
 };
  
 
@@ -318,7 +319,7 @@ CB.CloudPush._requestBrowserNotifications = function() {
         });
     }
 
-    return def;
+    return def.promise;
 };
 
 //save the device document to the db
@@ -337,7 +338,6 @@ CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, authKey, call
         def = new CB.Promise();
     }    
    
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB.toJSON(thisObj),
         key: CB.appKey
@@ -360,7 +360,7 @@ CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, authKey, call
     });
   
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
@@ -403,8 +403,11 @@ CB.CloudPush._deleteDevice = function(deviceOS, endPoint, callback) { //delete a
     });
 
     if (!callback) {
-        return def;
+        return def.promise;
     }
 };
 
 
+
+
+export default CB.CloudPush

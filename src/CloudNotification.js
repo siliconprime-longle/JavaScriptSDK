@@ -1,3 +1,4 @@
+import CB from './CB'
 /* CloudNotificiation */
 
 CB.CloudNotification = CB.CloudNotification || {};
@@ -27,7 +28,7 @@ CB.CloudNotification.on = function(channelName, callback, done) {
         def.resolve();
 
     if (!done) {
-        return def;
+        return def.promise;
     }
 
 };
@@ -54,7 +55,7 @@ CB.CloudNotification.off = function(channelName, done) {
         def.resolve();
 
     if (!done) {
-        return def;
+        return def.promise;
     }
 
 };
@@ -80,7 +81,9 @@ CB.CloudNotification.publish = function(channelName, data, done) {
         def.resolve();
 
     if (!done) {
-        return def;
+        return def.promise;
     }
 
 };
+
+export default CB.CloudNotification
