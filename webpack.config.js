@@ -11,7 +11,7 @@ var config = {
    },
    externals:{
     IO:"socket.io-client",
-    xmlhttprequest:"w3c-xmlhttprequest",
+    Axios:"axios"
    },
    module: {
       loaders: [

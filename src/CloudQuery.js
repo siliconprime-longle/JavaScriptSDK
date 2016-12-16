@@ -847,7 +847,6 @@ class CloudQuery {
 
         var thisObj = this;
 
-        var xmlhttp=CB._loadXml();
         var params=JSON.stringify({
             query: thisObj.query,
             select: thisObj.select,

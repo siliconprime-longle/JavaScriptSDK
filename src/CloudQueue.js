@@ -58,8 +58,7 @@ class CloudQueue {
         //PUT TO SERVER.
         var thisObj = this;
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             document: CB.toJSON(thisObj),
             key: CB.appKey
@@ -140,8 +139,7 @@ class CloudQueue {
 
         var thisObj = this;
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             count: count,
             key: CB.appKey
@@ -187,8 +185,7 @@ class CloudQueue {
         
         var thisObj = this;
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey
         });
@@ -224,8 +221,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey
         });
@@ -261,8 +257,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var thisObj = this;
 
         var params=JSON.stringify({       
@@ -295,8 +290,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var thisObj = this;
 
         var params=JSON.stringify({       
@@ -331,8 +325,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var tempSubscribers =  this.document.subscribers;
 
         this.document.subscribers = [];
@@ -381,8 +374,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var tempSubscribers =  this.document.subscribers;
 
         this.document.subscribers = [];
@@ -442,8 +434,7 @@ class CloudQueue {
         if(!count)
             count=1; 
         
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey,
             count : count
@@ -476,8 +467,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey,
             document : CB.toJSON(this),
@@ -513,8 +503,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey,
             document : CB.toJSON(this),
@@ -566,8 +555,7 @@ class CloudQueue {
             timeout = null;
         }
         
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey,
             timeout : timeout
@@ -610,8 +598,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
 
-        var xmlhttp = CB._loadXml();
-
+        
         var params=JSON.stringify({
             key: CB.appKey,
             method: "DELETE"
@@ -645,8 +632,7 @@ class CloudQueue {
             def = new CB.Promise();
         }
         
-        var xmlhttp = CB._loadXml();
-
+        
         var thisObj = this;
 
         var params=JSON.stringify({       
@@ -768,8 +754,7 @@ CloudQueue.getAll = function(callback){
         def = new CB.Promise();
     }
 
-    var xmlhttp = CB._loadXml();
-
+    
     var thisObj = this;
 
     var params=JSON.stringify({       

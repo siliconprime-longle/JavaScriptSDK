@@ -90,7 +90,7 @@ class CloudObject {
         var thisObj = this;
         CB._fileCheck(this).then(function(thisObj){
 
-            var xmlhttp = CB._loadXml();
+            
             var params=JSON.stringify({
                 document: CB.toJSON(thisObj),
                 key: CB.appKey
@@ -400,7 +400,7 @@ CloudObject.saveAll = function(array,callback){
     }
 
     CB._bulkObjFileCheck(array).then(function(){
-        var xmlhttp = CB._loadXml();
+        
         var params=JSON.stringify({
             document: CB.toJSON(array),
             key: CB.appKey
@@ -452,7 +452,7 @@ CloudObject.deleteAll = function(array,callback){
         def = new CB.Promise();
     }
 
-    var xmlhttp = CB._loadXml();
+    
     var params=JSON.stringify({
         document: CB.toJSON(array),
         key: CB.appKey,

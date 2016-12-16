@@ -338,7 +338,6 @@ CB.CloudPush._addDevice = function(deviceOS, endPoint, browserKey, authKey, call
         def = new CB.Promise();
     }    
    
-    var xmlhttp = CB._loadXml();
     var params=JSON.stringify({
         document: CB.toJSON(thisObj),
         key: CB.appKey

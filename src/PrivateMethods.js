@@ -283,74 +283,62 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
 
     CB._validate();
 
-    if(!params){
-        var params = {};
-    }
-    if(typeof params != "object"){
-        params = JSON.parse(params);
-    }
+    // if(!params){
+    //     var params = {};
+    // }
+    // if(typeof params != "object"){
+    //     params = JSON.parse(params);
+    // }
     
-    params.sdk = "JavaScript"
-    params = JSON.stringify(params)
+    // params.sdk = "JavaScript"
+    // params = JSON.stringify(params)
 
     if(!CB.CloudApp._isConnected)
         throw "Your CloudApp is disconnected. Please use CB.CloudApp.connect() and try again.";
 
     var def = new CB.Promise();
-    var xmlhttp= CB._loadXml();
+    var Axios
+    var headers = {}
 
     if(CB._isNode){
         localStorage = require('localStorage')
+        Axios = require('Axios')
+        if(params && typeof params != "object"){
+            params=JSON.parse(params);
+        }
+    } else {
+        Axios = require('axios')
     }
-    
-    xmlhttp.open(method,url,true);
-    if(!isFile) {
-        xmlhttp.setRequestHeader('Content-Type', 'text/plain');
-    }
-
-    if(progressCallback){
-        if(typeof(xmlhttp.upload)!=="undefined"){
-            xmlhttp.upload.addEventListener("progress", function(evt){
-              if (evt.lengthComputable) {  
-                var percentComplete = evt.loaded / evt.total;            
-                progressCallback(percentComplete);
-              }
-            }, false); 
-        }        
-    }
-
+        
     if(!isServiceUrl){
         var ssid = CB._getSessionId();
-        if(ssid != null)
-            xmlhttp.setRequestHeader('sessionID', ssid);
+        if(ssid != null) headers.sessionID = ssid
     }
-    if(CB._isNode){
-        xmlhttp.setRequestHeader("User-Agent","CB/" + CB.version + " (NodeJS " + process.versions.node + ")");
 
-        if(params && typeof params ==="object"){
-            params=JSON.stringify(params);
-        }
-    }
-    if(params)
-        xmlhttp.send(params);
-    else
-        xmlhttp.send();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == xmlhttp.DONE) {
-            if (xmlhttp.status == 200) {
-                if(!isServiceUrl){
-                    var sessionID = xmlhttp.getResponseHeader('sessionID');
-                    if(sessionID)
-                        localStorage.setItem('sessionID', sessionID);
-                    else
-                        localStorage.removeItem('sessionID');
-                }
-                def.resolve(xmlhttp.responseText);
-            } else {                
-                def.reject(xmlhttp.responseText);
+    Axios({
+        method: method,
+        url: url,
+        data: params,
+        headers:headers,
+        onUploadProgress:function(event){
+            if (event.lengthComputable) {  
+                var percentComplete = event.loaded / event.total;            
+                if(progressCallback) progressCallback(percentComplete)
             }
+        },
+    }).then(function(res){
+        if(!isServiceUrl){
+            var sessionID = res.headers.sessionid
+            if(sessionID)
+                localStorage.setItem('sessionID', sessionID);
+            else
+                localStorage.removeItem('sessionID');
         }
-    };
+        def.resolve(JSON.stringify(res.data));
+    },function(err){
+        def.reject(err)
+    })
+
     return def.promise;
 };
 

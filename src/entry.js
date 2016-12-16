@@ -10,23 +10,6 @@ try {
 	CB._isNode = true
 }
 
-if(CB._isNode){
-	CB._loadXml = function(){
-        var xmlhttp
-        xmlhttp = require('xmlhttprequest').XMLHttpRequest
-        xmlhttp = new xmlhttp();
-        return xmlhttp; 
-    }
-	
-} else {
-	CB._loadXml = function(){
-        var xmlhttp
-        xmlhttp = XMLHttpRequest
-        xmlhttp = new xmlhttp();
-        return xmlhttp; 
-    }
-}
-
 require( './PrivateMethods')
 require( './CloudApp')
 require( './Column')
