@@ -6379,9 +6379,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (_CB2.default._isNode) {
 	        localStorage = __webpack_require__(6);
 	        Axios = __webpack_require__(7);
-	        if (params && (typeof params === 'undefined' ? 'undefined' : _typeof(params)) != "object") {
-	            params = JSON.parse(params);
-	        }
 	    } else {
 	        Axios = __webpack_require__(8);
 	    }
@@ -6389,6 +6386,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!isServiceUrl) {
 	        var ssid = _CB2.default._getSessionId();
 	        if (ssid != null) headers.sessionID = ssid;
+	    }
+
+	    if (params && (typeof params === 'undefined' ? 'undefined' : _typeof(params)) != "object") {
+	        params = JSON.parse(params);
 	    }
 
 	    Axios({

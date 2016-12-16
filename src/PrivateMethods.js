@@ -303,9 +303,6 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     if(CB._isNode){
         localStorage = require('localStorage')
         Axios = require('Axios')
-        if(params && typeof params != "object"){
-            params=JSON.parse(params);
-        }
     } else {
         Axios = require('axios')
     }
@@ -313,6 +310,10 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     if(!isServiceUrl){
         var ssid = CB._getSessionId();
         if(ssid != null) headers.sessionID = ssid
+    }
+    
+    if(params && typeof params != "object"){
+        params=JSON.parse(params);
     }
 
     Axios({
