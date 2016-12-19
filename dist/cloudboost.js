@@ -6104,6 +6104,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	if (_CB2.default._isNode) {
+	    localStorage = __webpack_require__(6);
+	}
+
 	/* PRIVATE METHODS */
 	_CB2.default.toJSON = function (thisObj) {
 
@@ -6377,7 +6381,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var headers = {};
 
 	    if (_CB2.default._isNode) {
-	        localStorage = __webpack_require__(6);
 	        Axios = __webpack_require__(7);
 	    } else {
 	        Axios = __webpack_require__(8);

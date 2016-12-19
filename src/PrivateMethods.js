@@ -1,4 +1,7 @@
 import CB from './CB'
+if(CB._isNode){
+    localStorage = require('localStorage')
+}
 
 /* PRIVATE METHODS */
 CB.toJSON = function(thisObj) {
@@ -301,7 +304,6 @@ CB._request=function(method,url,params,isServiceUrl,isFile, progressCallback){
     var headers = {}
 
     if(CB._isNode){
-        localStorage = require('localStorage')
         Axios = require('Axios')
     } else {
         Axios = require('axios')

@@ -1,6 +1,6 @@
 {
   "name": "cloudboost",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Database Service that does Storage, Search, Real-time and a whole lot more.",
   "main": "dist/cloudboost.js",
   "keywords": [
