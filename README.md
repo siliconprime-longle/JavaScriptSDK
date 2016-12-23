@@ -28,6 +28,17 @@ bower install cloudboost
 <script src="bower_components/cloudboost/dist/cloudboost.js"></script>
 ```
 
+### Module Bundlers
+
+``` js
+// For ES6/ES7 , TypeScript(typings included)
+import * as CB from 'clodboost';
+
+//For ES5 (requireJs)
+var CB = require('cloudboost');
+
+```
+
 ### Sample Code
 
 ``` js
