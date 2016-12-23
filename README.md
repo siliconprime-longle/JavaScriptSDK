@@ -32,7 +32,7 @@ bower install cloudboost
 
 ``` js
 // For ES6/ES7 , TypeScript(typings included)
-import * as CB from 'clodboost';
+import * as CB from 'cloudboost';
 
 //For ES5 (requireJs)
 var CB = require('cloudboost');
