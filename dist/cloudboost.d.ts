@@ -34,6 +34,7 @@ declare module cloudboost {
 		required:any
 		editableByMasterKey:any
 		isSearchable:any
+		defaultValue:any
 	}
 	export class CloudTable {
 		constructor(tableName :string)
