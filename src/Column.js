@@ -9,12 +9,7 @@ class Column {
        CB._columnNameValidation(columnName);
        this.document.name = columnName;
        this.document._type = 'column';
-     }
-     else {
-       CB._columnNameValidation("default");
-       this.document.name = "default";
-       this.document._type = 'column';
-     }
+     } 
 
      if(dataType) {
        CB._columnDataTypeValidation(dataType);
@@ -23,14 +18,14 @@ class Column {
        this.document.dataType = "Text";
      }
 
-     if(typeof(required) === 'boolean'){
+     if(typeof(required) === 'boolean') {
        this.document.required = required;
      }
-     else{
+     else {
        this.document.required = false;
      }
 
-     if(typeof(unique) === 'boolean'){
+     if(typeof(unique) === 'boolean') {
        this.document.unique = unique;
      }
      else{
@@ -48,6 +43,7 @@ class Column {
      this.document.isEditable = true;
      this.document.isRenamable = false;
      this.document.editableByMasterKey = false; 
+     this.document.defaultValue = null;
   };
 }
 
@@ -95,6 +91,15 @@ Object.defineProperty(Column.prototype,'required',{
     },
     set: function(required) {
         this.document.required = required;
+    }
+});
+
+Object.defineProperty(Column.prototype,'defaultValue',{
+    get: function() {
+        return this.document.defaultValue;
+    },
+    set: function(defaultValue) {
+        this.document.defaultValue = defaultValue;
     }
 });
 
