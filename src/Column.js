@@ -2,7 +2,7 @@ import CB from './CB'
 /*
  Column.js
  */
-class Column{
+class Column {
   constructor(columnName, dataType, required, unique){
      this.document = {};
      if(columnName){
@@ -10,11 +10,16 @@ class Column{
        this.document.name = columnName;
        this.document._type = 'column';
      }
+     else {
+       CB._columnNameValidation("default");
+       this.document.name = "default";
+       this.document._type = 'column';
+     }
 
-     if(dataType){
+     if(dataType) {
        CB._columnDataTypeValidation(dataType);
        this.document.dataType = dataType;
-     }else{
+     } else {
        this.document.dataType = "Text";
      }
 
