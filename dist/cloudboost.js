@@ -431,7 +431,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * 
 	 */
 	/**
-	 * bluebird build version 3.4.6
+	 * bluebird build version 3.4.7
 	 * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, using, timers, filter, any, each
 	*/
 	!function(e){if(true)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -585,11 +585,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	}
-
-	Async.prototype.invokeFirst = function (fn, receiver, arg) {
-	    this._normalQueue.unshift(fn, receiver, arg);
-	    this._queueTick();
-	};
 
 	Async.prototype._drainQueue = function(queue) {
 	    while (queue.length() > 0) {
@@ -1370,6 +1365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            Promise.prototype._fireEvent = defaultFireEvent;
 	        }
 	    }
+	    return Promise;
 	};
 
 	function defaultFireEvent() { return false; }
@@ -1640,7 +1636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            break;
 	        }
 	    }
-	    if (i > 0) {
+	    if (i > 0 && error.name != "SyntaxError") {
 	        stack = stack.slice(i);
 	    }
 	    return stack;
@@ -1653,7 +1649,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                ? stackFramesAsArray(error) : ["    (No stack trace)"];
 	    return {
 	        message: message,
-	        stack: cleanStack(stack)
+	        stack: error.name == "SyntaxError" ? stack : cleanStack(stack)
 	    };
 	}
 
@@ -3871,7 +3867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	_dereq_("./join")(
 	    Promise, PromiseArray, tryConvertToPromise, INTERNAL, async, getDomain);
 	Promise.Promise = Promise;
-	Promise.version = "3.4.6";
+	Promise.version = "3.4.7";
 	_dereq_('./map.js')(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
 	_dereq_('./call_get.js')(Promise);
 	_dereq_('./using.js')(Promise, apiRejection, tryConvertToPromise, createContext, INTERNAL, debug);
@@ -4559,23 +4555,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var i = (this._front + length) & (this._capacity - 1);
 	    this[i] = arg;
 	    this._length = length + 1;
-	};
-
-	Queue.prototype._unshiftOne = function(value) {
-	    var capacity = this._capacity;
-	    this._checkCapacity(this.length() + 1);
-	    var front = this._front;
-	    var i = (((( front - 1 ) &
-	                    ( capacity - 1) ) ^ capacity ) - capacity );
-	    this[i] = value;
-	    this._front = i;
-	    this._length = this.length() + 1;
-	};
-
-	Queue.prototype.unshift = function(fn, receiver, arg) {
-	    this._unshiftOne(arg);
-	    this._unshiftOne(receiver);
-	    this._unshiftOne(fn);
 	};
 
 	Queue.prototype.push = function (fn, receiver, arg) {
@@ -5938,8 +5917,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isNode = typeof process !== "undefined" &&
 	        classString(process).toLowerCase() === "[object process]";
 
-	function env(key, def) {
-	    return isNode ? process.env[key] : def;
+	var hasEnvVariables = typeof process !== "undefined" &&
+	    typeof process.env !== "undefined";
+
+	function env(key) {
+	    return hasEnvVariables ? process.env[key] : undefined;
 	}
 
 	function getNativePromise() {
@@ -5987,6 +5969,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    hasDevTools: typeof chrome !== "undefined" && chrome &&
 	                 typeof chrome.loadTimes === "function",
 	    isNode: isNode,
+	    hasEnvVariables: hasEnvVariables,
 	    env: env,
 	    global: globalObject,
 	    getNativePromise: getNativePromise,
@@ -15618,6 +15601,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
@@ -15669,6 +15654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.document.isEditable = true;
 	    this.document.isRenamable = false;
 	    this.document.editableByMasterKey = false;
+	    this.document.defaultValue = null;
 	};
 
 	Object.defineProperty(Column.prototype, 'name', {
@@ -15713,6 +15699,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    set: function set(required) {
 	        this.document.required = required;
+	    }
+	});
+
+	Object.defineProperty(Column.prototype, 'defaultValue', {
+	    get: function get() {
+	        return this.document.defaultValue;
+	    },
+	    set: function set(defaultValue) {
+	        if (typeof defaultValue === 'string') {
+	            supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
+	            if (supportedStringDataTypes.indexOf(this.document.dataType) > -1) {
+	                this.document.defaultValue = defaultValue;
+	            } else if (this.document.dataType === 'URL') {
+	                if (defaultValue.match(/^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i)[0] === defaultValue) {
+	                    this.document.defaultValue = defaultValue;
+	                } else {
+	                    throw new TypeError("Invalid URL");
+	                }
+	            } else if (this.document.dataType === 'Email') {
+	                if (defaultValue.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i)[0] === defaultValue) {
+	                    this.document.defaultValue = defaultValue;
+	                } else {
+	                    throw new TypeError("Invalid Email");
+	                }
+	            } else {
+	                throw new TypeError("Unsupported DataType");
+	            }
+	        } else if (['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue)) > -1) {
+	            if (this.document.dataType.toUpperCase() === (typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue)).toUpperCase()) {
+	                this.document.defaultValue = defaultValue;
+	            } else {
+	                throw new TypeError("Unsupported DataType");
+	            }
+	        } else if (defaultValue === null) {
+	            this.document.defaultValue = defaultValue;
+	        } else {
+	            throw new TypeError("Unsupported DataType");
+	        }
 	    }
 	});
 
