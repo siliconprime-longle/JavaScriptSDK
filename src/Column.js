@@ -99,7 +99,47 @@ Object.defineProperty(Column.prototype,'defaultValue',{
         return this.document.defaultValue;
     },
     set: function(defaultValue) {
-        this.document.defaultValue = defaultValue;
+
+        if(typeof defaultValue === 'string') {
+            supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
+            if(supportedStringDataTypes.indexOf(this.document.dataType) > -1){
+                this.document.defaultValue = defaultValue;
+            }
+            else if(this.document.dataType === 'URL') {
+                if (defaultValue.match(/^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i)[0] === defaultValue){
+                    this.document.defaultValue = defaultValue;
+                }
+                else {
+                    throw new TypeError("Invalid URL");
+                }
+            }
+            else if(this.document.dataType === 'Email'){
+                if (defaultValue.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i)[0] === defaultValue){
+                    this.document.defaultValue = defaultValue;
+                }
+                else {
+                    throw new TypeError("Invalid Email");
+                }
+            }
+            else {
+                throw new TypeError("Unsupported DataType");
+            }
+        }
+        else if(['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue) > -1) {
+            if(this.document.dataType.toUpperCase() === (typeof defaultValue).toUpperCase()){
+                this.document.defaultValue = defaultValue;
+            }
+            else {
+                throw new TypeError("Unsupported DataType");
+            }
+        }
+        else if(defaultValue === null) {
+            this.document.defaultValue = defaultValue;
+        }
+        else {
+            throw new TypeError("Unsupported DataType");
+        }
+
     }
 });
 
