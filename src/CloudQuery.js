@@ -62,18 +62,16 @@ class CloudQuery {
         if (columnName === 'id')
             columnName = '_' + columnName;
 
-        if(data !== null){
-            if( data.constructor === CB.CloudObject){
-                columnName = columnName+'._id';
-                data = data.get('id');
+           console.log(data);
+           console.log(columnName);
+           if(data !== null){
+                if( data.constructor === CB.CloudObject){
+                    columnName = columnName+'._id';
+                    data = data.get('id');
+                }
             }
 
             this.query[columnName] = data;
-        }else{
-
-            //This is for people who code : obj.equalTo('column', null);
-            this.doesNotExists(columnName);
-        }
 
         return this;
     };
@@ -128,19 +126,15 @@ class CloudQuery {
             columnName = '_' + columnName;
 
         if(data !== null){
-
             if(data.constructor === CB.CloudObject){
                 columnName = columnName+'._id';
                 data = data.get('id');
             }
-
-            this.query[columnName] = {
-                $ne: data
-            };
-        }else{
-            //This is for people who code : obj.notEqualTo('column', null);
-            this.exists(columnName); 
         }
+
+        this.query[columnName] = {
+            $ne: data
+        };
 
         return this;
     };

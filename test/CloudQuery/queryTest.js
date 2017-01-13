@@ -274,10 +274,9 @@ describe("CloudQuery", function (done) {
                     }
                 }
 
-                //console.log(list);
-
-                if(list.length>0)
+                if(list.length>0){
                     done();
+                }
                 else
                     throw "object could not queried properly";
             },function(err){
@@ -286,8 +285,6 @@ describe("CloudQuery", function (done) {
         }, function(error){
             throw "object could not saved properly";
         });
-
-       
     });
 
 
@@ -1627,8 +1624,11 @@ describe("CloudQuery", function (done) {
         obj.find().then(function(list) {
             if (list.length > 0) {
                 for (var i = 0; i < list.length; i++) {
-                    if (!list[i].get('age'))
-                        throw "received wrong data";
+                    //if (!list[i].get('age'))
+                    if (list[i].get('age') !== null && !list[i].get('age')){
+                        //throw "received wrong data";
+                        done("received wrong data");
+                    }
                 }
                 done();
             }
@@ -1638,30 +1638,38 @@ describe("CloudQuery", function (done) {
         }, function () {
             throw "find data error";
         });
-
     });
 
-    it("Should get element not having a given column name", function (done) {
-
+    it("Should not get any element if queried with an invalid column name to exist", function (done) {
         this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
+        obj.exists('aNonExistingColumn');
+        obj.find().then(function(list) {
+            if (list.length > 0) {
+                done("Reciveing data");
+            }
+            else{
+                done();
+            }
+        }, function () {
+            throw "find data error";
+        });
+    });
+
+    it("Should not get any element if queried with a valid column name to not to exist", function (done) {
+        this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
         obj.doesNotExists('age');
         obj.find().then(function(list) {
             if (list.length > 0) {
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].get('age'))
-                        throw "received wrong data";
-                }
-                done();
+                done("Reciveing data");
             }
             else{
-                throw "data not received"
+                done();
             }
         }, function () {
             throw "find data error";
         });
-
     });
 
     it("Should not give element with a given relation",function(done){
