@@ -99,6 +99,7 @@ Object.defineProperty(Column.prototype,'defaultValue',{
         return this.document.defaultValue;
     },
     set: function(defaultValue) {
+
         if(typeof defaultValue === 'string') {
             supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
             if(supportedStringDataTypes.indexOf(this.document.dataType) > -1){
@@ -138,6 +139,7 @@ Object.defineProperty(Column.prototype,'defaultValue',{
         else {
             throw new TypeError("Unsupported DataType");
         }
+
     }
 });
 
