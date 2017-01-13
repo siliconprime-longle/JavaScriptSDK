@@ -275,17 +275,14 @@ describe("CloudQuery", function (done) {
                 }
 
                 if(list.length>0){
-                   console.log(list);
                     done();
                 }
                 else
                     throw "object could not queried properly";
             },function(err){
-                   console.log("a");
                 done(err);                
             });
         }, function(error){
-                   console.log("list");
             throw "object could not saved properly";
         });
     });
@@ -1625,8 +1622,6 @@ describe("CloudQuery", function (done) {
         var obj = new CB.CloudQuery('student4');
         obj.exists('age');
         obj.find().then(function(list) {
-                console.log("List: ");
-                console.log(list);
             if (list.length > 0) {
                 for (var i = 0; i < list.length; i++) {
                     //if (!list[i].get('age'))
