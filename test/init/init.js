@@ -21,7 +21,7 @@ describe("Cloud App", function() {
 			    }
 			});
 
-        }else{
+        } else{
         	$.ajax({ 
 			    // The URL for the request
 			    url: url,			
@@ -67,7 +67,7 @@ describe("Cloud App", function() {
 			       done();
 			    }
 			});
-        }else{
+        } else{
         	$.ajax({
  
 			    // The URL for the request
@@ -114,14 +114,15 @@ describe("Cloud App", function() {
 			}, function(error, response, json){
 			    if(error) {
 			        done(error);
-			    } else {
+			    } 
+				else {
 			       CB.CloudApp.init(URL, json.appId, json.keys.js);
 			       CB.masterKey = json.keys.master;
 			       CB.jsKey = json.keys.js;
 			       done();
 			    }
 			});
-       	}else{
+       	} else{
 	       $.ajax({
 	 
 			    // The URL for the request

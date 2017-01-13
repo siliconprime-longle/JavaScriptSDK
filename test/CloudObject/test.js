@@ -4,6 +4,25 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required.
 
+ it("Should add a null value in a column",function(done){
+
+    this.timeout(30000);
+
+    var obj = new CB.CloudObject('Employee');
+    obj.set('dob', null);
+    obj.save().then(function(res){
+            if(res.document.dob === null){
+                done();
+            }
+            else{
+               done("Unable to Save Object with a null value");
+            }
+        },function(err){
+            done(err);
+    });
+ });
+
+
  it("Should Save data in Custom date field",function(done){
 
     this.timeout(30000);

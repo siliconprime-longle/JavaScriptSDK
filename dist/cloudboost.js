@@ -19749,18 +19749,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (columnName === 'id') columnName = '_' + columnName;
 
+	            console.log(data);
+	            console.log(columnName);
 	            if (data !== null) {
 	                if (data.constructor === _CB2.default.CloudObject) {
 	                    columnName = columnName + '._id';
 	                    data = data.get('id');
 	                }
-
-	                this.query[columnName] = data;
-	            } else {
-
-	                //This is for people who code : obj.equalTo('column', null);
-	                this.doesNotExists(columnName);
 	            }
+
+	            this.query[columnName] = data;
+	            //}else{
+
+	            //This is for people who code : obj.equalTo('column', null);
+	            //  this.doesNotExists(columnName);
+	            // }
 
 	            return this;
 	        }
@@ -19815,19 +19818,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (columnName === 'id') columnName = '_' + columnName;
 
 	            if (data !== null) {
-
 	                if (data.constructor === _CB2.default.CloudObject) {
 	                    columnName = columnName + '._id';
 	                    data = data.get('id');
 	                }
-
-	                this.query[columnName] = {
-	                    $ne: data
-	                };
-	            } else {
-	                //This is for people who code : obj.notEqualTo('column', null);
-	                this.exists(columnName);
 	            }
+
+	            this.query[columnName] = {
+	                $ne: data
+	            };
+	            //else{
+	            //This is for people who code : obj.notEqualTo('column', null);
+	            //     this.exists(columnName); 
+	            // }
 
 	            return this;
 	        }
