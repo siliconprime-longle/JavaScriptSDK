@@ -72,11 +72,6 @@ class CloudQuery {
             }
 
             this.query[columnName] = data;
-        //}else{
-
-            //This is for people who code : obj.equalTo('column', null);
-          //  this.doesNotExists(columnName);
-       // }
 
         return this;
     };
@@ -140,10 +135,6 @@ class CloudQuery {
         this.query[columnName] = {
             $ne: data
         };
-        //else{
-            //This is for people who code : obj.notEqualTo('column', null);
-       //     this.exists(columnName); 
-       // }
 
         return this;
     };
