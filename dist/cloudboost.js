@@ -19766,8 +19766,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (columnName === 'id') columnName = '_' + columnName;
 
-	            console.log(data);
-	            console.log(columnName);
 	            if (data !== null) {
 	                if (data.constructor === _CB2.default.CloudObject) {
 	                    columnName = columnName + '._id';
