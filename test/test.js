@@ -1,8 +1,6 @@
-// var SECURE_KEY = "51d3ce3e-50fd-406e-9c5d-c6d89556887c";
-// var URL = "http://localhost:4730";
-
 var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
 var URL = "http://localhost:4730";
+
    var util = {
      makeString : function(){
 	    var text = "x";
@@ -50,7 +48,7 @@ describe("Cloud App", function() {
 			    }
 			});
 
-        }else{
+        } else{
         	$.ajax({ 
 			    // The URL for the request
 			    url: url,			
@@ -96,7 +94,7 @@ describe("Cloud App", function() {
 			       done();
 			    }
 			});
-        }else{
+        } else{
         	$.ajax({
  
 			    // The URL for the request
@@ -143,14 +141,15 @@ describe("Cloud App", function() {
 			}, function(error, response, json){
 			    if(error) {
 			        done(error);
-			    } else {
+			    } 
+				else {
 			       CB.CloudApp.init(URL, json.appId, json.keys.js);
 			       CB.masterKey = json.keys.master;
 			       CB.jsKey = json.keys.js;
 			       done();
 			    }
 			});
-       	}else{
+       	} else{
 	       $.ajax({
 	 
 			    // The URL for the request
@@ -4974,6 +4973,25 @@ describe("Cloud Object", function() {
 	// -> Which has columns : 
 	// name : string : required.
 
+ it("Should add a null value in a column",function(done){
+
+    this.timeout(30000);
+
+    var obj = new CB.CloudObject('Employee');
+    obj.set('dob', null);
+    obj.save().then(function(res){
+            if(res.document.dob === null){
+                done();
+            }
+            else{
+               done("Unable to Save Object with a null value");
+            }
+        },function(err){
+            done(err);
+    });
+ });
+
+
  it("Should Save data in Custom date field",function(done){
 
     this.timeout(30000);
@@ -8397,10 +8415,9 @@ describe("CloudQuery", function (done) {
                     }
                 }
 
-                //console.log(list);
-
-                if(list.length>0)
+                if(list.length>0){
                     done();
+                }
                 else
                     throw "object could not queried properly";
             },function(err){
@@ -8409,8 +8426,6 @@ describe("CloudQuery", function (done) {
         }, function(error){
             throw "object could not saved properly";
         });
-
-       
     });
 
 
@@ -9750,8 +9765,11 @@ describe("CloudQuery", function (done) {
         obj.find().then(function(list) {
             if (list.length > 0) {
                 for (var i = 0; i < list.length; i++) {
-                    if (!list[i].get('age'))
-                        throw "received wrong data";
+                    //if (!list[i].get('age'))
+                    if (list[i].get('age') !== null && !list[i].get('age')){
+                        //throw "received wrong data";
+                        done("received wrong data");
+                    }
                 }
                 done();
             }
@@ -9761,30 +9779,38 @@ describe("CloudQuery", function (done) {
         }, function () {
             throw "find data error";
         });
-
     });
 
-    it("Should get element not having a given column name", function (done) {
-
+    it("Should not get any element if queried with an invalid column name to exist", function (done) {
         this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
+        obj.exists('aNonExistingColumn');
+        obj.find().then(function(list) {
+            if (list.length > 0) {
+                done("Reciveing data");
+            }
+            else{
+                done();
+            }
+        }, function () {
+            throw "find data error";
+        });
+    });
+
+    it("Should not get any element if queried with a valid column name to not to exist", function (done) {
+        this.timeout(30000);
         var obj = new CB.CloudQuery('student4');
         obj.doesNotExists('age');
         obj.find().then(function(list) {
             if (list.length > 0) {
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].get('age'))
-                        throw "received wrong data";
-                }
-                done();
+                done("Reciveing data");
             }
             else{
-                throw "data not received"
+                done();
             }
         }, function () {
             throw "find data error";
         });
-
     });
 
     it("Should not give element with a given relation",function(done){
@@ -11590,7 +11616,7 @@ describe("Cloud Table", function(){
             done("should fetch the table");
         });
     });
-
+    
     it("should get all tables from an app",function(done){
         this.timeout(40000);
         CB.CloudTable.getAll().then(function(table){
