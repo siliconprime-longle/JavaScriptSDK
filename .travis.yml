@@ -40,6 +40,7 @@ install:
 after_success:
 #Deploy. 
 #Docker Login
+- bash <(curl -s https://codecov.io/bash)
 - cd ..
 - openssl aes-256-cbc -K $encrypted_008ab571332e_key -iv $encrypted_008ab571332e_iv -in javascriptcredentials.tar.enc -out javascriptcredentials.tar -d
 - tar -xvf javascriptcredentials.tar
