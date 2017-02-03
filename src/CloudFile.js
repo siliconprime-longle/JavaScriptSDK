@@ -143,8 +143,8 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 
     var thisObj = this;
-
-    if (!this.fileObj && !this.data && this.type != 'folder')
+    console.log('hi', this.url);
+    if (!this.fileObj && !this.data && this.type != 'folder' && !this.url) 
         throw "You cannot save a file which is null";
 
     if (!this.data) {
