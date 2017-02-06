@@ -5,13 +5,14 @@ import CB from './CB'
 
 CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
     if (!path)
-        path = '/home';
+        path = '/' + CB.appId;
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]') {
 
         this.fileObj = file;
         this.document = {
             _id: null,
             _type: 'file',
+            _tableName: '_File',
             ACL: new CB.ACL(),
             name: (file && file.name && file.name !== "")
                 ? file.name
@@ -33,6 +34,7 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
             this.document = {
                 _id: null,
                 _type: 'file',
+                _tableName: '_File',
                 ACL: new CB.ACL(),
                 name: '',
                 size: '',
@@ -52,6 +54,7 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 this.document = {
                     _id: null,
                     _type: 'file',
+                    _tableName: '_File',
                     ACL: new CB.ACL(),
                     name: file,
                     size: '',
@@ -65,7 +68,8 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
             } else {
                 this.document = {
                     _id: file,
-                    _type: 'file'
+                    _type: 'file',
+                    _tableName: '_File'
                 }
             }
         }
@@ -143,8 +147,7 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 
     var thisObj = this;
-
-    if (!this.fileObj && !this.data && this.type != 'folder')
+    if (!this.fileObj && !this.data && this.type != 'folder' && !this.url)
         throw "You cannot save a file which is null";
 
     if (!this.data) {
