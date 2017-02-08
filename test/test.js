@@ -1,5 +1,5 @@
 //var SECURE_KEY = "47dfc8b3-7c7a-4661-8e71-36ed0aaa0563";
-var SECURE_KEY = "84482db3-edfb-4fce-8ed6-9ce8130b74bd";
+var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
 
 var URL = "http://localhost:4730";
 
@@ -997,7 +997,6 @@ describe("Cloud Files", function(done) {
         var type = 'txt';
         var fileObj = new CB.CloudFile(name, data, type);
         fileObj.save().then(function(file) {
-            //console.log(file);
             if (file.url) {
 
                 if (!window) {
@@ -1009,17 +1008,16 @@ describe("Cloud Files", function(done) {
                         if (error) {
                             done(error);
                         } else {
-                            // file.set('name', 'haha.txt');
-                            // file.save().then(function(f) {
-                            //     if (f.name == 'haha.txt')
-                            //         done();
-                            //     else {
-                            //         done('Rename failed.');
-                            //     }
-                            // }, function(err) {
-                            //     done(err);
-                            // })
-                            done();
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
                         }
                     });
                 } else {
@@ -1288,7 +1286,6 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file) {
             if (file.url) {
                 file.delete().then(function(file) {
-                    //console.log(file);
                     if (file.url === null)
                         done();
                     else

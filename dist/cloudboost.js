@@ -17112,7 +17112,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (callback && callback.uploadProgress) {
 	            uploadProgressCallback = callback.uploadProgress;
 	        }
-	        console.log('here');
 
 	        _CB2.default._request('POST', url, params, false, true, uploadProgressCallback).then(function (response) {
 	            thisObj.document = JSON.parse(response);
