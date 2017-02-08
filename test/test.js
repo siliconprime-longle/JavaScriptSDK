@@ -1,5 +1,5 @@
 //var SECURE_KEY = "47dfc8b3-7c7a-4661-8e71-36ed0aaa0563";
-var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
+var SECURE_KEY = "84482db3-edfb-4fce-8ed6-9ce8130b74bd";
 
 var URL = "http://localhost:4730";
 
@@ -970,6 +970,78 @@ describe("Cloud Files", function(done) {
                         // the response is passed to the function
                         success: function(text) {
                             done();
+                        },
+                        // Code to run if the request fails; the raw request and
+                        // status codes are passed to the function
+                        error: function(xhr, status, errorThrown) {
+                            done(errorThrown);
+                            done("Error thrown.");
+                        }
+                    });
+                }
+            } else {
+                throw 'únable to get the url';
+            }
+        }, function(err) {
+            done(err);
+            throw "Unable to save file";
+        });
+    });
+
+    it("Should rename a file", function(done) {
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(file) {
+            //console.log(file);
+            if (file.url) {
+
+                if (!window) {
+                    //Lets configure and request
+                    request({
+                        url: file.url, //URL to hit
+                        method: 'GET'
+                    }, function(error, response, body) {
+                        if (error) {
+                            done(error);
+                        } else {
+                            // file.set('name', 'haha.txt');
+                            // file.save().then(function(f) {
+                            //     if (f.name == 'haha.txt')
+                            //         done();
+                            //     else {
+                            //         done('Rename failed.');
+                            //     }
+                            // }, function(err) {
+                            //     done(err);
+                            // })
+                            done();
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        // The URL for the request
+                        url: file.url,
+                        // Whether this is a POST or GET request
+                        type: "GET",
+                        // Code to run if the request succeeds;
+                        // the response is passed to the function
+                        success: function(text) {
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
+
                         },
                         // Code to run if the request fails; the raw request and
                         // status codes are passed to the function
