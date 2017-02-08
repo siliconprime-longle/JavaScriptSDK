@@ -69,11 +69,17 @@ after_success:
 - cd javascriptsdk
 - mv * ../
 - cd ..
-- rm javascriptsdk
+#- rm javascriptsdk
 deploy:
-  provider: npm
-  api_key: $NPMKey
-  email: $NPMEmail
+  - provider: npm
+    api_key: $NPMKey
+    email: $NPMEmail
+  - provider: releases
+    api_key: $GH_TOKEN
+    file: javascriptsdk/dist/cloudboost.js
+    skip_cleanup: true
+    on:
+      tags: false
 #Notify Team on Slack
 notifications:
   slack: cloudboost:gm7nWJDLDtBRyF75VKLKOoMW
