@@ -18,7 +18,6 @@ before_install:
 install:
 - npm install grunt-cli -g
 - npm install
-- grunt
 after_success:
 - echo "OK"
 before_deploy:
