@@ -101,7 +101,7 @@ Object.defineProperty(Column.prototype,'defaultValue',{
     set: function(defaultValue) {
 
         if(typeof defaultValue === 'string') {
-            supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
+            supportedStringDataTypes = ['Text', 'EncryptedText'];
             if(supportedStringDataTypes.indexOf(this.document.dataType) > -1){
                 this.document.defaultValue = defaultValue;
             }
@@ -121,11 +121,17 @@ Object.defineProperty(Column.prototype,'defaultValue',{
                     throw new TypeError("Invalid Email");
                 }
             }
+            else if(this.document.dataType === 'DateTime'){
+                if(new Date(defaultValue) == 'Invalid Date'){
+                    throw new TypeError("Invalid default value for DateTime Field");
+                } 
+                this.document.defaultValue = defaultValue;
+            }
             else {
                 throw new TypeError("Unsupported DataType");
             }
         }
-        else if(['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue) > -1) {
+        else if(defaultValue !== null && (['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue) > -1)) {
             if(this.document.dataType.toUpperCase() === (typeof defaultValue).toUpperCase()){
                 this.document.defaultValue = defaultValue;
             }

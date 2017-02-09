@@ -15707,6 +15707,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.document.defaultValue;
 	    },
 	    set: function set(defaultValue) {
+
 	        if (typeof defaultValue === 'string') {
 	            supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
 	            if (supportedStringDataTypes.indexOf(this.document.dataType) > -1) {
@@ -16959,19 +16960,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	 CloudFiles
 	 */
 
-	_CB2.default.CloudFile = _CB2.default.CloudFile || function (file, data, type) {
-
+	_CB2.default.CloudFile = _CB2.default.CloudFile || function (file, data, type, path) {
+	    if (!path) path = '/' + _CB2.default.appId;
 	    if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]') {
 
 	        this.fileObj = file;
 	        this.document = {
 	            _id: null,
 	            _type: 'file',
+	            _tableName: '_File',
 	            ACL: new _CB2.default.ACL(),
-	            name: file && file.name && file.name !== "" ? file.name : 'unknown',
+	            name: file && file.name && file.name !== "" ? file.name : 'default.file',
 	            size: file.size,
 	            url: null,
 	            expires: null,
+	            path: path,
+	            updatedAt: Date.now(),
+	            createdAt: Date.now(),
 	            contentType: typeof file.type !== "undefined" && file.type !== "" ? file.type : 'unknown'
 	        };
 	    } else if (typeof file === "string") {
@@ -16980,11 +16985,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.document = {
 	                _id: null,
 	                _type: 'file',
+	                _tableName: '_File',
 	                ACL: new _CB2.default.ACL(),
 	                name: '',
 	                size: '',
 	                url: file,
 	                expires: null,
+	                path: path,
+	                updatedAt: Date.now(),
+	                createdAt: Date.now(),
 	                contentType: ''
 	            };
 	        } else {
@@ -16996,17 +17005,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.document = {
 	                    _id: null,
 	                    _type: 'file',
+	                    _tableName: '_File',
 	                    ACL: new _CB2.default.ACL(),
 	                    name: file,
 	                    size: '',
 	                    url: null,
+	                    path: path,
+	                    updatedAt: Date.now(),
+	                    createdAt: Date.now(),
 	                    expires: null,
 	                    contentType: type
 	                };
 	            } else {
 	                this.document = {
 	                    _id: file,
-	                    _type: 'file'
+	                    _type: 'file',
+	                    _tableName: '_File'
 	                };
 	            }
 	        }
@@ -17036,9 +17050,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(_CB2.default.CloudFile.prototype, 'size', {
 	    get: function get() {
 	        return this.document.size;
-	    },
-	    set: function set(size) {
-	        this.document.size = size;
 	    }
 	});
 
@@ -17051,6 +17062,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
+	Object.defineProperty(_CB2.default.CloudFile.prototype, 'path', {
+	    get: function get() {
+	        return this.document.path;
+	    },
+	    set: function set(path) {
+	        this.document.path = path;
+	    }
+	});
+
+	Object.defineProperty(_CB2.default.CloudFile.prototype, 'createdAt', {
+	    get: function get() {
+	        return this.document.createdAt;
+	    }
+	});
+
+	Object.defineProperty(_CB2.default.CloudFile.prototype, 'updatedAt', {
+	    get: function get() {
+	        return this.document.updatedAt;
+	    }
+	});
 	/**
 	 * Uploads File
 	 *
@@ -17067,14 +17098,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var thisObj = this;
-
-	    if (!this.fileObj && !this.data) throw "You cannot save a file which is null";
+	    if (!this.fileObj && !this.data && this.type != 'folder' && !this.url) throw "You cannot save a file which is null";
 
 	    if (!this.data) {
-	        var params = new FormData();
-	        params.append("fileToUpload", this.fileObj);
-	        params.append("key", _CB2.default.appKey);
-	        params.append("fileObj", JSON.stringify(_CB2.default.toJSON(thisObj)));
+	        //  var params = new FormData();
+	        params = {};
+	        // params.append("fileToUpload", this.fileObj);
+	        // params.append("key", CB.appKey);
+	        //  params.append("fileObj", JSON.stringify(CB.toJSON(thisObj)));
+	        params['fileToUpload'] = this.fileObj;
+	        params['key'] = _CB2.default.appKey;
+	        params['fileObj'] = JSON.stringify(_CB2.default.toJSON(thisObj));
+
 	        var url = _CB2.default.apiUrl + '/file/' + _CB2.default.appId;
 
 	        var uploadProgressCallback = null;
@@ -17099,11 +17134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    } else {
 	        var data = this.data;
-	        var params = JSON.stringify({
-	            data: data,
-	            fileObj: _CB2.default.toJSON(this),
-	            key: _CB2.default.appKey
-	        });
+	        var params = JSON.stringify({ data: data, fileObj: _CB2.default.toJSON(this), key: _CB2.default.appKey });
 	        var url = _CB2.default.apiUrl + '/file/' + _CB2.default.appId;
 	        var uploadProgressCallback = null;
 
@@ -17151,11 +17182,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var thisObj = this;
 
-	    var params = JSON.stringify({
-	        fileObj: _CB2.default.toJSON(thisObj),
-	        key: _CB2.default.appKey,
-	        method: "PUT"
-	    });
+	    var params = JSON.stringify({ fileObj: _CB2.default.toJSON(thisObj), key: _CB2.default.appKey, method: "PUT" });
 	    var url = _CB2.default.apiUrl + '/file/' + _CB2.default.appId + '/' + this.document._id;
 
 	    _CB2.default._request('PUT', url, params).then(function (response) {
@@ -17189,9 +17216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        def = new _CB2.default.Promise();
 	    }
 
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
+	    var params = JSON.stringify({ key: _CB2.default.appKey });
 	    var url = this.url;
 
 	    _CB2.default._request('GET', url, params).then(function (response) {
@@ -19749,8 +19774,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (columnName === 'id') columnName = '_' + columnName;
 
-	            console.log(data);
-	            console.log(columnName);
 	            if (data !== null) {
 	                if (data.constructor === _CB2.default.CloudObject) {
 	                    columnName = columnName + '._id';
@@ -19759,11 +19782,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            this.query[columnName] = data;
-	            //}else{
-
-	            //This is for people who code : obj.equalTo('column', null);
-	            //  this.doesNotExists(columnName);
-	            // }
 
 	            return this;
 	        }
@@ -19827,10 +19845,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.query[columnName] = {
 	                $ne: data
 	            };
-	            //else{
-	            //This is for people who code : obj.notEqualTo('column', null);
-	            //     this.exists(columnName); 
-	            // }
 
 	            return this;
 	        }
