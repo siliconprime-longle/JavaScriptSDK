@@ -151,15 +151,28 @@ CB.CloudFile.prototype.save = function(callback) {
         throw "You cannot save a file which is null";
 
     if (!this.data) {
-        //  var params = new FormData();
-        params = {};
-        // params.append("fileToUpload", this.fileObj);
-        // params.append("key", CB.appKey);
-        //  params.append("fileObj", JSON.stringify(CB.toJSON(thisObj)));
-        params['fileToUpload'] = this.fileObj;
-        params['key'] = CB.appKey;
-        params['fileObj'] = JSON.stringify(CB.toJSON(thisObj));
+        var params;
+        try {
+            if (!window) {
+                params = {};
 
+                params['fileToUpload'] = this.fileObj;
+                params['key'] = CB.appKey;
+                params['fileObj'] = JSON.stringify(CB.toJSON(thisObj));
+            } else {
+                params = new FormData();
+                params.append("fileToUpload", this.fileObj);
+                params.append("key", CB.appKey);
+                params.append("fileObj", JSON.stringify(CB.toJSON(thisObj)));
+
+            }
+        } catch (e) {
+            params = {};
+
+            params['fileToUpload'] = this.fileObj;
+            params['key'] = CB.appKey;
+            params['fileObj'] = JSON.stringify(CB.toJSON(thisObj));
+        }
         var url = CB.apiUrl + '/file/' + CB.appId;
 
         var uploadProgressCallback = null;
