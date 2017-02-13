@@ -39,8 +39,8 @@ after_deploy:
   - npm set init.author.name $NPM_USERNAME
   - npm set init.author.email $NPM_EMAIL
   - npm set init.author.url "https://cloudboost.io"
-  - npm adduser
   - echo -e "$NPM_USERNAME\n$NPM_PASSWORD\n$NPM_EMAIL" | npm login
+  - echo -e "$NPM_USERNAME\n$NPM_PASSWORD\n$NPM_EMAIL" | npm adduser
   - npm run 2npm
 branches:
   except:
