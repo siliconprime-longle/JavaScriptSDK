@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "start": "webpack --watch --progress",
-    "test": "echo 'skipping test' ",
+    "test": "npm run test-browser && npm run test-node",
     "test-browser": "mocha-phantomjs -s webSecurityEnabled=false --ssl-protocol=any test/index.html",
     "test-node": "./node_modules/.bin/mocha --reporter spec test/test.js",
     "2npm": "publish"
