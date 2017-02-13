@@ -32,13 +32,13 @@ deploy:
   file: "dist/cloudboost.js"
   skip_cleanup: true
   on:
-    tags: false
+    tags: true
     all_branches: true
 - provider: npm
   api_key: $NPMKey
   email: $NPMEmail
   on:
-    tags: false
+    tags: true
     all_branches: true
 branches:
   except:
