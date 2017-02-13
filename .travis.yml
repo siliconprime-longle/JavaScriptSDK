@@ -27,19 +27,17 @@ before_deploy:
   - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
   - git push -q https://$GITLOGIN@github.com/CloudBoost/JavaScriptSDK --tags
 deploy:
-- provider: releases
+  provider: releases
   api_key: $GH_TOKEN
   file: "dist/cloudboost.js"
   skip_cleanup: true
   on:
-    tags: true
+    tags: false
     all_branches: true
-- provider: npm
-  api_key: $NPMKey
-  email: $NPMEmail
-  on:
-    tags: true
-    all_branches: true
+after_deploy:
+  # publish to npm
+  - echo -e "$NPM_USERNAME\n$NPM_PASSWORD\n$NPM_EMAIL" | npm login
+  - npm run 2npm
 branches:
   except:
     - /^*-v[0-9]/
