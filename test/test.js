@@ -6905,6 +6905,33 @@ describe("Query on Cloud Object Notifications ", function() {
 
     });
 
+    it("near test", function(done) {
+        //Custom5 table has location field.
+
+        this.timeout(30000);
+        var loc = new CB.CloudGeoPoint("17.7", "80.3");
+        var query = new CB.CloudQuery('Custom5');
+        var isDone = false;
+        query.near("location", loc, 400000);
+
+        CB.CloudObject.on('Custom5', 'created', query, function() {
+            CB.CloudObject.off('Custom5', 'created');
+            isDone = true;
+
+        });
+        loc = new CB.CloudGeoPoint("18.7", "70.3");
+        var obj = new CB.CloudObject('Custom5');
+        obj.set('location', loc);
+        obj.save();
+        setTimeout(function() {
+            if (isDone) {
+                done();
+            } else {
+                done('event not fired');
+            }
+        }, 20000);
+    })
+
     it("should only fire the second event and not the first one. ", function(done) {
         var message = "unmodified";
         var isDone = false;
