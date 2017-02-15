@@ -21,8 +21,8 @@ before_install:
 - rm gc_cred.json
 - mkdir cloudboost/config
 - mv smtp.json cloudboost/config/smtp.json
-- docker run --name mongo -p 27017:27017 -d mongo:3.2 
-- docker run --name redis -p 6379:6379 -d redis:3.0 
+- docker run --name mongo -p 27017:27017 -d mongo:3.2
+- docker run --name redis -p 6379:6379 -d redis:3.0
 - sleep 30s
 - docker exec $(docker ps -aqf "name=mongo") mongo _GLOBAL --eval "db.getCollection('_Settings').insertOne({secureKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',clusterKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',myURL:'http://localhost:4730'});"
 - mv javascriptsdk cloudboost/javascriptsdk
@@ -32,13 +32,13 @@ install:
 - cd ..
 - docker build -t cloudboost/cloudboost:2.0.$TRAVIS_BUILD_NUMBER .
 - docker build -t cloudboost/cloudboost:latest .
-- docker run --name cloudboost -p 4730:4730 -it --link redis:redis --link mongo:mongo -d cloudboost/cloudboost:2.0.$TRAVIS_BUILD_NUMBER 
+- docker run --name cloudboost -p 4730:4730 -it --link redis:redis --link mongo:mongo -d cloudboost/cloudboost:2.0.$TRAVIS_BUILD_NUMBER
 - sleep 30s
 - cd javascriptsdk
 - npm test
 - cd ..
 after_success:
-#Deploy. 
+#Deploy.
 #Docker Login
 - bash <(curl -s https://codecov.io/bash)
 - cd ..
@@ -59,7 +59,7 @@ after_success:
 #Install Kubectl
 - gcloud components install kubectl
 - gcloud container clusters get-credentials $GOOGLECLUSTERNAME --zone $GOOGLEZONE --project $GOOGLEPROJECT
-#Push docker images. 
+#Push docker images.
 - docker push cloudboost/cloudboost:latest
 #Upload to Kubernetes for deployment.
 - kubectl rolling-update cloudboost-engine --image=cloudboost/cloudboost:latest
@@ -70,6 +70,8 @@ after_success:
 - mv * ../
 - cd ..
 - rm javascriptsdk
+after_failure:
+- docker logs cloudboost
 deploy:
   provider: npm
   api_key: $NPMKey
@@ -77,4 +79,3 @@ deploy:
 #Notify Team on Slack
 notifications:
   slack: cloudboost:gm7nWJDLDtBRyF75VKLKOoMW
-
