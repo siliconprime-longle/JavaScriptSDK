@@ -15934,7 +15934,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    set: function set(defaultValue) {
 
 	        if (typeof defaultValue === 'string') {
-	            supportedStringDataTypes = ['Text', 'EncryptedText', 'DateTime'];
+	            supportedStringDataTypes = ['Text', 'EncryptedText'];
 	            if (supportedStringDataTypes.indexOf(this.document.dataType) > -1) {
 	                this.document.defaultValue = defaultValue;
 	            } else if (this.document.dataType === 'URL') {
@@ -15949,10 +15949,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                } else {
 	                    throw new TypeError("Invalid Email");
 	                }
+	            } else if (this.document.dataType === 'DateTime') {
+	                if (new Date(defaultValue) == 'Invalid Date') {
+	                    throw new TypeError("Invalid default value for DateTime Field");
+	                }
+	                this.document.defaultValue = defaultValue;
 	            } else {
 	                throw new TypeError("Unsupported DataType");
 	            }
-	        } else if (['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue)) > -1) {
+	        } else if (defaultValue !== null && ['number', 'boolean', 'object', 'undefined'].indexOf(typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue)) > -1) {
 	            if (this.document.dataType.toUpperCase() === (typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue)).toUpperCase()) {
 	                this.document.defaultValue = defaultValue;
 	            } else {
@@ -16642,7 +16647,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	Object.defineProperty(exports, "__esModule", {
+	/* WEBPACK VAR INJECTION */(function(global) {Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
@@ -16915,7 +16920,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _CB2.default._modified(this, 'expires');
 	    }
 	});
-
+	function getId() {
+	    try {
+	        var id = "";
+	        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	        for (var i = 0; i < 8; i++) {
+	            id = id + possible.charAt(Math.floor(Math.random() * possible.length));
+	        }
+	        return id;
+	    } catch (err) {
+	        global.winston.log('error', {
+	            "error": String(err),
+	            "stack": new Error().stack
+	        });
+	    }
+	}
 	/* This is Real time implementation of CloudObjects */
 	CloudObject.on = function (tableName, eventType, cloudQuery, callback, done) {
 
@@ -16965,22 +16984,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //if event type is an array.
 	        for (var i = 0; i < eventType.length; i++) {
 	            _CB2.default.CloudObject.on(tableName, eventType[i], cloudQuery, callback);
-	            if (done && done.success) done.success();else def.resolve();
+	            if (i == eventType.length - 1) {
+	                if (done && done.success) done.success();else def.resolve();
+	            }
 	        }
 	    } else {
 
 	        eventType = eventType.toLowerCase();
 	        if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
-
+	            //var timestamp = Date.now();
+	            var timestamp = Date.now();
 	            var payload = {
-	                room: (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase(),
+	                room: (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + timestamp,
 	                sessionId: _CB2.default._getSessionId(),
-	                query: cloudQuery
+	                data: {
+	                    query: cloudQuery,
+	                    timestamp: timestamp,
+	                    eventType: eventType
+	                }
 	            };
 
 	            _CB2.default.Socket.emit('join-object-channel', payload);
-	            _CB2.default.Socket.on((_CB2.default.appId + 'table' + tableName + eventType).toLowerCase(), function (data) {
+	            console.log(payload.room);
+	            _CB2.default.Socket.on(payload.room, function (data) {
 	                //listen to events in custom channel.
+	                data = JSON.parse(data);
 	                data = _CB2.default.fromJSON(data);
 	                if (cloudQuery && cloudQuery instanceof _CB2.default.CloudQuery && _CB2.default.CloudObject._validateNotificationQuery(data, cloudQuery)) callback(data);else if (!cloudQuery) callback(data);
 	            });
@@ -17014,15 +17042,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //if event type is an array.
 	        for (var i = 0; i < eventType.length; i++) {
 	            _CB2.default.CloudObject.off(tableName, eventType[i]);
-	            if (done && done.success) done.success();else def.resolve();
+	            if (i == eventType.length - 1) {
+	                if (done && done.success) done.success();else def.resolve();
+	            }
 	        }
 	    } else {
 
 	        eventType = eventType.toLowerCase();
-
+	        //        var timestamp = Date.now();
+	        var timestamp = Date.now();
 	        if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
-	            _CB2.default.Socket.emit('leave-object-channel', (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase());
-	            _CB2.default.Socket.removeAllListeners((_CB2.default.appId + 'table' + tableName + eventType).toLowerCase());
+	            _CB2.default.Socket.emit('leave-object-channel', {
+	                event: (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase(),
+	                timestamp: timestamp,
+	                eventType: eventType
+	            });
+	            _CB2.default.Socket.on('leave' + (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + timestamp, function (data) {
+	                console.log('leave', (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + data);
+	                _CB2.default.Socket.removeAllListeners((_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + data);
+	            });
 	            if (done && done.success) done.success();else def.resolve();
 	        } else {
 	            throw 'created, updated, deleted are supported notification types.';
@@ -17142,18 +17180,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //delete include
 	    delete query.$include;
 
-	    if (_CB2.default.CloudQuery._validateQuery(cloudObject, query)) {
-	        //redice limit of CloudQuery.
-	        --cloudQuery.limit;
-	        return true;
-	    } else {
-	        return false;
-	    }
+	    //redice limit of CloudQuery.
+	    --cloudQuery.limit;
+	    return true;
 	};
 
 	_CB2.default.CloudObject = CloudObject;
 
 	exports.default = _CB2.default.CloudObject;
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 38 */
