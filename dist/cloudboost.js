@@ -16647,7 +16647,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {Object.defineProperty(exports, "__esModule", {
+	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
@@ -16920,21 +16920,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _CB2.default._modified(this, 'expires');
 	    }
 	});
-	function getId() {
-	    try {
-	        var id = "";
-	        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	        for (var i = 0; i < 8; i++) {
-	            id = id + possible.charAt(Math.floor(Math.random() * possible.length));
-	        }
-	        return id;
-	    } catch (err) {
-	        global.winston.log('error', {
-	            "error": String(err),
-	            "stack": new Error().stack
-	        });
-	    }
-	}
+
 	/* This is Real time implementation of CloudObjects */
 	CloudObject.on = function (tableName, eventType, cloudQuery, callback, done) {
 
@@ -17005,7 +16991,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 
 	            _CB2.default.Socket.emit('join-object-channel', payload);
-	            console.log(payload.room);
 	            _CB2.default.Socket.on(payload.room, function (data) {
 	                //listen to events in custom channel.
 	                data = JSON.parse(data);
@@ -17058,7 +17043,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                eventType: eventType
 	            });
 	            _CB2.default.Socket.on('leave' + (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + timestamp, function (data) {
-	                console.log('leave', (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + data);
 	                _CB2.default.Socket.removeAllListeners((_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + data);
 	            });
 	            if (done && done.success) done.success();else def.resolve();
@@ -17177,9 +17161,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    //delete include
-	    delete query.$include;
-
 	    //redice limit of CloudQuery.
 	    --cloudQuery.limit;
 	    return true;
@@ -17188,7 +17169,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	_CB2.default.CloudObject = CloudObject;
 
 	exports.default = _CB2.default.CloudObject;
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 38 */
