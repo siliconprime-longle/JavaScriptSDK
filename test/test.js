@@ -6905,21 +6905,21 @@ describe("Query on Cloud Object Notifications ", function() {
 
     });
 
-    it("near test", function(done) {
+    it("near : 1", function(done) {
         //Custom5 table has location field.
 
         this.timeout(30000);
-        var loc = new CB.CloudGeoPoint("17.7", "80.3");
+        var loc = new CB.CloudGeoPoint("76.991204", "28.605977");
         var query = new CB.CloudQuery('Custom5');
         var isDone = false;
-        query.near("location", loc, 400000);
+        query.near("location", loc, 40000); //40km
 
         CB.CloudObject.on('Custom5', 'created', query, function() {
             CB.CloudObject.off('Custom5', 'created');
             isDone = true;
 
         });
-        loc = new CB.CloudGeoPoint("18.7", "70.3");
+        loc = new CB.CloudGeoPoint("77.061327", "28.621272");
         var obj = new CB.CloudObject('Custom5');
         obj.set('location', loc);
         obj.save();
@@ -6930,7 +6930,34 @@ describe("Query on Cloud Object Notifications ", function() {
                 done('event not fired');
             }
         }, 20000);
-    })
+    });
+
+    it("near : 2", function(done) {
+        //Custom5 table has location field.
+
+        this.timeout(30000);
+        var loc = new CB.CloudGeoPoint("76.991204", "28.605977");
+        var query = new CB.CloudQuery('Custom5');
+        var isDone = false;
+        query.near("location", loc, 40000); //40km
+
+        CB.CloudObject.on('Custom5', 'created', query, function() {
+            CB.CloudObject.off('Custom5', 'created');
+            isDone = true;
+
+        });
+        loc = new CB.CloudGeoPoint("78.486671", "17.385044");
+        var obj = new CB.CloudObject('Custom5');
+        obj.set('location', loc);
+        obj.save();
+        setTimeout(function() {
+            if (!isDone) {
+                done();
+            } else {
+                done('event  fired');
+            }
+        }, 20000);
+    });
 
     it("should only fire the second event and not the first one. ", function(done) {
         var message = "unmodified";

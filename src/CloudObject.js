@@ -289,24 +289,32 @@ CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
         //if event type is an array.
         for (var i = 0; i < eventType.length; i++) {
             CB.CloudObject.on(tableName, eventType[i], cloudQuery, callback);
-            if (done && done.success)
-                done.success();
-            else
-                def.resolve();
+            if (i == (eventType.length - 1)) {
+                if (done && done.success)
+                    done.success();
+                else
+                    def.resolve();
+                }
             }
-        } else {
+    } else {
 
         eventType = eventType.toLowerCase();
         if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
-
+            //var timestamp = Date.now();
+            var timestamp = CB._generateHash();
             var payload = {
-                room: (CB.appId + 'table' + tableName + eventType).toLowerCase(),
+                room: (CB.appId + 'table' + tableName + eventType).toLowerCase() + timestamp,
                 sessionId: CB._getSessionId(),
-                query: cloudQuery
+                data: {
+                    query: cloudQuery,
+                    timestamp: timestamp,
+                    eventType: eventType
+                }
             };
 
             CB.Socket.emit('join-object-channel', payload);
-            CB.Socket.on((CB.appId + 'table' + tableName + eventType).toLowerCase(), function(data) { //listen to events in custom channel.
+            CB.Socket.on(payload.room, function(data) { //listen to events in custom channel.
+                data = JSON.parse(data);
                 data = CB.fromJSON(data);
                 if (cloudQuery && cloudQuery instanceof CB.CloudQuery && CB.CloudObject._validateNotificationQuery(data, cloudQuery))
                     callback(data);
@@ -348,18 +356,27 @@ CloudObject.off = function(tableName, eventType, done) {
         //if event type is an array.
         for (var i = 0; i < eventType.length; i++) {
             CB.CloudObject.off(tableName, eventType[i]);
-            if (done && done.success)
-                done.success();
-            else
-                def.resolve();
+            if (i == (eventType.length - 1)) {
+                if (done && done.success)
+                    done.success();
+                else
+                    def.resolve()
             }
-        } else {
+        }
+    } else {
 
         eventType = eventType.toLowerCase();
-
+        //        var timestamp = Date.now();
+        var timestamp = CB._generateHash();
         if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
-            CB.Socket.emit('leave-object-channel', (CB.appId + 'table' + tableName + eventType).toLowerCase());
-            CB.Socket.removeAllListeners((CB.appId + 'table' + tableName + eventType).toLowerCase());
+            CB.Socket.emit('leave-object-channel', {
+                event: (CB.appId + 'table' + tableName + eventType).toLowerCase(),
+                timestamp: timestamp,
+                eventType: eventType
+            });
+            CB.Socket.on('leave' + (CB.appId + 'table' + tableName + eventType).toLowerCase() + timestamp, function(data) {
+                CB.Socket.removeAllListeners((CB.appId + 'table' + tableName + eventType).toLowerCase() + data);
+            });
             if (done && done.success)
                 done.success();
             else
@@ -485,16 +502,10 @@ CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //d
         return false;
     }
 
-    //delete include
-    delete query.$include;
+    //redice limit of CloudQuery.
+    --cloudQuery.limit;
+    return true;
 
-    if (CB.CloudQuery._validateQuery(cloudObject, query)) {
-        //redice limit of CloudQuery.
-        --cloudQuery.limit;
-        return true;
-    } else {
-        return false;
-    }
 };
 
 CB.CloudObject = CloudObject
