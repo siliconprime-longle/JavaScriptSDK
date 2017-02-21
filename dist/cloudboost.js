@@ -16979,7 +16979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        eventType = eventType.toLowerCase();
 	        if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
 	            //var timestamp = Date.now();
-	            var timestamp = Date.now();
+	            var timestamp = _CB2.default._generateHash();
 	            var payload = {
 	                room: (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase() + timestamp,
 	                sessionId: _CB2.default._getSessionId(),
@@ -17035,7 +17035,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        eventType = eventType.toLowerCase();
 	        //        var timestamp = Date.now();
-	        var timestamp = Date.now();
+	        var timestamp = _CB2.default._generateHash();
 	        if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
 	            _CB2.default.Socket.emit('leave-object-channel', {
 	                event: (_CB2.default.appId + 'table' + tableName + eventType).toLowerCase(),

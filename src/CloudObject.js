@@ -301,7 +301,7 @@ CloudObject.on = function(tableName, eventType, cloudQuery, callback, done) {
         eventType = eventType.toLowerCase();
         if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
             //var timestamp = Date.now();
-            var timestamp = Date.now();
+            var timestamp = CB._generateHash();
             var payload = {
                 room: (CB.appId + 'table' + tableName + eventType).toLowerCase() + timestamp,
                 sessionId: CB._getSessionId(),
@@ -367,7 +367,7 @@ CloudObject.off = function(tableName, eventType, done) {
 
         eventType = eventType.toLowerCase();
         //        var timestamp = Date.now();
-        var timestamp = Date.now();
+        var timestamp = CB._generateHash();
         if (eventType === 'created' || eventType === 'updated' || eventType === 'deleted') {
             CB.Socket.emit('leave-object-channel', {
                 event: (CB.appId + 'table' + tableName + eventType).toLowerCase(),
