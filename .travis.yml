@@ -13,11 +13,6 @@ before_install:
 - docker run --name redis -p 6379:6379 -d redis:3.0 
 - sleep 30s
 - docker exec $(docker ps -aqf "name=mongo") mongo _GLOBAL --eval "db.getCollection('_Settings').insertOne({secureKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',clusterKey:'1227d1c4-1385-4d5f-ae73-23e99f74b006',myURL:'http://localhost:4730'});"
-- git clone https://github.com/CloudBoost/cloudboost
-- cd cloudboost
-- npm install
-- docker build -t cloudboost/cloudboost:latest .
-- cd ..
 - docker run --name cloudboost -e MAIL_PROVIDER=$MAIL_PROVIDER -e MAIL_PROVIDER_API_KEY=$MAIL_PROVIDER_API_KEY -e DOMAIN=$DOMAIN -e FROM_EMAIL=$FROM_EMAIL -e FROM_NAME=$FROM_NAME -p 4730:4730 -it --link redis:redis --link mongo:mongo -d cloudboost/cloudboost:latest
 - sleep 30s
 install:
