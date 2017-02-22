@@ -1,5 +1,5 @@
 describe("Cloud Cache", function(){
-     
+
     before(function(){
         CB.appKey = CB.masterKey;
     });
@@ -71,12 +71,12 @@ describe("Cloud Cache", function(){
             success: function(response){
                 if(response != null){
                     if(response === 1){
-                       //delete it. 
+                       //delete it.
                        cache.deleteItem('test1',{
                            success: function(response){
                                 if(response != null){
                                     if(response === 'test1'){
-                                       //delete it. 
+                                       //delete it.
                                        cache.get('test1',{
                                          success: function(response){
                                             if(response === null){
@@ -140,7 +140,7 @@ describe("Cloud Cache", function(){
         }catch(e){
             done();
         }
-        
+
     });
 
     it("Should not try to insert null value", function(done){
@@ -234,7 +234,7 @@ describe("Cloud Cache", function(){
                                 if(response != null){
                                     if(response.name === "sample2" && response.sex === "male" && response.age === 24){
                                          cache.getAll({
-                                            success: function(response){                                                
+                                            success: function(response){
 
                                                 if(response.length>1){
                                                     if(response instanceof Array){
@@ -288,7 +288,7 @@ describe("Cloud Cache", function(){
                           cache.getInfo({
                                 success: function(response){
                                     if(response && response instanceof CB.CloudCache){
-                                        if(response.size.slice(-2,response.length) === 'kb'){
+                                        if(response.size.slice(-2,response.length) === 'KB'){
                                             done();
                                         }else{
                                             done("Got cache information but has incorrect units");
@@ -360,7 +360,7 @@ describe("Cloud Cache", function(){
         }, function(error){
             done("Cannot set values in a cache.");
         });
-    }); 
+    });
 
     it("Should delete a cache from an app.", function(done){
         this.timeout(30000);
@@ -376,7 +376,7 @@ describe("Cloud Cache", function(){
                                     if(response instanceof CB.CloudCache && response.size === "0kb"){
                                         CB.CloudCache.getAll({
                                           success : function(response){
-                                            
+
                                             for(var i=0;i<response.length;i++){
                                                 if(response[i].name === 'student'){
                                                     done("Cache did not delete");
@@ -413,28 +413,28 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
-       
+
         cache.delete({
             success: function(response){
                 done("Cache which does not exist, is deleted.")
             },error: function(error){
                 done();
             }
-        });    
+        });
     });
 
      it("Should throw error when clearing a wrong cache", function(done){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
-       
+
         cache.clear({
             success: function(response){
                 done("Cache which does not exist, is deleted.")
             },error: function(error){
                 done();
             }
-        });    
+        });
     });
 
 
