@@ -25,6 +25,7 @@
     "form-data": "^2.1.2",
     "jsdom": "^9.10.0",
     "localStorage": "^1.0.3",
+    "localforage": "^1.5.0",
     "socket.io-client": "^1.7.1"
   },
   "devDependencies": {
