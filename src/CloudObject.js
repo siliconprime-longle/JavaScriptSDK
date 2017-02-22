@@ -142,9 +142,9 @@ class CloudObject {
                 CloudObject.pin(thisObj, {
                     success: function(obj) {
                         if (!callback) {
-                            def.resolve(thisObj);
+                            def.resolve(value);
                         } else {
-                            callback.success(thisObj);
+                            callback.success(value);
                         }
                     },
                     error: function(err) {
@@ -549,9 +549,9 @@ CloudObject.pin = function(cloudObjects, callback) {
                     arr = value;
                 localforage.setItem(CB.appId + '-' + object.tableName, arr.concat(object.object)).then(function(value) {
                     if (!callback) {
-                        def.resolve(arr.concat(object.object));
+                        def.resolve(value);
                     } else {
-                        callback.success(arr.concat(object.object));
+                        callback.success(value);
                     }
                 }).catch(function(err) {
                     if (!callback) {

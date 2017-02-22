@@ -16835,9 +16835,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    CloudObject.pin(thisObj, {
 	                        success: function success(obj) {
 	                            if (!callback) {
-	                                def.resolve(thisObj);
+	                                def.resolve(value);
 	                            } else {
-	                                callback.success(thisObj);
+	                                callback.success(value);
 	                            }
 	                        },
 	                        error: function error(err) {
@@ -17224,9 +17224,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (value) arr = value;
 	                _localforage2.default.setItem(_CB2.default.appId + '-' + object.tableName, arr.concat(object.object)).then(function (value) {
 	                    if (!callback) {
-	                        def.resolve(arr.concat(object.object));
+	                        def.resolve(value);
 	                    } else {
-	                        callback.success(arr.concat(object.object));
+	                        callback.success(value);
 	                    }
 	                }).catch(function (err) {
 	                    if (!callback) {
@@ -21562,10 +21562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw "Value cannot be undefined.";
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey,
-	                item: value
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey, item: value });
 
 	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key;
 	            _CB2.default._request('PUT', url, params, true).then(function (response) {
@@ -21600,10 +21597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey,
-	                method: "DELETE"
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey, method: "DELETE" });
 
 	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/item/' + key;
 	            _CB2.default._request('PUT', url, params, true).then(function (response) {
@@ -21638,9 +21632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey });
 
 	            var thisObj = this;
 
@@ -21677,9 +21669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey });
 
 	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/' + key + '/item';
 	            _CB2.default._request('POST', url, params, true).then(function (response) {
@@ -21713,9 +21703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey });
 
 	            var thisObj = this;
 
@@ -21751,9 +21739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey });
 
 	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items/count';
 	            _CB2.default._request('POST', url, params, true).then(function (response) {
@@ -21789,9 +21775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var thisObj = this;
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey });
 	            var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId + '/' + this.document.name + '/items';
 	            _CB2.default._request('POST', url, params, true).then(function (response) {
 	                if (_CB2.default._isJsonString(response)) {
@@ -21827,10 +21811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey,
-	                method: "DELETE"
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey, method: "DELETE" });
 
 	            var thisObj = this;
 
@@ -21866,10 +21847,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                def = new _CB2.default.Promise();
 	            }
 
-	            var params = JSON.stringify({
-	                key: _CB2.default.appKey,
-	                method: "DELETE"
-	            });
+	            var params = JSON.stringify({ key: _CB2.default.appKey, method: "DELETE" });
 
 	            var thisObj = this;
 
@@ -21908,9 +21886,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        def = new _CB2.default.Promise();
 	    }
 
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey
-	    });
+	    var params = JSON.stringify({ key: _CB2.default.appKey });
 
 	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
 	    _CB2.default._request('POST', url, params, true).then(function (response) {
@@ -21943,10 +21919,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        def = new _CB2.default.Promise();
 	    }
 
-	    var params = JSON.stringify({
-	        key: _CB2.default.appKey,
-	        method: "DELETE"
-	    });
+	    var params = JSON.stringify({ key: _CB2.default.appKey, method: "DELETE" });
 
 	    var url = _CB2.default.apiUrl + '/cache/' + _CB2.default.appId;
 	    _CB2.default._request('PUT', url, params, true).then(function (response) {
