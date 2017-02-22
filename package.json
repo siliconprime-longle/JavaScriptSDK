@@ -13,7 +13,7 @@
     "scripts": {
         "start": "webpack --watch --progress",
         "test": "npm run test-browser && npm run test-node",
-        "test-browser": "mocha-phantomjs -s webSecurityEnabled=false --ssl-protocol=any test/index.html",
+        "test-browser": "mocha-phantomjs -p node_modules/phantomjs/lib/phantom/bin/phantomjs -s webSecurityEnabled=false --ssl-protocol=any test/index.html",
         "test-node": "./node_modules/.bin/mocha --reporter spec test/test.js",
         "2npm": "publish"
     },
@@ -25,7 +25,6 @@
         "form-data": "^2.1.2",
         "jsdom": "^9.10.0",
         "localStorage": "^1.0.3",
-        "localforage": "^1.5.0",
         "socket.io-client": "^1.7.1"
     },
     "devDependencies": {
