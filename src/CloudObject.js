@@ -171,6 +171,10 @@ class CloudObject {
         });
     }
 
+    disableSync(callback) {
+        CB.CloudObject.disableSync(this.document, callback);
+    }
+
     fetch(callback) { //fetch the document from the db
         if (!CB.appId) {
             throw "CB.appId is null.";
@@ -540,7 +544,7 @@ CloudObject.pin = function(cloudObjects, callback) {
         cloudObjects = [cloudObjects];
         CloudObject.pin(cloudObjects, callback);
     } else {
-        var groupedObjects = groupObjects(cloudObjects);
+        var groupedObjects = _groupObjects(cloudObjects);
         groupedObjects.forEach((object) => {
             var arr = [];
             localforage.getItem(CB.appId + '-' + object.tableName).then(function(value) {
@@ -584,7 +588,7 @@ CloudObject.unPin = function(cloudObjects, callback) {
         cloudObjects = [cloudObjects];
         CloudObject.unPin(cloudObjects);
     } else {
-        var groupedObjects = groupObjects(cloudObjects);
+        var groupedObjects = _groupObjects(cloudObjects);
         groupedObjects.forEach((object) => {
             localforage.getItem(CB.appId + '-' + object.tableName).then(function(objects) {
                 var arr = [];
@@ -641,7 +645,7 @@ CloudObject.clearLocalStore = function(callback) {
     });
 }
 
-function groupObjects(objects) {
+function _groupObjects(objects) {
     var groups = {};
     for (var i = 0; i < objects.length; i++) {
         if (!(objects[i]instanceof CB.CloudObject)) {
@@ -680,7 +684,7 @@ CloudObject.sync = function(callback) {
                         cloudObject.save({
                             success: function(obj) {
                                 count++;
-                                CB.CloudObject.clearFromSaveEventually(document, {
+                                CB.CloudObject.disableSync(document.document, {
                                     success: function(obj) {
                                         if (!callback) {
                                             def.resolve(count);
@@ -731,7 +735,7 @@ CloudObject.sync = function(callback) {
     }
 }
 
-CloudObject.clearFromSaveEventually = function(document, callback) {
+CloudObject.disableSync = function(document, callback) {
     var def;
     if (!callback)
         def = new CB.Promise();
@@ -739,7 +743,7 @@ CloudObject.clearFromSaveEventually = function(document, callback) {
     localforage.getItem('cb-saveEventually-' + CB.appId).then(function(values) {
         var arr = [];
         values.forEach((value) => {
-            if (value.document._hash != document.document._hash)
+            if (value.document._hash != document._hash)
                 arr.push(value);
             }
         );

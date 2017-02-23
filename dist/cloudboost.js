@@ -8334,18 +8334,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            this.onConnect(function () {
 	                _CB2.default.CloudApp._isConnected = true;
-	                console.log('App conected');
-	                _CB2.default.CloudObject.sync({
-	                    success: function success(obj) {
-	                        console.log(obj);
-	                    },
-	                    error: function error(err) {
-	                        console.log(err);
-	                    }
-	                });
+	                _CB2.default.CloudObject.sync();
 	            });
 	            this.onDisconnect(function () {
-	                console.log('App disconnected');
 	                _CB2.default.CloudApp._isConnected = false;
 	            });
 	        }
@@ -16866,6 +16857,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
+	        key: 'disableSync',
+	        value: function disableSync(callback) {
+	            _CB2.default.CloudObject.disableSync(this.document, callback);
+	        }
+	    }, {
 	        key: 'fetch',
 	        value: function fetch(callback) {
 	            //fetch the document from the db
@@ -17219,7 +17215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cloudObjects = [cloudObjects];
 	        CloudObject.pin(cloudObjects, callback);
 	    } else {
-	        var groupedObjects = groupObjects(cloudObjects);
+	        var groupedObjects = _groupObjects(cloudObjects);
 	        groupedObjects.forEach(function (object) {
 	            var arr = [];
 	            _localforage2.default.getItem(_CB2.default.appId + '-' + object.tableName).then(function (value) {
@@ -17257,7 +17253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cloudObjects = [cloudObjects];
 	        CloudObject.unPin(cloudObjects);
 	    } else {
-	        var groupedObjects = groupObjects(cloudObjects);
+	        var groupedObjects = _groupObjects(cloudObjects);
 	        groupedObjects.forEach(function (object) {
 	            _localforage2.default.getItem(_CB2.default.appId + '-' + object.tableName).then(function (objects) {
 	                var arr = [];
@@ -17311,7 +17307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	};
 
-	function groupObjects(objects) {
+	function _groupObjects(objects) {
 	    var groups = {};
 	    for (var i = 0; i < objects.length; i++) {
 	        if (!(objects[i] instanceof _CB2.default.CloudObject)) {
@@ -17349,7 +17345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        cloudObject.save({
 	                            success: function success(obj) {
 	                                count++;
-	                                _CB2.default.CloudObject.clearFromSaveEventually(document, {
+	                                _CB2.default.CloudObject.disableSync(document.document, {
 	                                    success: function success(obj) {
 	                                        if (!callback) {
 	                                            def.resolve(count);
@@ -17399,14 +17395,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
-	CloudObject.clearFromSaveEventually = function (document, callback) {
+	CloudObject.disableSync = function (document, callback) {
 	    var def;
 	    if (!callback) def = new _CB2.default.Promise();
 	    _CB2.default._validate();
 	    _localforage2.default.getItem('cb-saveEventually-' + _CB2.default.appId).then(function (values) {
 	        var arr = [];
 	        values.forEach(function (value) {
-	            if (value.document._hash != document.document._hash) arr.push(value);
+	            if (value.document._hash != document._hash) arr.push(value);
 	        });
 	        _localforage2.default.setItem('cb-saveEventually-' + _CB2.default.appId, arr).then(function (obj) {
 	            if (!callback) {
