@@ -35,6 +35,7 @@ class CloudApp {
                 CB.Socket = CB.io(CB.apiUrl);
             }
         }
+        CB.CloudApp._isConnected = true;
         this.onConnect(function() {
             CB.CloudApp._isConnected = true;
             CB.CloudObject.sync();
