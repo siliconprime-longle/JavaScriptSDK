@@ -74,7 +74,23 @@ class CloudQuery {
 
         return this;
     };
-
+    delete(callback) {
+        var def;
+        if (!callback)
+            def = new CB.Promise();
+        this.find({
+            success: function(obj) {
+                CB.CloudObject.deleteAll(obj, callback);
+            },
+            error: function(err) {
+                if (callback) {
+                    callback.error(err);
+                } else {
+                    def.reject(err);
+                }
+            }
+        })
+    }
     includeList(columnName) {
         if (columnName === 'id')
             columnName = '_' + columnName;
