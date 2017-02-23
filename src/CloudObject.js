@@ -1,4 +1,6 @@
 import CB from './CB'
+import localforage from 'localforage'
+
 /*
  CloudObject
  */
@@ -116,6 +118,63 @@ class CloudObject {
         }
     };
 
+    pin(callback) { //pins the document to the local store
+        CB.CloudObject.pin(this, callback);
+    };
+
+    unPin(callback) { //pins the document to the local store
+        CB.CloudObject.unPin(this, callback);
+    };
+
+    saveEventually(callback) {
+        var thisObj = this;
+        var def;
+        if (!callback) {
+            def = new CB.Promise();
+        }
+        CB._validate();
+        localforage.getItem('cb-saveEventually-' + CB.appId).then(function(value) {
+            var arr = [];
+            if (value)
+                arr = value;
+            arr.push({saved: false, document: CB.toJSON(thisObj)});
+            localforage.setItem('cb-saveEventually-' + CB.appId, arr).then(function(value) {
+                CloudObject.pin(thisObj, {
+                    success: function(obj) {
+                        if (!callback) {
+                            def.resolve(value);
+                        } else {
+                            callback.success(value);
+                        }
+                    },
+                    error: function(err) {
+                        if (!callback) {
+                            def.reject(err);
+                        } else {
+                            callback.error(err);
+                        }
+                    }
+                });
+            }).catch(function(err) {
+                if (!callback) {
+                    def.reject(err);
+                } else {
+                    callback.error(err);
+                }
+            });
+        }).catch(function(err) {
+            if (!callback) {
+                def.reject(err);
+            } else {
+                callback.error(err);
+            }
+        });
+    }
+
+    disableSync(callback) {
+        CB.CloudObject.disableSync(this.document, callback);
+    }
+
     fetch(callback) { //fetch the document from the db
         if (!CB.appId) {
             throw "CB.appId is null.";
@@ -212,20 +271,12 @@ Object.defineProperty(CloudObject.prototype, 'id', {
 Object.defineProperty(CloudObject.prototype, 'createdAt', {
     get: function() {
         return this.document.createdAt;
-    },
-    set: function(createdAt) {
-        this.document.createdAt = createdAt;
-        CB._modified(this, 'createdAt');
     }
 });
 
 Object.defineProperty(CloudObject.prototype, 'updatedAt', {
     get: function() {
         return this.document.updatedAt;
-    },
-    set: function(updatedAt) {
-        this.document.updatedAt = updatedAt;
-        CB._modified(this, 'updatedAt');
     }
 });
 
@@ -482,6 +533,243 @@ CloudObject.deleteAll = function(array, callback) {
 
 };
 
+CloudObject.pin = function(cloudObjects, callback) {
+    if (!cloudObjects)
+        throw "cloudObject(s) is required.";
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    CB._validate();
+    if (!(cloudObjects instanceof Array)) {
+        cloudObjects = [cloudObjects];
+        CloudObject.pin(cloudObjects, callback);
+    } else {
+        var groupedObjects = _groupObjects(cloudObjects);
+        groupedObjects.forEach((object) => {
+            var arr = [];
+            localforage.getItem(CB.appId + '-' + object.tableName).then(function(value) {
+                if (value)
+                    arr = value;
+                localforage.setItem(CB.appId + '-' + object.tableName, arr.concat(object.object)).then(function(value) {
+                    if (!callback) {
+                        def.resolve(value);
+                    } else {
+                        callback.success(value);
+                    }
+                }).catch(function(err) {
+                    if (!callback) {
+                        def.reject(err);
+                    } else {
+                        callback.error(err);
+                    }
+                });
+
+            }).catch(function(err) {
+                if (!callback) {
+                    def.reject(err);
+                } else {
+                    callback.error(err);
+                }
+            });
+        })
+
+    }
+
+}
+
+CloudObject.unPin = function(cloudObjects, callback) {
+    if (!cloudObjects)
+        throw "cloudObject(s) is required.";
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    CB._validate();
+    if (!(cloudObjects instanceof Array)) {
+        cloudObjects = [cloudObjects];
+        CloudObject.unPin(cloudObjects);
+    } else {
+        var groupedObjects = _groupObjects(cloudObjects);
+        groupedObjects.forEach((object) => {
+            localforage.getItem(CB.appId + '-' + object.tableName).then(function(objects) {
+                var arr = [];
+                objects.forEach((obj) => {
+                    object.object.forEach((cloudObject) => {
+                        if (cloudObject._hash != obj._hash) {
+                            arr.push(obj);
+                        }
+                    });
+                });
+                localforage.setItem(CB.appId + '-' + object.tableName, arr).then(function(obj) {
+                    if (!callback) {
+                        def.resolve(obj);
+                    } else {
+                        callback.success(obj);
+                    }
+                }).catch(function(err) {
+                    if (!callback) {
+                        def.reject(err);
+                    } else {
+                        callback.error(err);
+                    }
+                })
+
+            }).catch(function(err) {
+                if (!callback) {
+                    def.reject(err);
+                } else {
+                    callback.error(err);
+                }
+            });
+        });
+    }
+
+}
+
+CloudObject.clearLocalStore = function(callback) {
+    CB._validate();
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    localforage.clear().then(function() {
+        if (!callback) {
+            def.resolve();
+        } else {
+            callback.success();
+        }
+    }).catch(function(err) {
+        if (!callback) {
+            def.reject(err);
+        } else {
+            callback.error(err);
+        }
+    });
+}
+
+function _groupObjects(objects) {
+    var groups = {};
+    for (var i = 0; i < objects.length; i++) {
+        if (!(objects[i]instanceof CB.CloudObject)) {
+            throw "Should Be an instance of CloudObjects";
+        }
+        var groupName = objects[i].document._tableName;
+        if (!groups[groupName]) {
+            groups[groupName] = [];
+        }
+        groups[groupName].push(objects[i].document);
+    }
+    objects = [];
+    for (var groupName in groups) {
+        objects.push({tableName: groupName, object: groups[groupName]});
+    }
+    return objects;
+}
+
+CloudObject.sync = function(callback) {
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    CB._validate();
+    if (CB.CloudApp._isConnected) {
+        localforage.getItem('cb-saveEventually-' + CB.appId).then(function(documents) {
+            var cloudObjects = [];
+            var count = 0;
+            var cloudObject = null;
+            if (documents) {
+                var length = documents.length;
+
+                documents.forEach((document) => {
+                    length--;
+                    if (!document.saved) {
+                        cloudObject = CB.fromJSON(document.document);
+                        cloudObject.save({
+                            success: function(obj) {
+                                count++;
+                                CB.CloudObject.disableSync(document.document, {
+                                    success: function(obj) {
+                                        if (!callback) {
+                                            def.resolve(count);
+                                        } else {
+                                            callback.success(count);
+                                        }
+                                    },
+                                    error: function(err) {
+                                        if (!callback) {
+                                            def.reject(err);
+                                        } else {
+                                            callback.error(err);
+                                        }
+                                    }
+                                })
+                            },
+                            error: function(err) {
+                                if (!callback) {
+                                    def.reject(err);
+                                } else {
+                                    callback.error(err);
+                                }
+                            }
+                        });
+                    }
+
+                });
+            } else {
+                if (!callback) {
+                    def.resolve('Already up to date.');
+                } else {
+                    callback.success('Already up to date');
+                }
+            }
+        }).catch(function(err) {
+            if (!callback) {
+                def.reject(err);
+            } else {
+                callback.error(err);
+            }
+        });
+    } else {
+        if (!callback) {
+            def.reject('Internet connection not found.');
+        } else {
+            callback.error('Internet connection not found.');
+        }
+    }
+}
+
+CloudObject.disableSync = function(document, callback) {
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    CB._validate();
+    localforage.getItem('cb-saveEventually-' + CB.appId).then(function(values) {
+        var arr = [];
+        values.forEach((value) => {
+            if (value.document._hash != document._hash)
+                arr.push(value);
+            }
+        );
+        localforage.setItem('cb-saveEventually-' + CB.appId, arr).then(function(obj) {
+            if (!callback) {
+                def.resolve(obj);
+            } else {
+                callback.success(obj);
+            }
+        }).catch(function(err) {
+            if (!callback) {
+                def.reject(err);
+            } else {
+                callback.error(err);
+            }
+        })
+
+    }).catch(function(err) {
+        if (!callback) {
+            def.reject(err);
+        } else {
+            callback.error(err);
+        }
+    });
+}
+
 /* Private Methods */
 CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //delete an object matching the objectId
 
@@ -508,6 +796,5 @@ CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //d
 
 };
 
-CB.CloudObject = CloudObject
-
+CB.CloudObject = CloudObject;
 export default CB.CloudObject
