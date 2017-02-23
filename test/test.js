@@ -301,14 +301,14 @@ describe("Cloud App", function() {
 	
 });
 
-describe("Should Create All Test Tables",function(done){
+describe("Should Create All Test Tables", function(done) {
 
-    before(function(){
+    before(function() {
         this.timeout(10000);
         CB.appKey = CB.masterKey;
     });
 
-    it("Should create a table",function(done){
+    it("Should create a table", function(done) {
         this.timeout(50000);
         var Age = new CB.Column('Age');
         Age.dataType = 'Number';
@@ -323,32 +323,32 @@ describe("Should Create All Test Tables",function(done){
         var password = new CB.Column('password');
         password.dataType = 'EncryptedText';
         obj.addColumn(password);
-        obj.save().then(function(res){
+        obj.save().then(function(res) {
             //console.log(res);
             done();
-        },function(err){
+        }, function(err) {
             throw "Unable to Create Table";
         });
     });
 
-    it("should create an empty table",function(done){
+    it("should create an empty table", function(done) {
 
         this.timeout(50000);
 
         var obj = new CB.CloudTable('Empty');
-    
-        obj.save().then(function(res){
-            if(res.id){
+
+        obj.save().then(function(res) {
+            if (res.id) {
                 done();
-            }else
+            } else
                 done("Table saved but didnot return the id.");
-        },function(err){
+            }
+        , function(err) {
             throw "Unable to Create Table";
         });
     });
 
-
-    it("should create a table with two underscore columns",function(done){
+    it("should create a table with two underscore columns", function(done) {
 
         this.timeout(50000);
 
@@ -359,25 +359,24 @@ describe("Should Create All Test Tables",function(done){
 
         obj.addColumn(Age);
 
-        obj.save().then(function(obj){
+        obj.save().then(function(obj) {
 
             var Age = new CB.Column('Age_b');
             Age.dataType = 'Text';
 
             obj.addColumn(Age);
-            obj.save().then(function(obj){
-               done();
-            },function(err){
+            obj.save().then(function(obj) {
+                done();
+            }, function(err) {
                 done("Cannot save two underscore columns.");
             });
 
-        },function(err){
+        }, function(err) {
             throw "Unable to Create Table";
         });
     });
 
-
-    it("should create a table",function(done){
+    it("should create a table", function(done) {
 
         this.timeout(50000);
 
@@ -391,15 +390,15 @@ describe("Should Create All Test Tables",function(done){
         obj.addColumn(Revenue);
         obj.addColumn(Name);
         obj.addColumn(File);
-        obj.save().then(function(res){
+        obj.save().then(function(res) {
             //console.log(res);
             done();
-        },function(){
+        }, function() {
             throw "Unable to Create Table";
         });
     });
 
-    it("should create a table",function(done){
+    it("should create a table", function(done) {
 
         this.timeout(50000);
 
@@ -410,20 +409,20 @@ describe("Should Create All Test Tables",function(done){
         PinCode.dataType = 'Number';
         obj.addColumn(City);
         obj.addColumn(PinCode);
-        obj.save().then(function(res){
+        obj.save().then(function(res) {
             //console.log(res);
             done();
-        },function(){
+        }, function() {
             throw "Unable to Create Table";
         });
     });
 
-    it("Should update the table schema",function(done){
+    it("Should update the table schema", function(done) {
 
         this.timeout(50000);
 
         var obj = new CB.CloudTable('Employee');
-        CB.CloudTable.get(obj).then(function(res){
+        CB.CloudTable.get(obj).then(function(res) {
             var Company = new CB.Column('Company');
             Company.dataType = 'Relation';
             Company.relatedTo = 'Company';
@@ -432,23 +431,23 @@ describe("Should Create All Test Tables",function(done){
             Address.dataType = 'Relation';
             Address.relatedTo = 'Address';
             res.addColumn(Address);
-            res.save().then(function(res){
+            res.save().then(function(res) {
                 //console.log(res);
                 done();
-            },function(err){
+            }, function(err) {
                 throw "Unable to Update schema of the table";
             })
-        },function(){
+        }, function() {
             throw "Unable to get table";
         });
     });
 
-    it("Should update the table schema",function(done){
+    it("Should update the table schema", function(done) {
 
         this.timeout(50000);
 
         var obj = new CB.CloudTable('Company');
-        CB.CloudTable.get(obj).then(function(res){
+        CB.CloudTable.get(obj).then(function(res) {
             var Employee = new CB.Column('Employee');
             Employee.dataType = 'List';
             Employee.relatedTo = 'Employee';
@@ -457,104 +456,99 @@ describe("Should Create All Test Tables",function(done){
             Address.dataType = 'Relation';
             Address.relatedTo = 'Address';
             res.addColumn(Address);
-            res.save().then(function(res){
+            res.save().then(function(res) {
                 //console.log(res);
                 done();
-            },function(err){
+            }, function(err) {
                 throw "Unable to Update schema of the table";
             })
-        },function(){
+        }, function() {
             throw "Unable to get table";
         });
     });
 
-
-
-    it("should create table student4",function(done){
+    it("should create table student4", function(done) {
 
         this.timeout(50000);
-          var student = new CB.CloudTable('student4');
-            var subject = new CB.Column('subject');
-            subject.dataType = 'List';
-            subject.relatedTo = 'Text';
-            var age = new CB.Column('age');
-            age.dataType = 'Number';
-            student.addColumn(subject);
-            student.addColumn(age);
-            student.save().then(function(res){
-                done();
-            },function(){
-                throw "Unable to create Student";
-            });
+        var student = new CB.CloudTable('student4');
+        var subject = new CB.Column('subject');
+        subject.dataType = 'List';
+        subject.relatedTo = 'Text';
+        var age = new CB.Column('age');
+        age.dataType = 'Number';
+        student.addColumn(subject);
+        student.addColumn(age);
+        student.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Student";
+        });
     });
 
-
-    it("should create table Role",function(done){
+    it("should create table Role", function(done) {
 
         this.timeout(50000);
-
 
         var role = new CB.CloudTable('Role');
-        role.save().then(function(res){
+        role.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Role";
         });
-       
+
     });
 
-
-    it("should create table user",function(done){
+    it("should create table user", function(done) {
 
         this.timeout(50000);
 
         var user = new CB.CloudTable('User');
-        
+
         var newColumn = new CB.Column('newColumn');
         newColumn.dataType = 'Text';
         user.addColumn(newColumn);
 
-        user.save().then(function(user){
+        user.save().then(function(user) {
             var newColumn1 = new CB.Column('newColumn1');
             newColumn1.dataType = 'Text';
             user.addColumn(newColumn1);
 
-            user.save().then(function(res){
+            user.save().then(function(res) {
                 done();
-            },function(error){
+            }, function(error) {
                 throw "Unable to create user";
             });
-        },function(error){
+        }, function(error) {
             throw "Unable to create user";
         });
     });
 
-    it("should create table device",function(done){
+    it("should create table device", function(done) {
 
         this.timeout(50000);
 
         var device = new CB.CloudTable('Device');
-        
+
         var newColumn = new CB.Column('newColumn');
         newColumn.dataType = 'Text';
         device.addColumn(newColumn);
 
-        device.save().then(function(device){
+        device.save().then(function(device) {
             var newColumn1 = new CB.Column('newColumn1');
             newColumn1.dataType = 'Text';
             device.addColumn(newColumn1);
 
-            device.save().then(function(res){
+            device.save().then(function(res) {
                 done();
-            },function(error){
+            }, function(error) {
                 throw "Unable to create device";
             });
-        },function(error){
+        }, function(error) {
             throw "Unable to create device";
         });
     });
 
-    it("should create table Custom",function(done){
+    it("should create table Custom", function(done) {
 
         this.timeout(60000);
 
@@ -583,50 +577,49 @@ describe("Should Create All Test Tables",function(done){
         newColumn7.dataType = 'GeoPoint';
         custom.addColumn(newColumn7);
         custom.addColumn(newColumn6);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create user";
         });
     });
 
-    it("should update custom table ",function(done){
+    it("should update custom table ", function(done) {
 
         this.timeout(60000);
 
         var custom = new CB.CloudTable('Custom');
-        CB.CloudTable.get(custom).then(function(custom){
+        CB.CloudTable.get(custom).then(function(custom) {
             var newColumn7 = new CB.Column('newColumn7');
             newColumn7.dataType = 'List';
             newColumn7.relatedTo = 'Custom';
             custom.addColumn(newColumn7);
-            custom.save().then(function(res){
+            custom.save().then(function(res) {
                 done();
-            },function(){
+            }, function() {
                 throw "Unable to create user";
             });
-        },function(){
-           throw "Unable to get Table";
+        }, function() {
+            throw "Unable to get Table";
         });
     });
 
-    it("should create table Custom5",function(done){
+    it("should create table Custom5", function(done) {
 
-         this.timeout(30000);
+        this.timeout(30000);
 
-         var custom = new CB.CloudTable('Custom5');
-         var newColumn = new CB.Column('location');
-         newColumn.dataType = 'GeoPoint';
-         custom.addColumn(newColumn);
-         custom.save().then(function(res){
+        var custom = new CB.CloudTable('Custom5');
+        var newColumn = new CB.Column('location');
+        newColumn.dataType = 'GeoPoint';
+        custom.addColumn(newColumn);
+        custom.save().then(function(res) {
             done();
-         },function(error){
+        }, function(error) {
             throw "Unable to create Custom5";
-         });
+        });
     });
 
-
-    it("should create table Sample",function(done){
+    it("should create table Sample", function(done) {
 
         this.timeout(50000);
 
@@ -654,20 +647,19 @@ describe("Should Create All Test Tables",function(done){
         newColumn7.dataType = 'List';
         newColumn7.relatedTo = 'File';
         custom.addColumn(newColumn7);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Sample";
         });
     });
 
-
-    it("should update Sample table ",function(done){
+    it("should update Sample table ", function(done) {
 
         this.timeout(50000);
 
         var custom = new CB.CloudTable('Sample');
-        CB.CloudTable.get(custom).then(function(custom){
+        CB.CloudTable.get(custom).then(function(custom) {
             var newColumn = new CB.Column('uniqueRelation');
             newColumn.dataType = 'Relation';
             newColumn.relatedTo = 'Sample';
@@ -681,18 +673,17 @@ describe("Should Create All Test Tables",function(done){
             newColumn5.dataType = 'List';
             newColumn5.relatedTo = 'Sample';
             custom.addColumn(newColumn5);
-            custom.save().then(function(res){
+            custom.save().then(function(res) {
                 done();
-            },function(){
+            }, function() {
                 throw "Unable to Update Sample";
             });
-        },function(){
+        }, function() {
             throw "Unable to get Table";
         });
     });
 
-
-    it("should create table hostel",function(done){
+    it("should create table hostel", function(done) {
 
         this.timeout(50000);
 
@@ -703,17 +694,16 @@ describe("Should Create All Test Tables",function(done){
         var newColumn1 = new CB.Column('name');
         newColumn1.dataType = 'Text';
         custom.addColumn(newColumn1);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create hostel";
         });
-
 
     });
 
     //create Hostel
-    it("should create table student1",function(done){
+    it("should create table student1", function(done) {
 
         this.timeout(50000);
 
@@ -728,14 +718,14 @@ describe("Should Create All Test Tables",function(done){
         var newColumn3 = new CB.Column('name');
         newColumn3.dataType = 'Text';
         custom.addColumn(newColumn3);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Sample";
         });
     });
 
-    it("should create table Student",function(done){
+    it("should create table Student", function(done) {
 
         this.timeout(50000);
 
@@ -752,15 +742,40 @@ describe("Should Create All Test Tables",function(done){
         var newColumn3 = new CB.Column('description');
         newColumn3.dataType = 'Text';
         custom.addColumn(newColumn3);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Student";
         });
 
     });
 
-    it("should create table Custom18",function(done){
+    it("should create table Offline", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Offline');
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('age');
+        newColumn1.dataType = 'Number';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('class');
+        newColumn2.dataType = 'Text';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('description');
+        newColumn3.dataType = 'Text';
+        custom.addColumn(newColumn3);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Student";
+        });
+
+    });
+
+    it("should create table Custom18", function(done) {
 
         this.timeout(50000);
 
@@ -768,15 +783,15 @@ describe("Should Create All Test Tables",function(done){
         var newColumn = new CB.Column('number');
         newColumn.dataType = 'Number';
         custom.addColumn(newColumn);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom18";
         });
 
     });
 
-    it("should create table Custom3",function(done){
+    it("should create table Custom3", function(done) {
 
         this.timeout(50000);
 
@@ -784,14 +799,14 @@ describe("Should Create All Test Tables",function(done){
         var newColumn = new CB.Column('address');
         newColumn.dataType = 'Text';
         custom.addColumn(newColumn);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom3";
         });
     });
 
-    it("should create table Custom7",function(done){
+    it("should create table Custom7", function(done) {
 
         this.timeout(50000);
 
@@ -799,14 +814,14 @@ describe("Should Create All Test Tables",function(done){
         var newColumn = new CB.Column('requiredNumber');
         newColumn.dataType = 'Number';
         custom.addColumn(newColumn);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom7";
         });
     });
 
-    it("should create table Custom2",function(done){
+    it("should create table Custom2", function(done) {
 
         this.timeout(50000);
 
@@ -822,14 +837,14 @@ describe("Should Create All Test Tables",function(done){
         newColumn2.dataType = 'Relation';
         newColumn2.relatedTo = 'Custom3';
         custom.addColumn(newColumn2);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom2";
         });
     });
 
-    it("should create table Custom4",function(done){
+    it("should create table Custom4", function(done) {
 
         this.timeout(50000);
 
@@ -841,20 +856,19 @@ describe("Should Create All Test Tables",function(done){
         newColumn1.dataType = 'List';
         newColumn1.relatedTo = 'student1';
         custom.addColumn(newColumn1);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom4";
         });
 
     });
 
-
-    it("should create table Custom14",function(done){
+    it("should create table Custom14", function(done) {
 
         this.timeout(50000);
 
-         var custom = new CB.CloudTable('Custom14');
+        var custom = new CB.CloudTable('Custom14');
         var newColumn = new CB.Column('ListNumber');
         newColumn.dataType = 'List';
         newColumn.relatedTo = 'Number';
@@ -863,15 +877,15 @@ describe("Should Create All Test Tables",function(done){
         newColumn1.dataType = 'List';
         newColumn1.relatedTo = 'GeoPoint';
         custom.addColumn(newColumn1);
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom14";
         });
 
     });
 
-   it("should create table Custom1",function(done){
+    it("should create table Custom1", function(done) {
 
         this.timeout(50000);
 
@@ -886,15 +900,15 @@ describe("Should Create All Test Tables",function(done){
         newColumn2.dataType = 'Boolean';
         custom.addColumn(newColumn2);
 
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
             done();
-        },function(){
+        }, function() {
             throw "Unable to create Custom1";
         });
 
     });
 
-    it("should create table and delete table",function(done){
+    it("should create table and delete table", function(done) {
 
         this.timeout(50000);
 
@@ -912,23 +926,51 @@ describe("Should Create All Test Tables",function(done){
         newColumn2.dataType = 'Boolean';
         custom.addColumn(newColumn2);
 
-        custom.save().then(function(res){
+        custom.save().then(function(res) {
 
-            res.delete().then(function(delRes){
+            res.delete().then(function(delRes) {
                 done();
-            },function(err){ 
-                done(err);               
+            }, function(err) {
+                done(err);
                 throw "Unable to delete a table.";
             });
 
-        },function(){
+        }, function() {
+            throw "Unable to delete a table.";
+        });
+
+    });
+    it("should create tables", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('CustomDelete');
+
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+
+        var newColumn1 = new CB.Column('age');
+        newColumn1.dataType = 'Number';
+        custom.addColumn(newColumn1);
+
+        custom.save().then(function(res) {
+
+            res.delete().then(function(delRes) {
+                done();
+            }, function(err) {
+                done(err);
+                throw "Unable to delete a table.";
+            });
+
+        }, function() {
             throw "Unable to delete a table.";
         });
 
     });
 
     after(function() {
-       CB.appKey = CB.jsKey;
+        CB.appKey = CB.jsKey;
     });
 
 });
@@ -8113,6 +8155,7 @@ describe("Query on Cloud Object Notifications ", function() {
 });
 
 describe("Offline Mode", function() {
+
     var obj1 = new CB.CloudObject('Student');
     obj1.set('name', 'Student');
     var obj2 = new CB.CloudObject('Sample');
@@ -8121,28 +8164,33 @@ describe("Offline Mode", function() {
     obj3.set('address', 'Najafgarh New Delhi');
 
     it("should pin the object to local store", function(done) {
+        this.timeout(70000);
 
-        this.timeout(30000);
-        var found = false;
-        var obj = new CB.CloudObject('Student');
-        obj.set('name', 'Ritish');
-        obj.pin({
-            success: function(data) {
-                found = data.some(function(element) {
-                    return element._hash == obj.document._hash;
-                })
-            },
-            error: function(err) {
-                done(err);
-            }
-        });
+        console.log('Disconnecting App......');
+        CB.CloudApp.disconnect();
         setTimeout(function() {
-            if (found)
-                done();
-            else {
-                done('object not found in local store.')
-            }
-        }, 10000);
+            var found = false;
+            var obj = new CB.CloudObject('Student');
+            obj.set('name', 'Ritish');
+            obj.pin({
+                success: function(data) {
+                    found = data.some(function(element) {
+                        return element._hash == obj.document._hash;
+                    })
+                },
+                error: function(err) {
+                    done(err);
+                }
+            });
+            setTimeout(function() {
+                if (found)
+                    done();
+                else {
+                    done('object not found in local store.')
+                }
+            }, 5000);
+
+        }, 50000);
 
     });
 
@@ -8186,7 +8234,7 @@ describe("Offline Mode", function() {
             else {
                 done('object not found in local store.')
             }
-        }, 10000);
+        }, 5000);
     });
 
     it("should unpin the object from the local store", function(done) {
@@ -8212,7 +8260,7 @@ describe("Offline Mode", function() {
             else {
                 done('object found in local store.')
             }
-        }, 10000);
+        }, 5000);
 
     });
 
@@ -8244,32 +8292,112 @@ describe("Offline Mode", function() {
             else {
                 done('objects found in local store.')
             }
+        }, 5000);
+
+    });
+
+    it("should save the objects eventually", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+
+        var obj2 = new CB.CloudObject('Student');
+        obj2.set('name', 'Offline-Student');
+        obj2.set('age', 79);
+        obj2.saveEventually({
+            success: function(obj) {
+                count++;
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+
+        setTimeout(function() {
+            var obj1 = new CB.CloudObject('Offline');
+            obj1.set('name', 'Offline-offline');
+            obj1.set('age', 79);
+            obj1.saveEventually({
+                success: function(obj) {
+                    count++;
+                },
+                error: function(err) {
+                    done(err);
+                }
+            });
+        }, 1000);
+
+        setTimeout(function() {
+            if (count == 2)
+                done();
+            else {
+                done('objects not saved.')
+            }
+        }, 5000);
+
+    });
+
+    it("should query the local store", function(done) {
+
+        this.timeout(30000);
+        var query = new CB.CloudQuery('Offline');
+        query.equalTo('name', 'Offline-offline');
+        query.findFromLocalStore({
+            success: function(obj) {
+                console.log(obj);
+                if (obj[0].get('name') == 'Offline-offline')
+                    done();
+                else
+                    done('Not found');
+                }
+            ,
+            error: function(err) {
+                done(err);
+            }
+        })
+
+    });
+
+    it("should call sync function on onConnect", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+        console.log('Connecting App');
+        CB.CloudApp.connect();
+
+        setTimeout(function() {
+            var query = new CB.CloudQuery('Student');
+            query.equalTo('name', 'Offline-Student');
+            query.find({
+                success: function(obj) {
+                    console.log(obj);
+                    if (obj[0].get('name') == 'Offline-Student')
+                        done();
+                    else
+                        done('Not found');
+                    }
+                ,
+                error: function(err) {
+                    done(err);
+                }
+            })
         }, 10000);
 
     });
 
-    // it("should save the objects eventually", function(done) {
-    //
-    //     this.timeout(30000);
-    //     var count = 0;
-    //     var obj1 = new CB.CloudObject('Sample');
-    //     obj1.set('name', 'Offline-Sample');
-    //     obj1.set('unique', 'abrakadabra');
-    //     obj1.saveEventually();
-    //     var obj2 = new CB.CloudObject('Student');
-    //     obj2.set('name', 'Offline-Student');
-    //     obj2.set('age', 79);
-    //     obj2.saveEventually();
-    //
-    //     setTimeout(function() {
-    //         if (count == 0)
-    //             done();
-    //         else {
-    //             done('objects not saved.')
-    //         }
-    //     }, 10000);
-    //
-    // });
+    it("should clear the local store", function(done) {
+
+        this.timeout(30000);
+        CB.CloudObject.clearLocalStore({
+            success: function(obj) {
+                done();
+            },
+            error: function(err) {
+                done(err);
+            }
+        })
+
+    });
 
 });
 

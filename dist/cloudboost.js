@@ -8334,6 +8334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            this.onConnect(function () {
 	                _CB2.default.CloudApp._isConnected = true;
+	                console.log('App conected');
 	                _CB2.default.CloudObject.sync({
 	                    success: function success(obj) {
 	                        console.log(obj);
@@ -8344,6 +8345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            });
 	            this.onDisconnect(function () {
+	                console.log('App disconnected');
 	                _CB2.default.CloudApp._isConnected = false;
 	            });
 	        }
@@ -16830,7 +16832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _localforage2.default.getItem('cb-saveEventually-' + _CB2.default.appId).then(function (value) {
 	                var arr = [];
 	                if (value) arr = value;
-	                arr.push(_CB2.default.toJSON(thisObj));
+	                arr.push({ saved: false, document: _CB2.default.toJSON(thisObj) });
 	                _localforage2.default.setItem('cb-saveEventually-' + _CB2.default.appId, arr).then(function (value) {
 	                    CloudObject.pin(thisObj, {
 	                        success: function success(obj) {
@@ -17291,7 +17293,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	CloudObject.clearLocalStore = function (callback) {
-	    Cb._validate();
+	    _CB2.default._validate();
 	    var def;
 	    if (!callback) def = new _CB2.default.Promise();
 	    _localforage2.default.clear().then(function () {
@@ -17335,39 +17337,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (_CB2.default.CloudApp._isConnected) {
 	        _localforage2.default.getItem('cb-saveEventually-' + _CB2.default.appId).then(function (documents) {
 	            var cloudObjects = [];
+	            var count = 0;
 	            var cloudObject = null;
-	            if (documents) documents.forEach(function (document) {
-	                cloudObject = _CB2.default.fromJSON(document);
-	                cloudObjects.push(cloudObject);
-	            });
-	            if (cloudObjects.length != 0) {
-	                CloudObject.saveAll(cloudObjects, {
-	                    success: function success(obj) {
-	                        _localforage2.default.removeItem('cb-saveEventually-' + _CB2.default.appId).then(function () {
-	                            if (!callback) {
-	                                def.resolve('Sync Completed');
-	                            } else {
-	                                callback.success('Sync Completed');
-	                            }
-	                        }).catch(function (err) {
-	                            if (!callback) {
-	                                def.reject(err);
-	                            } else {
-	                                callback.error(err);
+	            if (documents) {
+	                var length = documents.length;
+
+	                documents.forEach(function (document) {
+	                    length--;
+	                    if (!document.saved) {
+	                        cloudObject = _CB2.default.fromJSON(document.document);
+	                        cloudObject.save({
+	                            success: function success(obj) {
+	                                count++;
+	                                _CB2.default.CloudObject.clearFromSaveEventually(document, {
+	                                    success: function success(obj) {
+	                                        if (!callback) {
+	                                            def.resolve(count);
+	                                        } else {
+	                                            callback.success(count);
+	                                        }
+	                                    },
+	                                    error: function error(err) {
+	                                        if (!callback) {
+	                                            def.reject(err);
+	                                        } else {
+	                                            callback.error(err);
+	                                        }
+	                                    }
+	                                });
+	                            },
+	                            error: function error(err) {
+	                                if (!callback) {
+	                                    def.reject(err);
+	                                } else {
+	                                    callback.error(err);
+	                                }
 	                            }
 	                        });
-	                    },
-	                    error: function error(err) {
-	                        if (!callback) {
-	                            def.reject(err);
-	                        } else {
-	                            callback.error(err);
-	                        }
 	                    }
 	                });
 	            } else {
 	                if (!callback) {
-	                    def.resolve('Already up to date');
+	                    def.resolve('Already up to date.');
 	                } else {
 	                    callback.success('Already up to date');
 	                }
@@ -17386,6 +17397,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback.error('Internet connection not found.');
 	        }
 	    }
+	};
+
+	CloudObject.clearFromSaveEventually = function (document, callback) {
+	    var def;
+	    if (!callback) def = new _CB2.default.Promise();
+	    _CB2.default._validate();
+	    _localforage2.default.getItem('cb-saveEventually-' + _CB2.default.appId).then(function (values) {
+	        var arr = [];
+	        values.forEach(function (value) {
+	            if (value.document._hash != document.document._hash) arr.push(value);
+	        });
+	        _localforage2.default.setItem('cb-saveEventually-' + _CB2.default.appId, arr).then(function (obj) {
+	            if (!callback) {
+	                def.resolve(obj);
+	            } else {
+	                callback.success(obj);
+	            }
+	        }).catch(function (err) {
+	            if (!callback) {
+	                def.reject(err);
+	            } else {
+	                callback.error(err);
+	            }
+	        });
+	    }).catch(function (err) {
+	        if (!callback) {
+	            def.reject(err);
+	        } else {
+	            callback.error(err);
+	        }
+	    });
 	};
 
 	/* Private Methods */
@@ -17412,7 +17454,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	_CB2.default.CloudObject = CloudObject;
-
 	exports.default = _CB2.default.CloudObject;
 
 /***/ },
@@ -23387,7 +23428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _localforage2.default.getItem(_CB2.default.appId + '-' + thisObj.tableName).then(function (documents) {
 	                var cloudObjects = [];
 	                var cloudObject = null;
-	                documents.forEach(function (document) {
+	                if (documents) documents.forEach(function (document) {
 	                    cloudObject = _CB2.default.fromJSON(document);
 	                    if (CloudQuery._validateQuery(cloudObject, thisObj.query)) cloudObjects.push(cloudObject);
 	                });

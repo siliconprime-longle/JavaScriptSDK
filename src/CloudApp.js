@@ -37,6 +37,7 @@ class CloudApp {
         }
         this.onConnect(function() {
             CB.CloudApp._isConnected = true;
+            console.log('App conected');
             CB.CloudObject.sync({
                 success: function(obj) {
                     console.log(obj);
@@ -47,6 +48,7 @@ class CloudApp {
             });
         });
         this.onDisconnect(function() {
+            console.log('App disconnected');
             CB.CloudApp._isConnected = false;
         });
     }

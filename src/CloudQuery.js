@@ -868,17 +868,19 @@ class CloudQuery {
         localforage.getItem(CB.appId + '-' + thisObj.tableName).then(function(documents) {
             var cloudObjects = [];
             var cloudObject = null;
-            documents.forEach((document) => {
-                cloudObject = CB.fromJSON(document);
-                if (CloudQuery._validateQuery(cloudObject, thisObj.query))
-                    cloudObjects.push(cloudObject);
-                }
-            );
+            if (documents)
+                documents.forEach((document) => {
+                    cloudObject = CB.fromJSON(document);
+                    if (CloudQuery._validateQuery(cloudObject, thisObj.query))
+                        cloudObjects.push(cloudObject);
+                    }
+                );
             if (!callback) {
                 def.resolve(cloudObjects);
             } else {
                 callback.success(cloudObjects);
             }
+
         }).catch(function(err) {
             if (!callback) {
                 def.reject(err);

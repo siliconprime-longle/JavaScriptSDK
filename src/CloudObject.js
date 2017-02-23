@@ -137,7 +137,7 @@ class CloudObject {
             var arr = [];
             if (value)
                 arr = value;
-            arr.push(CB.toJSON(thisObj));
+            arr.push({saved: false, document: CB.toJSON(thisObj)});
             localforage.setItem('cb-saveEventually-' + CB.appId, arr).then(function(value) {
                 CloudObject.pin(thisObj, {
                     success: function(obj) {
@@ -162,7 +162,6 @@ class CloudObject {
                     callback.error(err);
                 }
             });
-
         }).catch(function(err) {
             if (!callback) {
                 def.reject(err);
@@ -623,7 +622,7 @@ CloudObject.unPin = function(cloudObjects, callback) {
 }
 
 CloudObject.clearLocalStore = function(callback) {
-    Cb._validate();
+    CB._validate();
     var def;
     if (!callback)
         def = new CB.Promise();
@@ -669,41 +668,49 @@ CloudObject.sync = function(callback) {
     if (CB.CloudApp._isConnected) {
         localforage.getItem('cb-saveEventually-' + CB.appId).then(function(documents) {
             var cloudObjects = [];
+            var count = 0;
             var cloudObject = null;
-            if (documents)
-                documents.forEach((document) => {
-                    cloudObject = CB.fromJSON(document);
-                    cloudObjects.push(cloudObject);
+            if (documents) {
+                var length = documents.length;
 
-                });
-            if (cloudObjects.length != 0) {
-                CloudObject.saveAll(cloudObjects, {
-                    success: function(obj) {
-                        localforage.removeItem('cb-saveEventually-' + CB.appId).then(function() {
-                            if (!callback) {
-                                def.resolve('Sync Completed');
-                            } else {
-                                callback.success('Sync Completed');
-                            }
-                        }).catch(function(err) {
-                            if (!callback) {
-                                def.reject(err);
-                            } else {
-                                callback.error(err);
+                documents.forEach((document) => {
+                    length--;
+                    if (!document.saved) {
+                        cloudObject = CB.fromJSON(document.document);
+                        cloudObject.save({
+                            success: function(obj) {
+                                count++;
+                                CB.CloudObject.clearFromSaveEventually(document, {
+                                    success: function(obj) {
+                                        if (!callback) {
+                                            def.resolve(count);
+                                        } else {
+                                            callback.success(count);
+                                        }
+                                    },
+                                    error: function(err) {
+                                        if (!callback) {
+                                            def.reject(err);
+                                        } else {
+                                            callback.error(err);
+                                        }
+                                    }
+                                })
+                            },
+                            error: function(err) {
+                                if (!callback) {
+                                    def.reject(err);
+                                } else {
+                                    callback.error(err);
+                                }
                             }
                         });
-                    },
-                    error: function(err) {
-                        if (!callback) {
-                            def.reject(err);
-                        } else {
-                            callback.error(err);
-                        }
                     }
+
                 });
             } else {
                 if (!callback) {
-                    def.resolve('Already up to date');
+                    def.resolve('Already up to date.');
                 } else {
                     callback.success('Already up to date');
                 }
@@ -722,6 +729,41 @@ CloudObject.sync = function(callback) {
             callback.error('Internet connection not found.');
         }
     }
+}
+
+CloudObject.clearFromSaveEventually = function(document, callback) {
+    var def;
+    if (!callback)
+        def = new CB.Promise();
+    CB._validate();
+    localforage.getItem('cb-saveEventually-' + CB.appId).then(function(values) {
+        var arr = [];
+        values.forEach((value) => {
+            if (value.document._hash != document.document._hash)
+                arr.push(value);
+            }
+        );
+        localforage.setItem('cb-saveEventually-' + CB.appId, arr).then(function(obj) {
+            if (!callback) {
+                def.resolve(obj);
+            } else {
+                callback.success(obj);
+            }
+        }).catch(function(err) {
+            if (!callback) {
+                def.reject(err);
+            } else {
+                callback.error(err);
+            }
+        })
+
+    }).catch(function(err) {
+        if (!callback) {
+            def.reject(err);
+        } else {
+            callback.error(err);
+        }
+    });
 }
 
 /* Private Methods */
@@ -750,6 +792,5 @@ CloudObject._validateNotificationQuery = function(cloudObject, cloudQuery) { //d
 
 };
 
-CB.CloudObject = CloudObject
-
+CB.CloudObject = CloudObject;
 export default CB.CloudObject
