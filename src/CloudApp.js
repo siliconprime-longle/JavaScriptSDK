@@ -36,6 +36,7 @@ class CloudApp {
             }
         }
         CB.CloudApp._isConnected = true;
+        _confirmConnection();
         this.onConnect(function() {
             CB.CloudApp._isConnected = true;
             CB.CloudObject.sync();
@@ -84,6 +85,15 @@ class CloudApp {
         CB.Socket.emit('socket-disconnect', CB.appId);
         this._isConnected = false;
     }
+}
+
+function _confirmConnection(callback) {
+    var URL = 'https://api.cloudboost.io/status';
+    CB._request('GET', URL).then(function(res) {
+        CB.CloudApp._isConnected = true;
+    }, function(err) {
+        CB.CloudApp._isConnected = false;
+    });
 }
 
 CB.CloudApp = new CloudApp()
