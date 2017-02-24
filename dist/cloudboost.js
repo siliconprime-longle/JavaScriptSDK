@@ -22604,6 +22604,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this;
 	        }
 	    }, {
+	        key: 'delete',
+	        value: function _delete(callback) {
+	            var def;
+	            if (!callback) def = new _CB2.default.Promise();
+	            this.find({
+	                success: function success(obj) {
+	                    _CB2.default.CloudObject.deleteAll(obj, callback);
+	                },
+	                error: function error(err) {
+	                    if (callback) {
+	                        callback.error(err);
+	                    } else {
+	                        def.reject(err);
+	                    }
+	                }
+	            });
+	        }
+	    }, {
 	        key: 'includeList',
 	        value: function includeList(columnName) {
 	            if (columnName === 'id') columnName = '_' + columnName;
