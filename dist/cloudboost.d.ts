@@ -83,12 +83,20 @@ declare module cloudboost {
 		get(columnName:any):any
 		unset(columnName:any):any
 		save(callback?:any):any
+		saveEventually(callback?:any):any
+		pin(callback?:any):any
+		unPin(callback?:any):any
 		fetch(callback?:any):any
 		delete(callback?:any):any
 		static on(tableName:any, eventType?:any, cloudQuery?:any, callback?:any, done?:any):any
 		static off(tableName:any, eventType?:any, done?:any):any
 		static saveAll(array?:any,callback?:any):any
 		static deleteAll(array?:any,callback?:any):any
+		static pin(cloudObjects?:any,callback?:any):any
+		static unPin(cloudObjects?:any,callback?:any):any
+		static clearLocalStore(callback?:any):any
+		static sync(callback?:any):any
+		static disableSync(document?:any,callback?:any):any
 		ACL:any
 		id:any
 		createdAt:any
@@ -148,6 +156,8 @@ declare module cloudboost {
 		geoWithin (columnName:any, geoPoint?:any, radius?:any):any
 		count (callback?:any):any
 		find (callback?:any):any
+		findFromLocalStore (callback?:any):any
+		delete (callback?:any):any
 		findOne (callback?:any):any
 		distinct (keys?:any, callback?:any):any
 		get (keys?:any, callback?:any):any
