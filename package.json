@@ -21,7 +21,13 @@
   "dependencies": {
     "axios": "^0.14.0",
     "bluebird": "^3.4.6",
+    "csvtojson": "^1.1.4",
+    "form-data": "^2.1.2",
+    "fs": "0.0.1-security",
+    "grunt": "^0.4.5",
     "localStorage": "^1.0.3",
+    "path": "^0.12.7",
+    "q": "^1.4.1",
     "socket.io-client": "^1.7.1"
   },
   "devDependencies": {

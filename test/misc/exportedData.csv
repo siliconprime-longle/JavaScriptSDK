@@ -1,0 +1,3 @@
+_id,_tableName,_type,updatedAt,_version,rel._type,rel._tableName,rel._id,add,email,valid,perm.all,pass,expires,createdAt,ACL.read.allow.user,ACL.write.allow.user,perm
+dHB2bFbh,qwe,custom,2/17/2017,41,custom,qwe,ompFNg6t,https://www.facebook.com/,kash@mail.com,false,level,iISbVOa24TsJfmXP/cr8XHtSMCtBhY5hmr8abIhjx9Eb8akTI/G0xq1SLPmFjndaIz6+gvx/xDqcvwAX2QTngQ==,3/18/2017,2/10/2017,all,all,
+ompFNg6t,qwe,custom,2/17/2017,8,,,,https://www.facebook.com/,kush@mail.com,true,,Ucey3xdARZ9AYTH8Y2lzhz4ZQ6fsPTxukjIzbado7fhMbK3v3uTCBK5hG8PxOIBJ7oz5ABOIwwyveOwZfHYpPA==,3/17/2017,2/17/2017,all,all,
