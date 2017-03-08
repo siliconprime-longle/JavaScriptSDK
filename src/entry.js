@@ -4,7 +4,11 @@ import CB from './CB'
 
 try {
  	if(window){
- 		CB._isNode = false
+		if(navigator.product == 'ReactNative'){
+			CB._isNode = true
+		} else {
+			CB._isNode = false
+		}
  	}
 } catch(e){
 	CB._isNode = true

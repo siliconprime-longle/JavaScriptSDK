@@ -93,8 +93,13 @@ class CloudBoost {
 
 let CB = new CloudBoost()
 
+
 // inheriting BlueBird Promise Library
-Object.setPrototypeOf(CB.Promise,Promise_BlueBird)
+if(Object.setPrototypeOf){
+    Object.setPrototypeOf(CB.Promise,Promise_BlueBird)
+} else {
+    CB.Promise.prototype = Promise_BlueBird.prototype
+}
 
 export default CB
 

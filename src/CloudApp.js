@@ -29,7 +29,10 @@ class CloudApp {
         } else {
             if (CB._isNode) {
                 CB.io = require('IO')
-                CB.Socket = CB.io(CB.apiUrl)
+                CB.Socket = CB.io(CB.apiUrl,{
+                    jsonp: false,
+                    transports: ['websocket']
+                })
             } else {
                 CB.io = require('./CloudSocketClientLib.js')
                 CB.Socket = CB.io(CB.apiUrl);
