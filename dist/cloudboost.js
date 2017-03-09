@@ -61,11 +61,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	try {
-	  if (window) {
-	    _CB2.default._isNode = false;
-	  }
+		if (window) {
+			if (navigator.product == 'ReactNative') {
+				_CB2.default._isNode = true;
+			} else {
+				_CB2.default._isNode = false;
+			}
+		}
 	} catch (e) {
-	  _CB2.default._isNode = true;
+		_CB2.default._isNode = true;
 	} ///<reference path="./cloudboost.d.ts" />
 
 	__webpack_require__(5);
@@ -85,7 +89,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	__webpack_require__(46);
 
 	try {
-	  window.CB = _CB2.default;
+		window.CB = _CB2.default;
 	} catch (e) {}
 	module.exports = _CB2.default;
 
@@ -211,7 +215,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var CB = new CloudBoost();
 
 	// inheriting BlueBird Promise Library
-	Object.setPrototypeOf(CB.Promise, _bluebird2.default);
+	if (Object.setPrototypeOf) {
+	    Object.setPrototypeOf(CB.Promise, _bluebird2.default);
+	} else {
+	    CB.Promise.prototype = _bluebird2.default.prototype;
+	}
 
 	exports.default = CB;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
@@ -8326,7 +8334,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	                if (_CB2.default._isNode) {
 	                    _CB2.default.io = __webpack_require__(31);
-	                    _CB2.default.Socket = _CB2.default.io(_CB2.default.apiUrl);
+	                    _CB2.default.Socket = _CB2.default.io(_CB2.default.apiUrl, {
+	                        jsonp: false,
+	                        transports: ['websocket']
+	                    });
 	                } else {
 	                    _CB2.default.io = __webpack_require__(32);
 	                    _CB2.default.Socket = _CB2.default.io(_CB2.default.apiUrl);
