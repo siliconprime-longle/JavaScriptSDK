@@ -23,7 +23,8 @@ module.exports = function(grunt) {
                     'src/CloudQueue.js',
                     'src/CloudCache.js',
                     'src/CloudPush.js',
-                    'src/CloudUser.js'
+                    'src/CloudUser.js',
+                    'src/CloudEvent.js'
                 ],
                 // the location of the resulting JS file
                 dest: 'dist/cloudboost.js'
@@ -39,6 +40,7 @@ module.exports = function(grunt) {
                     'test/CloudTable/createTestTables.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudUser/userTest.js',
+                    'test/CloudEvent/test.js',
                     'test/CloudDevice/deviceTest.js',
                     'test/CloudPush/pushSend.js',
                     'test/CloudCache/CloudCache.js',
