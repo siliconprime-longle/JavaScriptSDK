@@ -9,7 +9,7 @@ CloudEvent.track = function(name, data, type, callback) {
     var def;
     if (typeof type === 'object') {
         if (callback != null) {
-            throw '\'type\' cannot be an object'
+            throw '\'type\' cannot be an object.'
         } else {
             callback = type;
             type = 'Custom';
