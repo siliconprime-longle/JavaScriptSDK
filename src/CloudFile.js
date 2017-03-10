@@ -282,7 +282,7 @@ CB.CloudFile.prototype.getFileContent = function(callback) {
     var params = JSON.stringify({key: CB.appKey});
     var url = this.url;
 
-    CB._request('GET', url, params).then(function(response) {
+    CB._request('POST', url, params).then(function(response) {
         if (callback) {
             callback.success(response);
         } else {

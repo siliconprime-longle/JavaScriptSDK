@@ -82,12 +82,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	__webpack_require__(74);
 	__webpack_require__(75);
 	__webpack_require__(76);
-	__webpack_require__(82);
 	__webpack_require__(77);
-	__webpack_require__(78);
 	__webpack_require__(79);
 	__webpack_require__(80);
 	__webpack_require__(81);
+	__webpack_require__(82);
+	__webpack_require__(83);
 
 	try {
 	    window.CB = _CB2.default;
@@ -17029,6 +17029,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    callback.error(err);
 	                }
 	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
 	        }
 	    }, {
 	        key: 'disableSync',
@@ -17416,6 +17419,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        });
 	    }
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
 	CloudObject.unPin = function (cloudObjects, callback) {
@@ -17460,6 +17466,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        });
 	    }
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
 	CloudObject.clearLocalStore = function (callback) {
@@ -17479,6 +17488,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback.error(err);
 	        }
 	    });
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
 	function _groupObjects(objects) {
@@ -17567,6 +17579,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback.error('Internet connection not found.');
 	        }
 	    }
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
 	CloudObject.disableSync = function (document, callback) {
@@ -17598,6 +17613,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback.error(err);
 	        }
 	    });
+	    if (!callback) {
+	        return def.promise;
+	    }
 	};
 
 	/* Private Methods */
@@ -20234,7 +20252,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var params = JSON.stringify({ key: _CB2.default.appKey });
 	    var url = this.url;
 
-	    _CB2.default._request('GET', url, params).then(function (response) {
+	    _CB2.default._request('POST', url, params).then(function (response) {
 	        if (callback) {
 	            callback.success(response);
 	        } else {
@@ -21212,6 +21230,196 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _CB = __webpack_require__(1);
+
+	var _CB2 = _interopRequireDefault(_CB);
+
+	var _axios = __webpack_require__(43);
+
+	var _axios2 = _interopRequireDefault(_axios);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var os = __webpack_require__(78);
+	/*
+	 CloudEvent
+	 */
+
+	var CloudEvent = function CloudEvent() {
+	    _classCallCheck(this, CloudEvent);
+	};
+
+	CloudEvent.track = function (name, data, type, callback) {
+	    var def;
+	    if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) === 'object') {
+	        if (callback != null) {
+	            throw '\'type\' cannot be an object.';
+	        } else {
+	            callback = type;
+	            type = 'Custom';
+	        }
+	    }
+	    if (!type) type = 'Custom';
+	    if (!callback) def = new _CB2.default.Promise();
+
+	    CloudEvent._getDeviceInformation({
+	        success: function success(object) {
+	            data['device'] = object;
+	            var obj = new _CB2.default.CloudObject('_Event');
+	            obj.ACL = new _CB2.default.ACL();
+	            obj.ACL.setPublicReadAccess(false);
+	            obj.ACL.setPublicWriteAccess(false);
+	            obj.set('user', _CB2.default.CloudUser.current);
+	            obj.set('name', name);
+	            obj.set('data', data);
+	            obj.set('type', type);
+	            obj.save({
+	                success: function success(obj) {
+	                    if (callback) {
+	                        callback.success(obj);
+	                    } else {
+	                        def.resolve(obj);
+	                    }
+	                },
+	                error: function error(err) {
+	                    if (callback) {
+	                        callback.error(err);
+	                    } else {
+	                        def.reject(err);
+	                    }
+	                }
+	            });
+	        }
+	    });
+	    if (!callback) return def.promise;
+	};
+
+	CloudEvent._getDeviceInformation = function (callback) {
+	    var obj = new Object();
+	    if (!_CB2.default._isNode) obj['browser'] = _getBrowser();else obj['browser'] = 'node';
+
+	    _getLocation(obj, {
+	        success: function success(object) {
+	            callback.success(object);
+	        }
+	    });
+	};
+
+	CloudEvent._os = function () {};
+
+	function _getBrowser() {
+	    // Opera 8.0+
+	    try {
+	        var isOpera = !!window.opr && !!opr.addons || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+
+	        // Firefox 1.0+
+	        var isFirefox = typeof InstallTrigger !== 'undefined';
+
+	        // Safari 3.0+ "[object HTMLElementConstructor]"
+	        var isSafari = /constructor/i.test(window.HTMLElement) || function (p) {
+	            return p.toString() === "[object SafariRemoteNotification]";
+	        }(!window['safari'] || safari.pushNotification);
+
+	        // Internet Explorer 6-11
+	        var isIE = /*@cc_on!@*/
+	        false || !!document.documentMode;
+
+	        // Edge 20+
+	        var isEdge = !isIE && !!window.StyleMedia;
+
+	        // Chrome 1+
+	        var isChrome = !!window.chrome && !!window.chrome.webstore;
+
+	        if (isChrome) return 'Chrome';else if (isEdge) return 'Edge';else if (isIE) return 'Internet Explorer';else if (isSafari) return 'Safari';else if (isFirefox) return 'Firefox';else if (isOpera) return 'Opera';else {
+	            return 'Other';
+	        }
+	    } catch (e) {
+	        return 'other';
+	    }
+	}
+
+	function _getLocation(obj, callback) {
+	    _axios2.default.get('https://ipinfo.io/json').then(function (data) {
+
+	        obj['ip'] = data.data.ip;
+	        obj['city'] = data.data.city;
+	        obj['region'] = data.data.region;
+	        obj['country'] = data.data.country;
+	        obj['loc'] = data.data.loc;
+	        callback.success(obj);
+	    }).catch(function (err) {
+	        obj['message'] = 'App is Offline';
+	        callback.success(obj);
+	    });
+	}
+
+	_CB2.default.CloudEvent = CloudEvent;
+
+	exports.default = CloudEvent;
+
+/***/ },
+/* 78 */
+/***/ function(module, exports) {
+
+	exports.endianness = function () { return 'LE' };
+
+	exports.hostname = function () {
+	    if (typeof location !== 'undefined') {
+	        return location.hostname
+	    }
+	    else return '';
+	};
+
+	exports.loadavg = function () { return [] };
+
+	exports.uptime = function () { return 0 };
+
+	exports.freemem = function () {
+	    return Number.MAX_VALUE;
+	};
+
+	exports.totalmem = function () {
+	    return Number.MAX_VALUE;
+	};
+
+	exports.cpus = function () { return [] };
+
+	exports.type = function () { return 'Browser' };
+
+	exports.release = function () {
+	    if (typeof navigator !== 'undefined') {
+	        return navigator.appVersion;
+	    }
+	    return '';
+	};
+
+	exports.networkInterfaces
+	= exports.getNetworkInterfaces
+	= function () { return {} };
+
+	exports.arch = function () { return 'javascript' };
+
+	exports.platform = function () { return 'browser' };
+
+	exports.tmpdir = exports.tmpDir = function () {
+	    return '/tmp';
+	};
+
+	exports.EOL = '\n';
+
+
+/***/ },
+/* 79 */
+/***/ function(module, exports, __webpack_require__) {
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
 	var _CB = __webpack_require__(1);
 
 	var _CB2 = _interopRequireDefault(_CB);
@@ -21706,7 +21914,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = _CB2.default.CloudUser;
 
 /***/ },
-/* 78 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	Object.defineProperty(exports, "__esModule", {
@@ -22160,7 +22368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = _CB2.default.CloudCache;
 
 /***/ },
-/* 79 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	Object.defineProperty(exports, "__esModule", {
@@ -22252,7 +22460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = _CB2.default.CloudNotification;
 
 /***/ },
-/* 80 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	Object.defineProperty(exports, "__esModule", {
@@ -22657,7 +22865,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = _CB2.default.CloudPush;
 
 /***/ },
-/* 81 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	Object.defineProperty(exports, "__esModule", {
@@ -23614,6 +23822,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    callback.error(err);
 	                }
 	            });
+	            if (!callback) {
+	                return def.promise;
+	            }
 	        }
 	    }, {
 	        key: 'get',
@@ -24005,199 +24216,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	_CB2.default.CloudQuery = CloudQuery;
 
 	exports.default = _CB2.default.CloudQuery;
-
-/***/ },
-/* 82 */
-/***/ function(module, exports, __webpack_require__) {
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-	var _CB = __webpack_require__(1);
-
-	var _CB2 = _interopRequireDefault(_CB);
-
-	var _axios = __webpack_require__(43);
-
-	var _axios2 = _interopRequireDefault(_axios);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var os = __webpack_require__(83);
-	/*
-	 CloudEvent
-	 */
-
-	var CloudEvent = function CloudEvent() {
-	    _classCallCheck(this, CloudEvent);
-	};
-
-	CloudEvent.track = function (name, data, type, callback) {
-	    var def;
-	    if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) === 'object') {
-	        if (callback != null) {
-	            throw '\'type\' cannot be an object';
-	        } else {
-	            callback = type;
-	            type = 'Custom';
-	        }
-	    }
-	    if (!type) type = 'Custom';
-	    if (!callback) def = new _CB2.default.Promise();
-
-	    CloudEvent._getDeviceInformation({
-	        success: function success(object) {
-	            data['device'] = object;
-	            var obj = new _CB2.default.CloudObject('_Event');
-	            obj.ACL = new _CB2.default.ACL();
-	            obj.ACL.setPublicReadAccess(false);
-	            obj.ACL.setPublicWriteAccess(false);
-	            obj.set('user', _CB2.default.CloudUser.current);
-	            obj.set('name', name);
-	            obj.set('data', data);
-	            obj.set('type', type);
-	            obj.save({
-	                success: function success(obj) {
-	                    if (callback) {
-	                        callback.success(obj);
-	                    } else {
-	                        def.resolve(obj);
-	                    }
-	                },
-	                error: function error(err) {
-	                    if (callback) {
-	                        callback.error(err);
-	                    } else {
-	                        def.reject(err);
-	                    }
-	                }
-	            });
-	        }
-	    });
-	    if (!callback) return def.promise;
-	};
-
-	CloudEvent._getDeviceInformation = function (callback) {
-	    var obj = new Object();
-	    try {
-	        if (window) obj['browser'] = _getBrowser();else obj['browser'] = 'node';
-	    } catch (e) {
-	        obj['browser'] = 'node';
-	    }
-	    _getLocation(obj, {
-	        success: function success(object) {
-	            callback.success(object);
-	        }
-	    });
-	};
-
-	CloudEvent._os = function () {};
-
-	function _getBrowser() {
-	    // Opera 8.0+
-	    try {
-	        var isOpera = !!window.opr && !!opr.addons || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-
-	        // Firefox 1.0+
-	        var isFirefox = typeof InstallTrigger !== 'undefined';
-
-	        // Safari 3.0+ "[object HTMLElementConstructor]"
-	        var isSafari = /constructor/i.test(window.HTMLElement) || function (p) {
-	            return p.toString() === "[object SafariRemoteNotification]";
-	        }(!window['safari'] || safari.pushNotification);
-
-	        // Internet Explorer 6-11
-	        var isIE = /*@cc_on!@*/
-	        false || !!document.documentMode;
-
-	        // Edge 20+
-	        var isEdge = !isIE && !!window.StyleMedia;
-
-	        // Chrome 1+
-	        var isChrome = !!window.chrome && !!window.chrome.webstore;
-
-	        if (isChrome) return 'Chrome';else if (isEdge) return 'Edge';else if (isIE) return 'Internet Explorer';else if (isSafari) return 'Safari';else if (isFirefox) return 'Firefox';else if (isOpera) return 'Opera';else {
-	            return 'Other';
-	        }
-	    } catch (e) {
-	        return 'other';
-	    }
-	}
-
-	function _getLocation(obj, callback) {
-	    _axios2.default.get('https://ipinfo.io/json').then(function (data) {
-
-	        obj['ip'] = data.data.ip;
-	        obj['city'] = data.data.city;
-	        obj['region'] = data.data.region;
-	        obj['country'] = data.data.country;
-	        obj['loc'] = data.data.loc;
-	        callback.success(obj);
-	    }).catch(function (err) {
-	        obj['message'] = 'App is Offline';
-	        callback.success(obj);
-	    });
-	}
-
-	_CB2.default.CloudEvent = CloudEvent;
-
-	exports.default = CloudEvent;
-
-/***/ },
-/* 83 */
-/***/ function(module, exports) {
-
-	exports.endianness = function () { return 'LE' };
-
-	exports.hostname = function () {
-	    if (typeof location !== 'undefined') {
-	        return location.hostname
-	    }
-	    else return '';
-	};
-
-	exports.loadavg = function () { return [] };
-
-	exports.uptime = function () { return 0 };
-
-	exports.freemem = function () {
-	    return Number.MAX_VALUE;
-	};
-
-	exports.totalmem = function () {
-	    return Number.MAX_VALUE;
-	};
-
-	exports.cpus = function () { return [] };
-
-	exports.type = function () { return 'Browser' };
-
-	exports.release = function () {
-	    if (typeof navigator !== 'undefined') {
-	        return navigator.appVersion;
-	    }
-	    return '';
-	};
-
-	exports.networkInterfaces
-	= exports.getNetworkInterfaces
-	= function () { return {} };
-
-	exports.arch = function () { return 'javascript' };
-
-	exports.platform = function () { return 'browser' };
-
-	exports.tmpdir = exports.tmpDir = function () {
-	    return '/tmp';
-	};
-
-	exports.EOL = '\n';
-
 
 /***/ }
 /******/ ])
