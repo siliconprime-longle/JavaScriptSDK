@@ -58,15 +58,11 @@ CloudEvent.track = function(name, data, type, callback) {
 
 CloudEvent._getDeviceInformation = function(callback) {
     var obj = new Object();
-    try {
-        if (window)
-            obj['browser'] = _getBrowser();
-        else
-            obj['browser'] = 'node';
-        }
-    catch (e) {
+    if (!CB._isNode) 
+        obj['browser'] = _getBrowser();
+    else
         obj['browser'] = 'node';
-    }
+
     _getLocation(obj, {
         success: function(object) {
             callback.success(object)
