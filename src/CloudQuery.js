@@ -904,6 +904,9 @@ class CloudQuery {
                 callback.error(err);
             }
         });
+        if (!callback) {
+            return def.promise;
+        }
     };
 
     get(objectId, callback) {

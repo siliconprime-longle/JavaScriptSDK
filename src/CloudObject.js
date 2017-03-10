@@ -169,6 +169,9 @@ class CloudObject {
                 callback.error(err);
             }
         });
+        if (!callback) {
+            return def.promise;
+        }
     }
 
     disableSync(callback) {
@@ -574,7 +577,9 @@ CloudObject.pin = function(cloudObjects, callback) {
         })
 
     }
-
+    if (!callback) {
+        return def.promise;
+    }
 }
 
 CloudObject.unPin = function(cloudObjects, callback) {
@@ -622,6 +627,9 @@ CloudObject.unPin = function(cloudObjects, callback) {
             });
         });
     }
+    if (!callback) {
+        return def.promise;
+    }
 
 }
 
@@ -643,6 +651,9 @@ CloudObject.clearLocalStore = function(callback) {
             callback.error(err);
         }
     });
+    if (!callback) {
+        return def.promise;
+    }
 }
 
 function _groupObjects(objects) {
@@ -733,6 +744,9 @@ CloudObject.sync = function(callback) {
             callback.error('Internet connection not found.');
         }
     }
+    if (!callback) {
+        return def.promise;
+    }
 }
 
 CloudObject.disableSync = function(document, callback) {
@@ -768,6 +782,9 @@ CloudObject.disableSync = function(document, callback) {
             callback.error(err);
         }
     });
+    if (!callback) {
+        return def.promise;
+    }
 }
 
 /* Private Methods */

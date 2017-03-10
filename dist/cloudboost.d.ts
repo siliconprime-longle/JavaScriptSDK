@@ -50,6 +50,9 @@ declare module cloudboost {
 		name:any
 		id:any
 	}
+	export class CloudEvent{
+	static track(name:any,data:any,type?:any,callback?:any):any
+	}
 	export class ACL {
 		constructor()
 		setPublicWriteAccess(value? :any):any
@@ -92,11 +95,11 @@ declare module cloudboost {
 		static off(tableName:any, eventType?:any, done?:any):any
 		static saveAll(array?:any,callback?:any):any
 		static deleteAll(array?:any,callback?:any):any
-		static pin(cloudObjects?:any,callback?:any):any
-		static unPin(cloudObjects?:any,callback?:any):any
+		static pin(cloudObjects:any,callback?:any):any
+		static unPin(cloudObjects:any,callback?:any):any
 		static clearLocalStore(callback?:any):any
 		static sync(callback?:any):any
-		static disableSync(document?:any,callback?:any):any
+		static disableSync(document:any,callback?:any):any
 		ACL:any
 		id:any
 		createdAt:any
