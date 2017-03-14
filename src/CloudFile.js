@@ -27,7 +27,18 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 ? file.type
                 : 'unknown'
         };
-
+        this.document._modifiedColumns = [
+            'name',
+            'updatedAt',
+            'ACL',
+            'expires',
+            'size',
+            'url',
+            'path',
+            'createdAt',
+            'contentType'
+        ];
+        this.document._isModified = true;
     } else if (typeof file === "string") {
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
@@ -45,6 +56,18 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 createdAt: Date.now(),
                 contentType: ''
             };
+            this.document._modifiedColumns = [
+                'name',
+                'updatedAt',
+                'ACL',
+                'expires',
+                'size',
+                'url',
+                'path',
+                'createdAt',
+                'contentType'
+            ];
+            this.document._isModified = true;
         } else {
             if (data) {
                 this.data = data;
@@ -65,15 +88,40 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                     expires: null,
                     contentType: type
                 };
+                this.document._modifiedColumns = [
+                    'name',
+                    'updatedAt',
+                    'ACL',
+                    'expires',
+                    'size',
+                    'url',
+                    'path',
+                    'createdAt',
+                    'contentType'
+                ];
+                this.document._isModified = true;
             } else {
                 this.document = {
                     _id: file,
                     _type: 'file',
                     _tableName: '_File'
                 }
+                this.document._modifiedColumns = [
+                    'name',
+                    'updatedAt',
+                    'ACL',
+                    'expires',
+                    'size',
+                    'url',
+                    'path',
+                    'createdAt',
+                    'contentType'
+                ];
+                this.document._isModified = true;
             }
         }
     }
+
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);

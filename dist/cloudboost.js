@@ -8580,7 +8580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var require;var require;/* WEBPACK VAR INJECTION */(function(global) {var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	var require;var require;var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	if (!CB._isNode) {
 	    //Socket.io Client library
@@ -20000,6 +20000,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            createdAt: Date.now(),
 	            contentType: typeof file.type !== "undefined" && file.type !== "" ? file.type : 'unknown'
 	        };
+	        this.document._modifiedColumns = ['name', 'updatedAt', 'ACL', 'expires', 'size', 'url', 'path', 'createdAt', 'contentType'];
+	        this.document._isModified = true;
 	    } else if (typeof file === "string") {
 	        var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
 	        if (regexp.test(file)) {
@@ -20017,6 +20019,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                createdAt: Date.now(),
 	                contentType: ''
 	            };
+	            this.document._modifiedColumns = ['name', 'updatedAt', 'ACL', 'expires', 'size', 'url', 'path', 'createdAt', 'contentType'];
+	            this.document._isModified = true;
 	        } else {
 	            if (data) {
 	                this.data = data;
@@ -20037,12 +20041,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    expires: null,
 	                    contentType: type
 	                };
+	                this.document._modifiedColumns = ['name', 'updatedAt', 'ACL', 'expires', 'size', 'url', 'path', 'createdAt', 'contentType'];
+	                this.document._isModified = true;
 	            } else {
 	                this.document = {
 	                    _id: file,
 	                    _type: 'file',
 	                    _tableName: '_File'
 	                };
+	                this.document._modifiedColumns = ['name', 'updatedAt', 'ACL', 'expires', 'size', 'url', 'path', 'createdAt', 'contentType'];
+	                this.document._isModified = true;
 	            }
 	        }
 	    }
