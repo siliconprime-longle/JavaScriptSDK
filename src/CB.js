@@ -2,7 +2,10 @@ import Promise_BlueBird from 'bluebird'
 
 class CloudBoost {
 	constructor(){
+        // to check if the env is node
 		this._isNode = false
+        // to check if env is native ( react native , native script etc. )
+        this._isNative = false
 		this.Socket = null
 		this.io = null //socket.io library is saved here.
 		this.apiUrl = 'https://api.cloudboost.io'

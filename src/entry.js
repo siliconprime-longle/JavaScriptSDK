@@ -5,12 +5,16 @@ import CB from './CB'
 try {
     if (window) {
         if (navigator.product == 'ReactNative') {
+            // for react native turn node and native flags to true
             CB._isNode = true
+            CB._isNative = true
         } else {
+            // if window is found then node is false
             CB._isNode = false
         }
     }
 } catch (e) {
+    // if window is not found , then turn node flag to true
     CB._isNode = true
 }
 

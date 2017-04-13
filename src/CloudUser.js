@@ -168,7 +168,8 @@ CB.CloudUser.current = CB.CloudUser._getCurrentUser();
 
 CB.CloudUser.prototype.signUp = function(callback) {
 
-    if (CB._isNode) {
+    // check if node env but not native, this method wont execute for node env's
+    if (CB._isNode && !CB._isNative) {
         throw "Error : You cannot signup the user on the server. Use CloudUser.save() instead.";
     }
 
@@ -262,7 +263,8 @@ CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callb
 
 CB.CloudUser.prototype.logIn = function(callback) {
 
-    if (CB._isNode) {
+    // check if node env but not native, this method wont execute for node env's
+    if (CB._isNode && !CB._isNative) {
         throw "Error : You cannot login the user on the server.";
     }
 
@@ -309,7 +311,8 @@ CB.CloudUser.prototype.logIn = function(callback) {
 
 CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
 
-    if (CB._isNode) {
+    // check if node env but not native, this method wont execute for node env's
+    if (CB._isNode && !CB._isNative) {
         throw "Error : You cannot login the user on the server.";
     }
 
@@ -370,7 +373,8 @@ CB.CloudUser.authenticateWithProvider = function(dataJson, callback) {
 
 CB.CloudUser.prototype.logOut = function(callback) {
 
-    if (CB._isNode) {
+    // check if node env but not native, this method wont execute for node env's
+    if (CB._isNode && !CB._isNative) {
         throw "Error : You cannot logOut the user on the server.";
     }
 
