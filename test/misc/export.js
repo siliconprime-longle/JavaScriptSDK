@@ -1,7 +1,5 @@
-var Axios = require('axios');
-var csv=require('csvtojson');
-var q = require('q');
-describe("Export Table",function(done){
+
+describe("Export Table",function(){
  
  before(function(){
         this.timeout(10000);
@@ -26,8 +24,6 @@ describe("Export Table",function(done){
         });
     });
 
-
-
     it("should add data to table",function(done){
 
         this.timeout(50000);
@@ -35,8 +31,23 @@ describe("Export Table",function(done){
         obj.set('Revenue', 1234);
         obj.set('Name', 'kashish');
         obj.save({
-            success : function(obj){
-              savedObject.push(obj)
+            success : function(obj){ 
+              savedObject.push(obj.document)
+                done();
+            },error : function(error){
+                done(error);
+            }
+        });   
+    })
+    it("should add data to table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudObject('Hospital');
+        obj.set('Revenue', 3453);
+        obj.set('Name', 'kash');
+        obj.save({
+            success : function(obj){ 
+              savedObject.push(obj.document)
                 done();
             },error : function(error){
                 done(error);
@@ -45,21 +56,35 @@ describe("Export Table",function(done){
     })
 
 
-    it("Export table",function(done){
+     it("Export table",function(done){
         this.timeout(50000);
-        Axios.post("http://localhost:4730/export/"+CB.appId+"/Hospital",{
-            formatType:"csv",
-            appKey:CB.appKey
-        }).then(function(data){
-            if(data.data){
-               done();
-            } else {
-                done('ERROR')
+        var url = CB.apiUrl+ "/export/"+CB.appId+"/Hospital"; 
+        CB._request('POST',url,{exportType:"json",key:CB.appKey}).then(function(data){
+            
+            data = JSON.parse(data).data
+            if(data.length !== savedObject.length)
+            {
+                return done('ERROR')
             }
-
+            var flag = false;
+            for(let i in savedObject)
+            {        
+                delete savedObject[i].ACL;
+                delete data[i].ACL;
+                if(equal(data[i],savedObject[i])){
+                    flag = true;
+                }
+                if(!flag){
+                    done('ERROR');
+                    break;
+                }
+            }
+            if(flag){
+                done();
+            }
         },function(err){
             done(err)
         })
-    })
+    })   
 });
        
