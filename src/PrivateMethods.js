@@ -131,7 +131,7 @@ CB.fromJSON = function(data, thisObj) {
             }
         }
         var id = thisObj
-        if (thisObj instanceof Object)
+        if (thisObj instanceof Object && !(thisObj instanceof CB.CloudQueue)) 
             id = thisObj._id || thisObj.id
         if (!thisObj || data['_id'] === id) {
             var id = null;

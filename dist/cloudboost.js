@@ -6376,7 +6376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	        var id = thisObj;
-	        if (thisObj instanceof Object) id = thisObj._id || thisObj.id;
+	        if (thisObj instanceof Object && !(thisObj instanceof _CB2.default.CloudQueue)) id = thisObj._id || thisObj.id;
 	        if (!thisObj || data['_id'] === id) {
 	            var id = null;
 	            var latitude = null;
