@@ -1,5 +1,7 @@
+
 //var SECURE_KEY = "47dfc8b3-7c7a-4661-8e71-36ed0aaa0563";
 var SECURE_KEY = "15dce85d-0fdc-46ef-844d-76eb14b28073";
+
 
 var URL = "http://localhost:4730";
 
@@ -304,6 +306,680 @@ describe("Cloud App", function() {
 	
 });
 
+describe("Should Create All Test Tables", function(done) {
+
+    before(function() {
+        this.timeout(10000);
+        CB.appKey = CB.masterKey;
+    });
+
+    it("Should create a table", function(done) {
+        this.timeout(50000);
+        var Age = new CB.Column('Age');
+        Age.dataType = 'Number';
+        var Name = new CB.Column('Name');
+        Name.dataType = 'Text';
+        obj = new CB.CloudTable('Employee');
+        obj.addColumn(Age);
+        obj.addColumn(Name);
+        var dob = new CB.Column('dob');
+        dob.dataType = 'DateTime';
+        obj.addColumn(dob);
+        var password = new CB.Column('password');
+        password.dataType = 'EncryptedText';
+        obj.addColumn(password);
+        obj.save().then(function(res) {
+            //console.log(res);
+            done();
+        }, function(err) {
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("should create an empty table", function(done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Empty');
+
+        obj.save().then(function(res) {
+            if (res.id) {
+                done();
+            } else
+                done("Table saved but didnot return the id.");
+            }
+        , function(err) {
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("should create a table with two underscore columns", function(done) {
+
+        this.timeout(50000);
+
+        obj = new CB.CloudTable('UnderScoreTable_a');
+
+        var Age = new CB.Column('Age_a');
+        Age.dataType = 'Text';
+
+        obj.addColumn(Age);
+
+        obj.save().then(function(obj) {
+
+            var Age = new CB.Column('Age_b');
+            Age.dataType = 'Text';
+
+            obj.addColumn(Age);
+            obj.save().then(function(obj) {
+                done();
+            }, function(err) {
+                done("Cannot save two underscore columns.");
+            });
+
+        }, function(err) {
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("should create a table", function(done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Company');
+        var Revenue = new CB.Column('Revenue');
+        Revenue.dataType = 'Number';
+        var Name = new CB.Column('Name');
+        Name.dataType = 'Text';
+        var File = new CB.Column('File');
+        File.dataType = 'File';
+        obj.addColumn(Revenue);
+        obj.addColumn(Name);
+        obj.addColumn(File);
+        obj.save().then(function(res) {
+            //console.log(res);
+            done();
+        }, function() {
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("should create a table", function(done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Address');
+        var City = new CB.Column('City');
+        City.dataType = 'Text';
+        var PinCode = new CB.Column('PinCode');
+        PinCode.dataType = 'Number';
+        obj.addColumn(City);
+        obj.addColumn(PinCode);
+        obj.save().then(function(res) {
+            //console.log(res);
+            done();
+        }, function() {
+            throw "Unable to Create Table";
+        });
+    });
+
+    it("Should update the table schema", function(done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Employee');
+        CB.CloudTable.get(obj).then(function(res) {
+            var Company = new CB.Column('Company');
+            Company.dataType = 'Relation';
+            Company.relatedTo = 'Company';
+            res.addColumn(Company);
+            var Address = new CB.Column('Address');
+            Address.dataType = 'Relation';
+            Address.relatedTo = 'Address';
+            res.addColumn(Address);
+            res.save().then(function(res) {
+                //console.log(res);
+                done();
+            }, function(err) {
+                throw "Unable to Update schema of the table";
+            })
+        }, function() {
+            throw "Unable to get table";
+        });
+    });
+
+    it("Should update the table schema", function(done) {
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Company');
+        CB.CloudTable.get(obj).then(function(res) {
+            var Employee = new CB.Column('Employee');
+            Employee.dataType = 'List';
+            Employee.relatedTo = 'Employee';
+            res.addColumn(Employee);
+            var Address = new CB.Column('Address');
+            Address.dataType = 'Relation';
+            Address.relatedTo = 'Address';
+            res.addColumn(Address);
+            res.save().then(function(res) {
+                //console.log(res);
+                done();
+            }, function(err) {
+                throw "Unable to Update schema of the table";
+            })
+        }, function() {
+            throw "Unable to get table";
+        });
+    });
+
+    it("should create table student4", function(done) {
+
+        this.timeout(50000);
+        var student = new CB.CloudTable('student4');
+        var subject = new CB.Column('subject');
+        subject.dataType = 'List';
+        subject.relatedTo = 'Text';
+        var age = new CB.Column('age');
+        age.dataType = 'Number';
+        student.addColumn(subject);
+        student.addColumn(age);
+        student.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Student";
+        });
+    });
+
+    it("should create table Role", function(done) {
+
+        this.timeout(50000);
+
+        var role = new CB.CloudTable('Role');
+        role.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Role";
+        });
+
+    });
+
+    it("should create table user", function(done) {
+
+        this.timeout(50000);
+
+        var user = new CB.CloudTable('User');
+
+        var newColumn = new CB.Column('newColumn');
+        newColumn.dataType = 'Text';
+        user.addColumn(newColumn);
+
+        user.save().then(function(user) {
+            var newColumn1 = new CB.Column('newColumn1');
+            newColumn1.dataType = 'Text';
+            user.addColumn(newColumn1);
+
+            user.save().then(function(res) {
+                done();
+            }, function(error) {
+                throw "Unable to create user";
+            });
+        }, function(error) {
+            throw "Unable to create user";
+        });
+    });
+
+    it("should create table device", function(done) {
+
+        this.timeout(50000);
+
+        var device = new CB.CloudTable('Device');
+
+        var newColumn = new CB.Column('newColumn');
+        newColumn.dataType = 'Text';
+        device.addColumn(newColumn);
+
+        device.save().then(function(device) {
+            var newColumn1 = new CB.Column('newColumn1');
+            newColumn1.dataType = 'Text';
+            device.addColumn(newColumn1);
+
+            device.save().then(function(res) {
+                done();
+            }, function(error) {
+                throw "Unable to create device";
+            });
+        }, function(error) {
+            throw "Unable to create device";
+        });
+    });
+
+    it("should create table Custom", function(done) {
+
+        this.timeout(60000);
+
+        var custom = new CB.CloudTable('Custom');
+        var newColumn = new CB.Column('newColumn');
+        newColumn.dataType = 'Email';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('newColumn1');
+        newColumn1.dataType = 'Text';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('newColumn2');
+        newColumn2.dataType = 'URL';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('newColumn3');
+        newColumn3.dataType = 'Number';
+        custom.addColumn(newColumn3);
+        var newColumn4 = new CB.Column('newColumn4');
+        newColumn4.dataType = 'Boolean';
+        custom.addColumn(newColumn4);
+        var newColumn5 = new CB.Column('newColumn5');
+        newColumn5.dataType = 'DateTime';
+        custom.addColumn(newColumn5);
+        var newColumn6 = new CB.Column('newColumn6');
+        newColumn6.dataType = 'Object';
+        var newColumn7 = new CB.Column('location');
+        newColumn7.dataType = 'GeoPoint';
+        custom.addColumn(newColumn7);
+        custom.addColumn(newColumn6);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create user";
+        });
+    });
+
+    it("should update custom table ", function(done) {
+
+        this.timeout(60000);
+
+        var custom = new CB.CloudTable('Custom');
+        CB.CloudTable.get(custom).then(function(custom) {
+            var newColumn7 = new CB.Column('newColumn7');
+            newColumn7.dataType = 'List';
+            newColumn7.relatedTo = 'Custom';
+            custom.addColumn(newColumn7);
+            custom.save().then(function(res) {
+                done();
+            }, function() {
+                throw "Unable to create user";
+            });
+        }, function() {
+            throw "Unable to get Table";
+        });
+    });
+
+    it("should create table Custom5", function(done) {
+
+        this.timeout(30000);
+
+        var custom = new CB.CloudTable('Custom5');
+        var newColumn = new CB.Column('location');
+        newColumn.dataType = 'GeoPoint';
+        custom.addColumn(newColumn);
+        custom.save().then(function(res) {
+            done();
+        }, function(error) {
+            throw "Unable to create Custom5";
+        });
+    });
+
+    it("should create table Sample", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Sample');
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        newColumn.required = true;
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('unique');
+        newColumn1.dataType = 'Text';
+        newColumn1.unique = true;
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('stringArray');
+        newColumn2.dataType = 'List';
+        newColumn2.relatedTo = 'Text';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('objectArray');
+        newColumn3.dataType = 'List';
+        newColumn3.relatedTo = 'Object';
+        custom.addColumn(newColumn3);
+        var newColumn6 = new CB.Column('file');
+        newColumn6.dataType = 'File';
+        custom.addColumn(newColumn6);
+        var newColumn7 = new CB.Column('fileList');
+        newColumn7.dataType = 'List';
+        newColumn7.relatedTo = 'File';
+        custom.addColumn(newColumn7);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Sample";
+        });
+    });
+
+    it("should update Sample table ", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Sample');
+        CB.CloudTable.get(custom).then(function(custom) {
+            var newColumn = new CB.Column('uniqueRelation');
+            newColumn.dataType = 'Relation';
+            newColumn.relatedTo = 'Sample';
+            newColumn.unique = true;
+            custom.addColumn(newColumn);
+            var newColumn4 = new CB.Column('sameRelation');
+            newColumn4.dataType = 'Relation';
+            newColumn4.relatedTo = 'Sample';
+            custom.addColumn(newColumn4);
+            var newColumn5 = new CB.Column('relationArray');
+            newColumn5.dataType = 'List';
+            newColumn5.relatedTo = 'Sample';
+            custom.addColumn(newColumn5);
+            custom.save().then(function(res) {
+                done();
+            }, function() {
+                throw "Unable to Update Sample";
+            });
+        }, function() {
+            throw "Unable to get Table";
+        });
+    });
+
+    it("should create table hostel", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('hostel');
+        var newColumn = new CB.Column('room');
+        newColumn.dataType = 'Number';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('name');
+        newColumn1.dataType = 'Text';
+        custom.addColumn(newColumn1);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create hostel";
+        });
+
+    });
+
+    //create Hostel
+    it("should create table student1", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('student1');
+        var newColumn = new CB.Column('age');
+        newColumn.dataType = 'Number';
+        custom.addColumn(newColumn);
+        var newColumn2 = new CB.Column('newColumn');
+        newColumn2.dataType = 'Relation';
+        newColumn2.relatedTo = 'hostel';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('name');
+        newColumn3.dataType = 'Text';
+        custom.addColumn(newColumn3);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Sample";
+        });
+    });
+
+    it("should create table Student", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Student');
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('age');
+        newColumn1.dataType = 'Number';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('class');
+        newColumn2.dataType = 'Text';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('description');
+        newColumn3.dataType = 'Text';
+        custom.addColumn(newColumn3);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Student";
+        });
+
+    });
+
+    it("should create table Offline", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Offline');
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('age');
+        newColumn1.dataType = 'Number';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('class');
+        newColumn2.dataType = 'Text';
+        custom.addColumn(newColumn2);
+        var newColumn3 = new CB.Column('description');
+        newColumn3.dataType = 'Text';
+        custom.addColumn(newColumn3);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Student";
+        });
+
+    });
+
+    it("should create table Custom18", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom18');
+        var newColumn = new CB.Column('number');
+        newColumn.dataType = 'Number';
+        custom.addColumn(newColumn);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom18";
+        });
+
+    });
+
+    it("should create table Custom3", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom3');
+        var newColumn = new CB.Column('address');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom3";
+        });
+    });
+
+    it("should create table Custom7", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom7');
+        var newColumn = new CB.Column('requiredNumber');
+        newColumn.dataType = 'Number';
+        custom.addColumn(newColumn);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom7";
+        });
+    });
+
+    it("should create table Custom2", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom2');
+        var newColumn = new CB.Column('newColumn1');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('newColumn7');
+        newColumn1.dataType = 'Relation';
+        newColumn1.relatedTo = 'student1';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('newColumn2');
+        newColumn2.dataType = 'Relation';
+        newColumn2.relatedTo = 'Custom3';
+        custom.addColumn(newColumn2);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom2";
+        });
+    });
+
+    it("should create table Custom4", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom4');
+        var newColumn = new CB.Column('newColumn1');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('newColumn7');
+        newColumn1.dataType = 'List';
+        newColumn1.relatedTo = 'student1';
+        custom.addColumn(newColumn1);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom4";
+        });
+
+    });
+
+    it("should create table Custom14", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom14');
+        var newColumn = new CB.Column('ListNumber');
+        newColumn.dataType = 'List';
+        newColumn.relatedTo = 'Number';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('ListGeoPoint');
+        newColumn1.dataType = 'List';
+        newColumn1.relatedTo = 'GeoPoint';
+        custom.addColumn(newColumn1);
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom14";
+        });
+
+    });
+
+    it("should create table Custom1", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('Custom1');
+        var newColumn = new CB.Column('description');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+        var newColumn1 = new CB.Column('newColumn');
+        newColumn1.dataType = 'Text';
+        custom.addColumn(newColumn1);
+        var newColumn2 = new CB.Column('newColumn1');
+        newColumn2.dataType = 'Boolean';
+        custom.addColumn(newColumn2);
+
+        custom.save().then(function(res) {
+            done();
+        }, function() {
+            throw "Unable to create Custom1";
+        });
+
+    });
+
+    it("should create table and delete table", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('CustomDelete');
+
+        var newColumn = new CB.Column('description');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+
+        var newColumn1 = new CB.Column('newColumn');
+        newColumn1.dataType = 'Text';
+        custom.addColumn(newColumn1);
+
+        var newColumn2 = new CB.Column('newColumn1');
+        newColumn2.dataType = 'Boolean';
+        custom.addColumn(newColumn2);
+
+        custom.save().then(function(res) {
+
+            res.delete().then(function(delRes) {
+                done();
+            }, function(err) {
+                done(err);
+                throw "Unable to delete a table.";
+            });
+
+        }, function() {
+            throw "Unable to delete a table.";
+        });
+
+    });
+    it("should create tables", function(done) {
+
+        this.timeout(50000);
+
+        var custom = new CB.CloudTable('CustomDelete');
+
+        var newColumn = new CB.Column('name');
+        newColumn.dataType = 'Text';
+        custom.addColumn(newColumn);
+
+        var newColumn1 = new CB.Column('age');
+        newColumn1.dataType = 'Number';
+        custom.addColumn(newColumn1);
+
+        custom.save().then(function(res) {
+
+            res.delete().then(function(delRes) {
+                done();
+            }, function(err) {
+                done(err);
+                throw "Unable to delete a table.";
+            });
+
+        }, function() {
+            throw "Unable to delete a table.";
+        });
+
+    });
+
+    after(function() {
+        CB.appKey = CB.jsKey;
+    });
+
+});
+
 
 describe("Export Table",function(){
  
@@ -394,638 +1070,6 @@ describe("Export Table",function(){
     })   
 });
        
-describe("Should Create All Test Tables",function(done){
-
-    before(function(){
-        this.timeout(10000);
-        CB.appKey = CB.masterKey;
-    });
-
-    it("Should create a table",function(done){
-        this.timeout(50000);
-        var Age = new CB.Column('Age');
-        Age.dataType = 'Number';
-        var Name = new CB.Column('Name');
-        Name.dataType = 'Text';
-        obj = new CB.CloudTable('Employee');
-        obj.addColumn(Age);
-        obj.addColumn(Name);
-        var dob = new CB.Column('dob');
-        dob.dataType = 'DateTime';
-        obj.addColumn(dob);
-        var password = new CB.Column('password');
-        password.dataType = 'EncryptedText';
-        obj.addColumn(password);
-        obj.save().then(function(res){
-            //console.log(res);
-            done();
-        },function(err){
-            throw "Unable to Create Table";
-        });
-    });
-
-    it("should create an empty table",function(done){
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('Empty');
-    
-        obj.save().then(function(res){
-            if(res.id){
-                done();
-            }else
-                done("Table saved but didnot return the id.");
-        },function(err){
-            throw "Unable to Create Table";
-        });
-    });
-
-
-    it("should create a table with two underscore columns",function(done){
-
-        this.timeout(50000);
-
-        obj = new CB.CloudTable('UnderScoreTable_a');
-
-        var Age = new CB.Column('Age_a');
-        Age.dataType = 'Text';
-
-        obj.addColumn(Age);
-
-        obj.save().then(function(obj){
-
-            var Age = new CB.Column('Age_b');
-            Age.dataType = 'Text';
-
-            obj.addColumn(Age);
-            obj.save().then(function(obj){
-               done();
-            },function(err){
-                done("Cannot save two underscore columns.");
-            });
-
-        },function(err){
-            throw "Unable to Create Table";
-        });
-    });
-
-
-    it("should create a table",function(done){
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('Company');
-        var Revenue = new CB.Column('Revenue');
-        Revenue.dataType = 'Number';
-        var Name = new CB.Column('Name');
-        Name.dataType = 'Text';
-        var File = new CB.Column('File');
-        File.dataType = 'File';
-        obj.addColumn(Revenue);
-        obj.addColumn(Name);
-        obj.addColumn(File);
-        obj.save().then(function(res){
-            //console.log(res);
-            done();
-        },function(){
-            throw "Unable to Create Table";
-        });
-    });
-
-    it("should create a table",function(done){
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('Address');
-        var City = new CB.Column('City');
-        City.dataType = 'Text';
-        var PinCode = new CB.Column('PinCode');
-        PinCode.dataType = 'Number';
-        obj.addColumn(City);
-        obj.addColumn(PinCode);
-        obj.save().then(function(res){
-            //console.log(res);
-            done();
-        },function(){
-            throw "Unable to Create Table";
-        });
-    });
-
-    it("Should update the table schema",function(done){
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('Employee');
-        CB.CloudTable.get(obj).then(function(res){
-            var Company = new CB.Column('Company');
-            Company.dataType = 'Relation';
-            Company.relatedTo = 'Company';
-            res.addColumn(Company);
-            var Address = new CB.Column('Address');
-            Address.dataType = 'Relation';
-            Address.relatedTo = 'Address';
-            res.addColumn(Address);
-            res.save().then(function(res){
-                //console.log(res);
-                done();
-            },function(err){
-                throw "Unable to Update schema of the table";
-            })
-        },function(){
-            throw "Unable to get table";
-        });
-    });
-
-    it("Should update the table schema",function(done){
-
-        this.timeout(50000);
-
-        var obj = new CB.CloudTable('Company');
-        CB.CloudTable.get(obj).then(function(res){
-            var Employee = new CB.Column('Employee');
-            Employee.dataType = 'List';
-            Employee.relatedTo = 'Employee';
-            res.addColumn(Employee);
-            var Address = new CB.Column('Address');
-            Address.dataType = 'Relation';
-            Address.relatedTo = 'Address';
-            res.addColumn(Address);
-            res.save().then(function(res){
-                //console.log(res);
-                done();
-            },function(err){
-                throw "Unable to Update schema of the table";
-            })
-        },function(){
-            throw "Unable to get table";
-        });
-    });
-
-
-
-    it("should create table student4",function(done){
-
-        this.timeout(50000);
-          var student = new CB.CloudTable('student4');
-            var subject = new CB.Column('subject');
-            subject.dataType = 'List';
-            subject.relatedTo = 'Text';
-            var age = new CB.Column('age');
-            age.dataType = 'Number';
-            student.addColumn(subject);
-            student.addColumn(age);
-            student.save().then(function(res){
-                done();
-            },function(){
-                throw "Unable to create Student";
-            });
-    });
-
-
-    it("should create table Role",function(done){
-
-        this.timeout(50000);
-
-
-        var role = new CB.CloudTable('Role');
-        role.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Role";
-        });
-       
-    });
-
-
-    it("should create table user",function(done){
-
-        this.timeout(50000);
-
-        var user = new CB.CloudTable('User');
-        
-        var newColumn = new CB.Column('newColumn');
-        newColumn.dataType = 'Text';
-        user.addColumn(newColumn);
-
-        user.save().then(function(user){
-            var newColumn1 = new CB.Column('newColumn1');
-            newColumn1.dataType = 'Text';
-            user.addColumn(newColumn1);
-
-            user.save().then(function(res){
-                done();
-            },function(error){
-                throw "Unable to create user";
-            });
-        },function(error){
-            throw "Unable to create user";
-        });
-    });
-
-    it("should create table device",function(done){
-
-        this.timeout(50000);
-
-        var device = new CB.CloudTable('Device');
-        
-        var newColumn = new CB.Column('newColumn');
-        newColumn.dataType = 'Text';
-        device.addColumn(newColumn);
-
-        device.save().then(function(device){
-            var newColumn1 = new CB.Column('newColumn1');
-            newColumn1.dataType = 'Text';
-            device.addColumn(newColumn1);
-
-            device.save().then(function(res){
-                done();
-            },function(error){
-                throw "Unable to create device";
-            });
-        },function(error){
-            throw "Unable to create device";
-        });
-    });
-
-    it("should create table Custom",function(done){
-
-        this.timeout(60000);
-
-        var custom = new CB.CloudTable('Custom');
-        var newColumn = new CB.Column('newColumn');
-        newColumn.dataType = 'Email';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('newColumn1');
-        newColumn1.dataType = 'Text';
-        custom.addColumn(newColumn1);
-        var newColumn2 = new CB.Column('newColumn2');
-        newColumn2.dataType = 'URL';
-        custom.addColumn(newColumn2);
-        var newColumn3 = new CB.Column('newColumn3');
-        newColumn3.dataType = 'Number';
-        custom.addColumn(newColumn3);
-        var newColumn4 = new CB.Column('newColumn4');
-        newColumn4.dataType = 'Boolean';
-        custom.addColumn(newColumn4);
-        var newColumn5 = new CB.Column('newColumn5');
-        newColumn5.dataType = 'DateTime';
-        custom.addColumn(newColumn5);
-        var newColumn6 = new CB.Column('newColumn6');
-        newColumn6.dataType = 'Object';
-        var newColumn7 = new CB.Column('location');
-        newColumn7.dataType = 'GeoPoint';
-        custom.addColumn(newColumn7);
-        custom.addColumn(newColumn6);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create user";
-        });
-    });
-
-    it("should update custom table ",function(done){
-
-        this.timeout(60000);
-
-        var custom = new CB.CloudTable('Custom');
-        CB.CloudTable.get(custom).then(function(custom){
-            var newColumn7 = new CB.Column('newColumn7');
-            newColumn7.dataType = 'List';
-            newColumn7.relatedTo = 'Custom';
-            custom.addColumn(newColumn7);
-            custom.save().then(function(res){
-                done();
-            },function(){
-                throw "Unable to create user";
-            });
-        },function(){
-           throw "Unable to get Table";
-        });
-    });
-
-    it("should create table Custom5",function(done){
-
-         this.timeout(30000);
-
-         var custom = new CB.CloudTable('Custom5');
-         var newColumn = new CB.Column('location');
-         newColumn.dataType = 'GeoPoint';
-         custom.addColumn(newColumn);
-         custom.save().then(function(res){
-            done();
-         },function(error){
-            throw "Unable to create Custom5";
-         });
-    });
-
-
-    it("should create table Sample",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Sample');
-        var newColumn = new CB.Column('name');
-        newColumn.dataType = 'Text';
-        newColumn.required = true;
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('unique');
-        newColumn1.dataType = 'Text';
-        newColumn1.unique = true;
-        custom.addColumn(newColumn1);
-        var newColumn2 = new CB.Column('stringArray');
-        newColumn2.dataType = 'List';
-        newColumn2.relatedTo = 'Text';
-        custom.addColumn(newColumn2);
-        var newColumn3 = new CB.Column('objectArray');
-        newColumn3.dataType = 'List';
-        newColumn3.relatedTo = 'Object';
-        custom.addColumn(newColumn3);
-        var newColumn6 = new CB.Column('file');
-        newColumn6.dataType = 'File';
-        custom.addColumn(newColumn6);
-        var newColumn7 = new CB.Column('fileList');
-        newColumn7.dataType = 'List';
-        newColumn7.relatedTo = 'File';
-        custom.addColumn(newColumn7);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Sample";
-        });
-    });
-
-
-    it("should update Sample table ",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Sample');
-        CB.CloudTable.get(custom).then(function(custom){
-            var newColumn = new CB.Column('uniqueRelation');
-            newColumn.dataType = 'Relation';
-            newColumn.relatedTo = 'Sample';
-            newColumn.unique = true;
-            custom.addColumn(newColumn);
-            var newColumn4 = new CB.Column('sameRelation');
-            newColumn4.dataType = 'Relation';
-            newColumn4.relatedTo = 'Sample';
-            custom.addColumn(newColumn4);
-            var newColumn5 = new CB.Column('relationArray');
-            newColumn5.dataType = 'List';
-            newColumn5.relatedTo = 'Sample';
-            custom.addColumn(newColumn5);
-            custom.save().then(function(res){
-                done();
-            },function(){
-                throw "Unable to Update Sample";
-            });
-        },function(){
-            throw "Unable to get Table";
-        });
-    });
-
-
-    it("should create table hostel",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('hostel');
-        var newColumn = new CB.Column('room');
-        newColumn.dataType = 'Number';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('name');
-        newColumn1.dataType = 'Text';
-        custom.addColumn(newColumn1);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create hostel";
-        });
-
-
-    });
-
-    //create Hostel
-    it("should create table student1",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('student1');
-        var newColumn = new CB.Column('age');
-        newColumn.dataType = 'Number';
-        custom.addColumn(newColumn);
-        var newColumn2 = new CB.Column('newColumn');
-        newColumn2.dataType = 'Relation';
-        newColumn2.relatedTo = 'hostel';
-        custom.addColumn(newColumn2);
-        var newColumn3 = new CB.Column('name');
-        newColumn3.dataType = 'Text';
-        custom.addColumn(newColumn3);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Sample";
-        });
-    });
-
-    it("should create table Student",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Student');
-        var newColumn = new CB.Column('name');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('age');
-        newColumn1.dataType = 'Number';
-        custom.addColumn(newColumn1);
-        var newColumn2 = new CB.Column('class');
-        newColumn2.dataType = 'Text';
-        custom.addColumn(newColumn2);
-        var newColumn3 = new CB.Column('description');
-        newColumn3.dataType = 'Text';
-        custom.addColumn(newColumn3);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Student";
-        });
-
-    });
-
-    it("should create table Custom18",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom18');
-        var newColumn = new CB.Column('number');
-        newColumn.dataType = 'Number';
-        custom.addColumn(newColumn);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom18";
-        });
-
-    });
-
-    it("should create table Custom3",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom3');
-        var newColumn = new CB.Column('address');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom3";
-        });
-    });
-
-    it("should create table Custom7",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom7');
-        var newColumn = new CB.Column('requiredNumber');
-        newColumn.dataType = 'Number';
-        custom.addColumn(newColumn);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom7";
-        });
-    });
-
-    it("should create table Custom2",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom2');
-        var newColumn = new CB.Column('newColumn1');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('newColumn7');
-        newColumn1.dataType = 'Relation';
-        newColumn1.relatedTo = 'student1';
-        custom.addColumn(newColumn1);
-        var newColumn2 = new CB.Column('newColumn2');
-        newColumn2.dataType = 'Relation';
-        newColumn2.relatedTo = 'Custom3';
-        custom.addColumn(newColumn2);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom2";
-        });
-    });
-
-    it("should create table Custom4",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom4');
-        var newColumn = new CB.Column('newColumn1');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('newColumn7');
-        newColumn1.dataType = 'List';
-        newColumn1.relatedTo = 'student1';
-        custom.addColumn(newColumn1);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom4";
-        });
-
-    });
-
-
-    it("should create table Custom14",function(done){
-
-        this.timeout(50000);
-
-         var custom = new CB.CloudTable('Custom14');
-        var newColumn = new CB.Column('ListNumber');
-        newColumn.dataType = 'List';
-        newColumn.relatedTo = 'Number';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('ListGeoPoint');
-        newColumn1.dataType = 'List';
-        newColumn1.relatedTo = 'GeoPoint';
-        custom.addColumn(newColumn1);
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom14";
-        });
-
-    });
-
-   it("should create table Custom1",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('Custom1');
-        var newColumn = new CB.Column('description');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-        var newColumn1 = new CB.Column('newColumn');
-        newColumn1.dataType = 'Text';
-        custom.addColumn(newColumn1);
-        var newColumn2 = new CB.Column('newColumn1');
-        newColumn2.dataType = 'Boolean';
-        custom.addColumn(newColumn2);
-
-        custom.save().then(function(res){
-            done();
-        },function(){
-            throw "Unable to create Custom1";
-        });
-
-    });
-
-    it("should create table and delete table",function(done){
-
-        this.timeout(50000);
-
-        var custom = new CB.CloudTable('CustomDelete');
-
-        var newColumn = new CB.Column('description');
-        newColumn.dataType = 'Text';
-        custom.addColumn(newColumn);
-
-        var newColumn1 = new CB.Column('newColumn');
-        newColumn1.dataType = 'Text';
-        custom.addColumn(newColumn1);
-
-        var newColumn2 = new CB.Column('newColumn1');
-        newColumn2.dataType = 'Boolean';
-        custom.addColumn(newColumn2);
-
-        custom.save().then(function(res){
-
-            res.delete().then(function(delRes){
-                done();
-            },function(err){ 
-                done(err);               
-                throw "Unable to delete a table.";
-            });
-
-        },function(){
-            throw "Unable to delete a table.";
-        });
-
-    });
-
-    after(function() {
-       CB.appKey = CB.jsKey;
-    });
-
-});
-
 describe("Cloud Files", function(done) {
 
     it("Should Save a file with file data and name", function(done) {
@@ -1062,6 +1106,76 @@ describe("Cloud Files", function(done) {
                         // the response is passed to the function
                         success: function(text) {
                             done();
+                        },
+                        // Code to run if the request fails; the raw request and
+                        // status codes are passed to the function
+                        error: function(xhr, status, errorThrown) {
+                            done(errorThrown);
+                            done("Error thrown.");
+                        }
+                    });
+                }
+            } else {
+                throw 'únable to get the url';
+            }
+        }, function(err) {
+            done(err);
+            throw "Unable to save file";
+        });
+    });
+
+    it("Should rename a file", function(done) {
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(file) {
+            if (file.url) {
+
+                if (!window) {
+                    //Lets configure and request
+                    request({
+                        url: file.url, //URL to hit
+                        method: 'GET'
+                    }, function(error, response, body) {
+                        if (error) {
+                            done(error);
+                        } else {
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        // The URL for the request
+                        url: file.url,
+                        // Whether this is a POST or GET request
+                        type: "GET",
+                        // Code to run if the request succeeds;
+                        // the response is passed to the function
+                        success: function(text) {
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
+
                         },
                         // Code to run if the request fails; the raw request and
                         // status codes are passed to the function
@@ -1308,7 +1422,6 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file) {
             if (file.url) {
                 file.delete().then(function(file) {
-                    //console.log(file);
                     if (file.url === null)
                         done();
                     else
@@ -2759,6 +2872,69 @@ describe("CloudUser", function () {
     });
 
 });
+describe("CloudEvent", function() {
+    var username = 'ritishgumber';
+    var passwd = 'ritish4321';
+    it("should track signup event.", function(done) {
+        CB.CloudApp.init(URL, CB.appId, CB.masterKey);
+        if (CB._isNode) {
+            done();
+            return;
+        }
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username);
+        obj.set('password', passwd);
+        obj.set('email', util.makeEmail());
+        obj.signUp();
+        setTimeout(() => {
+            var query = new CB.CloudQuery('_Event');
+            query.equalTo('data.username', username);
+            query.equalTo('name', 'Signup');
+            query.findOne().then(function(obj) {
+                if (obj.get('name') === 'Signup')
+                    done();
+                }
+            , function(err) {
+                done(err);
+            });
+        }, 10000)
+
+    });
+
+    it("Should track login event", function(done) {
+
+        if (CB._isNode) {
+            done();
+            return;
+        }
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudUser();
+        obj.set('username', username);
+        obj.set('password', passwd);
+        obj.logIn();
+        setTimeout(() => {
+            var query = new CB.CloudQuery('_Event');
+            query.equalTo('data.username', username);
+            query.equalTo('name', 'Login');
+            query.findOne().then(function(obj) {
+                if (obj.get('name') === 'Login') {
+                    CB.CloudApp.init(URL, CB.appId, CB.jsKey);
+                    done();
+                }
+            }, function(err) {
+                done(err);
+            });
+        }, 10000)
+
+    });
+
+});
+
 
 describe("CloudPush", function (done) {
 
@@ -3120,7 +3296,7 @@ describe("CloudPush", function (done) {
   
 
 describe("Cloud Cache", function(){
-     
+
     before(function(){
         CB.appKey = CB.masterKey;
     });
@@ -3192,12 +3368,12 @@ describe("Cloud Cache", function(){
             success: function(response){
                 if(response != null){
                     if(response === 1){
-                       //delete it. 
+                       //delete it.
                        cache.deleteItem('test1',{
                            success: function(response){
                                 if(response != null){
                                     if(response === 'test1'){
-                                       //delete it. 
+                                       //delete it.
                                        cache.get('test1',{
                                          success: function(response){
                                             if(response === null){
@@ -3261,7 +3437,7 @@ describe("Cloud Cache", function(){
         }catch(e){
             done();
         }
-        
+
     });
 
     it("Should not try to insert null value", function(done){
@@ -3355,7 +3531,7 @@ describe("Cloud Cache", function(){
                                 if(response != null){
                                     if(response.name === "sample2" && response.sex === "male" && response.age === 24){
                                          cache.getAll({
-                                            success: function(response){                                                
+                                            success: function(response){
 
                                                 if(response.length>1){
                                                     if(response instanceof Array){
@@ -3409,7 +3585,7 @@ describe("Cloud Cache", function(){
                           cache.getInfo({
                                 success: function(response){
                                     if(response && response instanceof CB.CloudCache){
-                                        if(response.size.slice(-2,response.length) === 'kb'){
+                                        if(response.size.slice(-2,response.length) === 'KB'){
                                             done();
                                         }else{
                                             done("Got cache information but has incorrect units");
@@ -3481,7 +3657,7 @@ describe("Cloud Cache", function(){
         }, function(error){
             done("Cannot set values in a cache.");
         });
-    }); 
+    });
 
     it("Should delete a cache from an app.", function(done){
         this.timeout(30000);
@@ -3497,7 +3673,7 @@ describe("Cloud Cache", function(){
                                     if(response instanceof CB.CloudCache && response.size === "0kb"){
                                         CB.CloudCache.getAll({
                                           success : function(response){
-                                            
+
                                             for(var i=0;i<response.length;i++){
                                                 if(response[i].name === 'student'){
                                                     done("Cache did not delete");
@@ -3534,28 +3710,28 @@ describe("Cloud Cache", function(){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
-       
+
         cache.delete({
             success: function(response){
                 done("Cache which does not exist, is deleted.")
             },error: function(error){
                 done();
             }
-        });    
+        });
     });
 
      it("Should throw error when clearing a wrong cache", function(done){
         this.timeout(30000);
 
         var cache = new CB.CloudCache('dafdfsdf');
-       
+
         cache.clear({
             success: function(response){
                 done("Cache which does not exist, is deleted.")
             },error: function(error){
                 done();
             }
-        });    
+        });
     });
 
 
@@ -5117,1021 +5293,1153 @@ it("Should not getMessage message with the delay ",function(done){
 });
 describe("Cloud Object", function() {
 
-	//Use Sample Table. 
-	// -> Which has columns : 
-	// name : string : required.
+    //Use Sample Table.
+    // -> Which has columns :
+    // name : string : required.
 
- it("Should add a null value in a column",function(done){
-
-    this.timeout(30000);
-
-    var obj = new CB.CloudObject('Employee');
-    obj.set('dob', null);
-    obj.save().then(function(res){
-            if(res.document.dob === null){
-                done();
-            }
-            else{
-               done("Unable to Save Object with a null value");
-            }
-        },function(err){
-            done(err);
-    });
- });
-
-
- it("Should Save data in Custom date field",function(done){
-
-    this.timeout(30000);
-
-    var obj = new CB.CloudObject('Employee');
-    obj.set('dob',new Date());
-    obj.save().then(function(res){
-            if(res)
-                done();
-            else
-               done("Unable to Save Object");
-    },function(err){
-        done(err);
-    });
- });
-
-  it("Should NOT Save data in email field with incorrect email",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Custom');
-     obj.set('newColumn',"email");
-     obj.save().then(function(res){
-         done("Saved with a valid email.");
-     },function(err){
-         done();
-     });
- });
-
-
-  it("Should save data in email field",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Custom');
-     obj.set('newColumn',"email@email.com");
-     obj.save().then(function(res){
-         done();
-     },function(err){
-         done("Cannot save email");
-     });
- });
-
- it("Should Save data in a CloudObject without attaching a file.",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Company');
-     obj.set('Name','sample');
-     obj.save().then(function(res){
-            if(res)
-                done();
-            else
-                done("Unable to Save Object");
-     },function(err){
-        done(err);
-     });
- });
-
-  it("Should NOT Save data in URL field with incorrect URL",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Custom');
-     obj.set('newColumn2',"url");
-     obj.save().then(function(res){
-         done("Saved with an invalid.");
-     },function(err){
-         done();
-     });
-
- });
-
-
-  it("Should save data in URL field",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Custom');
-     obj.set('newColumn2',"https://localhost.com");
-     obj.save().then(function(res){
-         done();
-     },function(err){
-         done("Cannot save URL");
-     });
- });
-
-
- it("Should Save geo point",function(done){
-
-     this.timeout(30000);
-
-     var obj = new CB.CloudObject('Custom5');
-     obj.set('location',new CB.CloudGeoPoint(100,80));
-     obj.save().then(function(res){
-            if(res)
-                done();
-            else
-                throw "Unable to Save Object";
-     },function(err){
-         throw "Unable to Save Date TIme";
-     });
- });
-
-
-it("should not save a string into date column",function(done){
+    it("Should add a null value in a column", function(done) {
 
         this.timeout(30000);
 
-        var obj = new CB.CloudObject('Sample');
-        obj.set('createdAt','abcd');
-        obj.set('name', 'sample');
-        obj.save().then(function(res){
-            if(res.createdAt === 'abcd')
-                throw("should not have saved string in datetime field");
-            else
+        var obj = new CB.CloudObject('Employee');
+        obj.set('dob', null);
+        obj.save().then(function(res) {
+            if (res.document.dob === null) {
                 done();
-        },function(){
+            } else {
+                done("Unable to Save Object with a null value");
+            }
+        }, function(err) {
+            done(err);
+        });
+    });
+
+    it("Should Save data in Custom date field", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Employee');
+        obj.set('dob', new Date());
+        obj.save().then(function(res) {
+            if (res)
+                done();
+            else
+                done("Unable to Save Object");
+            }
+        , function(err) {
+            done(err);
+        });
+    });
+
+    it("Should NOT Save data in email field with incorrect email", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn', "email");
+        obj.save().then(function(res) {
+            done("Saved with a valid email.");
+        }, function(err) {
             done();
         });
     });
 
-    it("should not set the id",function(done){
+    it("Should save data in email field", function(done) {
 
-        try{
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn', "email@email.com");
+        obj.save().then(function(res) {
+            done();
+        }, function(err) {
+            done("Cannot save email");
+        });
+    });
+
+    it("Should Save data in a CloudObject without attaching a file.", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Company');
+        obj.set('Name', 'sample');
+        obj.save().then(function(res) {
+            if (res)
+                done();
+            else
+                done("Unable to Save Object");
+            }
+        , function(err) {
+            done(err);
+        });
+    });
+
+    it("Should NOT Save data in URL field with incorrect URL", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn2', "url");
+        obj.save().then(function(res) {
+            done("Saved with an invalid.");
+        }, function(err) {
+            done();
+        });
+
+    });
+
+    it("Should save data in URL field", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom');
+        obj.set('newColumn2', "https://localhost.com");
+        obj.save().then(function(res) {
+            done();
+        }, function(err) {
+            done("Cannot save URL");
+        });
+    });
+
+    it("Should Save geo point", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Custom5');
+        obj.set('location', new CB.CloudGeoPoint(100, 80));
+        obj.save().then(function(res) {
+            if (res)
+                done();
+            else
+                throw "Unable to Save Object";
+            }
+        , function(err) {
+            throw "Unable to Save Date TIme";
+        });
+    });
+
+    it("should not save a string into date column", function(done) {
+
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('createdAt', 'abcd');
+        obj.set('name', 'sample');
+        obj.save().then(function(res) {
+            if (res.createdAt === 'abcd')
+                throw("should not have saved string in datetime field");
+            else
+                done();
+            }
+        , function() {
+            done();
+        });
+    });
+
+    it("should not set the id", function(done) {
+
+        try {
             this.timeout(30000);
 
             var obj = new CB.CloudObject('Sample');
             obj.set('id', '123');
             throw "CLoudObject can set the id";
-        }catch(e){
+        } catch (e) {
             done();
         }
-    
+
     });
 
     it("should save.", function(done) {
 
-    	this.timeout('30000');
-
-     	var obj = new CB.CloudObject('Sample');
-     	obj.set('name', 'sample');
-     	obj.save({
-     		success : function(newObj){
-     			if(obj.get('name') !== 'sample'){
-     				throw 'name is not equal to what was saved.';
-     			}
-     			if(!obj.id){
-     				throw 'id is not updated after save.';
-     			}
-
-     			done();
-     		}, error : function(error){
-     			throw 'Error saving the object';
-     		}
-     	});
-    });
-
-   it("should update the object after save and update.", function(done) {
         this.timeout('30000');
 
-     	var obj = new CB.CloudObject('Sample');
-     	obj.set('name', 'sample');
-     	obj.save({
-     		success : function(newObj){
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+        obj.save({
+            success: function(newObj) {
+                if (obj.get('name') !== 'sample') {
+                    throw 'name is not equal to what was saved.';
+                }
+                if (!obj.id) {
+                    throw 'id is not updated after save.';
+                }
 
-     			var oldId = newObj.id;
-
-     			if(obj.get('name') !== 'sample'){
-     				throw 'name is not equal to what was saved.';
-     			}
-
-     			if(!obj.id){
-     				throw 'id is not updated after save.';
-     			}
-
-     			obj.set('name','sample1');
-     			obj.save({
-		     		success : function(newObj){
-
-		     			if(obj.get('name') !== 'sample1'){
-		     				throw 'name is not equal to what was saved.';
-		     			}
-
-		     			if(!obj.id){
-		     				throw 'id is not updated after save.';
-		     			}
-		     			
-		     			if(obj.id !== oldId){
-		     				throw "did not update the object, but saved.";
-		     			}
-
-		     			done();
-		     		}, error : function(error){
-		     			throw 'Error updating the object';
-		     		}
-     			});
-
-     		}, error : function(error){
-     			throw 'Error saving the object';
-     		}
-     	});
+                done();
+            },
+            error: function(error) {
+                throw 'Error saving the object';
+            }
+        });
     });
 
-    it("should update a saved CloudObject",function(done){
+    it("should update the object after save and update.", function(done) {
+        this.timeout('30000');
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+        obj.save({
+            success: function(newObj) {
+
+                var oldId = newObj.id;
+
+                if (obj.get('name') !== 'sample') {
+                    throw 'name is not equal to what was saved.';
+                }
+
+                if (!obj.id) {
+                    throw 'id is not updated after save.';
+                }
+
+                obj.set('name', 'sample1');
+                obj.save({
+                    success: function(newObj) {
+
+                        if (obj.get('name') !== 'sample1') {
+                            throw 'name is not equal to what was saved.';
+                        }
+
+                        if (!obj.id) {
+                            throw 'id is not updated after save.';
+                        }
+
+                        if (obj.id !== oldId) {
+                            throw "did not update the object, but saved.";
+                        }
+
+                        done();
+                    },
+                    error: function(error) {
+                        throw 'Error updating the object';
+                    }
+                });
+
+            },
+            error: function(error) {
+                throw 'Error saving the object';
+            }
+        });
+    });
+
+    it("should update a saved CloudObject", function(done) {
 
         this.timeout(30000);
 
         var obj = new CB.CloudObject('student1');
         var obj1 = new CB.CloudObject('hostel');
-        obj1.set('room',8787);
-        obj1.save().then(function(res){          
+        obj1.set('room', 8787);
+        obj1.save().then(function(res) {
             obj1 = res;
-            obj.set('name','vipul');
-            obj.save().then(function(res){               
+            obj.set('name', 'vipul');
+            obj.save().then(function(res) {
                 obj = res;
-                obj.set('newColumn',obj1);
-                obj.save().then(function(res){                  
+                obj.set('newColumn', obj1);
+                obj.save().then(function(res) {
                     done();
-                },function(err){                   
+                }, function(err) {
                     throw "Should save";
                 });
-            },function(){
+            }, function() {
                 throw "Error while saving";
             });
-        },function(){
+        }, function() {
             throw "Error";
         });
     });
 
-   it("should delete an object after save.", function(done) {
+    it("should delete an object after save.", function(done) {
 
-    	this.timeout('50000');
-        
+        this.timeout('50000');
+
         var obj = new CB.CloudObject('Sample');
-     	obj.set('name', 'sample');
-     	obj.save({
-     		success : function(newObj){
-     			obj.delete({
-		     		success : function(obj){
-		     			done();
-		     		}, error : function(error){
-		     			throw 'Error deleting the object';
-		     		}
-     			});
-     		}, error : function(error){
-     			throw 'Error saving the object';
-     		}
-     	});
+        obj.set('name', 'sample');
+        obj.save({
+            success: function(newObj) {
+                obj.delete({
+                    success: function(obj) {
+                        done();
+                    },
+                    error: function(error) {
+                        throw 'Error deleting the object';
+                    }
+                });
+            },
+            error: function(error) {
+                throw 'Error saving the object';
+            }
+        });
     });
 
     it("should not save an object which has required column which is missing. ", function(done) {
         this.timeout('30000');
 
-     	var obj = new CB.CloudObject('Sample');
-   		//name is required which is missing.
-     	obj.save({
-     		success : function(newObj){
-     			throw "Saved an object even when required is missing.";
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+        var obj = new CB.CloudObject('Sample');
+        //name is required which is missing.
+        obj.save({
+            success: function(newObj) {
+                throw "Saved an object even when required is missing.";
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
 
     it("should not save an object with wrong dataType.", function(done) {
-       this.timeout('30000');
+        this.timeout('30000');
 
-     	var obj = new CB.CloudObject('Sample');
-   		//name is string and we have a wrong datatype here.
-   		obj.set('name', 10); //number instead of string.
-     	obj.save({
-     		success : function(newObj){
-     			throw "Saved an object even when required is missing.";
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+        var obj = new CB.CloudObject('Sample');
+        //name is string and we have a wrong datatype here.
+        obj.set('name', 10); //number instead of string.
+        obj.save({
+            success: function(newObj) {
+                throw "Saved an object even when required is missing.";
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
 
     it("should not save an object with duplicate values in unique fields.", function(done) {
 
-    	this.timeout('30000');
-        
+        this.timeout('30000');
+
         var text = util.makeString();
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
         obj.set('unique', text);
-   
-     	obj.save({
-     		success : function(newObj){
-     			var obj = new CB.CloudObject('Sample');
-		        obj.set('name','sample');
-		        obj.set('unique', text); //saving with sample text
-		     	obj.save({
-		     		success : function(newObj){
-		     			throw "Saved an object violated unique constraint.";
-		     		}, error : function(error){
-		     			done();
-		     		}
-		     	});
 
-     		}, error : function(error){
-     			throw "Saved Error";
-     		}
-     	});
+        obj.save({
+            success: function(newObj) {
+                var obj = new CB.CloudObject('Sample');
+                obj.set('name', 'sample');
+                obj.set('unique', text); //saving with sample text
+                obj.save({
+                    success: function(newObj) {
+                        throw "Saved an object violated unique constraint.";
+                    },
+                    error: function(error) {
+                        done();
+                    }
+                });
+
+            },
+            error: function(error) {
+                throw "Saved Error";
+            }
+        });
     });
 
     it("should save an array.", function(done) {
 
-    	this.timeout('30000');
+        this.timeout('30000');
 
         var text = util.makeString();
 
-		var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
-        obj.set('stringArray', [text,text]); //saving with sample text
-     	obj.save({
-     		success : function(newObj){
-     			done();
-     		}, error : function(error){
-     			throw "Error saving object. ";
-     		}
-     	});
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+        obj.set('stringArray', [text, text]); //saving with sample text
+        obj.save({
+            success: function(newObj) {
+                done();
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
     });
 
     it("should not save wrong datatype in an  array.", function(done) {
-       	
-       	this.timeout(30000);
 
-		var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
-        obj.set('stringArray', [10,20]); //saving with sample text
-     	obj.save({
-     		success : function(newObj){
-     			throw 'Wrong datatype in an array saved.';
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+        obj.set('stringArray', [10, 20]); //saving with sample text
+        obj.save({
+            success: function(newObj) {
+                throw 'Wrong datatype in an array saved.';
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
-
 
     it("should not allow multiple dataTypes in an array. ", function(done) {
 
         this.timeout(30000);
 
-    	var text = util.makeString();
+        var text = util.makeString();
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
-        obj.set('stringArray', [text,20]); //saving with sample text
-     	obj.save({
-     		success : function(newObj){
-     			throw 'Multiple datatype in an array saved.';
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+        obj.set('name', 'sample');
+        obj.set('stringArray', [text, 20]); //saving with sample text
+        obj.save({
+            success: function(newObj) {
+                throw 'Multiple datatype in an array saved.';
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
 
     it("should save an array with JSON objects. ", function(done) {
 
-    	this.timeout(30000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
-        obj.set('objectArray', [{sample : 'sample'},
-        						{sample : 'sample'}
-        					]); //saving with sample text
-     	obj.save({
-     		success : function(newObj){
-     			done();
-     		}, error : function(error){
-     			throw "Error saving object. ";
-     		}
-     	});
+        obj.set('name', 'sample');
+        obj.set('objectArray', [
+            {
+                sample: 'sample'
+            }, {
+                sample: 'sample'
+            }
+        ]); //saving with sample text
+        obj.save({
+            success: function(newObj) {
+                done();
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
     });
 
-   it("should save a CloudObject as a relation. ", function(done) {
-       	this.timeout(30000);
+    it("should save a CloudObject as a relation. ", function(done) {
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         obj.set('sameRelation', obj1); //saving with sample text
 
-     	obj.save({
-     		success : function(newObj){
-     			done();
-     		}, error : function(error){
-     			throw "Error saving object. ";
-     		}
-     	});
+        obj.save({
+            success: function(newObj) {
+                done();
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
+    });
+
+    it("should save a CloudObject as a relation when id is passed as string. ", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('student1');
+        obj.save({
+            success: function(newObj) {
+                var obj1 = new CB.CloudObject('Custom2');
+                obj1.set('newColumn7', newObj.id);
+                obj1.save({
+                    success: function(newObj2) {
+                        var doc = newObj2.get('newColumn7').document;
+                        if (doc._id === newObj.id && doc._tableName === 'student1' && doc._type === 'custom')
+                            done();
+                        else {
+                            throw "Object is not related"
+                        }
+                    },
+                    error: function(error) {
+                        throw "Error saving object. ";
+                    }
+                });
+
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
+
+    });
+
+    it("should save a CloudObject as a relation when id is passed as 'id' key. ", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('student1');
+        obj.save({
+            success: function(newObj) {
+                var obj1 = new CB.CloudObject('Custom2');
+                obj1.set('newColumn7', {id: newObj.id});
+                obj1.save({
+                    success: function(newObj2) {
+                        var doc = newObj2.get('newColumn7').document;
+                        if (doc._id === newObj.id && doc._tableName === 'student1' && doc._type === 'custom')
+                            done();
+                        else {
+                            throw "Object is not related"
+                        }
+                    },
+                    error: function(error) {
+                        throw "Error saving object. ";
+                    }
+                });
+
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
+
+    });
+
+    it("should save a CloudObject as a relation when id is passed as '_id' key. ", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('student1');
+        obj.save({
+            success: function(newObj) {
+                var obj1 = new CB.CloudObject('Custom2');
+                obj1.set('newColumn7', {_id: newObj.id});
+                obj1.save({
+                    success: function(newObj2) {
+                        var doc = newObj2.get('newColumn7').document;
+                        if (doc._id === newObj.id && doc._tableName === 'student1' && doc._type === 'custom')
+                            done();
+                        else {
+                            throw "Object is not related"
+                        }
+                    },
+                    error: function(error) {
+                        throw "Error saving object. ";
+                    }
+                });
+
+            },
+            error: function(error) {
+                throw "Error saving object. ";
+            }
+        });
+
     });
 
     it("should save a CloudObject as a relation with relate function. ", function(done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
         obj1.save({
-            success : function(newObj){
+            success: function(newObj) {
                 obj.relate('sameRelation', 'Sample', newObj.id); //saving with sample text
 
                 obj.save({
-                    success : function(newObj){
+                    success: function(newObj) {
                         done();
-                    }, error : function(error){
+                    },
+                    error: function(error) {
                         throw "Error saving object. ";
                     }
                 });
-            }, error : function(error){
+            },
+            error: function(error) {
                 throw "Error saving object. ";
             }
         });
 
-        
     });
-
 
     it("should keep relations intact.", function(done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom2');
-        obj.set('newColumn2',new CB.CloudObject('Custom3'));
+        obj.set('newColumn2', new CB.CloudObject('Custom3'));
 
-        obj.set('newColumn7',new CB.CloudObject('student1'));
-        
+        obj.set('newColumn7', new CB.CloudObject('student1'));
+
         obj.save({
-            success : function(newObj){
+            success: function(newObj) {
 
-               if(newObj.get('newColumn2').document._tableName === 'Custom3' &&  newObj.get('newColumn7').document._tableName === 'student1') {
+                if (newObj.get('newColumn2').document._tableName === 'Custom3' && newObj.get('newColumn7').document._tableName === 'student1') {
                     done();
-               }
+                }
 
-               throw "Wrong Relationship retrieved.";
+                throw "Wrong Relationship retrieved.";
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 throw "Error saving object. ";
             }
         });
 
-        
     });
 
-
-
-
-     it("should not save a a wrong relation.", function(done) {
-       this.timeout(30000);
+    it("should not save a a wrong relation.", function(done) {
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Student');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         obj.set('sameRelation', obj1); //saving with sample text
-        
-     	obj.save({
-     		success : function(newObj){
-     			throw "Saved an object with a wrong relation."
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+
+        obj.save({
+            success: function(newObj) {
+                throw "Saved an object with a wrong relation."
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
 
     it("should not save a CloudObject Relation when the schema of a related object is wrong. ", function(done) {
-       this.timeout(30000);
+        this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        //name is required , which means the schema is wrong. 
+        //name is required , which means the schema is wrong.
 
         obj.set('sameRelation', obj1); //saving with sample text
-        
-     	obj.save({
-     		success : function(newObj){
-     			throw "Saved an object in a relation with an invalid schema.";
-     		}, error : function(error){
-     			done();
-     		}
-     	});
+
+        obj.save({
+            success: function(newObj) {
+                throw "Saved an object in a relation with an invalid schema.";
+            },
+            error: function(error) {
+                done();
+            }
+        });
     });
 
     it("should not save a duplicate relation in unique fields. ", function(done) {
 
-       this.timeout(30000);
+        this.timeout(30000);
 
-       var obj = new CB.CloudObject('Sample');
-       obj.set('name','sample');
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         obj.set('uniqueRelation', obj1); //saving with sample text
-        
-     	obj.save({
-     		success : function(newObj){
-     			var obj2 = new CB.CloudObject('Sample');
-       			obj2.set('name','sample');
-       			obj2.set('uniqueRelation', obj1);
-       			obj2.save({success : function(newObj){
-       				throw "Saved a duplicate relation on a unique field.";
-       			}, error : function(error){
-       				done();
-       			}	
-       		});
 
+        obj.save({
+            success: function(newObj) {
+                var obj2 = new CB.CloudObject('Sample');
+                obj2.set('name', 'sample');
+                obj2.set('uniqueRelation', obj1);
+                obj2.save({
+                    success: function(newObj) {
+                        throw "Saved a duplicate relation on a unique field.";
+                    },
+                    error: function(error) {
+                        done();
+                    }
+                });
 
-     		}, error : function(error){
-     			throw "Cannot save an object";
-     		}
-     	});
+            },
+            error: function(error) {
+                throw "Cannot save an object";
+            }
+        });
     });
 
     it("should save an array of CloudObject with an empty array", function(done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         var obj2 = new CB.CloudObject('Sample');
-        obj2.set('name','sample');
+        obj2.set('name', 'sample');
         obj2.set('relationArray', []);
 
-
         obj.save({
-            success : function(newObj){
+            success: function(newObj) {
 
-                obj2.save({success : function(newObj){
-                    done();
-                }, error : function(error){
-                    throw "Cannot save an object in a relation.";
-                }
+                obj2.save({
+                    success: function(newObj) {
+                        done();
+                    },
+                    error: function(error) {
+                        throw "Cannot save an object in a relation.";
+                    }
                 });
-            }});
+            }
+        });
     });
-
 
     it("should save an array of CloudObject.", function(done) {
-       this.timeout(30000);
-
-       var obj = new CB.CloudObject('Sample');
-       obj.set('name','sample');
-
-        var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
-
-        var obj2 = new CB.CloudObject('Sample');
-		obj2.set('name','sample');
-		obj2.set('relationArray', [obj1, obj]);
-
-        
-     	obj.save({
-     		success : function(newObj){
-
-       			obj2.save({success : function(newObj){
-       				done();
-       			}, error : function(error){
-       				throw "Cannot save an object in a relation.";
-       			}	
-       		});
-    	}});
-    });
-
-     it("should modify the list relation of a saved CloudObject.", function(done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Sample');
-        obj.set('name','sample');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         var obj2 = new CB.CloudObject('Sample');
-        obj2.set('name','sample');
+        obj2.set('name', 'sample');
         obj2.set('relationArray', [obj1, obj]);
 
+        obj.save({
+            success: function(newObj) {
+
+                obj2.save({
+                    success: function(newObj) {
+                        done();
+                    },
+                    error: function(error) {
+                        throw "Cannot save an object in a relation.";
+                    }
+                });
+            }
+        });
+    });
+
+    it("should modify the list relation of a saved CloudObject.", function(done) {
+        this.timeout(30000);
+
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
+
+        var obj1 = new CB.CloudObject('Sample');
+        obj1.set('name', 'sample');
+
+        var obj2 = new CB.CloudObject('Sample');
+        obj2.set('name', 'sample');
+        obj2.set('relationArray', [obj1, obj]);
 
         obj.save({
-        success : function(newObj){
-            obj2.save({success : function(Obj3){
-                var relationArray = Obj3.get('relationArray');
-                if(relationArray.length !== 2)
-                    throw "unable to save relation properly";
-                relationArray.splice(1);
-                Obj3.set('relationArray',relationArray);
-                Obj3.save().then(function(Obj4){
-                    if(relationArray.length === 1)
-                        done();
-                },function(){
-                    throw "should save";
+            success: function(newObj) {
+                obj2.save({
+                    success: function(Obj3) {
+                        var relationArray = Obj3.get('relationArray');
+                        if (relationArray.length !== 2)
+                            throw "unable to save relation properly";
+                        relationArray.splice(1);
+                        Obj3.set('relationArray', relationArray);
+                        Obj3.save().then(function(Obj4) {
+                            if (relationArray.length === 1)
+                                done();
+                            }
+                        , function() {
+                            throw "should save";
+                        });
+                    },
+                    error: function(error) {
+                        throw "Cannot save an object in a relation.";
+                    }
                 });
-            }, error : function(error){
-                throw "Cannot save an object in a relation.";
             }
-            });
-        }});
-     });
+        });
+    });
 
     it("should save an array of CloudObject with some objects saved and others unsaved.", function(done) {
-       this.timeout(30000);
+        this.timeout(30000);
 
-       var obj = new CB.CloudObject('Sample');
-       obj.set('name','sample');
+        var obj = new CB.CloudObject('Sample');
+        obj.set('name', 'sample');
 
-       obj.save({
+        obj.save({
 
-     		success : function(newObj){
+            success: function(newObj) {
 
-     			var obj1 = new CB.CloudObject('Sample');
-		        obj1.set('name','sample');
+                var obj1 = new CB.CloudObject('Sample');
+                obj1.set('name', 'sample');
 
-		        var obj2 = new CB.CloudObject('Sample');
-				obj2.set('name','sample');
-				obj2.set('relationArray', [obj1, obj]);
+                var obj2 = new CB.CloudObject('Sample');
+                obj2.set('name', 'sample');
+                obj2.set('relationArray', [obj1, obj]);
 
-       			obj2.save({success : function(newObj){
-	       				done();
-	       			}, error : function(error){
-	       				throw "Cannot save an object in a relation.";
-	       			}	
-       			});
-       			
-    	}});
+                obj2.save({
+                    success: function(newObj) {
+                        done();
+                    },
+                    error: function(error) {
+                        throw "Cannot save an object in a relation.";
+                    }
+                });
+
+            }
+        });
 
     });
 
     it("should not save an array of different CloudObjects.", function(done) {
         this.timeout(30000);
 
-       var obj = new CB.CloudObject('Student');
-       obj.set('name','sample');
+        var obj = new CB.CloudObject('Student');
+        obj.set('name', 'sample');
 
         var obj1 = new CB.CloudObject('Sample');
-        obj1.set('name','sample');
+        obj1.set('name', 'sample');
 
         var obj2 = new CB.CloudObject('Sample');
-		obj2.set('name','sample');
-		obj2.set('relationArray', [obj1, obj]);
+        obj2.set('name', 'sample');
+        obj2.set('relationArray', [obj1, obj]);
 
-        
-     	obj.save({
-     		success : function(newObj){
+        obj.save({
+            success: function(newObj) {
 
-       			obj2.save({success : function(newObj){
-       				throw "Saved different types of CloudObject in a single list";
-       			}, error : function(error){
-       				done();
-       			}	
-       		});
-    	}, error : function(error){
+                obj2.save({
+                    success: function(newObj) {
+                        throw "Saved different types of CloudObject in a single list";
+                    },
+                    error: function(error) {
+                        done();
+                    }
+                });
+            },
+            error: function(error) {
                 throw "Cannot save obj";
-            }});
+            }
+        });
     });
 
- // Test for error of getting duplicate objects while saving a object after updating
-    it("Should not duplicate the values in a list after updating",function(done){
+    // Test for error of getting duplicate objects while saving a object after updating
+    it("Should not duplicate the values in a list after updating", function(done) {
         this.timeout(30000);
 
         var obj = new CB.CloudObject('student1');
-        obj.set('age',5);
-        obj.set('name','abcd');
+        obj.set('age', 5);
+        obj.set('name', 'abcd');
 
         var obj1 = new CB.CloudObject('Custom4');
-        obj1.set('newColumn7',[obj,obj]);
+        obj1.set('newColumn7', [obj, obj]);
 
-        obj1.save().then(function(list){
+        obj1.save().then(function(list) {
 
-            nc7=list.get('newColumn7');
+            nc7 = list.get('newColumn7');
             nc7.push(obj);
-            obj1.set('newColumn7',nc7);
-            obj1.save().then(function(list){
-                if(list.get('newColumn7').length === 1)
+            obj1.set('newColumn7', nc7);
+            obj1.save().then(function(list) {
+                if (list.get('newColumn7').length === 1)
                     done();
                 else
                     done("should not save duplicate objects");
-            },function(err){
+                }
+            , function(err) {
                 done(err);
             });
 
-        },function(err){
+        }, function(err) {
             done(err);
         });
     });
 
-// Test Case for error saving an object in a column
-    it("should save a JSON object in a column",function(done){
+    // Test Case for error saving an object in a column
+    it("should save a JSON object in a column", function(done) {
         this.timeout(30000);
-        var json= {"name":"vipul","location":"uoh","age":10};
+        var json = {
+            "name": "vipul",
+            "location": "uoh",
+            "age": 10
+        };
         var obj = new CB.CloudObject('Custom');
-        obj.set('newColumn6',json);
-        obj.save().then(function(list){
-            var obje=list.get('newColumn6');
-            if(obje.name === 'vipul' && obje.location === 'uoh' && obje.age === 10)
+        obj.set('newColumn6', json);
+        obj.save().then(function(list) {
+            var obje = list.get('newColumn6');
+            if (obje.name === 'vipul' && obje.location === 'uoh' && obje.age === 10)
                 done();
             else
                 throw "error in saving json object";
-        },function(){
+            }
+        , function() {
             throw "should save JSON object in cloud";
         });
     });
 
-    it("should save list of numbers",function(done){
+    it("should save list of numbers", function(done) {
 
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom14');
-        obj.set('ListNumber',[1,2,3]);
-        obj.save().then(function(list){           
-           done();
-        },function(){
+        obj.set('ListNumber', [1, 2, 3]);
+        obj.save().then(function(list) {
+            done();
+        }, function() {
             throw "should save the list of numbers";
         });
     });
 
-    it("should save a list of GeoPoint",function(done){
+    it("should save a list of GeoPoint", function(done) {
 
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom14');
-        var GP1 = new CB.CloudGeoPoint(17,89);
-        var GP2 = new CB.CloudGeoPoint(66,78);
-        obj.set('ListGeoPoint',[GP1,GP2]);
-        obj.save().then(function(list){          
+        var GP1 = new CB.CloudGeoPoint(17, 89);
+        var GP2 = new CB.CloudGeoPoint(66, 78);
+        obj.set('ListGeoPoint', [GP1, GP2]);
+        obj.save().then(function(list) {
             done();
-        },function(){
+        }, function() {
             throw "should save list of geopoint";
         });
     });
 
-    it("should save the relation",function(done){
+    it("should save the relation", function(done) {
 
         this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
-        obj1.set('room',123);
-        obj1.save().then(function(obj){
-            if(obj){
+        obj1.set('room', 123);
+        obj1.save().then(function(obj) {
+            if (obj) {
                 obj1 = obj;
-            }else{
+            } else {
                 throw "should save the object";
             }
             obj = new CB.CloudObject('student1');
-            obj2 = new CB.CloudObject('hostel',obj1.get('id'));
-            obj.set('newColumn',obj2);
-            obj.save().then(function(list){              
+            obj2 = new CB.CloudObject('hostel', obj1.get('id'));
+            obj.set('newColumn', obj2);
+            obj.save().then(function(list) {
                 done();
-            },function(){
+            }, function() {
                 throw "should save the object";
             });
-        },function(){
+        }, function() {
             throw "should save the object";
         });
     });
 
     it("should display correct error message when you save a string in a number field. ", function(done) {
-        
+
         this.timeout(30000);
 
         var obj = new CB.CloudObject('Custom7');
-        obj.set('requiredNumber','sample');
-       
+        obj.set('requiredNumber', 'sample');
+
         obj.save({
-            success : function(newObj){
+            success: function(newObj) {
                 throw 'Wrong datatype in an array saved.';
-            }, error : function(error){                
+            },
+            error: function(error) {
                 done();
             }
         });
     });
 
-     it("should unset the field. ", function(done) {
-        
+    it("should unset the field. ", function(done) {
+
         this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
-        obj1.set('room',123);
-        obj1.save().then(function(obj){
-            
-            if(obj.get('room') === 123){
+        obj1.set('room', 123);
+        obj1.save().then(function(obj) {
+
+            if (obj.get('room') === 123) {
                 obj.unset('room');
-                obj1.save().then(function(obj){
-                    if(!obj.get('room')){
+                obj1.save().then(function(obj) {
+                    if (!obj.get('room')) {
                         done();
-                    }else
+                    } else
                         throw "Didnot unset the data from an object";
 
-                },function(){
+                    }
+                , function() {
                     throw "should save the object";
                 });
-            }else
+            } else
                 throw "Didnot set the data to an object";
 
-        },function(){
+            }
+        , function() {
             throw "should save the object";
         });
     });
 
+    it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
 
-     it("should add multiple relations to CLoudObject -> save -> should maintain the order of those relations. ", function(done) {
-        
         this.timeout(30000);
 
         var obj1 = new CB.CloudObject('hostel');
-        obj1.set('room',123);
-        obj1.save().then(function(obj){
-            
-            if(obj.get('room')===123){
+        obj1.set('room', 123);
+        obj1.save().then(function(obj) {
+
+            if (obj.get('room') === 123) {
                 obj.unset('room');
-                obj1.save().then(function(obj){
-                    if(!obj.get('room')){
+                obj1.save().then(function(obj) {
+                    if (!obj.get('room')) {
                         done();
-                    }else
+                    } else
                         throw "DidNot unset the data from an object";
 
-                },function(){
+                    }
+                , function() {
                     throw "should save the object";
                 });
-            }else
+            } else
                 throw "DidNot set the data to an object";
 
-        },function(){
+            }
+        , function() {
             throw "should save the object";
         });
     });
 
+    it("should save a required number with 0.", function(done) {
 
-     it("should save a required number with 0.", function(done) {
-        
         this.timeout(30000);
 
         var obj1 = new CB.CloudObject('Custom18');
-        obj1.set('number',0);
-        obj1.save().then(function(obj){
+        obj1.set('number', 0);
+        obj1.save().then(function(obj) {
             done();
-        },function(){
+        }, function() {
             throw "should save the object";
         });
     });
-
 
     it("should fetch a CloudObject", function(done) {
 
         this.timeout(30000);
 
         var obj1 = new CB.CloudObject('Custom18');
-        obj1.set('number',0);
-        obj1.save().then(function(obj){
+        obj1.set('number', 0);
+        obj1.save().then(function(obj) {
             delete obj1.document.number;
-            obj1.fetch().then(function(res){
-                if(res.get('number') === 0)
+            obj1.fetch().then(function(res) {
+                if (res.get('number') === 0)
                     done();
                 else
                     throw "Unable to Fetch Data Using fetch function";
-            },function(err){
+                }
+            , function(err) {
                 throw "Unable to fetch";
             });
-        },function(){
+        }, function() {
             throw "should save the object";
         });
     });
 
-     it("should not update the createdAt when the object is updated.",function(done){
+    it("should not update the createdAt when the object is updated.", function(done) {
 
         this.timeout('40000');
 
         var obj = new CB.CloudObject('Sample');
         obj.set('name', 'sample');
         obj.save({
-            success : function(newObj){
+            success: function(newObj) {
                 var createdAt = Date.parse(newObj.createdAt);
 
                 obj.set('name', 'sample1');
 
-                setTimeout(function(){
-                   
-                    if(createdAt ==null){
+                setTimeout(function() {
+
+                    if (createdAt == null) {
                         done("Error : Didnot save CreatedAt");
                     }
 
                     obj.save({
-                        success : function(newObj){
+                        success: function(newObj) {
                             //console.log("OLD CreatedAt : "+createdAt);
                             //console.log("NEW CreatedAt : "+Date.parse(newObj.createdAt));
                             //console.log("NEW UpdatedAt : "+Date.parse(newObj.updatedAt));
 
-                            if(Date.parse(newObj.createdAt) === createdAt && Date.parse(newObj.updatedAt) !== createdAt){
+                            if (Date.parse(newObj.createdAt) === createdAt && Date.parse(newObj.updatedAt) !== createdAt) {
                                 done();
-                            }else{
+                            } else {
                                 done("Throw CreatedAt updated when the object is updated.")
                             }
-                            
-                        }, error : function(error){
+
+                        },
+                        error: function(error) {
                             throw 'Error saving the object';
                         }
                     });
-                 },10000);
+                }, 10000);
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 throw 'Error saving the object';
             }
         });
-    
+
     });
 
-    it("should only save data of column with master key.",function(done){
+    it("should only save data of column with master key.", function(done) {
         this.timeout('40000');
-           
-        //MasterKey   
-        CB.appKey = CB.masterKey;        
 
-        var table = new CB.CloudTable('ColByMaster');  
-            var Name = new CB.Column('Name');
-            Name.dataType = 'Text';
-            Name.editableByMasterKey=true;     
+        //MasterKey
+        CB.appKey = CB.masterKey;
+
+        var table = new CB.CloudTable('ColByMaster');
+        var Name = new CB.Column('Name');
+        Name.dataType = 'Text';
+        Name.editableByMasterKey = true;
         table.addColumn(Name);
-      
-        table.save().then(function(res){
-            
+
+        table.save().then(function(res) {
+
             //Switched to ClientKey
-            CB.appKey = CB.jsKey; 
+            CB.appKey = CB.jsKey;
 
             var obj = new CB.CloudObject('ColByMaster');
             obj.set('Name', "doNotAllowMe");
             obj.save({
-                success : function(obj){
+                success: function(obj) {
                     done("Column saved with Client Key");
-                },error : function(error){
+                },
+                error: function(error) {
                     done();
                 }
             });
-            
-        },function(err){
+
+        }, function(err) {
             done(err);
-        }); 
-        
+        });
+
     });
 
-    it("should save data of columns other than editableByMasterKey.",function(done){
+    it("should save data of columns other than editableByMasterKey.", function(done) {
         this.timeout('40000');
-           
-        //MasterKey   
-        CB.appKey = CB.masterKey;        
 
-        var table = new CB.CloudTable('ColByMaster2');  
-            var Name = new CB.Column('Name');
-            Name.dataType = 'Text';
-            Name.editableByMasterKey=true;     
+        //MasterKey
+        CB.appKey = CB.masterKey;
+
+        var table = new CB.CloudTable('ColByMaster2');
+        var Name = new CB.Column('Name');
+        Name.dataType = 'Text';
+        Name.editableByMasterKey = true;
         table.addColumn(Name);
 
         var Surname = new CB.Column('Surname');
-            Surname.dataType = 'Text';               
+        Surname.dataType = 'Text';
         table.addColumn(Surname);
-      
-        table.save().then(function(res){
-            
+
+        table.save().then(function(res) {
+
             //Switched to ClientKey
-            CB.appKey = CB.jsKey; 
+            CB.appKey = CB.jsKey;
 
             var obj = new CB.CloudObject('ColByMaster2');
             obj.set('Surname', "AllowMe");
             obj.save({
-                success : function(obj){
+                success: function(obj) {
                     done();
-                },error : function(error){
+                },
+                error: function(error) {
                     done(error);
                 }
             });
-            
-        },function(err){
+
+        }, function(err) {
             done(err);
-        }); 
-        
-    });    
+        });
+
+    });
 
 });
+
 describe("Bulk API",function(done){
 
     it("should save array of CloudObject using bulk Api",function(done){
@@ -6775,744 +7083,876 @@ describe("Cloud Objects Notification", function() {
 });
 describe("Query on Cloud Object Notifications ", function() {
 
-	//Use Sample Table. 
-	// -> Which has columns : 
-	// name : string : required. 
+    //Use Sample Table.
+    // -> Which has columns :
+    // name : string : required.
 
-    it("limit : 1",function(done){
+    it("limit : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.limit = 2;   
+        query.limit = 2;
 
         var count = 0;
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           ++count;
+        CB.CloudObject.on('Student', 'created', query, function() {
+            ++count;
         });
 
-        for(var i=0;i<3;i++){
-            //attach it to the event. 
+        for (var i = 0; i < 3; i++) {
+            //attach it to the event.
             var obj = new CB.CloudObject('Student');
-            obj.set('name','Nawaz');
+            obj.set('name', 'Nawaz');
             obj.save();
         }
 
-        setTimeout(function(){
-            if(count === 2){
-                 if(!isDone){
-                    isDone=true;
+        setTimeout(function() {
+            if (count === 2) {
+                if (!isDone) {
+                    isDone = true;
                     done();
-                 };
-            }else{
-                 if(!isDone){
-                    isDone=true;
+                };
+            } else {
+                if (!isDone) {
+                    isDone = true;
                     done("Limit Error");
-                 };
+                };
             }
         }, 30000)
 
-    });    
+    });
 
-    it("skip : 1",function(done){
+    it("near : 1", function(done) {
+        //Custom5 table has location field.
 
+        this.timeout(30000);
+        var loc = new CB.CloudGeoPoint("76.991204", "28.605977");
+        var query = new CB.CloudQuery('Custom5');
         var isDone = false;
-        
-        this.timeout(40000);
-        //create the query. 
+        query.near("location", loc, 40000); //40km
+
+        CB.CloudObject.on('Custom5', 'created', query, function() {
+            CB.CloudObject.off('Custom5', 'created');
+            isDone = true;
+
+        });
+        loc = new CB.CloudGeoPoint("77.061327", "28.621272");
+        var obj = new CB.CloudObject('Custom5');
+        obj.set('location', loc);
+        obj.save();
+        setTimeout(function() {
+            if (isDone) {
+                done();
+            } else {
+                done('event not fired');
+            }
+        }, 20000);
+    });
+
+    it("near : 2", function(done) {
+        //Custom5 table has location field.
+
+        this.timeout(30000);
+        var loc = new CB.CloudGeoPoint("76.991204", "28.605977");
+        var query = new CB.CloudQuery('Custom5');
+        var isDone = false;
+        query.near("location", loc, 40000); //40km
+
+        CB.CloudObject.on('Custom5', 'created', query, function() {
+            CB.CloudObject.off('Custom5', 'created');
+            isDone = true;
+
+        });
+        loc = new CB.CloudGeoPoint("78.486671", "17.385044");
+        var obj = new CB.CloudObject('Custom5');
+        obj.set('location', loc);
+        obj.save();
+        setTimeout(function() {
+            if (!isDone) {
+                done();
+            } else {
+                done('event  fired');
+            }
+        }, 20000);
+    });
+
+    it("should only fire the second event and not the first one. ", function(done) {
+        var message = "unmodified";
+        var isDone = false;
+
+        this.timeout(30000);
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.skip = 1;   
+        query.equalTo('name', 'Sample');
 
-        var count = 0;
-
-        CB.CloudObject.on('Student', 'created', query, function(data){
-           ++count;
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                message = 'first event fired.';
+            } else {
+                message = 'first event fired after second.';
+            }
         });
 
-        for(var i=0;i<3;i++){
-            //attach it to the event. 
-            var obj = new CB.CloudObject('Student');
-            obj.set('name','Nawaz');
-            obj.save();
-        }
+        query = new CB.CloudQuery('Student');
+        query.equalTo('age', 10);
 
-        setTimeout(function(){
-            if(count === 2){
-                 if(!isDone){
-                    isDone=true;
-                    done();
-                 };
-            }else{
-                 if(!isDone){
-                    isDone=true;
-                    done("Limit Error");
-                 };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+            } else {
+                message = 'second event fired after first';
+            }
+        });
+
+        //attach it to the event.
+        var obj = new CB.CloudObject('Student');
+        obj.set('age', 10);
+        obj.save();
+
+        setTimeout(function() {
+            if (message == 'unmodified') {
+                done();
+            } else {
+                done(message);
             }
         }, 20000);
 
     });
-  
 
-    it("notification should work on equalTo Columns",function(done){
+    it("should only fire the first event and not the second one. ", function(done) {
+        var message = "unmodified";
+        var isDone = false;
+
+        this.timeout(30000);
+        //create the query.
+        var query = new CB.CloudQuery('Student');
+        query.equalTo('name', 'Sample');
+
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+            } else {
+                message = 'first event fired after second.';
+            }
+        });
+
+        query = new CB.CloudQuery('Student');
+        query.equalTo('age', 10);
+
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                message = 'second event fired.';
+            } else {
+                message = 'second event fired after first';
+            }
+        });
+
+        //attach it to the event.
+        var obj = new CB.CloudObject('Student');
+        obj.set('name', 'Sample');
+        obj.save();
+
+        setTimeout(function() {
+            if (message == 'unmodified') {
+                done();
+            } else {
+                done(message);
+            }
+        }, 20000);
+
+    });
+
+    it("skip : 1", function(done) {
+
+        var isDone = false;
+
+        this.timeout(40000);
+        //create the query.
+        var query = new CB.CloudQuery('Student');
+        query.skip = 1;
+
+        var count = 0;
+
+        CB.CloudObject.on('Student', 'created', query, function(data) {
+            ++count;
+        });
+
+        for (var i = 0; i < 3; i++) {
+            //attach it to the event.
+            var obj = new CB.CloudObject('Student');
+            obj.set('name', 'Nawaz');
+            obj.save();
+        }
+
+        setTimeout(function() {
+            if (count === 2) {
+                if (!isDone) {
+                    isDone = true;
+                    done();
+                };
+            } else {
+                if (!isDone) {
+                    isDone = true;
+                    done("Limit Error");
+                };
+            }
+        }, 20000);
+
+    });
+
+    it("notification should work on equalTo Columns", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.equalTo('name','Sample');
+        query.equalTo('name', 'Sample');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done();
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done();
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('name','Sample');
+        obj.set('name', 'Sample');
         obj.save();
 
     });
 
-    it("should work on equalTo Columns : 2",function(done){
+    it("should work on equalTo Columns : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.equalTo('name','Sample');
+        query.equalTo('name', 'Sample');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('name','Sample1');
+        obj.set('name', 'Sample1');
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                }
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            }
         }, 10000);
     });
 
-
-    it("should work on notEqualTo Columns : 1",function(done){
+    it("should work on notEqualTo Columns : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.notEqualTo('name','Sample');
+        query.notEqualTo('name', 'Sample');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('name','Sample1');
+        obj.set('name', 'Sample1');
         obj.save();
 
     });
 
-
-     it("should work on notEqualTo Columns : 2",function(done){
+    it("should work on notEqualTo Columns : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.notEqualTo('name','Sample');
+        query.notEqualTo('name', 'Sample');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('name','Sample');
+        obj.set('name', 'Sample');
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
     });
 
-
-    it("greaterThan : 1",function(done){
+    it("greaterThan : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.greaterThan('age', 10);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-
-    it("greaterThan : 2",function(done){
+    it("greaterThan : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.greaterThan('age', 10);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-
-    it("lessThan : 1",function(done){
+    it("lessThan : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.lessThan('age', 10);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
     });
 
-
-    it("lessThan : 2",function(done){
+    it("lessThan : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.lessThan('age', 10);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-    it("Exists : 1",function(done){
+    it("Exists : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.exists('age');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-
-    it("Exists : 2",function(done){
+    it("Exists : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.exists('name');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-    it("doesNotExist : 1",function(done){
+    it("doesNotExist : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.doesNotExists('name');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-
-    it("doesNotExist : 2",function(done){
+    it("doesNotExist : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
         query.doesNotExists('age');
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-    it("GTE : 1",function(done){
+    it("GTE : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.greaterThanEqualTo('age',11);
+        query.greaterThanEqualTo('age', 11);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-
-    it("GTE : 2",function(done){
+    it("GTE : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.greaterThanEqualTo('age',9);
+        query.greaterThanEqualTo('age', 9);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',8);
+        obj.set('age', 8);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-
-    it("LTE : 1",function(done){
+    it("LTE : 1", function(done) {
 
         var isDone = false;
-        
-        this.timeout(30000);
-        //create the query. 
-        var query = new CB.CloudQuery('Student');
-        query.lessThanEqualTo('age',11);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        this.timeout(30000);
+        //create the query.
+        var query = new CB.CloudQuery('Student');
+        query.lessThanEqualTo('age', 11);
+
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
+    it("LTE : 2", function(done) {
 
-    it("LTE : 2",function(done){
-
-        var isDone = false; 
+        var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.lessThanEqualTo('age',9);
+        query.lessThanEqualTo('age', 9);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-    it("containedIn : 1",function(done){
+    it("containedIn : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.containedIn('age',[11]);
+        query.containedIn('age', [11]);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-    it("containedIn : 2",function(done){
+    it("containedIn : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.containedIn('age',[9]);
+        query.containedIn('age', [9]);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-    it("notContainedIn : 1",function(done){
+    it("notContainedIn : 1", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.notContainedIn('age',[10]);
+        query.notContainedIn('age', [10]);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
+        obj.set('age', 11);
         obj.save();
     });
 
-    it("notContainedIn : 2",function(done){
+    it("notContainedIn : 2", function(done) {
 
         var isDone = false;
 
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query = new CB.CloudQuery('Student');
-        query.notContainedIn('age',[9]);
+        query.notContainedIn('age', [9]);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
-        }, 10000);
-
-    });   
-
-    it("containsAll : 1",function(done){
-
-        var isDone = false;
-
-        this.timeout(30000);
-        //create the query. 
-        var query = new CB.CloudQuery('Student');
-        query.containsAll('age',[11]);
-
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
-        });
-
-        //attach it to the event. 
-        var obj = new CB.CloudObject('Student');
-        obj.set('age',11);
-        obj.save();
-    });
-
-
-    it("containsAll : 2",function(done){
-
-        var isDone = false;
-
-        this.timeout(30000);
-        //create the query. 
-        var query = new CB.CloudQuery('Student');
-        query.containsAll('age',[8]);
-
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
-        });
-
-        //attach it to the event. 
-        var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
-        obj.save();
-
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
 
-
-    it("or : 1",function(done){
+    it("containsAll : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(30000);
-        //create the query. 
+        //create the query.
+        var query = new CB.CloudQuery('Student');
+        query.containsAll('age', [11]);
+
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
+        });
+
+        //attach it to the event.
+        var obj = new CB.CloudObject('Student');
+        obj.set('age', 11);
+        obj.save();
+    });
+
+    it("containsAll : 2", function(done) {
+
+        var isDone = false;
+
+        this.timeout(30000);
+        //create the query.
+        var query = new CB.CloudQuery('Student');
+        query.containsAll('age', [8]);
+
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
+        });
+
+        //attach it to the event.
+        var obj = new CB.CloudObject('Student');
+        obj.set('age', 9);
+        obj.save();
+
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
+        }, 10000);
+
+    });
+
+    it("or : 1", function(done) {
+
+        var isDone = false;
+
+        this.timeout(30000);
+        //create the query.
         var query1 = new CB.CloudQuery('Student');
-        query1.equalTo('age',8);
+        query1.equalTo('age', 8);
 
         var query2 = new CB.CloudQuery('Student');
-        query2.equalTo('name','Nawaz');
+        query2.equalTo('name', 'Nawaz');
 
         var query = CB.CloudQuery.or(query1, query2);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-           if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        CB.CloudObject.on('Student', 'created', query, function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',8);
+        obj.set('age', 8);
         obj.save();
-    });       
+    });
 
-    it("or : 2",function(done){
+    it("or : 2", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(30000);
-        //create the query. 
+        //create the query.
         var query1 = new CB.CloudQuery('Student');
-        query1.equalTo('age',8);
+        query1.equalTo('age', 8);
 
         var query2 = new CB.CloudQuery('Student');
-        query2.equalTo('name','Nawaz');
+        query2.equalTo('name', 'Nawaz');
 
         var query = CB.CloudQuery.or(query1, query2);
 
-        CB.CloudObject.on('Student', 'created', query, function(){
-            CB.CloudObject.off('Student','created');
-            if(!isDone){
-                    isDone=true;
-                    done("Fired a wrong event");
-                }
+        CB.CloudObject.on('Student', 'created', query, function() {
+            CB.CloudObject.off('Student', 'created');
+            if (!isDone) {
+                isDone = true;
+                done("Fired a wrong event");
+            }
         });
 
-        //attach it to the event. 
+        //attach it to the event.
         var obj = new CB.CloudObject('Student');
-        obj.set('age',9);
+        obj.set('age', 9);
         obj.save();
 
-        setTimeout(function(){
-            if(!isDone){
-                    isDone=true;
-                    done();
-                };
+        setTimeout(function() {
+            if (!isDone) {
+                isDone = true;
+                done();
+            };
         }, 10000);
 
     });
@@ -7520,11 +7960,11 @@ describe("Query on Cloud Object Notifications ", function() {
     // it("startsWith : 1",function(done){
 
     //     var isDone = false;
-        
+
     //     this.timeout(30000);
-    //     //create the query. 
+    //     //create the query.
     //     var query = new CB.CloudQuery('Student');
-    //     query.startsWith('name','N');       
+    //     query.startsWith('name','N');
 
     //     CB.CloudObject.on('Student', 'created', query, function(){
     //        if(!isDone){
@@ -7533,18 +7973,18 @@ describe("Query on Cloud Object Notifications ", function() {
     //             };
     //     });
 
-    //     //attach it to the event. 
+    //     //attach it to the event.
     //     var obj = new CB.CloudObject('Student');
     //     obj.set('name','Nawaz');
     //     obj.save();
-    // });       
+    // });
 
     // it("startsWith : 2",function(done){
 
     //     var isDone = false;
-        
+
     //     this.timeout(30000);
-      
+
     //     var query = new CB.CloudQuery('Student');
     //     query.startsWith('name','N');
 
@@ -7556,7 +7996,7 @@ describe("Query on Cloud Object Notifications ", function() {
     //             }
     //     });
 
-    //     //attach it to the event. 
+    //     //attach it to the event.
     //     var obj = new CB.CloudObject('Student');
     //     obj.set('name','x');
     //     obj.save();
@@ -7570,323 +8010,576 @@ describe("Query on Cloud Object Notifications ", function() {
 
     // });
 
-
-    it("EqualTo over CloudObjects : 1",function(done){
+    it("EqualTo over CloudObjects : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
         child.save({
-            success : function(child){
-               
-                //create the query. 
+            success: function(child) {
+
+                //create the query.
                 var query = new CB.CloudQuery('Custom2');
                 query.equalTo('newColumn7', child);
 
-                CB.CloudObject.on('Custom2', 'created', query, function(data){
-                   if(!isDone){
-                        isDone=true;
+                CB.CloudObject.on('Custom2', 'created', query, function(data) {
+                    if (!isDone) {
+                        isDone = true;
                         done();
                     }
                 });
 
                 var obj = new CB.CloudObject('Custom2');
-                obj.set('newColumn7',child);
+                obj.set('newColumn7', child);
                 obj.save();
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-
-    it("EqualTo over CloudObjects : 2",function(done){
+    it("EqualTo over CloudObjects : 2", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
 
         child.save({
-            success : function(child){
+            success: function(child) {
                 var child2 = new CB.CloudObject('student1');
-        
+
                 child2.save({
-                    success : function(child2){
-                        //create the query. 
+                    success: function(child2) {
+                        //create the query.
                         var query = new CB.CloudQuery('Custom2');
                         query.equalTo('newColumn7', child2);
 
-                        CB.CloudObject.on('Custom2', 'created', query, function(data){
-                            if(!isDone){
-                                isDone=true;
+                        CB.CloudObject.on('Custom2', 'created', query, function(data) {
+                            if (!isDone) {
+                                isDone = true;
                                 done("Wrong event fired");
                             }
                         });
 
                         var obj = new CB.CloudObject('Custom2');
-                        obj.set('newColumn7',child);
+                        obj.set('newColumn7', child);
                         obj.save();
 
-                        setTimeout(function(){
-                            if(!isDone){
-                                    isDone=true;
-                                    done();
-                                };
+                        setTimeout(function() {
+                            if (!isDone) {
+                                isDone = true;
+                                done();
+                            };
                         }, 10000);
-                    }, error : function(error){
-                     done("Object cannot be saved");
-                }
-            });
+                    },
+                    error: function(error) {
+                        done("Object cannot be saved");
+                    }
+                });
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-    it("ContainedIn : 1",function(done){
+    it("ContainedIn : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
         child.save({
-            success : function(child){
-               
-                //create the query. 
+            success: function(child) {
+
+                //create the query.
                 var query = new CB.CloudQuery('Custom4');
                 query.containedIn('newColumn7', [child]);
 
-                CB.CloudObject.on('Custom4', 'created', query, function(data){
-                   if(!isDone){
-                        isDone=true;
+                CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                    if (!isDone) {
+                        isDone = true;
                         done();
                     }
                 });
 
                 var obj = new CB.CloudObject('Custom4');
-                obj.set('newColumn7',[child]);
+                obj.set('newColumn7', [child]);
                 obj.save();
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-
-    it("ContainedIn : 2",function(done){
+    it("ContainedIn : 2", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
 
         child.save({
-            success : function(child){
+            success: function(child) {
                 var child2 = new CB.CloudObject('student1');
-        
+
                 child2.save({
-                    success : function(child2){
-                        //create the query. 
+                    success: function(child2) {
+                        //create the query.
                         var query = new CB.CloudQuery('Custom4');
                         query.containedIn('newColumn7', [child2]);
 
-                        CB.CloudObject.on('Custom4', 'created', query, function(data){
-                            if(!isDone){
-                                isDone=true;
+                        CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                            if (!isDone) {
+                                isDone = true;
                                 done("Wrong event fired");
                             }
                         });
 
                         var obj = new CB.CloudObject('Custom4');
-                        obj.set('newColumn7',[child]);
+                        obj.set('newColumn7', [child]);
                         obj.save();
 
-                        setTimeout(function(){
-                            if(!isDone){
-                                    isDone=true;
-                                    done();
-                                };
+                        setTimeout(function() {
+                            if (!isDone) {
+                                isDone = true;
+                                done();
+                            };
                         }, 10000);
-                    }, error : function(error){
-                     done("Object cannot be saved");
-                }
-            });
+                    },
+                    error: function(error) {
+                        done("Object cannot be saved");
+                    }
+                });
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-
-    it("ContainsAll : 1",function(done){
+    it("ContainsAll : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
         child.save({
-            success : function(child){
-               
-                //create the query. 
+            success: function(child) {
+
+                //create the query.
                 var query = new CB.CloudQuery('Custom4');
                 query.containsAll('newColumn7', [child]);
 
-                CB.CloudObject.on('Custom4', 'created', query, function(data){
-                   if(!isDone){
-                        isDone=true;
+                CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                    if (!isDone) {
+                        isDone = true;
                         done();
                     }
                 });
 
                 var obj = new CB.CloudObject('Custom4');
-                obj.set('newColumn7',[child]);
+                obj.set('newColumn7', [child]);
                 obj.save();
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-
-    it("ContainsAll : 2",function(done){
+    it("ContainsAll : 2", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
 
         child.save({
-            success : function(child){
+            success: function(child) {
                 var child2 = new CB.CloudObject('student1');
-        
+
                 child2.save({
-                    success : function(child2){
-                        //create the query. 
+                    success: function(child2) {
+                        //create the query.
                         var query = new CB.CloudQuery('Custom4');
                         query.containsAll('newColumn7', [child2]);
 
-                        CB.CloudObject.on('Custom4', 'created', query, function(data){
-                            if(!isDone){
-                                isDone=true;
+                        CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                            if (!isDone) {
+                                isDone = true;
                                 done("Wrong event fired");
                             }
                         });
 
                         var obj = new CB.CloudObject('Custom4');
-                        obj.set('newColumn7',[child]);
+                        obj.set('newColumn7', [child]);
                         obj.save();
 
-                        setTimeout(function(){
-                            if(!isDone){
-                                    isDone=true;
-                                    done();
-                                };
+                        setTimeout(function() {
+                            if (!isDone) {
+                                isDone = true;
+                                done();
+                            };
                         }, 10000);
-                    }, error : function(error){
-                     done("Object cannot be saved");
-                }
-            });
+                    },
+                    error: function(error) {
+                        done("Object cannot be saved");
+                    }
+                });
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-    it("notContainedIn : 1",function(done){
+    it("notContainedIn : 1", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
         child.save({
-            success : function(child){
-               
-                //create the query. 
+            success: function(child) {
+
+                //create the query.
                 var query = new CB.CloudQuery('Custom4');
                 query.notContainedIn('newColumn7', [child]);
 
-                CB.CloudObject.on('Custom4', 'created', query, function(data){
-                   if(!isDone){
-                        isDone=true;
+                CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                    if (!isDone) {
+                        isDone = true;
                         done("Wrong event fired");
                     }
                 });
 
                 var obj = new CB.CloudObject('Custom4');
-                obj.set('newColumn7',[child]);
+                obj.set('newColumn7', [child]);
                 obj.save();
 
-                 setTimeout(function(){
-                            if(!isDone){
-                                    isDone=true;
-                                    done();
-                                };
+                setTimeout(function() {
+                    if (!isDone) {
+                        isDone = true;
+                        done();
+                    };
                 }, 10000);
 
-
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
 
-
-    it("notContainedIn : 2",function(done){
+    it("notContainedIn : 2", function(done) {
 
         var isDone = false;
-        
+
         this.timeout(40000);
 
         var child = new CB.CloudObject('student1');
 
         child.save({
-            success : function(child){
+            success: function(child) {
                 var child2 = new CB.CloudObject('student1');
-        
+
                 child2.save({
-                    success : function(child2){
-                        //create the query. 
+                    success: function(child2) {
+                        //create the query.
                         var query = new CB.CloudQuery('Custom4');
                         query.notContainedIn('newColumn7', [child2]);
 
-                        CB.CloudObject.on('Custom4', 'created', query, function(data){
-                            if(!isDone){
-                                isDone=true;
+                        CB.CloudObject.on('Custom4', 'created', query, function(data) {
+                            if (!isDone) {
+                                isDone = true;
                                 done();
                             }
                         });
 
                         var obj = new CB.CloudObject('Custom4');
-                        obj.set('newColumn7',[child]);
+                        obj.set('newColumn7', [child]);
                         obj.save();
 
-                       
-                    }, error : function(error){
-                     done("Object cannot be saved");
-                }
-            });
+                    },
+                    error: function(error) {
+                        done("Object cannot be saved");
+                    }
+                });
 
-            }, error : function(error){
+            },
+            error: function(error) {
                 done("Object cannot be saved");
             }
         });
     });
+
 });
+
+describe("Offline Mode", function() {
+
+    var obj1 = new CB.CloudObject('Student');
+    obj1.set('name', 'Student');
+    var obj2 = new CB.CloudObject('Sample');
+    obj2.set('name', 'Sample');
+    var obj3 = new CB.CloudObject('Custom3');
+    obj3.set('address', 'Najafgarh New Delhi');
+
+    it("should pin the object to local store", function(done) {
+        this.timeout(70000);
+
+        console.log('Disconnecting App......');
+        CB.CloudApp.disconnect();
+        setTimeout(function() {
+            var found = false;
+            var obj = new CB.CloudObject('Student');
+            obj.set('name', 'Ritish');
+            obj.pin({
+                success: function(data) {
+                    found = data.some(function(element) {
+                        return element._hash == obj.document._hash;
+                    })
+                },
+                error: function(err) {
+                    done(err);
+                }
+            });
+            setTimeout(function() {
+                if (found)
+                    done();
+                else {
+                    done('object not found in local store.')
+                }
+            }, 5000);
+
+        }, 50000);
+
+    });
+
+    it("should pin multiple objects to local store", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+        obj1.pin({
+            success: function(data) {
+                data.some(function(element) {
+                    if (element._hash == obj1.document._hash)
+                        count++;
+                    }
+                );
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+        CB.CloudObject.pin([
+            obj2, obj3
+        ], {
+            success: function(data) {
+                data.some(function(element) {
+                    if (element._hash == obj1.document._hash)
+                        count++;
+                    else if (element._hash == obj2.document._hash)
+                        count++;
+                    else if (element._hash == obj3.document._hash)
+                        count++;
+                    }
+                );
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+        setTimeout(function() {
+            if (count == 3)
+                done();
+            else {
+                done('object not found in local store.')
+            }
+        }, 5000);
+    });
+
+    it("should unpin the object from the local store", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+
+        obj1.unPin({
+            success: function(data) {
+                data.some(function(element) {
+                    if (element._hash == obj1.document._hash)
+                        count++;
+                    }
+                );
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+        setTimeout(function() {
+            if (count == 0)
+                done();
+            else {
+                done('object found in local store.')
+            }
+        }, 5000);
+
+    });
+
+    it("should unpin multiple objects from the local store", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+
+        CB.CloudObject.unPin([
+            obj2, obj3
+        ], {
+            success: function(data) {
+                data.some(function(element) {
+                    if (element._hash == obj2.document._hash)
+                        count++;
+                    else if (element._hash == obj3.document._hash)
+                        count++;
+
+                    }
+                );
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+        setTimeout(function() {
+            if (count == 0)
+                done();
+            else {
+                done('objects found in local store.')
+            }
+        }, 5000);
+
+    });
+
+    it("should save the objects eventually", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+
+        var obj2 = new CB.CloudObject('Student');
+        obj2.set('name', 'Offline-Student');
+        obj2.set('age', 79);
+        obj2.saveEventually({
+            success: function(obj) {
+                count++;
+            },
+            error: function(err) {
+                done(err);
+            }
+        });
+
+        setTimeout(function() {
+            var obj1 = new CB.CloudObject('Offline');
+            obj1.set('name', 'Offline-offline');
+            obj1.set('age', 79);
+            obj1.saveEventually({
+                success: function(obj) {
+                    count++;
+                },
+                error: function(err) {
+                    done(err);
+                }
+            });
+        }, 1000);
+
+        setTimeout(function() {
+            if (count == 2)
+                done();
+            else {
+                done('objects not saved.')
+            }
+        }, 5000);
+
+    });
+
+    it("should query the local store", function(done) {
+
+        this.timeout(30000);
+        var query = new CB.CloudQuery('Offline');
+        query.equalTo('name', 'Offline-offline');
+        query.findFromLocalStore({
+            success: function(obj) {
+                console.log(obj);
+                if (obj[0].get('name') == 'Offline-offline')
+                    done();
+                else
+                    done('Not found');
+                }
+            ,
+            error: function(err) {
+                done(err);
+            }
+        })
+
+    });
+
+    it("should call sync function on onConnect", function(done) {
+
+        this.timeout(30000);
+        var count = 0;
+        console.log('Connecting App');
+        CB.CloudApp.connect();
+
+        setTimeout(function() {
+            var query = new CB.CloudQuery('Student');
+            query.equalTo('name', 'Offline-Student');
+            query.find({
+                success: function(obj) {
+                    console.log(obj);
+                    if (obj[0].get('name') == 'Offline-Student')
+                        done();
+                    else
+                        done('Not found');
+                    }
+                ,
+                error: function(err) {
+                    done(err);
+                }
+            })
+        }, 10000);
+
+    });
+
+    it("should clear the local store", function(done) {
+
+        this.timeout(30000);
+        CB.CloudObject.clearLocalStore({
+            success: function(obj) {
+                done();
+            },
+            error: function(err) {
+                done(err);
+            }
+        })
+
+    });
+
+});
+
 describe("CloudObject - Encryption", function (done) {
 
     it("should encrypt passwords", function (done) {
@@ -8312,15 +9005,15 @@ describe("CloudQuery", function(done) {
 
         this.timeout(30000);
 
-        obj.set('name', 'vipul');
+        obj.set('name', 'abrakadabra');
         obj.save().then(function(list) {
-            if (list.get('name') === 'vipul') {
+            if (list.get('name') === 'abrakadabra') {
                 var query = new CB.CloudQuery('student1');
-                query.substring("name", "pu");
+                query.substring("name", "kad");
                 query.find({
                     success: function(list) {
                         if (list.length > 0) {
-                            if (list[0].get("name") === "vipul") {
+                            if (list[0].get("name") === "abrakadabra") {
                                 done();
                             } else {
                                 done("Got the list but got incorrect name");
@@ -10386,6 +11079,59 @@ describe("CloudQuery", function(done) {
             CB.appKey = CB.jsKey;
             done(err);
             throw "Unable to Create Table";
+        });
+
+    });
+
+    it("Should delete data based on query.", function(done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'Ritish');
+        obj.save().then(function(list) {
+            if (list.get('name') === 'Ritish') {
+                var query = new CB.CloudQuery('student1');
+                query.equalTo('name', 'Ritish');
+                query.delete({
+                    success: function(obj) {
+                        query = new CB.CloudQuery('student1');
+                        query.find({
+                            success: function(list) {
+
+                                if (list.length > 0) {
+
+                                    var foundObj = false;
+                                    for (var i = 0; i < list.length; ++i) {
+                                        if (list[i].get("name") === "Ritish") {
+                                            foundObj = true;
+                                        }
+                                    }
+
+                                    if (!foundObj) {
+                                        done();
+                                    } else {
+                                        done("Object not deleted");
+                                    }
+
+                                } else {
+                                    done("Failed to get the list");
+                                }
+
+                            },
+                            error: function(error) {
+                                done("Failed to save the object");
+                            }
+                        });
+                    },
+                    error: function(err) {
+                        done(err);
+                    }
+                })
+            } else
+                throw "object could not saved properly";
+            }
+        , function() {
+            throw "data Save error";
         });
 
     });

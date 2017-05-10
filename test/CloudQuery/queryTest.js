@@ -23,15 +23,15 @@ describe("CloudQuery", function(done) {
 
         this.timeout(30000);
 
-        obj.set('name', 'vipul');
+        obj.set('name', 'abrakadabra');
         obj.save().then(function(list) {
-            if (list.get('name') === 'vipul') {
+            if (list.get('name') === 'abrakadabra') {
                 var query = new CB.CloudQuery('student1');
-                query.substring("name", "pu");
+                query.substring("name", "kad");
                 query.find({
                     success: function(list) {
                         if (list.length > 0) {
-                            if (list[0].get("name") === "vipul") {
+                            if (list[0].get("name") === "abrakadabra") {
                                 done();
                             } else {
                                 done("Got the list but got incorrect name");
@@ -2097,6 +2097,59 @@ describe("CloudQuery", function(done) {
             CB.appKey = CB.jsKey;
             done(err);
             throw "Unable to Create Table";
+        });
+
+    });
+
+    it("Should delete data based on query.", function(done) {
+
+        this.timeout(30000);
+
+        obj.set('name', 'Ritish');
+        obj.save().then(function(list) {
+            if (list.get('name') === 'Ritish') {
+                var query = new CB.CloudQuery('student1');
+                query.equalTo('name', 'Ritish');
+                query.delete({
+                    success: function(obj) {
+                        query = new CB.CloudQuery('student1');
+                        query.find({
+                            success: function(list) {
+
+                                if (list.length > 0) {
+
+                                    var foundObj = false;
+                                    for (var i = 0; i < list.length; ++i) {
+                                        if (list[i].get("name") === "Ritish") {
+                                            foundObj = true;
+                                        }
+                                    }
+
+                                    if (!foundObj) {
+                                        done();
+                                    } else {
+                                        done("Object not deleted");
+                                    }
+
+                                } else {
+                                    done("Failed to get the list");
+                                }
+
+                            },
+                            error: function(error) {
+                                done("Failed to save the object");
+                            }
+                        });
+                    },
+                    error: function(err) {
+                        done(err);
+                    }
+                })
+            } else
+                throw "object could not saved properly";
+            }
+        , function() {
+            throw "data Save error";
         });
 
     });

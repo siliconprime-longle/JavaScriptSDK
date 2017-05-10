@@ -1,4 +1,4 @@
-#Introduction
+# Introduction
 
 [![Build Status](https://travis-ci.org/CloudBoost/JavaScriptSDK.svg?branch=master)](https://travis-ci.org/CloudBoost/JavaScriptSDK)  [![npm version](https://badge.fury.io/js/cloudboost.svg)](http://badge.fury.io/js/cloudboost)  [![Bower version](https://badge.fury.io/bo/cloudboost.svg)](http://badge.fury.io/bo/cloudboost)
 

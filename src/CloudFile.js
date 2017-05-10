@@ -5,13 +5,14 @@ import CB from './CB'
 
 CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
     if (!path)
-        path = '/home';
+        path = '/' + CB.appId;
     if (Object.prototype.toString.call(file) === '[object File]' || Object.prototype.toString.call(file) === '[object Blob]') {
 
         this.fileObj = file;
         this.document = {
             _id: null,
             _type: 'file',
+            _tableName: '_File',
             ACL: new CB.ACL(),
             name: (file && file.name && file.name !== "")
                 ? file.name
@@ -26,13 +27,25 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 ? file.type
                 : 'unknown'
         };
-
+        this.document._modifiedColumns = [
+            'name',
+            'updatedAt',
+            'ACL',
+            'expires',
+            'size',
+            'url',
+            'path',
+            'createdAt',
+            'contentType'
+        ];
+        this.document._isModified = true;
     } else if (typeof file === "string") {
         var regexp = RegExp("https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,}");
         if (regexp.test(file)) {
             this.document = {
                 _id: null,
                 _type: 'file',
+                _tableName: '_File',
                 ACL: new CB.ACL(),
                 name: '',
                 size: '',
@@ -43,6 +56,18 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 createdAt: Date.now(),
                 contentType: ''
             };
+            this.document._modifiedColumns = [
+                'name',
+                'updatedAt',
+                'ACL',
+                'expires',
+                'size',
+                'url',
+                'path',
+                'createdAt',
+                'contentType'
+            ];
+            this.document._isModified = true;
         } else {
             if (data) {
                 this.data = data;
@@ -52,6 +77,7 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                 this.document = {
                     _id: null,
                     _type: 'file',
+                    _tableName: '_File',
                     ACL: new CB.ACL(),
                     name: file,
                     size: '',
@@ -62,14 +88,40 @@ CB.CloudFile = CB.CloudFile || function(file, data, type, path) {
                     expires: null,
                     contentType: type
                 };
+                this.document._modifiedColumns = [
+                    'name',
+                    'updatedAt',
+                    'ACL',
+                    'expires',
+                    'size',
+                    'url',
+                    'path',
+                    'createdAt',
+                    'contentType'
+                ];
+                this.document._isModified = true;
             } else {
                 this.document = {
                     _id: file,
-                    _type: 'file'
+                    _type: 'file',
+                    _tableName: '_File'
                 }
+                this.document._modifiedColumns = [
+                    'name',
+                    'updatedAt',
+                    'ACL',
+                    'expires',
+                    'size',
+                    'url',
+                    'path',
+                    'createdAt',
+                    'contentType'
+                ];
+                this.document._isModified = true;
             }
         }
     }
+
 };
 
 CB.CloudFile.prototype = Object.create(CB.CloudObject.prototype);
@@ -143,15 +195,32 @@ CB.CloudFile.prototype.save = function(callback) {
     }
 
     var thisObj = this;
-
-    if (!this.fileObj && !this.data && this.type != 'folder')
+    if (!this.fileObj && !this.data && this.type != 'folder' && !this.url)
         throw "You cannot save a file which is null";
 
     if (!this.data) {
-        var params = new FormData();
-        params.append("fileToUpload", this.fileObj);
-        params.append("key", CB.appKey);
-        params.append("fileObj", JSON.stringify(CB.toJSON(thisObj)));
+        var params;
+        try {
+            if (!window) {
+                params = {};
+
+                params['fileToUpload'] = this.fileObj;
+                params['key'] = CB.appKey;
+                params['fileObj'] = JSON.stringify(CB.toJSON(thisObj));
+            } else {
+                params = new FormData();
+                params.append("fileToUpload", this.fileObj);
+                params.append("key", CB.appKey);
+                params.append("fileObj", JSON.stringify(CB.toJSON(thisObj)));
+
+            }
+        } catch (e) {
+            params = {};
+
+            params['fileToUpload'] = this.fileObj;
+            params['key'] = CB.appKey;
+            params['fileObj'] = JSON.stringify(CB.toJSON(thisObj));
+        }
         var url = CB.apiUrl + '/file/' + CB.appId;
 
         var uploadProgressCallback = null;
@@ -261,7 +330,7 @@ CB.CloudFile.prototype.getFileContent = function(callback) {
     var params = JSON.stringify({key: CB.appKey});
     var url = this.url;
 
-    CB._request('GET', url, params).then(function(response) {
+    CB._request('POST', url, params).then(function(response) {
         if (callback) {
             callback.success(response);
         } else {

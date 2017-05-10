@@ -52,6 +52,76 @@ describe("Cloud Files", function(done) {
         });
     });
 
+    it("Should rename a file", function(done) {
+
+        this.timeout(30000);
+
+        var data = 'akldaskdhklahdasldhd';
+        var name = 'abc.txt';
+        var type = 'txt';
+        var fileObj = new CB.CloudFile(name, data, type);
+        fileObj.save().then(function(file) {
+            if (file.url) {
+
+                if (!window) {
+                    //Lets configure and request
+                    request({
+                        url: file.url, //URL to hit
+                        method: 'GET'
+                    }, function(error, response, body) {
+                        if (error) {
+                            done(error);
+                        } else {
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        // The URL for the request
+                        url: file.url,
+                        // Whether this is a POST or GET request
+                        type: "GET",
+                        // Code to run if the request succeeds;
+                        // the response is passed to the function
+                        success: function(text) {
+                            file.set('name', 'haha.txt');
+                            file.save().then(function(f) {
+                                if (f.name == 'haha.txt')
+                                    done();
+                                else {
+                                    done('Rename failed.');
+                                }
+                            }, function(err) {
+                                done(err);
+                            })
+
+                        },
+                        // Code to run if the request fails; the raw request and
+                        // status codes are passed to the function
+                        error: function(xhr, status, errorThrown) {
+                            done(errorThrown);
+                            done("Error thrown.");
+                        }
+                    });
+                }
+            } else {
+                throw 'únable to get the url';
+            }
+        }, function(err) {
+            done(err);
+            throw "Unable to save file";
+        });
+    });
+
     it("Should return the file with CloudObject", function(done) {
 
         this.timeout(30000);
@@ -280,7 +350,6 @@ describe("Cloud Files", function(done) {
         fileObj.save().then(function(file) {
             if (file.url) {
                 file.delete().then(function(file) {
-                    //console.log(file);
                     if (file.url === null)
                         done();
                     else
