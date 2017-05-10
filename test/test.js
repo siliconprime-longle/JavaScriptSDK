@@ -1,4 +1,7 @@
-var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
+
+//var SECURE_KEY = "47dfc8b3-7c7a-4661-8e71-36ed0aaa0563";
+var SECURE_KEY = "15dce85d-0fdc-46ef-844d-76eb14b28073";
+
 
 var URL = "http://localhost:4730";
 
@@ -26,6 +29,8 @@ var URL = "http://localhost:4730";
 var window = window || null;
 var request = require('request');
 var CB = require('../dist/cloudboost');
+var equal = require('deep-equal');
+
 describe("Cloud App", function() {
     
     it("MongoDb,RedisDb & Elastic SearchDb Statuses..", function(done) {
@@ -975,6 +980,96 @@ describe("Should Create All Test Tables", function(done) {
 
 });
 
+
+describe("Export Table",function(){
+ 
+ before(function(){
+        this.timeout(10000);
+        CB.appKey = CB.masterKey;
+    });
+    var savedObject = [];
+    it("should create a table",function(done){
+
+        this.timeout(50000);
+
+        var obj = new CB.CloudTable('Hospital');
+        var Revenue = new CB.Column('Revenue');
+        Revenue.dataType = 'Number';
+        var Name = new CB.Column('Name');
+        Name.dataType = 'Text';
+        obj.addColumn(Revenue);
+        obj.addColumn(Name);
+        obj.save().then(function(res){
+            done();
+        },function(err){
+            throw err
+        });
+    });
+
+    it("should add data to table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudObject('Hospital');
+        obj.set('Revenue', 1234);
+        obj.set('Name', 'kashish');
+        obj.save({
+            success : function(obj){ 
+              savedObject.push(obj.document)
+                done();
+            },error : function(error){
+                done(error);
+            }
+        });   
+    })
+    it("should add data to table",function(done){
+
+        this.timeout(50000);
+        var obj = new CB.CloudObject('Hospital');
+        obj.set('Revenue', 3453);
+        obj.set('Name', 'kash');
+        obj.save({
+            success : function(obj){ 
+              savedObject.push(obj.document)
+                done();
+            },error : function(error){
+                done(error);
+            }
+        });   
+    })
+
+
+     it("Export table",function(done){
+        this.timeout(50000);
+        var url = CB.apiUrl+ "/export/"+CB.appId+"/Hospital"; 
+        CB._request('POST',url,{exportType:"json",key:CB.appKey}).then(function(data){
+            
+            data = JSON.parse(data).data
+            if(data.length !== savedObject.length)
+            {
+                return done('ERROR')
+            }
+            var flag = false;
+            for(let i in savedObject)
+            {        
+                delete savedObject[i].ACL;
+                delete data[i].ACL;
+                if(equal(data[i],savedObject[i])){
+                    flag = true;
+                }
+                if(!flag){
+                    done('ERROR');
+                    break;
+                }
+            }
+            if(flag){
+                done();
+            }
+        },function(err){
+            done(err)
+        })
+    })   
+});
+       
 describe("Cloud Files", function(done) {
 
     it("Should Save a file with file data and name", function(done) {
@@ -2840,117 +2935,6 @@ describe("CloudEvent", function() {
 
 });
 
-describe("CloudDevice", function () {
-
-    it("Should create new device with all fields", function (done) {
-        if(CB._isNode){
-           done();
-           return;
-        }
-
-        this.timeout(300000);       
-
-        var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "data");
-        obj.set('deviceOS', "windows");
-        obj.set('timezone', "chile");
-        obj.set('channels', ["pirates","hackers","stealers"]);
-        obj.set('metadata', {"appname":"hdhfhfhfhf"});
-        obj.save({
-            success : function(savedObj){
-                if(savedObj){
-                    done();
-                }else{
-                    done("error on creating device object");
-                }
-            },error : function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should fail on creating device with same deviceToken twice", function (done) {
-        if(CB._isNode){
-           done();
-           return;
-        }
-
-        this.timeout(300000);       
-
-        var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "hdgdd");        
-        obj.save({
-            success : function(savedObj){
-                if(savedObj){
-
-                    var obj = new CB.CloudObject('Device');
-                    obj.set('deviceToken', "hdgdd");        
-                    obj.save({
-                        success : function(savedObj2){
-                            if(savedObj2){
-                               done("created twice with same deviceToken");
-                            }else{
-                                done();
-                            }
-                        },error : function(error){
-                            done();
-                        }
-                    });
-
-                }else{
-                    done("error on creating device object");
-                }
-            },error : function(error){
-                done(error);
-            }
-        });
-    });
-
-    it("Should update device", function (done) {
-        if(CB._isNode){
-           done();
-           return;
-        }
-
-        this.timeout(300000);       
-
-        var obj = new CB.CloudObject('Device');
-        obj.set('deviceToken', "token");
-        obj.set('deviceOS', "windows");
-        obj.set('timezone', "chile");
-        obj.set('channels', ["pirates","hackers","stealers"]);
-        obj.set('metadata', {"appname":"hdhfhfhfhf"});
-        obj.save({
-            success : function(savedObj){
-                if(savedObj){
-
-                    savedObj.set('deviceToken', "toke2");
-                    savedObj.set('deviceOS', "windows2");
-                    savedObj.set('timezone', "chile2");
-                    savedObj.set('channels', ["pirates2","hackers2","stealers2"]);
-                    savedObj.set('metadata', {"appname":"hdhfhfhfhf2"});
-                    savedObj.save({
-                        success : function(savedObj2){
-                            if(savedObj2){
-                                done();
-                            }else{
-                                done("error on updating device object");
-                            }
-                        },error : function(error){
-                            done(error);
-                        }
-                    });
-
-                }else{
-                    done("error on creating device object for the first time");
-                }
-            },error : function(error){
-                done(error);
-            }
-        });
-    });    
-
-});
 
 describe("CloudPush", function (done) {
 
@@ -13391,55 +13375,6 @@ describe("Disabled - Cloud Objects Notification", function() {
       }catch(e){
         done();
       }
-    });
-
-});
-describe("Disabled Cloud Object test", function() {
-
-    before(function(){
-        this.timeout(10000);
-        CB.appKey = CB.masterKey;
-    });
-
-    it("should save cloudObject", function(done) {
-        this.timeout('30000');
-
-        var table = new CB.CloudTable('uniqueTablename');
-        var column = new CB.Column('name');
-        column.dataType = 'Text';
-        table.addColumn(column);
-        table.save({
-            success : function(table){
-
-                var obj = new CB.CloudObject('uniqueTablename');
-                obj.set('name', 'sample');
-                obj.save({
-                    success : function(newObj){
-                        if(obj.get('name') !== 'sample'){
-                            done("name is not equal to what was saved.");
-                            throw 'name is not equal to what was saved.';
-                        }
-                        if(!obj.id){
-                            done('id is not updated after save.');
-                            throw 'id is not updated after save.';
-                        }
-
-                        done();
-                    }, error : function(error){
-                        done(error);
-                        throw 'Error saving the object';
-                    }
-                });
-
-            }, error : function(error){
-                done(error);
-            }
-        });        
-
-    });
-
-    after(function() {
-        CB.appKey = CB.jsKey;
     });
 
 });

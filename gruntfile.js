@@ -29,7 +29,6 @@ module.exports = function(grunt) {
                 // the location of the resulting JS file
                 dest: 'dist/cloudboost.js'
             },
-
             test: {
                 // the files to concatenate
                 src: [
@@ -38,6 +37,7 @@ module.exports = function(grunt) {
                     'test/requireCloudBoost.js',
                     'test/init/init.js',
                     'test/CloudTable/createTestTables.js',
+                    'test/misc/export.js',
                     'test/CloudFile/CloudFile.js',
                     'test/CloudUser/userTest.js',
                     'test/CloudEvent/test.js',
@@ -76,7 +76,6 @@ module.exports = function(grunt) {
                     'test/DisabledRealtime/CloudObjectNotification.js',
                     'test/DisabledRealtime/CloudObject.js'
                 ],
-
                 dest: 'test/test.js'
             },
 
