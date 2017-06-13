@@ -68,6 +68,8 @@ module.exports = function(grunt) {
                     'test/CloudObject/versionTest.js',
                     'test/CloudTable/test.js',
                     'test/CloudTable/cloudtable.js',
+                    'test/CloudTable/acl.js',
+                    'test/CloudApp/acl.js',
                     'test/AtomicityTests/atomicity.js',
                     'test/CloudTable/deleteTestTables.js',
                     'test/CloudApp/deleteApp.js',

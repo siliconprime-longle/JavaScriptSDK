@@ -1,6 +1,5 @@
 
-//var SECURE_KEY = "47dfc8b3-7c7a-4661-8e71-36ed0aaa0563";
-var SECURE_KEY = "15dce85d-0fdc-46ef-844d-76eb14b28073";
+var SECURE_KEY = "1227d1c4-1385-4d5f-ae73-23e99f74b006";
 
 
 var URL = "http://localhost:4730";
@@ -5297,6 +5296,160 @@ describe("Cloud Object", function() {
     // -> Which has columns :
     // name : string : required.
 
+    it("should automatically create table if it does not exist",function(done){
+
+        this.timeout(30000);
+
+        var tableName = util.makeString();
+
+        var obj = new CB.CloudObject(tableName);
+        obj.save().then(function(res){
+                var query = new CB.CloudQuery(tableName);
+                query.find({
+                    success : function(list){
+                        if(list.length>0){
+                            done();
+                        }
+                        else{
+                            done("Cannot create table.");
+                        }
+                    }, error : function(query){
+                        //cannot query. 
+                        console.log(query);
+                        done("Cannot query");
+                    }
+                });
+            },function(err){
+                done(err);
+        });
+    });
+
+
+    it("should automatically create column if it does not exist",function(done){
+
+        this.timeout(30000);
+        CB.appKey = CB.masterKey;
+
+        var aNewTableName = util.makeString();
+        var queryText = util.makeString();
+        var queryEmail = util.makeEmail();
+        var queryRelation = new CB.CloudObject('Custom');
+        var queryDate = new Date();
+        var queryObject = {name: "Nawaz", company: "Cloudboost"};
+        var queryList = ["Hi", "Hello", "Howdy"];
+        var queryLocation = {latitude: 17.7, longitude: 78.9};
+        var queryFile = {name: util.makeString(), type: "txt", data: util.makeString()};
+        var autoColumns = {
+            Text : util.makeString(),
+            Email : util.makeString(),
+            URL: util.makeString(),
+            Number: util.makeString(),
+            Boolean: util.makeString(),
+            DateTime: util.makeString(),
+            Relation: util.makeString(),
+            Object: util.makeString(),
+            List: util.makeString(),
+            GeoPoint: util.makeString(),
+            File: util.makeString()
+        }
+
+        var obj = new CB.CloudObject(aNewTableName);
+        var geoPoint = new CB.CloudGeoPoint(queryLocation.longitude, queryLocation.latitude);
+        var file = new CB.CloudFile(queryFile.name, queryFile.data, queryFile.type);
+        file.save().then(function(fileObj){
+            obj.set(autoColumns.Text, queryText);
+            obj.set(autoColumns.Email, queryEmail);
+            obj.set(autoColumns.DateTime, queryDate);
+            obj.set(autoColumns.URL, "http://cloudboost.io");
+            obj.set(autoColumns.Number, 46);
+            obj.set(autoColumns.Boolean, true);
+            obj.set(autoColumns.Relation, queryRelation);
+            obj.set(autoColumns.Object, queryObject);
+            obj.set(autoColumns.List, queryList);
+            obj.set(autoColumns.GeoPoint, geoPoint);
+            obj.set(autoColumns.File, fileObj);
+            obj.save().then(
+                function(res){
+                    CB.CloudTable.get(aNewTableName, {
+                        success : function(table) {
+                            let missingColumn = checkForColumnsExistance(table.document.columns);
+                            if(missingColumn){
+                                done("Couldn't creat column of type " + missingColumn);
+                            }
+                            else {                  
+                                var query = new CB.CloudQuery(aNewTableName);
+                                query.equalTo(autoColumns.Text, queryText);
+                                query.equalTo(autoColumns.Email, queryEmail);
+                                query.equalTo(autoColumns.DateTime, queryDate);
+                                query.equalTo(autoColumns.URL, "http://cloudboost.io");
+                                query.equalTo(autoColumns.Number, 46);
+                                query.equalTo(autoColumns.Boolean, true);
+                                query.equalTo(autoColumns.Relation, queryRelation);
+                                query.find({
+                                    success : function(list){
+                                        if(list.length>0){
+                                            if(JSON.stringify(queryObject) !== JSON.stringify(list[0].document[autoColumns.Object])){
+                                                done("Can't add correct data to Object type column");
+                                            }
+                                            if(JSON.stringify(queryList) !== JSON.stringify(list[0].document[autoColumns.List])){
+                                                done("Can't add correct data to List type column");
+                                            }
+                                            if(list[0].document[autoColumns.Relation].document._tableName !== 'Custom'){
+                                                done("Can't add correct data to Relation type column");
+                                            }
+                                            if(list[0].document[autoColumns.GeoPoint].document.latitude !== queryLocation.latitude){
+                                                done("Can't add correct data to GeoPoint type column");
+                                            }
+                                            if(list[0].document[autoColumns.File].document._type !== "file"){
+                                                done("Can't add correct data to File type column");
+                                            }
+                                            done();
+                                        }
+                                        else{
+                                            done("Columns created but data not added.");
+                                        }
+                                    },
+                                    error : function(query){
+                                        console.log(query);
+                                        done("Cannot query");
+                                    }
+                                });
+                            }
+                        },
+                        error : function(error) {
+                            done(err);
+                        }
+                    });
+                },
+                function(err){
+                    done(err);
+                }
+            );
+        });
+
+        function checkForColumnsExistance(columns) {
+            var defaultColumns = ["id", "expires", "updatedAt", "createdAt", "ACL"];
+            var customColumns = [];
+            for(var i = 0, length = columns.length; i < length; i++){
+                //filter out custom coulumns for check
+                if(defaultColumns.indexOf(columns[i].document.name) < 0){
+                    customColumns.push(JSON.stringify({
+                            type: columns[i].document.dataType,
+                            name: columns[i].document.name
+                        })
+                    )
+                }
+            }
+            for (column in autoColumns) {
+                // if column to be added is not actually added
+                var columnString = JSON.stringify({type: column, name: autoColumns[column]});
+                if(customColumns.indexOf(columnString) < 0)
+                    return column;
+            }
+            return null;
+        }
+    });
+ 
     it("Should add a null value in a column", function(done) {
 
         this.timeout(30000);
@@ -12722,6 +12875,228 @@ describe("Cloud Table", function(){
         }catch(e){
             done();
         }
+    });
+
+    after(function() {
+    	CB.appKey = CB.jsKey;
+  	});
+
+
+});
+
+describe("Table level ACL, for editing and getting table via clientKey", function(){
+
+    before(function(){
+        CB.appKey = CB.masterKey;
+    });
+
+    var tableName = util.makeString();
+
+    it("should not get table via clientKey",function(done){
+
+        this.timeout(80000);
+
+        var obj = new CB.CloudTable(tableName);
+
+        obj.save().then(function(table){
+            if(table.id){
+                CB.appKey = CB.jsKey;
+                CB.CloudTable.get(tableName).then(function(table){
+                    done('table should not be fetched via clientKey')
+                },function(err){
+                    done()
+                })
+            }else{
+              done("Table cannot be created");
+            }
+        },function(){
+            throw "Should Create a table";
+        });
+    });
+
+    it("should set isEditableByClientKey of a table",function(done){
+
+        this.timeout(80000);
+        CB.appKey = CB.masterKey;
+        CB.CloudTable.get(tableName).then(function(table){
+            table.isEditableByClientKey = true
+            table.save().then(function(res){
+                done()
+            },function(err){
+                done(err)
+            })
+        },function(err){
+            done(err)
+        })
+    
+    });
+
+    it("should now get the table via client key",function(done){
+
+        this.timeout(80000);
+        CB.appKey = CB.jsKey;
+        CB.CloudTable.get(tableName).then(function(table){
+            if(table.id){
+                done()
+            }else{
+                done("Table cannot be created");
+            }
+        },function(err){
+            done(err)
+        })
+    
+    });
+
+    it("should now edit the table via client key",function(done){
+
+        this.timeout(80000);
+        CB.appKey = CB.jsKey;
+
+        CB.CloudTable.get(tableName).then(function(table){
+            if(table.id){
+                var column1 = new CB.Column('Name1', 'Text', true, false);
+                table.addColumn(column1);
+                table.save().then(function(newTable){
+                    done();
+                    newTable.delete();
+                });
+            }else{
+                done("Table cannot be created");
+            }
+        },function(err){
+            done(err)
+        })
+    
+    });
+
+    after(function() {
+    	CB.appKey = CB.jsKey;
+  	});
+
+
+});
+
+describe("App level ACL, for adding deleting tables of an app via clientKey", function(){
+
+    before(function(){
+        CB.appKey = CB.masterKey;
+    });
+
+    var tableName = util.makeString();
+
+    it("should not get tables of an app via clientKey",function(done){
+
+        this.timeout(80000);
+
+        var obj = new CB.CloudTable(tableName);
+
+        obj.save().then(function(table){
+            if(table.id){
+                CB.appKey = CB.jsKey;
+                CB.CloudTable.getAll().then(function(table){
+                    done('tables should not be fetched via clientKey')
+                },function(err){
+                    done()
+                })
+            }else{
+              done("Table cannot be created");
+            }
+        },function(){
+            throw "Should Create a table";
+        });
+    });
+
+    it("should set isTableEditableByClientKey of an app",function(done){
+
+        this.timeout(100000);
+        var url = URL+'/settings/'+CB.appId+"/general";
+        var params = {};
+        params.key = CB.masterKey;
+        params.settings = {
+        	"isTableEditableByClientKey" : true
+        };
+          if(!window){
+        	//Lets configure and request
+			request({
+			    url: url, //URL to hit
+			    method: 'PUT',
+			    headers: {
+			        'Content-Type': 'application/json'
+			    },
+			    json: params //Set the body as a string
+			}, function(error, response, json){
+			    if(error) {
+			        done(error);
+			    } else {
+			      done();
+			    }
+			});
+        }else{
+	       $.ajax({
+	 
+			    // The URL for the request
+			    url: url,
+			    // The data to send (will be converted to a query string)
+			    data: params,
+			    // Whether this is a POST or GET request
+			    type: "PUT",
+			    // The type of data we expect back
+			    dataType : "json",
+			    // Code to run if the request succeeds;
+			    // the response is passed to the function
+			    success: function( json ) {			    			    	
+			       if(json.category === "general"){
+			       	 done();
+			       }else{
+			       	 done("Wrong json.");
+			       }
+			    },
+			    // Code to run if the request fails; the raw request and
+			    // status codes are passed to the function
+			    error: function( xhr, status, errorThrown ) {
+			        done("Error thrown.");
+			    },
+			 
+			});
+		}
+        
+    
+    });
+
+    it("should now get all the tables via client key",function(done){
+
+        this.timeout(80000);
+        CB.appKey = CB.jsKey;
+        CB.CloudTable.getAll().then(function(tables){
+            if(tables){
+                done()
+            }else{
+                done("Table cannot be created");
+            }
+        },function(err){
+            done(err)
+        })
+    
+    });
+
+    it("should now add a table via client key",function(done){
+
+        this.timeout(80000);
+        CB.appKey = CB.jsKey;
+        var obj = new CB.CloudTable(util.makeString());
+
+        obj.save().then(function(table){
+            if(table.id){
+                done()
+                table.delete()
+            }else{
+              done("Table cannot be created");
+            }
+        },function(err){
+            done(err)
+        });
+        
+    
     });
 
     after(function() {

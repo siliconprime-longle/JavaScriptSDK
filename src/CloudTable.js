@@ -10,6 +10,7 @@ class CloudTable {
       this.document.name = tableName;
       this.document.appId = CB.appId;
       this.document._type = 'table';
+      this.document.isEditableByClientKey = false
 
       if(tableName.toLowerCase() === "user") {
           this.document.type = "user";
@@ -216,6 +217,15 @@ Object.defineProperty(CloudTable.prototype,'name',{
 Object.defineProperty(CloudTable.prototype,'id',{
     get: function(){
         return this.document._id;
+    }
+});
+
+Object.defineProperty(CloudTable.prototype,'isEditableByClientKey',{
+    get: function(){
+        return this.document.isEditableByClientKey;
+    },
+    set: function(isEditableByClientKey){
+        this.document.isEditableByClientKey = isEditableByClientKey;
     }
 });
 
