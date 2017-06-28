@@ -8,11 +8,12 @@ describe("Setting Default Values for Cloud Object", function(){
         CB.appKey = CB.masterKey;
         var table = new CB.CloudTable(tableName);
         globalTable = table;
+        var currDate = new Date().toString()
         defaults = {
             Text: "Default Text",
             Number: 56,
             Boolean: true,
-            DateTime: "1994-11-05T08:15:30-05:00",
+            DateTime: currDate,
             Object: {},
             EncryptedText: "ljklwej4543434",
             URL: "https://cloudboost.io/",
@@ -189,10 +190,13 @@ describe("Setting Default Values for Cloud Object", function(){
         var obj = new CB.CloudObject(tableName);
         obj.save({
             success : function(obj){
-                if(obj.get("NameDate") === defaults.DateTime){
-                    done()
-                }
-                else {
+                try{
+                    if(new Date(obj.get("NameDate")).toLocaleDateString() == new Date(defaults.DateTime).toLocaleDateString()){
+                        done()
+                    } else {
+                        done("Not setting default Value for Boolean columns")
+                    }
+                } catch(e){
                     done("Not setting default Value for Boolean columns")
                 }
             },error : function(err){
