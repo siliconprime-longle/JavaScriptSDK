@@ -264,7 +264,7 @@ CB.CloudUser.prototype.changePassword = function(oldPassword, newPassword, callb
 CB.CloudUser.prototype.logIn = function(callback) {
 
     // check if node env but not native, this method wont execute for node env's
-    if (CB._isNode && !CB._isNative) {
+    if (CB._isNode && !CB._isNative && !CB._isMultiUsersEnabled) {
         throw "Error : You cannot login the user on the server.";
     }
 

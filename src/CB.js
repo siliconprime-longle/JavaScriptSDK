@@ -92,6 +92,10 @@ class CloudBoost {
             promise: promise
         }
     }
+    // L.Le add support muti-user support for node backend
+    setMultiUser(bool){
+        this._isMultiUsersEnabled = bool;
+    }
 }
 
 let CB = new CloudBoost()
