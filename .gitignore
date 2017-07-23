@@ -64,3 +64,5 @@ DataServices.v14.suo
 node_modules
 test/test.html
 test/testtt.js
+
+.DS_Store
